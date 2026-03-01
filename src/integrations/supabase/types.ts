@@ -6741,6 +6741,9 @@ export type Database = {
       }
       opportunities: {
         Row: {
+          admin_notes: string | null
+          assigned_to: string | null
+          assigned_vendor_id: string | null
           budget_max: number | null
           budget_min: number | null
           business_id: string | null
@@ -6769,7 +6772,11 @@ export type Database = {
           quantity: string | null
           required_certifications: string[] | null
           required_trainings: string[] | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           skills_required: string[] | null
+          sla_deadline: string | null
+          sla_type: string
           slug: string
           specifications: string | null
           status: string
@@ -6780,6 +6787,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          assigned_vendor_id?: string | null
           budget_max?: number | null
           budget_min?: number | null
           business_id?: string | null
@@ -6808,7 +6818,11 @@ export type Database = {
           quantity?: string | null
           required_certifications?: string[] | null
           required_trainings?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           skills_required?: string[] | null
+          sla_deadline?: string | null
+          sla_type?: string
           slug: string
           specifications?: string | null
           status?: string
@@ -6819,6 +6833,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          assigned_vendor_id?: string | null
           budget_max?: number | null
           budget_min?: number | null
           business_id?: string | null
@@ -6847,7 +6864,11 @@ export type Database = {
           quantity?: string | null
           required_certifications?: string[] | null
           required_trainings?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           skills_required?: string[] | null
+          sla_deadline?: string | null
+          sla_type?: string
           slug?: string
           specifications?: string | null
           status?: string
@@ -6858,6 +6879,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "opportunities_assigned_vendor_id_fkey"
+            columns: ["assigned_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "business_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "opportunities_business_id_fkey"
             columns: ["business_id"]
@@ -6919,6 +6947,9 @@ export type Database = {
       }
       orders: {
         Row: {
+          admin_notes: string | null
+          assigned_to: string | null
+          assigned_vendor_id: string | null
           created_at: string
           created_by: string | null
           currency: string
@@ -6927,13 +6958,20 @@ export type Database = {
           items: Json
           notes: string | null
           order_number: string
+          reviewed_at: string | null
+          reviewed_by: string | null
           service_slug: string
+          sla_deadline: string | null
+          sla_type: string
           status: string
           total_cents: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          assigned_vendor_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
@@ -6942,13 +6980,20 @@ export type Database = {
           items?: Json
           notes?: string | null
           order_number: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           service_slug: string
+          sla_deadline?: string | null
+          sla_type?: string
           status?: string
           total_cents?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          assigned_vendor_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
@@ -6957,13 +7002,25 @@ export type Database = {
           items?: Json
           notes?: string | null
           order_number?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           service_slug?: string
+          sla_deadline?: string | null
+          sla_type?: string
           status?: string
           total_cents?: number
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_assigned_vendor_id_fkey"
+            columns: ["assigned_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "business_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partner_team_members: {
         Row: {
