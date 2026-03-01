@@ -246,7 +246,7 @@ const AdminProgramEdit = () => {
                 </div>
               </div>
               <div>
-                <Label className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5" /> Institusi</Label>
+                <Label className="flex items-center gap-1.5 pb-1.5"><Building2 className="w-3.5 h-3.5" /> Institusi</Label>
                 <Select value={data.institution_id || "none"} onValueChange={(v) => update("institution_id", v === "none" ? null : v)}>
                   <SelectTrigger><SelectValue placeholder="Pilih institusi..." /></SelectTrigger>
                   <SelectContent>
