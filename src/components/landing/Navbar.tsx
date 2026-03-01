@@ -322,7 +322,7 @@ const Navbar = () => {
               </Link>
               <Link to="/auth">
                 <button className="px-5 py-2 text-sm font-semibold rounded-lg border transition-colors" style={{ borderColor: "hsl(0 0% 30%)", color: "white" }}>
-                  See a demo
+                  Request Quote
                 </button>
               </Link>
             </>
