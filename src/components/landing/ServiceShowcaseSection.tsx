@@ -144,16 +144,13 @@ const ServiceShowcaseSection = () => {
           {loadingServices ? (
             Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="rounded-xl border border-border bg-card animate-pulse overflow-hidden">
-                <div className="p-6 space-y-4">
-                  <div className="w-12 h-12 bg-muted rounded-lg" />
-                  <div className="h-5 bg-muted rounded w-1/2" />
+                <div className="h-40 bg-muted" />
+                <div className="p-5 space-y-3">
+                  <div className="h-5 bg-muted rounded w-3/4" />
                   <div className="h-4 bg-muted rounded w-full" />
-                  <div className="flex gap-2">
-                    <div className="h-6 bg-muted rounded-full w-16" />
-                    <div className="h-6 bg-muted rounded-full w-20" />
-                  </div>
+                  <div className="h-4 bg-muted rounded w-2/3" />
                 </div>
-                <div className="h-12 border-t border-border bg-muted/30" />
+                <div className="h-14 border-t border-border bg-muted/30" />
               </div>
             ))
           ) : services.length === 0 ? (
@@ -173,51 +170,58 @@ const ServiceShowcaseSection = () => {
                     transition={{ delay: i * 0.04 }}
                     className="group rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all h-full flex flex-col overflow-hidden"
                   >
+                    {/* Thumbnail area with icon pattern */}
+                    <div className="h-40 bg-gradient-to-br from-primary/5 via-muted/50 to-accent/10 flex items-center justify-center gap-6 px-6">
+                      <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                        <Icon className="w-8 h-8 text-primary" />
+                      </div>
+                      <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center opacity-60">
+                        <Icon className="w-6 h-6 text-accent-foreground" />
+                      </div>
+                      <div className="w-10 h-10 rounded-lg bg-muted border border-border flex items-center justify-center opacity-40">
+                        <Icon className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    </div>
+
                     {/* Card body */}
-                    <div className="p-6 flex-1 flex flex-col">
-                      {/* Icon */}
-                      <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center mb-5">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
+                    <div className="p-5 flex-1 flex flex-col">
+                      <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors mb-1 line-clamp-1">
+                        {service.name}
+                      </h3>
 
-                      {/* Title with chevron */}
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
-                          {service.name}
-                        </h3>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-5 line-clamp-2 flex-1">
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-2 flex-1">
                         {service.description}
                       </p>
 
                       {/* Skill tags */}
                       <div className="flex flex-wrap gap-1.5">
-                        {service.required_skills.slice(0, 4).map((skill) => (
+                        {service.required_skills.slice(0, 3).map((skill) => (
                           <span
                             key={skill}
                             className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground"
                           >
-                            <CheckCircle2 className="w-3 h-3 text-primary/50" />
                             {skill}
                           </span>
                         ))}
-                        {service.required_skills.length > 4 && (
+                        {service.required_skills.length > 3 && (
                           <span className="text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
-                            +{service.required_skills.length - 4}
+                            +{service.required_skills.length - 3}
                           </span>
                         )}
                       </div>
                     </div>
 
-                    {/* Card footer */}
-                    <div className="px-6 py-3.5 border-t border-border bg-muted/30 flex items-center justify-between group-hover:bg-primary/5 transition-colors">
-                      <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                        Lihat detail
+                    {/* CTA footer */}
+                    <div className="px-5 py-3.5 border-t border-border bg-muted/30 flex items-center justify-between group-hover:bg-primary/5 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {service.provider_count > 0 ? `${service.provider_count} penyedia tersedia` : "Segera hadir"}
+                        </span>
+                      </div>
+                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:gap-2 transition-all">
+                        Lihat Detail
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </span>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                   </motion.div>
                 </Link>
