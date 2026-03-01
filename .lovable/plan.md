@@ -1,63 +1,53 @@
 
 
-# Insight & Rekomendasi Learning untuk Match Score
+## Change All Fonts to Inter with Softer Bold Weights
 
-## Overview
-Menambahkan section insight di bawah breakdown kriteria match score pada halaman Job Detail. Section ini menampilkan:
-1. Daftar aksi konkret yang harus dilakukan user untuk mencapai 70% match
-2. Rekomendasi program Learning dari tabel `programs` yang relevan dengan skill yang belum dimiliki user
+### Overview
+Replace the current dual-font system (Space Grotesk for headings + Plus Jakarta Sans for body) with a single **Inter** font family. Reduce heavy bold weights (`font-bold` / 700, `font-extrabold` / 800) to medium-bold levels (`font-semibold` / 600) across the entire app.
 
-## Perubahan pada `src/pages/JobDetail.tsx`
+### Changes
 
-### 1. Fetch Program Learning yang Relevan
-- Setelah fetch data opportunity dan profile, query tabel `programs` untuk mencari program yang mengandung skill yang dibutuhkan job tapi belum dimiliki user
-- Query: cari program `approved` yang title/description mengandung keyword dari missing skills
-- Simpan di state `recommendedPrograms`
-
-### 2. Hitung Missing Skills
-- Di dalam `calcMatchDetails`, tambahkan return value `missingSkills` (array skill yang dibutuhkan job tapi tidak dimiliki user)
-- Gunakan data ini untuk menampilkan insight dan filter program learning
-
-### 3. Section Insight (di bawah criteria breakdown, sebelum tombol Lamar)
-Tampilkan hanya jika `score < 70`. Berisi:
-
-**Aksi yang Harus Dilakukan:**
-- Jika skill kurang: "Tambahkan skill berikut ke profil Anda: [list missing skills]"
-- Jika pengalaman kurang: "Tambahkan pengalaman kerja Anda (min X tahun)"
-- Jika profil belum lengkap: "Lengkapi profil: skill, pengalaman, pendidikan"
-
-**Rekomendasi Learning:**
-- Tampilkan 1-3 program dari tabel `programs` yang cocok dengan missing skills
-- Setiap kartu berisi: judul program, kategori, dan link ke `/learning/:slug`
-- Jika tidak ada program yang cocok, tampilkan link umum ke `/learning`
-
-### 4. UI Design
-- Card dengan background `bg-amber-50` / `bg-amber-500/5` dan border kuning
-- Icon `Lightbulb` sebagai header "Cara Meningkatkan Skor Anda"
-- List aksi dengan bullet points
-- Kartu mini program learning yang bisa diklik (link ke detail)
-
-## Detail Teknis
-
-**Query program learning:**
-```sql
-SELECT id, title, slug, category, thumbnail_url, price_cents
-FROM programs
-WHERE status = 'approved'
-ORDER BY created_at DESC
+#### 1. Google Fonts Import (`src/index.css`, line 1)
+Replace the current import:
 ```
-Kemudian filter di client-side: cocokkan `title` atau `description` terhadap missing skills menggunakan `.toLowerCase().includes()`.
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+```
+Remove Space Grotesk and Plus Jakarta Sans entirely. Import Inter with weights 400 (regular), 500 (medium), 600 (semibold), 700 (bold -- used sparingly).
 
-**State baru:**
-- `recommendedPrograms: Program[]` - program yang relevan dengan missing skills
+#### 2. Tailwind Font Config (`tailwind.config.ts`, lines 17-18)
+Update both `display` and `body` font families to Inter:
+```ts
+fontFamily: {
+  display: ['"Inter"', 'system-ui', 'sans-serif'],
+  body: ['"Inter"', 'system-ui', 'sans-serif'],
+},
+```
 
-**Komponen baru (inline):**
-- Insight card dengan aksi dan rekomendasi learning
-- Mini card program learning (clickable link ke `/learning/:slug`)
+#### 3. Reduce Bold Weights Across ~33 Files
+Global find-and-replace across all `.tsx` files in `src/`:
 
-## File yang Diubah
+| Current class | Replacement |
+|---|---|
+| `font-extrabold` | `font-semibold` |
+| `font-black` | `font-semibold` |
+| `font-bold` (on headings h1-h6, large text) | `font-semibold` |
+| `font-bold` (on small UI elements like logos, badges) | Keep as `font-semibold` |
 
-| File | Perubahan |
-|------|-----------|
-| `src/pages/JobDetail.tsx` | Tambah fetch programs, hitung missing skills, tampilkan insight section dengan rekomendasi learning |
+Key files affected:
+- `src/components/landing/Navbar.tsx` -- logo text, mega menu titles
+- `src/components/landing/HeroSection.tsx` -- hero heading
+- `src/components/landing/FeaturesSection.tsx`, `CaseStudiesSection.tsx`, `CTASection.tsx`, `HowItWorksSection.tsx`, `Footer.tsx`
+- `src/components/dashboard/DashboardNav.tsx`, `ProfileHeader.tsx`, `ProfileOverview.tsx`, `ProfileEditForm.tsx`
+- `src/components/admin/AdminSidebar.tsx`, `AdminOverview.tsx`, `AdminUsers.tsx`, `AdminContent.tsx`, `AdminCredits.tsx`, `AdminHiring.tsx`, `AdminKYC.tsx`, `AdminCompanies.tsx`
+- `src/pages/` -- all page files (Dashboard, AuthPage, Matchmaking, JobDetail, Learning, LearningDetail, etc.)
+
+The approach: replace **all** `font-bold` with `font-semibold` and all `font-extrabold`/`font-black` with `font-semibold` project-wide to achieve the medium-bold look.
+
+#### 4. Inline Style Font Weights
+Check for any inline `style={{ fontWeight: ... }}` and normalize to 500-600 range.
+
+### Result
+- Single consistent font (Inter) across all UI
+- Headings and emphasis text use `font-semibold` (600) instead of `font-bold` (700) or heavier
+- Cleaner, more modern typographic feel with less visual heaviness
 
