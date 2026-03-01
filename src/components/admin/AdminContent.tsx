@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Briefcase, GraduationCap, Eye, EyeOff } from "lucide-react";
+import { Search, Briefcase, GraduationCap, Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Opportunity {
   id: string;
@@ -26,12 +26,16 @@ interface Program {
   created_at: string;
 }
 
+const PAGE_SIZE = 20;
+
 const AdminContent = () => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"opportunities" | "programs">("opportunities");
   const [search, setSearch] = useState("");
+  const [oppPage, setOppPage] = useState(1);
+  const [progPage, setProgPage] = useState(1);
 
   useEffect(() => {
     fetchData();
@@ -83,6 +87,34 @@ const AdminContent = () => {
     return "bg-amber-500/10 text-amber-600";
   };
 
+  // Reset page on search change
+  useEffect(() => {
+    setOppPage(1);
+    setProgPage(1);
+  }, [search]);
+
+  const oppTotalPages = Math.max(1, Math.ceil(filteredOpps.length / PAGE_SIZE));
+  const progTotalPages = Math.max(1, Math.ceil(filteredProgs.length / PAGE_SIZE));
+  const pagedOpps = filteredOpps.slice((oppPage - 1) * PAGE_SIZE, oppPage * PAGE_SIZE);
+  const pagedProgs = filteredProgs.slice((progPage - 1) * PAGE_SIZE, progPage * PAGE_SIZE);
+
+  const PaginationBar = ({ page, totalPages, total, onPrev, onNext }: { page: number; totalPages: number; total: number; onPrev: () => void; onNext: () => void }) => (
+    <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+      <span className="text-xs text-muted-foreground">
+        Menampilkan {Math.min((page - 1) * PAGE_SIZE + 1, total)}–{Math.min(page * PAGE_SIZE, total)} dari {total}
+      </span>
+      <div className="flex items-center gap-1">
+        <Button size="sm" variant="ghost" disabled={page <= 1} onClick={onPrev}>
+          <ChevronLeft className="w-4 h-4" />
+        </Button>
+        <span className="text-xs text-muted-foreground px-2">{page} / {totalPages}</span>
+        <Button size="sm" variant="ghost" disabled={page >= totalPages} onClick={onNext}>
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -122,10 +154,10 @@ const AdminContent = () => {
                   Array.from({ length: 3 }).map((_, i) => (
                     <tr key={i} className="border-b border-border"><td colSpan={7} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
                   ))
-                ) : filteredOpps.length === 0 ? (
+                ) : pagedOpps.length === 0 ? (
                   <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
                 ) : (
-                  filteredOpps.map((o) => (
+                  pagedOpps.map((o) => (
                     <tr key={o.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 font-medium text-foreground max-w-[200px] truncate">{o.title}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{o.business_profiles?.name || "—"}</td>
@@ -146,6 +178,9 @@ const AdminContent = () => {
               </tbody>
             </table>
           </div>
+          {!loading && filteredOpps.length > PAGE_SIZE && (
+            <PaginationBar page={oppPage} totalPages={oppTotalPages} total={filteredOpps.length} onPrev={() => setOppPage(p => p - 1)} onNext={() => setOppPage(p => p + 1)} />
+          )}
         </div>
       )}
 
@@ -167,7 +202,7 @@ const AdminContent = () => {
                 {filteredProgs.length === 0 ? (
                   <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
                 ) : (
-                  filteredProgs.map((p) => (
+                  pagedProgs.map((p) => (
                     <tr key={p.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 font-medium text-foreground max-w-[200px] truncate">{p.title}</td>
                       <td className="px-4 py-3"><Badge variant="secondary" className="text-xs">{p.program_type || "—"}</Badge></td>
@@ -187,6 +222,9 @@ const AdminContent = () => {
               </tbody>
             </table>
           </div>
+          {filteredProgs.length > PAGE_SIZE && (
+            <PaginationBar page={progPage} totalPages={progTotalPages} total={filteredProgs.length} onPrev={() => setProgPage(p => p - 1)} onNext={() => setProgPage(p => p + 1)} />
+          )}
         </div>
       )}
     </div>
