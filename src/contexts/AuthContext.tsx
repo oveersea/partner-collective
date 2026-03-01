@@ -30,13 +30,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Record last_online on sign in
+        // Record last_online and login log on sign in
         if (event === 'SIGNED_IN' && session?.user) {
           setTimeout(() => {
             supabase
               .from('profiles')
               .update({ last_online: new Date().toISOString() } as any)
               .eq('user_id', session.user.id)
+              .then();
+            supabase
+              .from('login_logs')
+              .insert({ user_id: session.user.id } as any)
               .then();
           }, 0);
         }

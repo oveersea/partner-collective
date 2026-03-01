@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Shield, User, MoreVertical, Trash2, UserX, Clock, Activity } from "lucide-react";
+import { Search, Shield, User, MoreVertical, Trash2, UserX, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -33,6 +33,14 @@ interface UserProfile {
   avatar_url: string | null;
   linkedin_url: string | null;
 }
+
+interface LoginActivity {
+  user_id: string;
+  total_logins: number;
+  daily_breakdown: Record<string, number>; // "Sen","Sel",...
+}
+
+const DAY_NAMES = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 const calcProfileScore = (u: UserProfile): number => {
   let score = 0;
@@ -63,15 +71,22 @@ const formatLastOnline = (d: string | null): string => {
   return new Date(d).toLocaleDateString("id-ID");
 };
 
+type SortKey = "profile" | "activity" | "last_online" | "created_at" | null;
+type SortDir = "asc" | "desc";
+
 const AdminUsers = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [activityMap, setActivityMap] = useState<Record<string, LoginActivity>>({});
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; type: "deactivate" | "delete"; userId: string; name: string }>({ open: false, type: "deactivate", userId: "", name: "" });
 
   useEffect(() => {
     fetchUsers();
+    fetchLoginActivity();
   }, []);
 
   const fetchUsers = async () => {
@@ -84,6 +99,31 @@ const AdminUsers = () => {
     if (data) setUsers(data);
     if (error) toast.error("Gagal memuat data user");
     setLoading(false);
+  };
+
+  const fetchLoginActivity = async () => {
+    // Get login logs from last 7 days
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    const { data } = await supabase
+      .from("login_logs")
+      .select("user_id, logged_in_at")
+      .gte("logged_in_at", weekAgo.toISOString())
+      .order("logged_in_at", { ascending: false }) as any;
+
+    if (data) {
+      const map: Record<string, LoginActivity> = {};
+      for (const log of data) {
+        if (!map[log.user_id]) {
+          map[log.user_id] = { user_id: log.user_id, total_logins: 0, daily_breakdown: {} };
+        }
+        map[log.user_id].total_logins++;
+        const dayName = DAY_NAMES[new Date(log.logged_in_at).getDay()];
+        map[log.user_id].daily_breakdown[dayName] = (map[log.user_id].daily_breakdown[dayName] || 0) + 1;
+      }
+      setActivityMap(map);
+    }
   };
 
   const assignRole = async (userId: string, role: string) => {
@@ -121,11 +161,56 @@ const AdminUsers = () => {
     setConfirmDialog({ open: false, type: "delete", userId: "", name: "" });
   };
 
-  const filtered = users.filter(
-    (u) =>
-      (u.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
-      u.oveercode.toLowerCase().includes(search.toLowerCase())
-  );
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      if (sortDir === "desc") setSortDir("asc");
+      else { setSortKey(null); setSortDir("desc"); }
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  };
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="w-3 h-3 ml-1 opacity-40" />;
+    return sortDir === "desc" ? <ArrowDown className="w-3 h-3 ml-1" /> : <ArrowUp className="w-3 h-3 ml-1" />;
+  };
+
+  const sortedFiltered = useMemo(() => {
+    let list = users.filter(
+      (u) =>
+        (u.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
+        u.oveercode.toLowerCase().includes(search.toLowerCase())
+    );
+
+    if (sortKey) {
+      list = [...list].sort((a, b) => {
+        let va: number, vb: number;
+        switch (sortKey) {
+          case "profile":
+            va = calcProfileScore(a);
+            vb = calcProfileScore(b);
+            break;
+          case "activity":
+            va = activityMap[a.user_id]?.total_logins || 0;
+            vb = activityMap[b.user_id]?.total_logins || 0;
+            break;
+          case "last_online":
+            va = a.last_online ? new Date(a.last_online).getTime() : 0;
+            vb = b.last_online ? new Date(b.last_online).getTime() : 0;
+            break;
+          case "created_at":
+            va = new Date(a.created_at).getTime();
+            vb = new Date(b.created_at).getTime();
+            break;
+          default:
+            return 0;
+        }
+        return sortDir === "desc" ? vb - va : va - vb;
+      });
+    }
+    return list;
+  }, [users, search, sortKey, sortDir, activityMap]);
 
   const kycBadge = (status: string) => {
     const map: Record<string, string> = {
@@ -157,10 +242,19 @@ const AdminUsers = () => {
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Oveercode</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipe</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">KYC</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Profil</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Last Online</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("profile")}>
+                  <span className="flex items-center">Profil <SortIcon col="profile" /></span>
+                </th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("activity")}>
+                  <span className="flex items-center">Aktivitas <SortIcon col="activity" /></span>
+                </th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("last_online")}>
+                  <span className="flex items-center">Last Online <SortIcon col="last_online" /></span>
+                </th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Lokasi</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Bergabung</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("created_at")}>
+                  <span className="flex items-center">Bergabung <SortIcon col="created_at" /></span>
+                </th>
                 <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
               </tr>
             </thead>
@@ -168,15 +262,17 @@ const AdminUsers = () => {
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-b border-border">
-                    <td colSpan={9} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td>
+                    <td colSpan={10} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td>
                   </tr>
                 ))
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+              ) : sortedFiltered.length === 0 ? (
+                <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
               ) : (
-                filtered.map((u) => {
+                sortedFiltered.map((u) => {
                   const pScore = calcProfileScore(u);
                   const scoreColor = pScore >= 70 ? "text-primary bg-primary/10" : pScore >= 40 ? "text-amber-600 bg-amber-500/10" : "text-destructive bg-destructive/10";
+                  const activity = activityMap[u.user_id];
+                  const totalLogins = activity?.total_logins || 0;
                   return (
                   <tr key={u.user_id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/user/${u.user_id}`)}>
                     <td className="px-4 py-3">
@@ -200,6 +296,33 @@ const AdminUsers = () => {
                       <span className={`text-xs font-bold px-2 py-1 rounded-full ${scoreColor}`}>
                         {pScore}%
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-1">
+                        <span className={`text-xs font-semibold ${totalLogins > 5 ? "text-primary" : totalLogins > 0 ? "text-amber-600" : "text-muted-foreground"}`}>
+                          {totalLogins}x /minggu
+                        </span>
+                        {activity && totalLogins > 0 && (
+                          <div className="flex gap-0.5">
+                            {DAY_NAMES.map((day) => {
+                              const count = activity.daily_breakdown[day] || 0;
+                              return (
+                                <div
+                                  key={day}
+                                  title={`${day}: ${count}x`}
+                                  className={`w-3 h-3 rounded-sm text-[6px] flex items-center justify-center font-bold ${
+                                    count > 2 ? "bg-primary text-primary-foreground" :
+                                    count > 0 ? "bg-primary/30 text-primary" :
+                                    "bg-muted text-muted-foreground/50"
+                                  }`}
+                                >
+                                  {day[0]}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
