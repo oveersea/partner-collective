@@ -9,14 +9,14 @@ interface CreditOrder {
   id: string;
   order_number: string;
   credits: number;
-  amount: number;
+  amount_cents: number;
   currency: string;
   status: string;
   buyer_type: string;
-  payment_method: string | null;
   created_at: string;
-  profiles: { full_name: string | null } | null;
-  business_profiles: { name: string } | null;
+  user_id: string;
+  user_name?: string;
+  business_name?: string;
 }
 
 interface WalletDeposit {
@@ -26,7 +26,8 @@ interface WalletDeposit {
   method: string;
   status: string;
   created_at: string;
-  profiles: { full_name: string | null } | null;
+  user_id: string;
+  user_name?: string;
 }
 
 const AdminCredits = () => {
@@ -40,21 +41,54 @@ const AdminCredits = () => {
   }, []);
 
   const fetchData = async () => {
-    const [ordRes, depRes] = await Promise.all([
-      supabase
-        .from("credit_orders")
-        .select("id, order_number, credits, amount, currency, status, buyer_type, payment_method, created_at, profiles!credit_orders_user_id_fkey(full_name), business_profiles(name)")
-        .order("created_at", { ascending: false })
-        .limit(50),
-      supabase
-        .from("wallet_deposits")
-        .select("id, deposit_number, amount, method, status, created_at, profiles!wallet_deposits_user_id_fkey(full_name)")
-        .order("created_at", { ascending: false })
-        .limit(50),
+    // Fetch orders
+    const { data: ordData } = await supabase
+      .from("credit_orders")
+      .select("id, order_number, credits, amount_cents, currency, status, buyer_type, user_id, business_id, created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    // Fetch deposits
+    const { data: depData } = await supabase
+      .from("wallet_deposits")
+      .select("id, deposit_number, amount, method, status, user_id, created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    // Collect unique user IDs to fetch names
+    const userIds = new Set<string>();
+    const businessIds = new Set<string>();
+    ordData?.forEach((o: any) => { if (o.user_id) userIds.add(o.user_id); if (o.business_id) businessIds.add(o.business_id); });
+    depData?.forEach((d: any) => { if (d.user_id) userIds.add(d.user_id); });
+
+    // Fetch profiles and business names
+    const [profilesRes, bizRes] = await Promise.all([
+      userIds.size > 0
+        ? supabase.from("profiles").select("user_id, full_name").in("user_id", Array.from(userIds))
+        : Promise.resolve({ data: [] }),
+      businessIds.size > 0
+        ? supabase.from("business_profiles").select("id, name").in("id", Array.from(businessIds))
+        : Promise.resolve({ data: [] }),
     ]);
 
-    if (ordRes.data) setOrders(ordRes.data as unknown as CreditOrder[]);
-    if (depRes.data) setDeposits(depRes.data as unknown as WalletDeposit[]);
+    const profileMap: Record<string, string> = {};
+    (profilesRes.data || []).forEach((p: any) => { profileMap[p.user_id] = p.full_name || ""; });
+    const bizMap: Record<string, string> = {};
+    (bizRes.data || []).forEach((b: any) => { bizMap[b.id] = b.name || ""; });
+
+    if (ordData) {
+      setOrders(ordData.map((o: any) => ({
+        ...o,
+        user_name: profileMap[o.user_id] || "",
+        business_name: bizMap[o.business_id] || "",
+      })) as CreditOrder[]);
+    }
+    if (depData) {
+      setDeposits(depData.map((d: any) => ({
+        ...d,
+        user_name: profileMap[d.user_id] || "",
+      })) as WalletDeposit[]);
+    }
     setLoading(false);
   };
 
@@ -123,12 +157,12 @@ const AdminCredits = () => {
                     <tr key={o.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 font-mono text-xs text-foreground">{o.order_number}</td>
                       <td className="px-4 py-3 text-foreground text-xs">
-                        {o.business_profiles?.name || o.profiles?.full_name || "—"}
+                        {o.business_name || o.user_name || "—"}
                         <Badge variant="secondary" className="ml-2 text-[10px]">{o.buyer_type}</Badge>
                       </td>
                       <td className="px-4 py-3 font-semibold text-foreground">{o.credits}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">
-                        {new Intl.NumberFormat("id-ID", { style: "currency", currency: o.currency || "IDR", maximumFractionDigits: 0 }).format(o.amount)}
+                        {new Intl.NumberFormat("id-ID", { style: "currency", currency: o.currency || "IDR", maximumFractionDigits: 0 }).format(o.amount_cents)}
                       </td>
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(o.status)}`}>{o.status}</span>
@@ -177,7 +211,7 @@ const AdminCredits = () => {
                   deposits.map((d) => (
                     <tr key={d.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 font-mono text-xs text-foreground">{d.deposit_number}</td>
-                      <td className="px-4 py-3 text-foreground text-xs">{d.profiles?.full_name || "—"}</td>
+                      <td className="px-4 py-3 text-foreground text-xs">{d.user_name || "—"}</td>
                       <td className="px-4 py-3 font-semibold text-foreground">
                         {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(d.amount)}
                       </td>
