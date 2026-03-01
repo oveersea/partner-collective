@@ -258,7 +258,7 @@ const ServiceDetailPage = () => {
                   </div>
                 </div>
 
-                <Link to="/auth">
+                <Link to={`/services/${service.slug}/order`}>
                   <button className="w-full py-3 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2" style={{ borderRadius: "5px" }}>
                     Mulai Sekarang
                     <ArrowRight className="w-4 h-4" />
