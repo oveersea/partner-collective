@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Briefcase, FolderKanban, GraduationCap, Users, UserSearch, Plus, Building2, Zap, CreditCard } from "lucide-react";
+import { User, Briefcase, FolderKanban, GraduationCap, Users, UserSearch, Plus, Building2, Zap, CreditCard, Layers } from "lucide-react";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import KYCBanner from "@/components/dashboard/KYCBanner";
 import ProfileHeader from "@/components/dashboard/ProfileHeader";
@@ -13,6 +13,7 @@ import ExperienceTab from "@/components/dashboard/ExperienceTab";
 import EducationTab from "@/components/dashboard/EducationTab";
 import PortfolioTab from "@/components/dashboard/PortfolioTab";
 import TeamsTab from "@/components/dashboard/TeamsTab";
+import ServicesTab from "@/components/dashboard/ServicesTab";
 
 interface Profile {
   full_name: string | null;
@@ -41,6 +42,7 @@ const tabs = [
   { id: "education", label: "Pendidikan", icon: GraduationCap },
   { id: "portfolio", label: "Portofolio", icon: FolderKanban },
   { id: "teams", label: "Tim", icon: Users },
+  { id: "services", label: "Layanan", icon: Layers },
 ];
 
 const Dashboard = () => {
@@ -210,6 +212,7 @@ const Dashboard = () => {
         {activeTab === "education" && <EducationTab />}
         {activeTab === "portfolio" && <PortfolioTab />}
         {activeTab === "teams" && <TeamsTab />}
+        {activeTab === "services" && <ServicesTab />}
       </div>
     </div>
   );
