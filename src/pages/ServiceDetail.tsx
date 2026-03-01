@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, Users, Clock, Target, Briefcase, ArrowRight } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Users, Clock, Target, Briefcase, ArrowRight, Shield, Star, Award, Crown } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
@@ -226,14 +226,35 @@ const ServiceDetailPage = () => {
                     <span className="ml-auto font-semibold text-foreground">{providerCount}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    <Target className="w-4 h-4 text-primary" />
-                    <span className="text-muted-foreground">Min. Skill Match</span>
-                    <span className="ml-auto font-semibold text-foreground">{service.min_match_pct}%</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-primary" />
                     <span className="text-muted-foreground">Skills</span>
                     <span className="ml-auto font-semibold text-foreground">{service.required_skills.length}</span>
+                  </div>
+                  {/* Talent Tier */}
+                  <div className="pt-3 border-t border-border">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">Talent Tier</span>
+                    <div className="space-y-2">
+                      {[
+                        { label: "Advisor", min: 90, icon: Crown, color: "text-amber-500", bg: "bg-amber-500/10" },
+                        { label: "Expert", min: 70, icon: Award, color: "text-primary", bg: "bg-primary/10" },
+                        { label: "Senior", min: 50, icon: Star, color: "text-blue-500", bg: "bg-blue-500/10" },
+                        { label: "Junior", min: 20, icon: Shield, color: "text-muted-foreground", bg: "bg-muted" },
+                      ].map((tier) => {
+                        const isActive = service.min_match_pct >= tier.min;
+                        return (
+                          <div
+                            key={tier.label}
+                            className={`flex items-center gap-2.5 text-sm px-3 py-2 rounded-md transition-colors ${
+                              isActive ? `${tier.bg} ${tier.color} font-medium` : "text-muted-foreground/40"
+                            }`}
+                          >
+                            <tier.icon className="w-4 h-4" />
+                            <span>{tier.label}</span>
+                            <span className="ml-auto text-xs">≥ {tier.min}%</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
