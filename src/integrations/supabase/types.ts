@@ -6945,6 +6945,75 @@ export type Database = {
           },
         ]
       }
+      order_claims: {
+        Row: {
+          admin_notes: string | null
+          bid_amount: number | null
+          business_id: string | null
+          claim_as: string
+          cover_note: string | null
+          created_at: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_id: string
+          source_type: string
+          status: string
+          team_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          bid_amount?: number | null
+          business_id?: string | null
+          claim_as?: string
+          cover_note?: string | null
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id: string
+          source_type: string
+          status?: string
+          team_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          bid_amount?: number | null
+          business_id?: string | null
+          claim_as?: string
+          cover_note?: string | null
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id?: string
+          source_type?: string
+          status?: string
+          team_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_claims_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_claims_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "partner_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           admin_notes: string | null
