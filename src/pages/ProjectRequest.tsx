@@ -33,6 +33,13 @@ const categories = [
   "Content Writing", "Video Production", "Consulting", "Lainnya",
 ];
 
+const currencies = [
+  { value: "IDR", label: "IDR (Rp)", symbol: "Rp" },
+  { value: "USD", label: "USD ($)", symbol: "$" },
+  { value: "EUR", label: "EUR (€)", symbol: "€" },
+  { value: "SGD", label: "SGD (S$)", symbol: "S$" },
+];
+
 const durations = [
   { value: "1-2 minggu", label: "1-2 Minggu" },
   { value: "1 bulan", label: "1 Bulan" },
@@ -61,6 +68,7 @@ const ProjectRequest = () => {
     project_scope: "",
     project_duration: "",
     demand_type: "partner" as "partner" | "team",
+    currency: "IDR",
   });
 
   useEffect(() => {
@@ -239,13 +247,22 @@ const ProjectRequest = () => {
               {/* Budget & Duration row */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <Label className="text-card-foreground">Budget (IDR)</Label>
-                  <div className="grid grid-cols-2 gap-3 mt-1.5">
-                    <div className="relative">
+                  <Label className="text-card-foreground">Budget</Label>
+                  <div className="flex gap-2 mt-1.5">
+                    <select
+                      className="h-10 px-2 rounded-md border border-input bg-background text-sm w-[100px] shrink-0"
+                      value={form.currency}
+                      onChange={(e) => set("currency", e.target.value)}
+                    >
+                      {currencies.map((c) => (
+                        <option key={c.value} value={c.value}>{c.label}</option>
+                      ))}
+                    </select>
+                    <div className="relative flex-1">
                       <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input className="pl-10" type="number" placeholder="Min" value={form.budget_min} onChange={(e) => set("budget_min", e.target.value)} />
                     </div>
-                    <div className="relative">
+                    <div className="relative flex-1">
                       <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input className="pl-10" type="number" placeholder="Max" value={form.budget_max} onChange={(e) => set("budget_max", e.target.value)} />
                     </div>
