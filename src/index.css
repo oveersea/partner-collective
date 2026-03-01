@@ -34,7 +34,7 @@
     --input: 0 0% 90%;
     --ring: 0 79% 47%;
 
-    --radius: 0.75rem;
+    --radius: 5px;
 
     /* Custom tokens */
     --navy: 0 0% 5%;
