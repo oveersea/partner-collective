@@ -1767,7 +1767,10 @@ export type Database = {
       }
       case_studies: {
         Row: {
+          challenge: string | null
+          client_logo_url: string | null
           company_name: string
+          content: string | null
           created_at: string
           cta_label: string | null
           cta_url: string | null
@@ -1777,12 +1780,21 @@ export type Database = {
           industry: string | null
           is_active: boolean | null
           is_featured: boolean | null
+          results: string | null
+          slug: string
+          solution: string | null
           sort_order: number | null
+          testimonial_author: string | null
+          testimonial_quote: string | null
+          testimonial_role: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          challenge?: string | null
+          client_logo_url?: string | null
           company_name: string
+          content?: string | null
           created_at?: string
           cta_label?: string | null
           cta_url?: string | null
@@ -1792,12 +1804,21 @@ export type Database = {
           industry?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          results?: string | null
+          slug: string
+          solution?: string | null
           sort_order?: number | null
+          testimonial_author?: string | null
+          testimonial_quote?: string | null
+          testimonial_role?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          challenge?: string | null
+          client_logo_url?: string | null
           company_name?: string
+          content?: string | null
           created_at?: string
           cta_label?: string | null
           cta_url?: string | null
@@ -1807,11 +1828,94 @@ export type Database = {
           industry?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          results?: string | null
+          slug?: string
+          solution?: string | null
           sort_order?: number | null
+          testimonial_author?: string | null
+          testimonial_quote?: string | null
+          testimonial_role?: string | null
           title?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      case_study_sections: {
+        Row: {
+          body: string | null
+          case_study_id: string
+          created_at: string
+          id: string
+          image_url: string | null
+          section_type: string
+          sort_order: number
+          title: string | null
+        }
+        Insert: {
+          body?: string | null
+          case_study_id: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          section_type?: string
+          sort_order?: number
+          title?: string | null
+        }
+        Update: {
+          body?: string | null
+          case_study_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          section_type?: string
+          sort_order?: number
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_study_sections_case_study_id_fkey"
+            columns: ["case_study_id"]
+            isOneToOne: false
+            referencedRelation: "case_studies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_study_services: {
+        Row: {
+          case_study_id: string
+          created_at: string
+          id: string
+          service_id: string
+        }
+        Insert: {
+          case_study_id: string
+          created_at?: string
+          id?: string
+          service_id: string
+        }
+        Update: {
+          case_study_id?: string
+          created_at?: string
+          id?: string
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_study_services_case_study_id_fkey"
+            columns: ["case_study_id"]
+            isOneToOne: false
+            referencedRelation: "case_studies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_study_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       certificates: {
         Row: {
