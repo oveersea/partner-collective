@@ -2,49 +2,83 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Megaphone, Code, Palette, Briefcase, FileText, Calculator, ChevronRight, CheckCircle2, ArrowRight } from "lucide-react";
-
-// Service thumbnail imports
-import imgDigitalMarketing from "@/assets/services/digital-marketing.jpg";
-import imgWebDevelopment from "@/assets/services/web-development.jpg";
-import imgUiUxDesign from "@/assets/services/ui-ux-design.jpg";
-import imgBusinessConsulting from "@/assets/services/business-consulting.jpg";
-import imgContentWriting from "@/assets/services/content-writing.jpg";
-import imgAccountingTax from "@/assets/services/accounting-tax.jpg";
-import imgMobileDevelopment from "@/assets/services/mobile-development.jpg";
-import imgFinancialPlanning from "@/assets/services/financial-planning.jpg";
-import imgGraphicDesign from "@/assets/services/graphic-design.jpg";
-import imgVideoProduction from "@/assets/services/video-production.jpg";
-import imgSocialMedia from "@/assets/services/social-media.jpg";
-import imgHrRecruitment from "@/assets/services/hr-recruitment.jpg";
-import imgDataAnalytics from "@/assets/services/data-analytics.jpg";
-import imgSeoSem from "@/assets/services/seo-sem.jpg";
-import imgMotionGraphics from "@/assets/services/motion-graphics.jpg";
-import imgCloudDevops from "@/assets/services/cloud-devops.jpg";
-import imgEmailMarketing from "@/assets/services/email-marketing.jpg";
+import { Megaphone, Code, Palette, Briefcase, FileText, Calculator, ArrowRight } from "lucide-react";
 
 const iconMap: Record<string, React.ElementType> = {
   Megaphone, Code, Palette, Briefcase, FileText, Calculator,
 };
 
-const serviceImageMap: Record<string, string> = {
-  "digital-marketing": imgDigitalMarketing,
-  "web-development": imgWebDevelopment,
-  "ui-ux-design": imgUiUxDesign,
-  "business-consulting": imgBusinessConsulting,
-  "content-writing": imgContentWriting,
-  "accounting-tax": imgAccountingTax,
-  "mobile-development": imgMobileDevelopment,
-  "financial-planning": imgFinancialPlanning,
-  "graphic-design": imgGraphicDesign,
-  "video-production": imgVideoProduction,
-  "social-media-management": imgSocialMedia,
-  "hr-recruitment": imgHrRecruitment,
-  "data-analytics": imgDataAnalytics,
-  "seo-sem": imgSeoSem,
-  "motion-graphics": imgMotionGraphics,
-  "cloud-devops": imgCloudDevops,
-  "email-marketing": imgEmailMarketing,
+// Service thumbnail imports
+import imgDigitalMarketing from "@/assets/services/digital-marketing.jpg";
+import imgDigitalMarketing2 from "@/assets/services/digital-marketing-2.jpg";
+import imgDigitalMarketing3 from "@/assets/services/digital-marketing-3.jpg";
+import imgWebDevelopment from "@/assets/services/web-development.jpg";
+import imgWebDevelopment2 from "@/assets/services/web-development-2.jpg";
+import imgWebDevelopment3 from "@/assets/services/web-development-3.jpg";
+import imgUiUxDesign from "@/assets/services/ui-ux-design.jpg";
+import imgUiUxDesign2 from "@/assets/services/ui-ux-design-2.jpg";
+import imgUiUxDesign3 from "@/assets/services/ui-ux-design-3.jpg";
+import imgBusinessConsulting from "@/assets/services/business-consulting.jpg";
+import imgBusinessConsulting2 from "@/assets/services/business-consulting-2.jpg";
+import imgBusinessConsulting3 from "@/assets/services/business-consulting-3.jpg";
+import imgContentWriting from "@/assets/services/content-writing.jpg";
+import imgContentWriting2 from "@/assets/services/content-writing-2.jpg";
+import imgContentWriting3 from "@/assets/services/content-writing-3.jpg";
+import imgAccountingTax from "@/assets/services/accounting-tax.jpg";
+import imgAccountingTax2 from "@/assets/services/accounting-tax-2.jpg";
+import imgAccountingTax3 from "@/assets/services/accounting-tax-3.jpg";
+import imgMobileDevelopment from "@/assets/services/mobile-development.jpg";
+import imgMobileDevelopment2 from "@/assets/services/mobile-development-2.jpg";
+import imgMobileDevelopment3 from "@/assets/services/mobile-development-3.jpg";
+import imgFinancialPlanning from "@/assets/services/financial-planning.jpg";
+import imgFinancialPlanning2 from "@/assets/services/financial-planning-2.jpg";
+import imgFinancialPlanning3 from "@/assets/services/financial-planning-3.jpg";
+import imgGraphicDesign from "@/assets/services/graphic-design.jpg";
+import imgGraphicDesign2 from "@/assets/services/graphic-design-2.jpg";
+import imgGraphicDesign3 from "@/assets/services/graphic-design-3.jpg";
+import imgVideoProduction from "@/assets/services/video-production.jpg";
+import imgVideoProduction2 from "@/assets/services/video-production-2.jpg";
+import imgVideoProduction3 from "@/assets/services/video-production-3.jpg";
+import imgSocialMedia from "@/assets/services/social-media.jpg";
+import imgSocialMedia2 from "@/assets/services/social-media-2.jpg";
+import imgSocialMedia3 from "@/assets/services/social-media-3.jpg";
+import imgHrRecruitment from "@/assets/services/hr-recruitment.jpg";
+import imgHrRecruitment2 from "@/assets/services/hr-recruitment-2.jpg";
+import imgHrRecruitment3 from "@/assets/services/hr-recruitment-3.jpg";
+import imgDataAnalytics from "@/assets/services/data-analytics.jpg";
+import imgDataAnalytics2 from "@/assets/services/data-analytics-2.jpg";
+import imgDataAnalytics3 from "@/assets/services/data-analytics-3.jpg";
+import imgSeoSem from "@/assets/services/seo-sem.jpg";
+import imgSeoSem2 from "@/assets/services/seo-sem-2.jpg";
+import imgSeoSem3 from "@/assets/services/seo-sem-3.jpg";
+import imgMotionGraphics from "@/assets/services/motion-graphics.jpg";
+import imgMotionGraphics2 from "@/assets/services/motion-graphics-2.jpg";
+import imgMotionGraphics3 from "@/assets/services/motion-graphics-3.jpg";
+import imgCloudDevops from "@/assets/services/cloud-devops.jpg";
+import imgCloudDevops2 from "@/assets/services/cloud-devops-2.jpg";
+import imgCloudDevops3 from "@/assets/services/cloud-devops-3.jpg";
+import imgEmailMarketing from "@/assets/services/email-marketing.jpg";
+import imgEmailMarketing2 from "@/assets/services/email-marketing-2.jpg";
+import imgEmailMarketing3 from "@/assets/services/email-marketing-3.jpg";
+
+const serviceImageMap: Record<string, string[]> = {
+  "digital-marketing": [imgDigitalMarketing, imgDigitalMarketing2, imgDigitalMarketing3],
+  "web-development": [imgWebDevelopment, imgWebDevelopment2, imgWebDevelopment3],
+  "ui-ux-design": [imgUiUxDesign, imgUiUxDesign2, imgUiUxDesign3],
+  "business-consulting": [imgBusinessConsulting, imgBusinessConsulting2, imgBusinessConsulting3],
+  "content-writing": [imgContentWriting, imgContentWriting2, imgContentWriting3],
+  "accounting-tax": [imgAccountingTax, imgAccountingTax2, imgAccountingTax3],
+  "mobile-development": [imgMobileDevelopment, imgMobileDevelopment2, imgMobileDevelopment3],
+  "financial-planning": [imgFinancialPlanning, imgFinancialPlanning2, imgFinancialPlanning3],
+  "graphic-design": [imgGraphicDesign, imgGraphicDesign2, imgGraphicDesign3],
+  "video-production": [imgVideoProduction, imgVideoProduction2, imgVideoProduction3],
+  "social-media-management": [imgSocialMedia, imgSocialMedia2, imgSocialMedia3],
+  "hr-recruitment": [imgHrRecruitment, imgHrRecruitment2, imgHrRecruitment3],
+  "data-analytics": [imgDataAnalytics, imgDataAnalytics2, imgDataAnalytics3],
+  "seo-sem": [imgSeoSem, imgSeoSem2, imgSeoSem3],
+  "motion-graphics": [imgMotionGraphics, imgMotionGraphics2, imgMotionGraphics3],
+  "cloud-devops": [imgCloudDevops, imgCloudDevops2, imgCloudDevops3],
+  "email-marketing": [imgEmailMarketing, imgEmailMarketing2, imgEmailMarketing3],
 };
 
 interface ServiceCategory {
@@ -200,7 +234,7 @@ const ServiceShowcaseSection = () => {
             services.map((service, i) => {
               const cat = categories.find(c => c.id === service.category_id);
               const Icon = iconMap[cat?.icon || ""] || Briefcase;
-              const thumbnailImg = serviceImageMap[service.slug];
+              const thumbnailImgs = serviceImageMap[service.slug];
               return (
                 <Link key={service.id} to={`/services/${service.slug}`}>
                   <motion.div
@@ -212,11 +246,11 @@ const ServiceShowcaseSection = () => {
                   >
                     {/* Thumbnail grid */}
                     <div className="grid grid-cols-3 gap-0.5 h-40 bg-muted overflow-hidden">
-                      {thumbnailImg ? (
+                      {thumbnailImgs ? (
                         <>
-                          <img src={thumbnailImg} alt={service.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" style={{ objectPosition: 'left center' }} />
-                          <img src={thumbnailImg} alt={service.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" style={{ objectPosition: 'center center' }} />
-                          <img src={thumbnailImg} alt={service.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" style={{ objectPosition: 'right center' }} />
+                          <img src={thumbnailImgs[0]} alt={service.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <img src={thumbnailImgs[1]} alt={service.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <img src={thumbnailImgs[2]} alt={service.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         </>
                       ) : (
                         <div className="col-span-3 w-full h-full bg-gradient-to-br from-primary/10 via-muted to-accent/10 flex items-center justify-center">
