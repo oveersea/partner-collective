@@ -54,6 +54,8 @@ const Matchmaking = () => {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [remoteFilter, setRemoteFilter] = useState<"all" | "remote" | "onsite">("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
 
   // Detail modal
   const [detailModal, setDetailModal] = useState<Opportunity | null>(null);
@@ -253,7 +255,7 @@ const Matchmaking = () => {
                 className="pl-10"
                 placeholder="Cari berdasarkan judul, deskripsi, atau skill..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               />
             </div>
             <Button
@@ -314,15 +316,22 @@ const Matchmaking = () => {
         </div>
 
         {/* Results count */}
-        <p className="text-sm text-muted-foreground mb-4">
-          {filtered.length} peluang ditemukan
-        </p>
+        {(() => {
+          const totalPages = Math.ceil(filtered.length / itemsPerPage);
+          const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+          return (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-muted-foreground">
+                  {filtered.length} peluang ditemukan • Halaman {currentPage} dari {totalPages || 1}
+                </p>
+              </div>
 
-        {/* Opportunity Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map((opp, idx) => {
-            const score = calcMatchScore(opp);
-            const applied = appliedIds.has(opp.id);
+              {/* Opportunity Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {paginated.map((opp, idx) => {
+                  const score = calcMatchScore(opp);
+                  const applied = appliedIds.has(opp.id);
             const budget = formatBudget(opp.budget_min, opp.budget_max);
             const matchedSkills = opp.skills_required?.filter((s) =>
               profile?.skills?.some((ps) => ps.toLowerCase() === s.toLowerCase())
@@ -440,17 +449,59 @@ const Matchmaking = () => {
                   </Button>
                 </div>
               </motion.div>
-            );
-          })}
+                );
+                })}
 
-          {filtered.length === 0 && (
-            <div className="text-center py-16">
-              <Search className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-              <h3 className="text-lg font-semibold text-foreground mb-1">Tidak ada peluang ditemukan</h3>
-              <p className="text-sm text-muted-foreground">Coba ubah filter atau cari dengan kata kunci lain</p>
-            </div>
-          )}
-        </div>
+                {filtered.length === 0 && (
+                  <div className="text-center py-16 col-span-full">
+                    <Search className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <h3 className="text-lg font-semibold text-foreground mb-1">Tidak ada peluang ditemukan</h3>
+                    <p className="text-sm text-muted-foreground">Coba ubah filter atau cari dengan kata kunci lain</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-8">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                  >
+                    Sebelumnya
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                    .map((p, i, arr) => (
+                      <span key={p} className="flex items-center">
+                        {i > 0 && arr[i - 1] !== p - 1 && <span className="text-muted-foreground mx-1">…</span>}
+                        <button
+                          onClick={() => setCurrentPage(p)}
+                          className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
+                            currentPage === p
+                              ? "bg-primary text-primary-foreground"
+                              : "text-muted-foreground hover:bg-accent"
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      </span>
+                    ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                  >
+                    Selanjutnya
+                  </Button>
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
 
       {/* Detail Modal */}
