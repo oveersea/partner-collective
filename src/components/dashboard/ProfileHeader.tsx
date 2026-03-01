@@ -55,7 +55,7 @@ const ProfileHeader = ({ profile, editing, onToggleEdit }: ProfileHeaderProps) =
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-card-foreground">
+              <h1 className="text-2xl font-semibold text-card-foreground">
                 {profile.full_name || "Nama belum diisi"}
               </h1>
               <p className="text-muted-foreground">{profile.headline || "Headline belum diisi"}</p>

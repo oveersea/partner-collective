@@ -216,7 +216,7 @@ const VendorRegistration = () => {
           {/* Left: Form (70%) */}
           <div className="lg:w-[70%]">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Registrasi Vendor</h1>
+              <h1 className="text-2xl font-semibold text-foreground mb-2">Registrasi Vendor</h1>
               <p className="text-muted-foreground text-sm">Daftarkan perusahaan Anda dan upload dokumen legalitas</p>
             </motion.div>
 
@@ -225,7 +225,7 @@ const VendorRegistration = () => {
               {[1, 2].map((s) => (
                 <div key={s} className="flex items-center gap-2">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
                       step >= s
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted text-muted-foreground"
@@ -359,7 +359,7 @@ const VendorRegistration = () => {
                 className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-5"
               >
                 <div>
-                  <h2 className="text-lg font-bold text-card-foreground mb-1">Upload Dokumen Legalitas</h2>
+                  <h2 className="text-lg font-semibold text-card-foreground mb-1">Upload Dokumen Legalitas</h2>
                   <p className="text-sm text-muted-foreground">
                     Upload dokumen perusahaan Anda. Format: JPG, PNG, PDF. Maks 10MB per file.
                   </p>

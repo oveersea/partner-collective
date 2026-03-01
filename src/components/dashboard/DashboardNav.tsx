@@ -41,9 +41,9 @@ const DashboardNav = () => {
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">O</span>
+              <span className="text-primary-foreground font-semibold text-sm">O</span>
             </div>
-            <span className="font-display text-lg font-bold text-foreground">Oveersea</span>
+            <span className="font-display text-lg font-semibold text-foreground">Oveersea</span>
           </Link>
           <div className="hidden sm:flex items-center gap-1">
             <Link

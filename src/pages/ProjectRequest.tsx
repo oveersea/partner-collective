@@ -172,7 +172,7 @@ const ProjectRequest = () => {
           {/* Left: Form (70%) */}
           <div className="lg:w-[70%]">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Project Request</h1>
+              <h1 className="text-2xl font-semibold text-foreground mb-2">Project Request</h1>
               <p className="text-muted-foreground text-sm">Temukan partner atau tim untuk mengerjakan project Anda</p>
             </motion.div>
 

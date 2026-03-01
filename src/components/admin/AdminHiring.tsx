@@ -81,7 +81,7 @@ const AdminHiring = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-foreground">Hiring & Matchmaking</h2>
+        <h2 className="text-xl font-semibold text-foreground">Hiring & Matchmaking</h2>
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input className="pl-9" placeholder="Cari role atau perusahaan..." value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -188,7 +188,7 @@ const AdminHiring = () => {
                           ))}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-destructive font-bold">{a.shortage_count}</td>
+                      <td className="px-4 py-3 text-destructive font-semibold">{a.shortage_count}</td>
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${slaColor(a.sla_type)}`}>{a.sla_type}</span>
                       </td>

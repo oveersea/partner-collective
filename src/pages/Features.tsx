@@ -31,7 +31,7 @@ const Features = () => {
           </Link>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+            <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">
               Temukan Talenta <span className="text-gradient-accent">Terbaik</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl">
@@ -64,7 +64,7 @@ const Features = () => {
                 <div className="w-14 h-14 rounded-xl border border-border bg-background flex items-center justify-center mb-5">
                   <cat.icon className="w-6 h-6 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold text-card-foreground mb-3">{cat.title}</h2>
+                <h2 className="text-xl font-semibold text-card-foreground mb-3">{cat.title}</h2>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-5">{cat.description}</p>
                 <div className="flex flex-wrap gap-2">
                   {cat.skills.map(skill => (

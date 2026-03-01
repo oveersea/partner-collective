@@ -235,7 +235,7 @@ const AdminUsers = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-foreground">Manajemen User</h2>
+        <h2 className="text-xl font-semibold text-foreground">Manajemen User</h2>
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input className="pl-9" placeholder="Cari nama atau oveercode..." value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -304,7 +304,7 @@ const AdminUsers = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${scoreColor}`}>
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-full ${scoreColor}`}>
                         {pScore}%
                       </span>
                     </td>

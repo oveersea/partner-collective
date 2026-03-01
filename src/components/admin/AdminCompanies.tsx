@@ -132,7 +132,7 @@ const AdminCompanies = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-foreground">Manajemen Perusahaan</h2>
+        <h2 className="text-xl font-semibold text-foreground">Manajemen Perusahaan</h2>
         <div className="relative w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -157,7 +157,7 @@ const AdminCompanies = () => {
               <s.icon className={`w-5 h-5 ${s.color}`} />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{s.value}</p>
+              <p className="text-2xl font-semibold text-foreground">{s.value}</p>
               <p className="text-xs text-muted-foreground">{s.label}</p>
             </div>
           </div>

@@ -126,7 +126,7 @@ const Learning = () => {
             <div className="p-2 rounded-lg bg-primary/10">
               <GraduationCap className="w-6 h-6 text-primary" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Learning Programs</h1>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">Learning Programs</h1>
           </div>
           <p className="text-muted-foreground max-w-2xl">
             Tingkatkan kompetensi Anda dengan program sertifikasi dan bootcamp berkualitas dari instruktur berpengalaman.
@@ -216,7 +216,7 @@ const Learning = () => {
                         {p.delivery_mode && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{p.delivery_mode}</span>}
                       </div>
                       <div className="mt-auto flex items-center justify-between">
-                        <span className="font-bold text-sm text-foreground">{formatRupiah(p.price_cents)}</span>
+                        <span className="font-semibold text-sm text-foreground">{formatRupiah(p.price_cents)}</span>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           {p.rating && <span className="flex items-center gap-0.5"><Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />{p.rating}</span>}
                           {p.student_count != null && <span className="flex items-center gap-0.5"><Users className="w-3 h-3" />{p.student_count}</span>}

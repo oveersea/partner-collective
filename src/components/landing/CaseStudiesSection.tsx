@@ -27,7 +27,7 @@ const CaseStudiesSection = () => {
           className="text-center mb-14"
         >
           <span className="text-sm font-semibold text-primary uppercase tracking-widest">Studi Kasus</span>
-          <h2 className="text-4xl md:text-5xl font-bold mt-3 mb-5 text-foreground">
+          <h2 className="text-4xl md:text-5xl font-semibold mt-3 mb-5 text-foreground">
             Dipercaya oleh <span className="text-gradient-accent">Berbagai Industri</span>
           </h2>
           <p className="text-lg max-w-2xl mx-auto text-muted-foreground">
@@ -55,7 +55,7 @@ const CaseStudiesSection = () => {
 
               {/* Company name */}
               <div className="absolute top-5 left-5">
-                <h3 className="text-lg font-bold text-white drop-shadow-lg">{item.company}</h3>
+                <h3 className="text-lg font-semibold text-white drop-shadow-lg">{item.company}</h3>
                 <p className="text-xs text-white/70 font-medium">{item.industry}</p>
               </div>
 

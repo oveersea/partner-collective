@@ -216,7 +216,7 @@ const Matchmaking = () => {
               <Zap className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Matchmaking</h1>
+              <h1 className="text-2xl font-semibold text-foreground">Matchmaking</h1>
               <p className="text-muted-foreground text-sm">
                 Temukan peluang yang cocok dengan skill Anda
               </p>
@@ -362,7 +362,7 @@ const Matchmaking = () => {
                         </span>
                       )}
                     </div>
-                    <h3 className="text-lg font-bold text-card-foreground truncate">{opp.title}</h3>
+                    <h3 className="text-lg font-semibold text-card-foreground truncate">{opp.title}</h3>
                     {opp.company_name && (
                       <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
                         <Building2 className="w-3.5 h-3.5" /> {opp.company_name}
@@ -376,7 +376,7 @@ const Matchmaking = () => {
                   {/* Match Score */}
                   <div className={`shrink-0 w-16 h-16 rounded-2xl border flex flex-col items-center justify-center ${getScoreColor(score)}`}>
                     <TrendingUp className="w-3.5 h-3.5 mb-0.5" />
-                    <span className="text-lg font-bold leading-none">{score}%</span>
+                    <span className="text-lg font-semibold leading-none">{score}%</span>
                   </div>
                 </div>
 

@@ -85,7 +85,7 @@ const AdminCredits = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-foreground mb-6">Kredit & Wallet</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-6">Kredit & Wallet</h2>
 
       <div className="flex gap-2 mb-4">
         <Button size="sm" variant={tab === "orders" ? "default" : "outline"} onClick={() => setTab("orders")}>
@@ -126,7 +126,7 @@ const AdminCredits = () => {
                         {o.business_profiles?.name || o.profiles?.full_name || "—"}
                         <Badge variant="secondary" className="ml-2 text-[10px]">{o.buyer_type}</Badge>
                       </td>
-                      <td className="px-4 py-3 font-bold text-foreground">{o.credits}</td>
+                      <td className="px-4 py-3 font-semibold text-foreground">{o.credits}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">
                         {new Intl.NumberFormat("id-ID", { style: "currency", currency: o.currency || "IDR", maximumFractionDigits: 0 }).format(o.amount)}
                       </td>
@@ -178,7 +178,7 @@ const AdminCredits = () => {
                     <tr key={d.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 font-mono text-xs text-foreground">{d.deposit_number}</td>
                       <td className="px-4 py-3 text-foreground text-xs">{d.profiles?.full_name || "—"}</td>
-                      <td className="px-4 py-3 font-bold text-foreground">
+                      <td className="px-4 py-3 font-semibold text-foreground">
                         {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(d.amount)}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{d.method}</td>

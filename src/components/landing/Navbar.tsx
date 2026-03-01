@@ -129,9 +129,9 @@ const Navbar = () => {
         {/* Logo */}
         <a href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "hsl(0 79% 47%)" }}>
-            <span className="text-white font-bold text-sm">O</span>
+            <span className="text-white font-semibold text-sm">O</span>
           </div>
-          <span className="font-display text-lg font-bold text-white">Oveersea</span>
+          <span className="font-display text-lg font-semibold text-white">Oveersea</span>
         </a>
 
         {/* Desktop links */}

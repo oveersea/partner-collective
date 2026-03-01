@@ -111,7 +111,7 @@ const AdminKYC = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-foreground mb-6">Verifikasi KYC</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-6">Verifikasi KYC</h2>
 
       <div className="flex gap-2 mb-4">
         {filters.map((f) => (

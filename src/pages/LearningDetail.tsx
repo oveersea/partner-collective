@@ -144,7 +144,7 @@ const LearningDetail = () => {
                 {program.badge && <Badge variant="secondary">{program.badge}</Badge>}
                 {program.level && <Badge variant="outline">{program.level}</Badge>}
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">{program.title}</h1>
+              <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-3">{program.title}</h1>
               {program.description && <p className="text-muted-foreground leading-relaxed">{program.description}</p>}
             </motion.div>
 
@@ -250,7 +250,7 @@ const LearningDetail = () => {
             <Card className="sticky top-24">
               <CardContent className="p-6 space-y-5">
                 <div>
-                  <span className="text-2xl font-bold text-foreground">{formatRupiah(program.price_cents)}</span>
+                  <span className="text-2xl font-semibold text-foreground">{formatRupiah(program.price_cents)}</span>
                 </div>
                 <Button className="w-full" size="lg">Daftar Program</Button>
                 <div className="space-y-3 text-sm">
