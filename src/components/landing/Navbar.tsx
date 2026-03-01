@@ -35,7 +35,7 @@ const megaMenus: MegaMenuData[] = [
   {
     label: "Layanan",
     tagline: "Solusi end-to-end untuk kebutuhan talent & bisnis Anda",
-    cta: { label: "Lihat semua layanan", href: "/features" },
+    cta: { label: "Lihat semua layanan", href: "/services" },
     masters: [
       {
         label: "Talent Matchmaking",
@@ -130,10 +130,10 @@ const megaMenus: MegaMenuData[] = [
         description: "Semua fitur platform Oveersea",
         icon: Settings,
         subItems: [
-          { icon: Settings, title: "Semua Fitur", description: "Eksplorasi seluruh kapabilitas platform", href: "/features" },
-          { icon: Bell, title: "Notifikasi", description: "Pusat notifikasi & alert penting", href: "/features" },
-          { icon: Compass, title: "Panduan Penggunaan", description: "Tutorial & cara menggunakan platform", href: "/features" },
-          { icon: TrendingUp, title: "Insight & Analytics", description: "Data performa & statistik aktivitas", href: "/features" },
+          { icon: Settings, title: "Semua Fitur", description: "Eksplorasi seluruh kapabilitas platform", href: "/services" },
+          { icon: Bell, title: "Notifikasi", description: "Pusat notifikasi & alert penting", href: "/services" },
+          { icon: Compass, title: "Panduan Penggunaan", description: "Tutorial & cara menggunakan platform", href: "/services" },
+          { icon: TrendingUp, title: "Insight & Analytics", description: "Data performa & statistik aktivitas", href: "/services" },
         ],
       },
     ],
@@ -222,17 +222,17 @@ const megaMenus: MegaMenuData[] = [
   {
     label: "Resources",
     tagline: "Insight, riset, dan tools untuk keputusan bisnis lebih baik",
-    cta: { label: "Lihat semua resources", href: "/features" },
+    cta: { label: "Lihat semua resources", href: "/services" },
     masters: [
       {
         label: "Insight & Analisis",
         description: "Data & tren industri terkini",
         icon: BarChart3,
         subItems: [
-          { icon: BarChart3, title: "Industry Insight", description: "Laporan tren pasar tenaga kerja terkini", href: "/features" },
-          { icon: TrendingUp, title: "Salary Report", description: "Data benchmark gaji per industri & role", href: "/features" },
-          { icon: BookOpen, title: "Blog & Artikel", description: "Artikel edukatif seputar HR & talent", href: "/features" },
-          { icon: Star, title: "Best Practices", description: "Tips & strategi pengelolaan talent", href: "/features" },
+          { icon: BarChart3, title: "Industry Insight", description: "Laporan tren pasar tenaga kerja terkini", href: "/services" },
+          { icon: TrendingUp, title: "Salary Report", description: "Data benchmark gaji per industri & role", href: "/services" },
+          { icon: BookOpen, title: "Blog & Artikel", description: "Artikel edukatif seputar HR & talent", href: "/services" },
+          { icon: Star, title: "Best Practices", description: "Tips & strategi pengelolaan talent", href: "/services" },
         ],
       },
       {
@@ -240,10 +240,10 @@ const megaMenus: MegaMenuData[] = [
         description: "Survei & penelitian eksklusif",
         icon: ClipboardCheck,
         subItems: [
-          { icon: ClipboardCheck, title: "Talent Survey", description: "Survei kepuasan & tren talent Indonesia", href: "/features" },
-          { icon: FileText, title: "Workforce Report", description: "Laporan riset pasar tenaga kerja", href: "/features" },
-          { icon: BarChart3, title: "Skill Demand Index", description: "Indeks permintaan skill terpopuler", href: "/features" },
-          { icon: Globe, title: "Global Benchmark", description: "Perbandingan dengan standar internasional", href: "/features" },
+          { icon: ClipboardCheck, title: "Talent Survey", description: "Survei kepuasan & tren talent Indonesia", href: "/services" },
+          { icon: FileText, title: "Workforce Report", description: "Laporan riset pasar tenaga kerja", href: "/services" },
+          { icon: BarChart3, title: "Skill Demand Index", description: "Indeks permintaan skill terpopuler", href: "/services" },
+          { icon: Globe, title: "Global Benchmark", description: "Perbandingan dengan standar internasional", href: "/services" },
         ],
       },
       {
@@ -251,10 +251,10 @@ const megaMenus: MegaMenuData[] = [
         description: "Kisah sukses klien kami",
         icon: FolderOpen,
         subItems: [
-          { icon: FolderOpen, title: "Semua Case Studies", description: "Lihat semua studi kasus klien", href: "/features" },
-          { icon: Building2, title: "Enterprise", description: "Studi kasus perusahaan besar", href: "/features" },
-          { icon: Briefcase, title: "Startup & SME", description: "Studi kasus startup & UKM", href: "/features" },
-          { icon: Globe, title: "Cross-Border", description: "Studi kasus penempatan internasional", href: "/features" },
+          { icon: FolderOpen, title: "Semua Case Studies", description: "Lihat semua studi kasus klien", href: "/services" },
+          { icon: Building2, title: "Enterprise", description: "Studi kasus perusahaan besar", href: "/services" },
+          { icon: Briefcase, title: "Startup & SME", description: "Studi kasus startup & UKM", href: "/services" },
+          { icon: Globe, title: "Cross-Border", description: "Studi kasus penempatan internasional", href: "/services" },
         ],
       },
       {
@@ -262,10 +262,10 @@ const megaMenus: MegaMenuData[] = [
         description: "Tools & template untuk bisnis",
         icon: ScrollText,
         subItems: [
-          { icon: ClipboardCheck, title: "Assessment Tools", description: "Template tes kompetensi siap pakai", href: "/features" },
-          { icon: ScrollText, title: "Document Templates", description: "Template kontrak, NDA, & dokumen HR", href: "/features" },
-          { icon: PackageCheck, title: "Compliance Checklist", description: "Checklist kepatuhan ketenagakerjaan", href: "/features" },
-          { icon: Shield, title: "Legal Resources", description: "Panduan regulasi tenaga kerja", href: "/features" },
+          { icon: ClipboardCheck, title: "Assessment Tools", description: "Template tes kompetensi siap pakai", href: "/services" },
+          { icon: ScrollText, title: "Document Templates", description: "Template kontrak, NDA, & dokumen HR", href: "/services" },
+          { icon: PackageCheck, title: "Compliance Checklist", description: "Checklist kepatuhan ketenagakerjaan", href: "/services" },
+          { icon: Shield, title: "Legal Resources", description: "Panduan regulasi tenaga kerja", href: "/services" },
         ],
       },
     ],
