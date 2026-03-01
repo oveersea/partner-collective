@@ -12,6 +12,7 @@ import HiringRequest from "./pages/HiringRequest";
 import ProjectRequest from "./pages/ProjectRequest";
 import VendorRegistration from "./pages/VendorRegistration";
 import Matchmaking from "./pages/Matchmaking";
+import JobDetail from "./pages/JobDetail";
 import Features from "./pages/Features";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/project-request" element={<ProjectRequest />} />
             <Route path="/vendor-registration" element={<VendorRegistration />} />
             <Route path="/matchmaking" element={<Matchmaking />} />
+            <Route path="/job/:slug" element={<JobDetail />} />
             <Route path="/features" element={<Features />} />
             <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
