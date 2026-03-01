@@ -1,53 +1,57 @@
 
 
-## Change All Fonts to Inter with Softer Bold Weights
+## Add Learning, Assessment & Insights Management to Admin Panel
 
 ### Overview
-Replace the current dual-font system (Space Grotesk for headings + Plus Jakarta Sans for body) with a single **Inter** font family. Reduce heavy bold weights (`font-bold` / 700, `font-extrabold` / 800) to medium-bold levels (`font-semibold` / 600) across the entire app.
+Add 3 new admin sections to the superadmin sidebar and dashboard, leveraging existing database tables: `learning_programs`, `competency_tests` (assessments), and `insight_services`/`surveys`.
 
 ### Changes
 
-#### 1. Google Fonts Import (`src/index.css`, line 1)
-Replace the current import:
-```
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-```
-Remove Space Grotesk and Plus Jakarta Sans entirely. Import Inter with weights 400 (regular), 500 (medium), 600 (semibold), 700 (bold -- used sparingly).
+#### 1. Update AdminSidebar (`src/components/admin/AdminSidebar.tsx`)
+Add 3 new menu items to the `sections` array:
+- **Learning Program** (icon: `GraduationCap`, id: `learning`)
+- **Assessment** (icon: `ClipboardCheck`, id: `assessment`)
+- **Insights & Survey** (icon: `BarChart3`, id: `insights`)
 
-#### 2. Tailwind Font Config (`tailwind.config.ts`, lines 17-18)
-Update both `display` and `body` font families to Inter:
-```ts
-fontFamily: {
-  display: ['"Inter"', 'system-ui', 'sans-serif'],
-  body: ['"Inter"', 'system-ui', 'sans-serif'],
-},
-```
+#### 2. Create `AdminLearning.tsx` (`src/components/admin/AdminLearning.tsx`)
+Management panel for `learning_programs` table (20 records exist). Features:
+- Table listing: title, category, skill_name, difficulty_level, program_type, duration_hours, price, is_active, oveercode, created_at
+- Toggle active/inactive (`is_active`)
+- Enrollment stats from `learning_enrollments` (count per program)
+- Search + pagination (reuse PAGE_SIZE=20 pattern from AdminContent)
 
-#### 3. Reduce Bold Weights Across ~33 Files
-Global find-and-replace across all `.tsx` files in `src/`:
+#### 3. Create `AdminAssessment.tsx` (`src/components/admin/AdminAssessment.tsx`)
+Management panel for `competency_tests` table (1 record exists) + `assessment_orders`. Features:
+- Table listing: title, skill_name, assessment_type, test_tier, total_questions, passing_score, time_limit, price, is_active
+- Toggle active/inactive
+- Sub-tab for Assessment Orders from `assessment_orders`: order_number, user, status, amount, payment confirmation (approve/reject)
+- Search + pagination
 
-| Current class | Replacement |
-|---|---|
-| `font-extrabold` | `font-semibold` |
-| `font-black` | `font-semibold` |
-| `font-bold` (on headings h1-h6, large text) | `font-semibold` |
-| `font-bold` (on small UI elements like logos, badges) | Keep as `font-semibold` |
+#### 4. Create `AdminInsights.tsx` (`src/components/admin/AdminInsights.tsx`)
+Management panel for `insight_services` + `surveys` (3 surveys exist). Features:
+- Two tabs: "Insight Services" and "Surveys"
+- Insight Services table: title, tagline, icon_name, sort_order, is_active, toggle active
+- Surveys table: title, category, status, total_responses, starts_at, ends_at, toggle status
+- Search + pagination
 
-Key files affected:
-- `src/components/landing/Navbar.tsx` -- logo text, mega menu titles
-- `src/components/landing/HeroSection.tsx` -- hero heading
-- `src/components/landing/FeaturesSection.tsx`, `CaseStudiesSection.tsx`, `CTASection.tsx`, `HowItWorksSection.tsx`, `Footer.tsx`
-- `src/components/dashboard/DashboardNav.tsx`, `ProfileHeader.tsx`, `ProfileOverview.tsx`, `ProfileEditForm.tsx`
-- `src/components/admin/AdminSidebar.tsx`, `AdminOverview.tsx`, `AdminUsers.tsx`, `AdminContent.tsx`, `AdminCredits.tsx`, `AdminHiring.tsx`, `AdminKYC.tsx`, `AdminCompanies.tsx`
-- `src/pages/` -- all page files (Dashboard, AuthPage, Matchmaking, JobDetail, Learning, LearningDetail, etc.)
+#### 5. Update AdminDashboard (`src/pages/AdminDashboard.tsx`)
+- Import the 3 new components
+- Add cases to `renderContent()` switch: `learning`, `assessment`, `insights`
 
-The approach: replace **all** `font-bold` with `font-semibold` and all `font-extrabold`/`font-black` with `font-semibold` project-wide to achieve the medium-bold look.
+### Technical Details
 
-#### 4. Inline Style Font Weights
-Check for any inline `style={{ fontWeight: ... }}` and normalize to 500-600 range.
+All 3 new components follow the exact same pattern as `AdminContent.tsx`:
+- Fetch data from Supabase on mount
+- Filter with search input
+- Paginate with PAGE_SIZE=20
+- Status badge helper
+- Toggle status with update query + toast feedback
+- Consistent table styling with `bg-card rounded-2xl border border-border`
 
-### Result
-- Single consistent font (Inter) across all UI
-- Headings and emphasis text use `font-semibold` (600) instead of `font-bold` (700) or heavier
-- Cleaner, more modern typographic feel with less visual heaviness
+Database tables used (read-only exploration confirmed):
+| Section | Primary Table | Related Tables |
+|---|---|---|
+| Learning | `learning_programs` | `learning_enrollments`, `learning_modules` |
+| Assessment | `competency_tests` | `assessment_orders`, `assessment_attempts` |
+| Insights | `insight_services`, `surveys` | `insight_subscriptions`, `survey_responses` |
 
