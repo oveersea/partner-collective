@@ -14,34 +14,29 @@ const CTASection = () => {
           className="relative rounded-2xl bg-muted border border-border overflow-hidden"
         >
           <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10 p-6 md:p-8">
-            {/* Globe image */}
             <div className="shrink-0 w-28 h-28 md:w-36 md:h-36 rounded-xl overflow-hidden">
               <img src={ctaGlobe} alt="Global network" className="w-full h-full object-cover" />
             </div>
-
-            {/* Text content */}
             <div className="flex-1 text-center md:text-left">
               <h3 className="text-xl md:text-2xl font-semibold text-foreground mb-2">
-                Kelola seluruh workforce Anda secara global
+                Manage your entire workforce globally
               </h3>
               <p className="text-muted-foreground text-sm md:text-base max-w-xl">
-                Onboard, kelola, dan bayar partner serta kontraktor di seluruh dunia dalam satu platform, tanpa kerumitan manual.
+                Onboard, manage, and pay partners and contractors worldwide in one platform, without manual hassle.
               </p>
             </div>
-
-            {/* CTA buttons */}
             <div className="flex items-center gap-3 shrink-0">
               <Button
                 className="font-semibold px-6 py-5 rounded-lg text-sm"
                 style={{ background: "hsl(38 90% 55%)", color: "hsl(0 0% 0%)" }}
               >
-                Minta Demo
+                Request Demo
               </Button>
               <Button
                 variant="outline"
                 className="font-semibold px-6 py-5 rounded-lg text-sm border-2 border-foreground text-foreground hover:bg-foreground hover:text-background"
               >
-                Pelajari Lanjut
+                Learn More
               </Button>
             </div>
           </div>

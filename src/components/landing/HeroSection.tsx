@@ -6,9 +6,9 @@ import { Star, Play, Briefcase, GraduationCap, BarChart3, CreditCard, ShieldChec
 import { Link, useNavigate } from "react-router-dom";
 
 const socialProof = [
-  { stars: 0, source: "2.000+", sub: "Talent Terdaftar", icon: Users },
-  { stars: 0, source: "120+", sub: "Perusahaan Partner", icon: Building2 },
-  { stars: 0, source: "80+", sub: "Lowongan Aktif", icon: Zap },
+  { stars: 0, source: "2,000+", sub: "Registered Talent", icon: Users },
+  { stars: 0, source: "120+", sub: "Partner Companies", icon: Building2 },
+  { stars: 0, source: "80+", sub: "Active Jobs", icon: Zap },
 ];
 
 const sidebarItems = [
@@ -102,13 +102,13 @@ const DashboardPanel = ({ activeTab }: { activeTab: string }) => {
   if (activeTab === "services") {
     return (
       <div>
-        <h3 className="text-sm font-semibold text-white mb-3">Katalog Layanan</h3>
+        <h3 className="text-sm font-semibold text-white mb-3">Service Catalog</h3>
         <div className="space-y-2">
           {[
             { name: "Digital Marketing", category: "Marketing", providers: 24 },
-            { name: "Web Development", category: "Teknologi", providers: 38 },
-            { name: "UI/UX Design", category: "Desain", providers: 19 },
-            { name: "Content Writing", category: "Konten", providers: 15 },
+            { name: "Web Development", category: "Technology", providers: 38 },
+            { name: "UI/UX Design", category: "Design", providers: 19 },
+            { name: "Content Writing", category: "Content", providers: 15 },
           ].map((s) => (
             <div key={s.name} className="rounded-lg p-3 flex items-center justify-between" style={{ background: "hsl(0 0% 15%)" }}>
               <div>
@@ -164,7 +164,7 @@ const DashboardPanel = ({ activeTab }: { activeTab: string }) => {
               <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(0 0% 20%)" }}>
                 <div className="h-full rounded-full" style={{ width: `${l.progress}%`, background: "hsl(var(--primary))" }} />
               </div>
-              <p className="text-[10px] text-white/40 mt-1">{l.progress}% selesai</p>
+              <p className="text-[10px] text-white/40 mt-1">{l.progress}% completed</p>
             </div>
           ))}
         </div>
@@ -178,9 +178,9 @@ const DashboardPanel = ({ activeTab }: { activeTab: string }) => {
         <h3 className="text-sm font-semibold text-white mb-3">KYC Verification</h3>
         <div className="space-y-2">
           {[
-            { step: "Identitas", status: "Verified", icon: "✓" },
-            { step: "Dokumen Bisnis", status: "Verified", icon: "✓" },
-            { step: "Verifikasi Wajah", status: "Pending", icon: "…" },
+            { step: "Identity", status: "Verified", icon: "✓" },
+            { step: "Business Documents", status: "Verified", icon: "✓" },
+            { step: "Face Verification", status: "Pending", icon: "…" },
           ].map((k) => (
             <div key={k.step} className="rounded-lg p-3 flex items-center gap-3" style={{ background: "hsl(0 0% 15%)" }}>
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${k.status === "Verified" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
@@ -203,12 +203,12 @@ const DashboardPanel = ({ activeTab }: { activeTab: string }) => {
         <h3 className="text-sm font-semibold text-white mb-3">Credit Balance</h3>
         <div className="rounded-lg p-4 text-center mb-4" style={{ background: "hsl(0 0% 15%)" }}>
           <p className="text-2xl font-semibold text-white">1,250</p>
-          <p className="text-[10px] text-white/50">Credits tersedia</p>
+          <p className="text-[10px] text-white/50">Credits available</p>
         </div>
         <div className="space-y-2">
           {[
-            { desc: "Pembelian paket Pro", amount: "+500", date: "28 Feb" },
-            { desc: "Unlock kandidat", amount: "-50", date: "27 Feb" },
+            { desc: "Pro package purchase", amount: "+500", date: "28 Feb" },
+            { desc: "Candidate unlock", amount: "-50", date: "27 Feb" },
             { desc: "Assessment order", amount: "-100", date: "25 Feb" },
           ].map((t) => (
             <div key={t.desc} className="rounded-lg p-3 flex items-center justify-between" style={{ background: "hsl(0 0% 15%)" }}>
@@ -284,23 +284,23 @@ const HeroSection = () => {
             </motion.div>
 
             <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.1] mb-6">
-              Partner & tim terbaik untuk bisnis Anda
+              The best partners & teams for your business
             </motion.h1>
 
             <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="text-lg leading-relaxed mb-10" style={{ color: "hsl(0 0% 55%)" }}>
-              Temukan partner freelance & tim terverifikasi KYC. Dari hiring request hingga project request — semua dimulai dengan kualitas.
+              Find KYC-verified freelance partners & teams. From hiring requests to project requests — everything starts with quality.
             </motion.p>
 
             <motion.form initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} onSubmit={handleCTA} className="flex flex-col sm:flex-row gap-0 mb-4">
-              <Input type="email" placeholder="Email bisnis Anda*" value={email} onChange={(e) => setEmail(e.target.value)} className="h-14 px-5 text-base bg-white/10 border-white/20 text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:border-white/40" style={{ borderRadius: "5px 0 0 5px" }} />
+              <Input type="email" placeholder="Your business email*" value={email} onChange={(e) => setEmail(e.target.value)} className="h-14 px-5 text-base bg-white/10 border-white/20 text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:border-white/40" style={{ borderRadius: "5px 0 0 5px" }} />
               <Button type="submit" className="h-14 px-8 text-base font-semibold shrink-0" style={{ background: "hsl(0 79% 47%)", color: "white", borderRadius: "0 5px 5px 0" }}>
-                Buat akun gratis
+                Create free account
               </Button>
             </motion.form>
 
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-xs mb-8" style={{ color: "hsl(0 0% 45%)" }}>
-              Kami menjaga privasi Anda.{" "}
-              <a href="#" className="underline hover:text-white transition-colors">Pelajari lebih lanjut</a>.
+              We protect your privacy.{" "}
+              <a href="#" className="underline hover:text-white transition-colors">Learn more</a>.
             </motion.p>
 
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="mb-12">
@@ -308,7 +308,7 @@ const HeroSection = () => {
                 <div className="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center group-hover:border-white/60 transition-colors">
                   <Play className="w-3.5 h-3.5 fill-white/80" />
                 </div>
-                Lihat demo platform
+                Watch platform demo
               </Link>
             </motion.div>
 

@@ -13,22 +13,22 @@ const KYCBanner = ({ kycStatus }: KYCBannerProps) => {
   const config: Record<string, { icon: typeof Shield; title: string; desc: string; color: string; borderColor: string }> = {
     unverified: {
       icon: Shield,
-      title: "Verifikasi Identitas Diperlukan",
-      desc: "Lengkapi verifikasi KYC untuk mengakses semua fitur platform.",
+      title: "Identity Verification Required",
+      desc: "Complete KYC verification to access all platform features.",
       color: "bg-destructive/10 text-destructive",
       borderColor: "border-destructive/20",
     },
     pending: {
       icon: Clock,
-      title: "Verifikasi Sedang Diproses",
-      desc: "Dokumen Anda sedang ditinjau. Estimasi 1-3 hari kerja.",
+      title: "Verification In Progress",
+      desc: "Your documents are being reviewed. Estimated 1-3 business days.",
       color: "bg-amber-500/10 text-amber-600",
       borderColor: "border-amber-500/20",
     },
     rejected: {
       icon: XCircle,
-      title: "Verifikasi Ditolak",
-      desc: "Dokumen Anda ditolak. Silakan kirim ulang dokumen yang valid.",
+      title: "Verification Rejected",
+      desc: "Your documents were rejected. Please resubmit valid documents.",
       color: "bg-destructive/10 text-destructive",
       borderColor: "border-destructive/20",
     },
@@ -54,7 +54,7 @@ const KYCBanner = ({ kycStatus }: KYCBannerProps) => {
         {kycStatus !== "pending" && (
           <Link to="/kyc">
             <Button size="sm" variant="outline" className="shrink-0">
-              {kycStatus === "rejected" ? "Kirim Ulang" : "Verifikasi"}
+              {kycStatus === "rejected" ? "Resubmit" : "Verify"}
               <ArrowRight className="w-3.5 h-3.5" />
             </Button>
           </Link>

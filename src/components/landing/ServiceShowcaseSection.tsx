@@ -169,12 +169,12 @@ const ServiceShowcaseSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-semibold text-primary uppercase tracking-widest">Katalog Layanan</span>
+          <span className="text-sm font-semibold text-primary uppercase tracking-widest">Service Catalog</span>
           <h2 className="text-4xl md:text-5xl font-semibold mt-3 mb-5 text-foreground">
-            Layanan dari <span className="text-gradient-accent">Talent Terverifikasi</span>
+            Services from <span className="text-gradient-accent">Verified Talent</span>
           </h2>
           <p className="text-lg max-w-2xl mx-auto text-muted-foreground">
-            Temukan layanan profesional dari talent yang telah terverifikasi skill-nya. Minimum 70% skill match dijamin.
+            Find professional services from skill-verified talent. Minimum 70% skill match guaranteed.
           </p>
         </motion.div>
 
@@ -189,7 +189,7 @@ const ServiceShowcaseSection = () => {
             }`}
             style={{ borderRadius: '5px' }}
           >
-            Semua
+            All
           </button>
           {categories.map((cat) => {
             const Icon = iconMap[cat.icon || ""] || Briefcase;
@@ -227,8 +227,8 @@ const ServiceShowcaseSection = () => {
               </div>
             ))
           ) : services.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-muted-foreground">
-              Belum ada layanan di kategori ini.
+             <div className="col-span-full text-center py-12 text-muted-foreground">
+              No services in this category yet.
             </div>
           ) : (
             services.map((service, i) => {
@@ -291,11 +291,11 @@ const ServiceShowcaseSection = () => {
                     <div className="px-5 py-3.5 border-t border-border bg-muted/30 flex items-center justify-between group-hover:bg-primary/5 transition-colors">
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">
-                          {service.provider_count > 0 ? `${service.provider_count} penyedia tersedia` : "Segera hadir"}
+                          {service.provider_count > 0 ? `${service.provider_count} providers available` : "Coming soon"}
                         </span>
                       </div>
                       <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:gap-2 transition-all">
-                        Lihat Detail
+                        View Details
                         <ArrowRight className="w-3.5 h-3.5" />
                       </span>
                     </div>
@@ -315,12 +315,12 @@ const ServiceShowcaseSection = () => {
         >
           <Link to="/auth">
             <button className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity" style={{ borderRadius: '5px' }}>
-              Tawarkan Layanan Anda
+              Offer Your Services
               <ArrowRight className="w-4 h-4" />
             </button>
           </Link>
           <p className="text-xs text-muted-foreground mt-3">
-            Daftar, lengkapi profil skill Anda, dan mulai tawarkan layanan profesional.
+            Sign up, complete your skill profile, and start offering professional services.
           </p>
         </motion.div>
       </div>

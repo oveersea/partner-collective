@@ -33,7 +33,7 @@ const AuthPage = () => {
           .eq("user_id", authData.user.id)
           .single();
 
-        toast.success("Login berhasil!");
+        toast.success("Login successful!");
         
         if (profile?.kyc_status === "verified") {
           navigate("/dashboard");
@@ -50,10 +50,10 @@ const AuthPage = () => {
           },
         });
         if (error) throw error;
-        toast.success("Registrasi berhasil! Silakan cek email untuk verifikasi.");
+        toast.success("Registration successful! Please check your email for verification.");
       }
     } catch (error: any) {
-      toast.error(error.message || "Terjadi kesalahan");
+      toast.error(error.message || "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -73,7 +73,7 @@ const AuthPage = () => {
         {/* Back button */}
         <button onClick={() => navigate("/")} className="flex items-center gap-2 text-sm mb-6 hover:text-emerald transition-colors" style={{ color: "hsl(220 20% 65%)" }}>
           <ArrowLeft className="w-4 h-4" />
-          Kembali ke Beranda
+          Back to Home
         </button>
 
         <div className="bg-card rounded-2xl p-8 shadow-card-hover border border-border">
@@ -86,22 +86,22 @@ const AuthPage = () => {
           </div>
 
           <h1 className="text-2xl font-semibold text-card-foreground mb-1">
-            {isLogin ? "Masuk ke Akun" : "Buat Akun Baru"}
+            {isLogin ? "Sign In" : "Create Account"}
           </h1>
           <p className="text-muted-foreground text-sm mb-6">
-            {isLogin ? "Masuk untuk mengakses dashboard Anda" : "Daftar untuk mulai menggunakan platform"}
+            {isLogin ? "Sign in to access your dashboard" : "Register to start using the platform"}
           </p>
 
           <form onSubmit={handleAuth} className="space-y-4">
             {!isLogin && (
               <>
                 <div>
-                  <Label htmlFor="fullName" className="text-card-foreground">Nama Lengkap</Label>
+                  <Label htmlFor="fullName" className="text-card-foreground">Full Name</Label>
                   <div className="relative mt-1.5">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       id="fullName"
-                      placeholder="Nama lengkap Anda"
+                      placeholder="Your full name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required
@@ -111,7 +111,7 @@ const AuthPage = () => {
                 </div>
 
                 <div>
-                  <Label className="text-card-foreground">Tipe Akun</Label>
+                  <Label className="text-card-foreground">Account Type</Label>
                   <div className="grid grid-cols-2 gap-3 mt-1.5">
                     <button
                       type="button"
@@ -149,7 +149,7 @@ const AuthPage = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="email@contoh.com"
+                  placeholder="email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -165,7 +165,7 @@ const AuthPage = () => {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Minimal 6 karakter"
+                  placeholder="Minimum 6 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -176,7 +176,7 @@ const AuthPage = () => {
             </div>
 
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? "Memproses..." : isLogin ? "Masuk" : "Daftar"}
+              {loading ? "Processing..." : isLogin ? "Sign In" : "Sign Up"}
             </Button>
           </form>
 
@@ -185,7 +185,7 @@ const AuthPage = () => {
               onClick={() => setIsLogin(!isLogin)}
               className="text-sm text-primary hover:underline"
             >
-              {isLogin ? "Belum punya akun? Daftar" : "Sudah punya akun? Masuk"}
+              {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
             </button>
           </div>
         </div>

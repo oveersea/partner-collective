@@ -98,7 +98,7 @@ const DashboardNav = () => {
             {isAdmin && <DropdownMenuSeparator />}
             <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
               <LogOut className="w-4 h-4 mr-2" />
-              Keluar
+              Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
