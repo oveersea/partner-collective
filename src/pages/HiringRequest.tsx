@@ -1,0 +1,337 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { ArrowLeft, UserSearch, MapPin, Briefcase, Clock, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import DashboardNav from "@/components/dashboard/DashboardNav";
+import { z } from "zod";
+
+const hiringSchema = z.object({
+  title: z.string().trim().min(3, "Judul minimal 3 karakter").max(200, "Judul maksimal 200 karakter"),
+  description: z.string().trim().min(10, "Deskripsi minimal 10 karakter").max(5000, "Deskripsi maksimal 5000 karakter"),
+  required_skills: z.array(z.string().trim()).min(1, "Minimal 1 skill diperlukan"),
+  experience_min: z.number().min(0).max(50).nullable(),
+  experience_max: z.number().min(0).max(50).nullable(),
+  positions_count: z.number().min(1, "Minimal 1 posisi").max(100),
+  hiring_type: z.enum(["normal", "fast"]),
+  work_mode: z.enum(["remote", "onsite", "hybrid"]),
+  location: z.string().max(200).optional(),
+  employment_type: z.enum(["fulltime", "parttime", "freelance", "contract"]),
+});
+
+const HiringRequest = () => {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    skillsInput: "",
+    required_skills: [] as string[],
+    experience_min: "",
+    experience_max: "",
+    positions_count: "1",
+    hiring_type: "normal" as "normal" | "fast",
+    work_mode: "remote" as "remote" | "onsite" | "hybrid",
+    location: "",
+    employment_type: "fulltime" as "fulltime" | "parttime" | "freelance" | "contract",
+  });
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate("/auth");
+  }, [user, authLoading, navigate]);
+
+  const set = (key: string, value: any) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
+
+  const addSkill = () => {
+    const skill = form.skillsInput.trim();
+    if (skill && !form.required_skills.includes(skill)) {
+      set("required_skills", [...form.required_skills, skill]);
+      set("skillsInput", "");
+    }
+  };
+
+  const removeSkill = (skill: string) => {
+    set("required_skills", form.required_skills.filter((s) => s !== skill));
+  };
+
+  const handleSubmit = async () => {
+    const parsed = hiringSchema.safeParse({
+      title: form.title,
+      description: form.description,
+      required_skills: form.required_skills,
+      experience_min: form.experience_min ? Number(form.experience_min) : null,
+      experience_max: form.experience_max ? Number(form.experience_max) : null,
+      positions_count: Number(form.positions_count) || 1,
+      hiring_type: form.hiring_type,
+      work_mode: form.work_mode,
+      location: form.location,
+      employment_type: form.employment_type,
+    });
+
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      parsed.error.errors.forEach((e) => {
+        const field = e.path[0] as string;
+        fieldErrors[field] = e.message;
+      });
+      setErrors(fieldErrors);
+      toast.error("Silakan periksa kembali form Anda");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Ensure client_profile exists
+      const { data: existing } = await supabase
+        .from("client_profiles")
+        .select("id")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+
+      let clientId = existing?.id;
+      if (!clientId) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", user!.id)
+          .single();
+
+        const { data: newClient, error: clientErr } = await supabase
+          .from("client_profiles")
+          .insert({ user_id: user!.id, company_name: profile?.full_name || "My Company" })
+          .select("id")
+          .single();
+        if (clientErr) throw clientErr;
+        clientId = newClient.id;
+      }
+
+      const creditCost = parsed.data.hiring_type === "fast" ? 10 * parsed.data.positions_count : parsed.data.positions_count;
+
+      const { error } = await supabase.from("hiring_requests").insert({
+        client_id: clientId,
+        title: parsed.data.title,
+        description: parsed.data.description,
+        required_skills: parsed.data.required_skills,
+        experience_min: parsed.data.experience_min,
+        experience_max: parsed.data.experience_max,
+        positions_count: parsed.data.positions_count,
+        hiring_type: parsed.data.hiring_type,
+        credit_cost: creditCost,
+        status: "open",
+      });
+
+      if (error) throw error;
+      toast.success("Hiring request berhasil dibuat!");
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast.error(error.message || "Gagal membuat hiring request");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (authLoading) return null;
+
+  return (
+    <div className="min-h-screen bg-background">
+      <DashboardNav />
+      <div className="container mx-auto px-6 py-8 max-w-2xl">
+        <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
+        </button>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <UserSearch className="w-8 h-8 text-primary" />
+          </div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Hiring Request</h1>
+          <p className="text-muted-foreground text-sm">Temukan partner atau tim untuk bekerja bersama Anda</p>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-6">
+          {/* Title */}
+          <div>
+            <Label className="text-card-foreground">Judul Posisi *</Label>
+            <Input className="mt-1.5" placeholder="Contoh: Senior React Developer" value={form.title} onChange={(e) => set("title", e.target.value)} />
+            {errors.title && <p className="text-xs text-destructive mt-1">{errors.title}</p>}
+          </div>
+
+          {/* Description */}
+          <div>
+            <Label className="text-card-foreground">Deskripsi Pekerjaan *</Label>
+            <Textarea className="mt-1.5" rows={4} placeholder="Jelaskan tanggung jawab, kualifikasi, dan detail posisi..." value={form.description} onChange={(e) => set("description", e.target.value)} />
+            {errors.description && <p className="text-xs text-destructive mt-1">{errors.description}</p>}
+          </div>
+
+          {/* Employment Type */}
+          <div>
+            <Label className="text-card-foreground">Tipe Pekerjaan</Label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1.5">
+              {[
+                { value: "fulltime", label: "Full-time", icon: Briefcase },
+                { value: "parttime", label: "Part-time", icon: Clock },
+                { value: "freelance", label: "Freelance", icon: UserSearch },
+                { value: "contract", label: "Kontrak", icon: Briefcase },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => set("employment_type", opt.value)}
+                  className={`p-3 rounded-xl border text-sm font-medium transition-all text-center ${
+                    form.employment_type === opt.value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-primary/30"
+                  }`}
+                >
+                  <opt.icon className="w-4 h-4 mx-auto mb-1" />
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Work Mode */}
+          <div>
+            <Label className="text-card-foreground">Mode Kerja</Label>
+            <div className="grid grid-cols-3 gap-2 mt-1.5">
+              {[
+                { value: "remote", label: "Remote", icon: "🌍" },
+                { value: "onsite", label: "On-site", icon: "🏢" },
+                { value: "hybrid", label: "Hybrid", icon: "🔄" },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => set("work_mode", opt.value)}
+                  className={`p-3 rounded-xl border text-sm font-medium transition-all text-center ${
+                    form.work_mode === opt.value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-primary/30"
+                  }`}
+                >
+                  <span className="text-lg">{opt.icon}</span>
+                  <p className="mt-0.5">{opt.label}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Location (conditional) */}
+          {form.work_mode !== "remote" && (
+            <div>
+              <Label className="text-card-foreground">Lokasi</Label>
+              <div className="relative mt-1.5">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input className="pl-10" placeholder="Jakarta, Indonesia" value={form.location} onChange={(e) => set("location", e.target.value)} />
+              </div>
+            </div>
+          )}
+
+          {/* Skills */}
+          <div>
+            <Label className="text-card-foreground">Skills yang Dibutuhkan *</Label>
+            <div className="flex gap-2 mt-1.5">
+              <Input
+                placeholder="Tambah skill, tekan Enter"
+                value={form.skillsInput}
+                onChange={(e) => set("skillsInput", e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }}
+              />
+              <Button type="button" variant="outline" onClick={addSkill} size="sm">+</Button>
+            </div>
+            {form.required_skills.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {form.required_skills.map((skill) => (
+                  <span key={skill} className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary flex items-center gap-1">
+                    {skill}
+                    <button onClick={() => removeSkill(skill)} className="hover:text-destructive ml-0.5">&times;</button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {errors.required_skills && <p className="text-xs text-destructive mt-1">{errors.required_skills}</p>}
+          </div>
+
+          {/* Experience */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-card-foreground">Pengalaman Min (tahun)</Label>
+              <Input className="mt-1.5" type="number" min="0" max="50" placeholder="0" value={form.experience_min} onChange={(e) => set("experience_min", e.target.value)} />
+            </div>
+            <div>
+              <Label className="text-card-foreground">Pengalaman Max (tahun)</Label>
+              <Input className="mt-1.5" type="number" min="0" max="50" placeholder="10" value={form.experience_max} onChange={(e) => set("experience_max", e.target.value)} />
+            </div>
+          </div>
+
+          {/* Positions */}
+          <div>
+            <Label className="text-card-foreground">Jumlah Posisi</Label>
+            <Input className="mt-1.5" type="number" min="1" max="100" value={form.positions_count} onChange={(e) => set("positions_count", e.target.value)} />
+          </div>
+
+          {/* Hiring Type (SLA) */}
+          <div>
+            <Label className="text-card-foreground">Kecepatan Pencarian</Label>
+            <div className="grid grid-cols-2 gap-3 mt-1.5">
+              <button
+                type="button"
+                onClick={() => set("hiring_type", "normal")}
+                className={`p-4 rounded-xl border text-left transition-all ${
+                  form.hiring_type === "normal"
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:border-primary/30"
+                }`}
+              >
+                <Clock className={`w-5 h-5 mb-2 ${form.hiring_type === "normal" ? "text-primary" : "text-muted-foreground"}`} />
+                <p className="font-semibold text-sm text-card-foreground">Normal</p>
+                <p className="text-xs text-muted-foreground mt-0.5">SLA 14 hari • 1 kredit/posisi</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => set("hiring_type", "fast")}
+                className={`p-4 rounded-xl border text-left transition-all ${
+                  form.hiring_type === "fast"
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:border-primary/30"
+                }`}
+              >
+                <Zap className={`w-5 h-5 mb-2 ${form.hiring_type === "fast" ? "text-primary" : "text-muted-foreground"}`} />
+                <p className="font-semibold text-sm text-card-foreground">Fast Track</p>
+                <p className="text-xs text-muted-foreground mt-0.5">SLA 3 hari • 10 kredit/posisi</p>
+              </button>
+            </div>
+          </div>
+
+          {/* Cost summary */}
+          <div className="bg-muted rounded-xl p-4">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Estimasi biaya kredit:</span>
+              <span className="font-bold text-card-foreground">
+                {form.hiring_type === "fast" ? 10 * (Number(form.positions_count) || 1) : Number(form.positions_count) || 1} kredit
+              </span>
+            </div>
+          </div>
+
+          <Button className="w-full" size="lg" onClick={handleSubmit} disabled={submitting}>
+            {submitting ? "Mengirim..." : "Buat Hiring Request"}
+          </Button>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default HiringRequest;
