@@ -5,10 +5,14 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Shield, User, MoreVertical } from "lucide-react";
+import { Search, Shield, User, MoreVertical, Trash2, UserX } from "lucide-react";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface UserProfile {
   user_id: string;
@@ -26,6 +30,7 @@ const AdminUsers = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; type: "deactivate" | "delete"; userId: string; name: string }>({ open: false, type: "deactivate", userId: "", name: "" });
 
   useEffect(() => {
     fetchUsers();
@@ -50,6 +55,32 @@ const AdminUsers = () => {
     );
     if (error) toast.error("Gagal assign role: " + error.message);
     else toast.success(`Role '${role}' berhasil ditambahkan`);
+  };
+
+  const deactivateUser = async (userId: string) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ kyc_status: "deactivated" } as any)
+      .eq("user_id", userId);
+    if (error) toast.error("Gagal menonaktifkan user: " + error.message);
+    else {
+      toast.success("User berhasil dinonaktifkan");
+      fetchUsers();
+    }
+    setConfirmDialog({ open: false, type: "deactivate", userId: "", name: "" });
+  };
+
+  const deleteUserProfile = async (userId: string) => {
+    const { error } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("user_id", userId);
+    if (error) toast.error("Gagal menghapus profil: " + error.message);
+    else {
+      toast.success("Profil user berhasil dihapus");
+      setUsers((prev) => prev.filter((u) => u.user_id !== userId));
+    }
+    setConfirmDialog({ open: false, type: "delete", userId: "", name: "" });
   };
 
   const filtered = users.filter(
@@ -133,12 +164,19 @@ const AdminUsers = () => {
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm"><MoreVertical className="w-4 h-4" /></Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => assignRole(u.user_id, "admin")}>
+                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); assignRole(u.user_id, "admin"); }}>
                             <Shield className="w-4 h-4 mr-2" /> Jadikan Admin
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => assignRole(u.user_id, "instructor")}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); assignRole(u.user_id, "instructor"); }}>
                             Jadikan Instructor
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setConfirmDialog({ open: true, type: "deactivate", userId: u.user_id, name: u.full_name || "User" }); }}>
+                            <UserX className="w-4 h-4 mr-2" /> Nonaktifkan
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={(e) => { e.stopPropagation(); setConfirmDialog({ open: true, type: "delete", userId: u.user_id, name: u.full_name || "User" }); }}>
+                            <Trash2 className="w-4 h-4 mr-2" /> Hapus Profil
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -150,6 +188,34 @@ const AdminUsers = () => {
           </table>
         </div>
       </div>
+
+      <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, open }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmDialog.type === "delete" ? "Hapus Profil User?" : "Nonaktifkan User?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDialog.type === "delete"
+                ? `Profil "${confirmDialog.name}" akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`
+                : `User "${confirmDialog.name}" akan dinonaktifkan dan tidak dapat mengakses platform.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              className={confirmDialog.type === "delete" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+              onClick={() =>
+                confirmDialog.type === "delete"
+                  ? deleteUserProfile(confirmDialog.userId)
+                  : deactivateUser(confirmDialog.userId)
+              }
+            >
+              {confirmDialog.type === "delete" ? "Hapus" : "Nonaktifkan"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
