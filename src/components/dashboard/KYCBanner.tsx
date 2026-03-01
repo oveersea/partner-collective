@@ -8,7 +8,7 @@ interface KYCBannerProps {
 }
 
 const KYCBanner = ({ kycStatus }: KYCBannerProps) => {
-  if (kycStatus === "verified") return null;
+  if (kycStatus === "verified" || kycStatus === "approved") return null;
 
   const config: Record<string, { icon: typeof Shield; title: string; desc: string; color: string; borderColor: string }> = {
     unverified: {
