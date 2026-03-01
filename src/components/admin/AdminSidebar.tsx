@@ -23,7 +23,7 @@ export const adminSections = [
   { id: "kyc", label: "Verifikasi KYC", icon: Shield },
   { id: "hiring", label: "Hiring & Matching", icon: Briefcase },
   { id: "credits", label: "Kredit & Wallet", icon: CreditCard },
-  { id: "content", label: "Konten & Program", icon: FileText },
+  { id: "content", label: "Peluang & Job", icon: FileText },
   { id: "case_studies", label: "Case Studies", icon: ImageIcon },
   { id: "learning", label: "Learning Program", icon: GraduationCap },
   { id: "institutions", label: "Institusi", icon: Landmark },
