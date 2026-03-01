@@ -159,6 +159,12 @@ const Dashboard = () => {
               Matchmaking
             </button>
           </Link>
+          <Link to="/learning">
+            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
+              <GraduationCap className="w-4 h-4" />
+              Learning
+            </button>
+          </Link>
         </div>
 
         {/* Tabs */}
