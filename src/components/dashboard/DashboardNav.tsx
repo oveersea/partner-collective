@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User, LayoutDashboard, ShieldCheck, Briefcase } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import logoLight from "@/assets/logo-light.png";
 
 const DashboardNav = () => {
   const { user, signOut } = useAuth();
@@ -39,11 +40,8 @@ const DashboardNav = () => {
     <nav className="border-b border-border bg-card sticky top-0 z-40">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-semibold text-sm">O</span>
-            </div>
-            <span className="font-display text-lg font-semibold text-foreground">Oveersea</span>
+          <Link to="/" className="flex items-center">
+            <img src={logoLight} alt="Oveersea" className="h-7" />
           </Link>
           <div className="hidden sm:flex items-center gap-1">
             <Link

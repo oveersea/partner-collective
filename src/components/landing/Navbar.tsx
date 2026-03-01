@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import logoLight from "@/assets/logo-light.png";
+import logoDark from "@/assets/logo-dark.png";
 
 interface SubMenuItem {
   icon: React.ElementType;
@@ -285,11 +287,9 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "hsl(0 79% 47%)" }}>
-            <span className="text-white font-semibold text-sm">O</span>
-          </div>
-          <span className="font-display text-lg font-semibold text-white">Oveersea</span>
+        <a href="/" className="flex items-center">
+          <img src={logoDark} alt="Oveersea" className="h-7 hidden dark:block" />
+          <img src={logoDark} alt="Oveersea" className="h-7 block dark:hidden" />
         </a>
 
         {/* Desktop links */}

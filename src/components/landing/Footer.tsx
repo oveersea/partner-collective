@@ -1,3 +1,5 @@
+import logoDark from "@/assets/logo-dark.png";
+
 const Footer = () => {
   return (
     <footer className="bg-hero border-t border-border/20 py-12">
@@ -5,10 +7,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-semibold text-sm">O</span>
-              </div>
-              <span className="font-display text-lg font-semibold" style={{ color: "hsl(0 0% 93%)" }}>Oveersea</span>
+              <img src={logoDark} alt="Oveersea" className="h-7" />
             </div>
             <p className="text-sm leading-relaxed" style={{ color: "hsl(0 0% 50%)" }}>
               Platform matchmaking untuk menemukan partner dan tim berkualitas tinggi yang terverifikasi.

@@ -7,6 +7,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
 } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
+import logoLight from "@/assets/logo-light.png";
 
 const sections = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -44,13 +45,7 @@ const AdminSidebar = ({ activeSection, onSectionChange }: AdminSidebarProps) => 
             </Link>
             {!collapsed && (
               <div className="mt-4 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                  <span className="text-primary-foreground font-semibold text-xs">A</span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Admin Panel</p>
-                  <p className="text-[10px] text-muted-foreground">Oveersea</p>
-                </div>
+                <img src={logoLight} alt="Oveersea" className="h-6" />
               </div>
             )}
           </div>
