@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Eye, EyeOff, ChevronLeft, ChevronRight, Check, X } from "lucide-react";
+import { Search, Eye, EyeOff, ChevronLeft, ChevronRight, Check, X, Trash2 } from "lucide-react";
 
 interface CompetencyTest {
   id: string;
@@ -77,6 +77,13 @@ const AdminAssessment = () => {
     const { error } = await supabase.from("assessment_orders").update(updateData).eq("id", id);
     if (error) toast.error("Gagal update order");
     else { toast.success(`Order ${status === "paid" ? "disetujui" : "ditolak"}`); fetchData(); }
+  };
+
+  const deleteOrder = async (id: string) => {
+    if (!confirm("Yakin ingin menghapus order ini?")) return;
+    const { error } = await supabase.from("assessment_orders").delete().eq("id", id);
+    if (error) toast.error("Gagal menghapus order");
+    else { toast.success("Order dihapus"); fetchData(); }
   };
 
   const filteredTests = tests.filter(
@@ -229,16 +236,21 @@ const AdminAssessment = () => {
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(o.created_at).toLocaleDateString("id-ID")}</td>
                       <td className="px-4 py-3 text-right">
-                        {(o.status === "pending" || o.status === "pending_payment") && (
-                          <div className="flex items-center justify-end gap-1">
-                            <Button size="sm" variant="ghost" className="text-primary" onClick={() => updateOrderStatus(o.id, "paid")}>
-                              <Check className="w-4 h-4" />
-                            </Button>
-                            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => updateOrderStatus(o.id, "rejected")}>
-                              <X className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        )}
+                        <div className="flex items-center justify-end gap-1">
+                          {(o.status === "pending" || o.status === "pending_payment") && (
+                            <>
+                              <Button size="sm" variant="ghost" className="text-primary" onClick={() => updateOrderStatus(o.id, "paid")}>
+                                <Check className="w-4 h-4" />
+                              </Button>
+                              <Button size="sm" variant="ghost" className="text-destructive" onClick={() => updateOrderStatus(o.id, "rejected")}>
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                          <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deleteOrder(o.id)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))
