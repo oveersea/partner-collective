@@ -101,7 +101,7 @@ const ServiceShowcaseSection = () => {
         </motion.div>
 
         {/* Category pills */}
-        <div className="flex flex-wrap justify-center gap-2 mb-12">
+        <div className="flex flex-wrap justify-center gap-3 mb-12 p-1.5 bg-muted/50 rounded-lg border border-border w-fit mx-auto">
           {categories.map((cat) => {
             const Icon = iconMap[cat.icon || ""] || Briefcase;
             const isActive = activeCategory === cat.id;
@@ -109,11 +109,12 @@ const ServiceShowcaseSection = () => {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all border ${
+                className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all relative ${
                   isActive
-                    ? "bg-primary text-primary-foreground border-primary shadow-md"
-                    : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "text-muted-foreground hover:text-foreground hover:bg-card/80"
                 }`}
+                style={{ borderRadius: '5px' }}
               >
                 <Icon className="w-4 h-4" />
                 {cat.name}
