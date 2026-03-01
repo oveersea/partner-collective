@@ -358,7 +358,7 @@ const Matchmaking = () => {
                       </p>
                     )}
                     {opp.description && (
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{opp.description}</p>
+                      <div className="text-sm text-muted-foreground mt-2 line-clamp-2 [&_p]:m-0 [&_strong]:font-semibold" dangerouslySetInnerHTML={{ __html: opp.description }} />
                     )}
                   </div>
 
