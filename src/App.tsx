@@ -19,6 +19,7 @@ import AdminUserDetail from "./pages/AdminUserDetail";
 import Learning from "./pages/Learning";
 import LearningDetail from "./pages/LearningDetail";
 import CreditBalance from "./pages/CreditBalance";
+import AdminProgramEdit from "./pages/AdminProgramEdit";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/features" element={<Features />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/user/:userId" element={<AdminUserDetail />} />
+            <Route path="/admin/program/:programId" element={<AdminProgramEdit />} />
             <Route path="/learning" element={<Learning />} />
             <Route path="/learning/:slug" element={<LearningDetail />} />
             <Route path="/credit-balance" element={<CreditBalance />} />
