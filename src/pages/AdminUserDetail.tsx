@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, User, MapPin, Phone, Globe, Linkedin, Briefcase,
-  Calendar, Shield, Star, GraduationCap, Clock, Pencil, Save, X,
+  Calendar, Shield, Star, GraduationCap, Clock, Pencil, Save, X, Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -312,11 +312,28 @@ const AdminUserDetail = () => {
           {/* Profile Header */}
           <div className="bg-card rounded-2xl border border-border p-6 shadow-card mb-6">
             <div className="flex items-start gap-5">
-              <div className="w-20 h-20 rounded-2xl bg-muted flex items-center justify-center shrink-0">
+              <div className="relative group w-28 h-28 rounded-2xl bg-muted flex items-center justify-center shrink-0">
                 {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt="" className="w-20 h-20 rounded-2xl object-cover" />
+                  <img src={profile.avatar_url} alt="" className="w-28 h-28 rounded-2xl object-cover" />
                 ) : (
-                  <User className="w-8 h-8 text-muted-foreground" />
+                  <User className="w-10 h-10 text-muted-foreground" />
+                )}
+                {editing && (
+                  <label className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <Camera className="w-6 h-6 text-white" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const url = URL.createObjectURL(file);
+                          set("avatar_url", url);
+                        }
+                      }}
+                    />
+                  </label>
                 )}
               </div>
               <div className="flex-1 min-w-0">
