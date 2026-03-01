@@ -7796,6 +7796,38 @@ export type Database = {
         }
         Relationships: []
       }
+      program_instructors: {
+        Row: {
+          created_at: string
+          id: string
+          instructor_id: string
+          program_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          instructor_id: string
+          program_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          instructor_id?: string
+          program_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_instructors_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       program_orders: {
         Row: {
           amount: number

@@ -73,6 +73,7 @@ const AdminProgramEdit = () => {
   const [saving, setSaving] = useState(false);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [selectedInstructors, setSelectedInstructors] = useState<Instructor[]>([]);
 
   const [newOutcome, setNewOutcome] = useState("");
   const [newAudience, setNewAudience] = useState("");
@@ -119,6 +120,26 @@ const AdminProgramEdit = () => {
       return;
     }
     setData(prog as unknown as ProgramData);
+
+    // Fetch assigned instructors
+    const { data: assigned } = await supabase
+      .from("program_instructors")
+      .select("instructor_id, sort_order")
+      .eq("program_id", programId)
+      .order("sort_order");
+    if (assigned && assigned.length > 0) {
+      const ids = assigned.map((a: any) => a.instructor_id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, avatar_url, bio")
+        .in("user_id", ids);
+      if (profiles) {
+        // Maintain sort order
+        const sorted = ids.map((id: string) => profiles.find((p: any) => p.user_id === id)).filter(Boolean) as Instructor[];
+        setSelectedInstructors(sorted);
+      }
+    }
+
     setLoading(false);
   };
 
@@ -145,22 +166,15 @@ const AdminProgramEdit = () => {
     if (profiles) setInstructors(profiles as Instructor[]);
   };
 
-  const handleInstructorChange = (userId: string) => {
-    if (!data) return;
-    if (userId === "none") {
-      setData({ ...data, instructor_id: null, instructor_name: null, instructor_avatar_url: null, instructor_bio: null });
-      return;
-    }
+  const addInstructor = (userId: string) => {
+    if (!data || userId === "none") return;
+    if (selectedInstructors.some((i) => i.user_id === userId)) return;
     const inst = instructors.find((i) => i.user_id === userId);
-    if (inst) {
-      setData({
-        ...data,
-        instructor_id: userId,
-        instructor_name: inst.full_name,
-        instructor_avatar_url: inst.avatar_url,
-        instructor_bio: inst.bio,
-      });
-    }
+    if (inst) setSelectedInstructors([...selectedInstructors, inst]);
+  };
+
+  const removeInstructor = (userId: string) => {
+    setSelectedInstructors(selectedInstructors.filter((i) => i.user_id !== userId));
   };
 
   const update = (field: string, value: any) => {
@@ -175,9 +189,22 @@ const AdminProgramEdit = () => {
     const { error } = await supabase.from("programs").update(fields).eq("id", data.id);
     if (error) {
       toast.error("Gagal menyimpan: " + error.message);
-    } else {
-      toast.success("Program berhasil diperbarui");
+      setSaving(false);
+      return;
     }
+
+    // Save instructors to junction table
+    await supabase.from("program_instructors").delete().eq("program_id", data.id);
+    if (selectedInstructors.length > 0) {
+      const rows = selectedInstructors.map((inst, i) => ({
+        program_id: data.id,
+        instructor_id: inst.user_id,
+        sort_order: i,
+      }));
+      await supabase.from("program_instructors").insert(rows);
+    }
+
+    toast.success("Program berhasil diperbarui");
     setSaving(false);
   };
 
@@ -482,36 +509,43 @@ const AdminProgramEdit = () => {
             <CardHeader><CardTitle className="text-base">Instruktur</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Pilih Instruktur</Label>
-                <Select value={data.instructor_id || "none"} onValueChange={handleInstructorChange}>
+                <Label>Tambah Instruktur</Label>
+                <Select value="none" onValueChange={addInstructor}>
                   <SelectTrigger><SelectValue placeholder="Pilih instruktur..." /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">— Tidak ada —</SelectItem>
-                    {instructors.map((inst) => (
-                      <SelectItem key={inst.user_id} value={inst.user_id}>{inst.full_name}</SelectItem>
-                    ))}
+                    <SelectItem value="none">— Pilih —</SelectItem>
+                    {instructors
+                      .filter((inst) => !selectedInstructors.some((s) => s.user_id === inst.user_id))
+                      .map((inst) => (
+                        <SelectItem key={inst.user_id} value={inst.user_id}>{inst.full_name}</SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
-              {data.instructor_id && (
-                <div className="rounded-[5px] border border-border p-4 space-y-2">
-                  <div className="flex items-center gap-3">
-                    {data.instructor_avatar_url ? (
-                      <img src={data.instructor_avatar_url} alt="" className="w-10 h-10 rounded-full object-cover border border-border" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-sm font-medium">
-                        {(data.instructor_name || "?")[0]}
+              {selectedInstructors.length > 0 && (
+                <div className="space-y-2">
+                  {selectedInstructors.map((inst) => (
+                    <div key={inst.user_id} className="rounded-[5px] border border-border p-3 flex items-center gap-3">
+                      {inst.avatar_url ? (
+                        <img src={inst.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover border border-border" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-sm font-medium">
+                          {(inst.full_name || "?")[0]}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{inst.full_name}</p>
+                        {inst.bio && <p className="text-xs text-muted-foreground truncate">{inst.bio}</p>}
                       </div>
-                    )}
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{data.instructor_name}</p>
-                      <p className="text-xs text-muted-foreground">Instruktur</p>
+                      <button onClick={() => removeInstructor(inst.user_id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
-                  </div>
-                  {data.instructor_bio && (
-                    <p className="text-xs text-muted-foreground leading-relaxed">{data.instructor_bio}</p>
-                  )}
+                  ))}
                 </div>
+              )}
+              {selectedInstructors.length === 0 && (
+                <p className="text-xs text-muted-foreground">Belum ada instruktur yang ditambahkan</p>
               )}
             </CardContent>
           </Card>
