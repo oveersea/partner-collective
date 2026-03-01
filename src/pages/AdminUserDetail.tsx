@@ -16,6 +16,12 @@ import { Label } from "@/components/ui/label";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
+
+interface SkillScore {
+  name: string;
+  score: number;
+}
 
 interface Profile {
   user_id: string;
@@ -27,6 +33,8 @@ interface Profile {
   country: string | null;
   phone_number: string | null;
   skills: string[] | null;
+  soft_skills: SkillScore[] | null;
+  technical_skills: SkillScore[] | null;
   kyc_status: string;
   account_type: string;
   oveercode: string;
@@ -43,6 +51,76 @@ interface Profile {
 interface UserRole {
   role: string;
 }
+
+const SkillRadarView = ({ skills, color, fillColor }: { skills: SkillScore[]; color: string; fillColor: string }) => {
+  if (skills.length === 0) return <p className="text-sm text-muted-foreground">Belum ada data skill</p>;
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <RadarChart data={skills} cx="50%" cy="50%" outerRadius="75%">
+        <PolarGrid stroke="hsl(var(--border))" />
+        <PolarAngleAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+        <PolarRadiusAxis angle={90} domain={[0, 20]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+        <Radar dataKey="score" stroke={color} fill={fillColor} fillOpacity={0.6} />
+      </RadarChart>
+    </ResponsiveContainer>
+  );
+};
+
+const SkillRadarEditor = ({ skills, onChange }: { skills: SkillScore[]; onChange: (v: SkillScore[]) => void }) => {
+  const [newName, setNewName] = useState("");
+  const [newScore, setNewScore] = useState(10);
+
+  const add = () => {
+    const n = newName.trim();
+    if (n && !skills.some((s) => s.name === n)) {
+      onChange([...skills, { name: n, score: Math.min(20, Math.max(0, newScore)) }]);
+      setNewName("");
+      setNewScore(10);
+    }
+  };
+
+  const remove = (name: string) => onChange(skills.filter((s) => s.name !== name));
+  const updateScore = (name: string, score: number) =>
+    onChange(skills.map((s) => (s.name === name ? { ...s, score: Math.min(20, Math.max(0, score)) } : s)));
+
+  return (
+    <div className="space-y-3">
+      {skills.length > 0 && (
+        <ResponsiveContainer width="100%" height={250}>
+          <RadarChart data={skills} cx="50%" cy="50%" outerRadius="75%">
+            <PolarGrid stroke="hsl(var(--border))" />
+            <PolarAngleAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+            <PolarRadiusAxis angle={90} domain={[0, 20]} tick={{ fontSize: 10 }} />
+            <Radar dataKey="score" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.3)" fillOpacity={0.6} />
+          </RadarChart>
+        </ResponsiveContainer>
+      )}
+      <div className="space-y-2 max-h-48 overflow-y-auto">
+        {skills.map((s) => (
+          <div key={s.name} className="flex items-center gap-2">
+            <span className="text-sm text-foreground flex-1 truncate">{s.name}</span>
+            <Input
+              type="number"
+              min={0}
+              max={20}
+              className="w-20 h-8 text-sm"
+              value={s.score}
+              onChange={(e) => updateScore(s.name, Number(e.target.value))}
+            />
+            <button onClick={() => remove(s.name)} className="text-muted-foreground hover:text-destructive text-lg leading-none">&times;</button>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <Input placeholder="Nama skill..." value={newName} onChange={(e) => setNewName(e.target.value)} className="flex-1 h-9"
+          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), add())} />
+        <Input type="number" min={0} max={20} value={newScore} onChange={(e) => setNewScore(Number(e.target.value))} className="w-16 h-9" />
+        <Button variant="outline" size="sm" onClick={add}>+</Button>
+      </div>
+      <p className="text-xs text-muted-foreground">Skor 0–20</p>
+    </div>
+  );
+};
 
 const AdminUserDetail = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -81,7 +159,7 @@ const AdminUserDetail = () => {
     const [profileRes, rolesRes] = await Promise.all([
       supabase
         .from("profiles")
-        .select("user_id, full_name, headline, bio, avatar_url, city, country, phone_number, skills, kyc_status, account_type, oveercode, years_of_experience, daily_rate, linkedin_url, website_url, opportunity_availability, professional_summary, highest_education, created_at")
+        .select("user_id, full_name, headline, bio, avatar_url, city, country, phone_number, skills, soft_skills, technical_skills, kyc_status, account_type, oveercode, years_of_experience, daily_rate, linkedin_url, website_url, opportunity_availability, professional_summary, highest_education, created_at")
         .eq("user_id", userId!)
         .single(),
       supabase
@@ -91,8 +169,11 @@ const AdminUserDetail = () => {
     ]);
 
     if (profileRes.data) {
-      setProfile(profileRes.data as Profile);
-      setEditData(profileRes.data as Profile);
+      const p = profileRes.data as any;
+      p.soft_skills = Array.isArray(p.soft_skills) ? p.soft_skills : [];
+      p.technical_skills = Array.isArray(p.technical_skills) ? p.technical_skills : [];
+      setProfile(p as Profile);
+      setEditData({ ...p } as Profile);
     }
     if (rolesRes.data) setRoles(rolesRes.data as UserRole[]);
     setLoading(false);
@@ -123,6 +204,8 @@ const AdminUserDetail = () => {
         country: editData.country,
         phone_number: editData.phone_number,
         skills: editData.skills,
+        soft_skills: editData.soft_skills as any,
+        technical_skills: editData.technical_skills as any,
         kyc_status: editData.kyc_status,
         account_type: editData.account_type,
         daily_rate: editData.daily_rate,
@@ -131,7 +214,7 @@ const AdminUserDetail = () => {
         opportunity_availability: editData.opportunity_availability,
         professional_summary: editData.professional_summary,
         highest_education: editData.highest_education,
-      })
+      } as any)
       .eq("user_id", userId!);
 
     if (error) {
@@ -320,9 +403,38 @@ const AdminUserDetail = () => {
                 )}
               </div>
 
-              {/* Skills */}
+              {/* Skill Radar Charts */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Soft Skills Radar */}
+                <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                  <h2 className="text-sm font-semibold text-card-foreground mb-4">Soft Skills</h2>
+                  {editing ? (
+                    <SkillRadarEditor
+                      skills={editData.soft_skills || []}
+                      onChange={(v) => set("soft_skills", v)}
+                    />
+                  ) : (
+                    <SkillRadarView skills={profile.soft_skills || []} color="hsl(var(--primary))" fillColor="hsl(var(--primary) / 0.3)" />
+                  )}
+                </div>
+
+                {/* Technical Skills Radar */}
+                <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                  <h2 className="text-sm font-semibold text-card-foreground mb-4">Technical Skills</h2>
+                  {editing ? (
+                    <SkillRadarEditor
+                      skills={editData.technical_skills || []}
+                      onChange={(v) => set("technical_skills", v)}
+                    />
+                  ) : (
+                    <SkillRadarView skills={profile.technical_skills || []} color="hsl(262, 80%, 60%)" fillColor="hsl(262, 80%, 60%, 0.3)" />
+                  )}
+                </div>
+              </div>
+
+              {/* General Skills Tags */}
               <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
-                <h2 className="text-sm font-semibold text-card-foreground mb-3">Skills</h2>
+                <h2 className="text-sm font-semibold text-card-foreground mb-3">Skills (Tags)</h2>
                 {editing ? (
                   <div>
                     <div className="flex gap-2 mb-3">
