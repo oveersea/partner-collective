@@ -433,18 +433,20 @@ const Matchmaking = () => {
                   <span className="text-xs text-muted-foreground">
                     {new Date(opp.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                   </span>
-                  {applied ? (
-                    <span className="flex items-center gap-1.5 text-sm text-primary font-medium">
-                      <CheckCircle2 className="w-4 h-4" /> Sudah Melamar
-                    </span>
-                  ) : (
-                    <Button size="sm" onClick={(e) => { e.stopPropagation(); setApplyModal(opp); }}>
-                      <Send className="w-3.5 h-3.5" /> Lamar
+                  <div className="flex items-center gap-2">
+                    {applied ? (
+                      <span className="flex items-center gap-1.5 text-sm text-primary font-medium">
+                        <CheckCircle2 className="w-4 h-4" /> Sudah Melamar
+                      </span>
+                    ) : (
+                      <Button size="sm" onClick={(e) => { e.stopPropagation(); setApplyModal(opp); }}>
+                        <Send className="w-3.5 h-3.5" /> Lamar
+                      </Button>
+                    )}
+                    <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); navigate(`/job/${opp.slug}`); }}>
+                      <Eye className="w-3.5 h-3.5" /> Detail
                     </Button>
-                  )}
-                  <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); navigate(`/job/${opp.slug}`); }}>
-                    <Eye className="w-3.5 h-3.5" /> Detail
-                  </Button>
+                  </div>
                 </div>
               </motion.div>
                 );
