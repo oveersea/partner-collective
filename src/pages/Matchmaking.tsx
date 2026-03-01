@@ -198,7 +198,7 @@ const Matchmaking = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
-      <div className="container mx-auto px-6 py-8 max-w-4xl">
+      <div className="w-full px-6 py-8">
         <button
           onClick={() => navigate("/dashboard")}
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
@@ -316,7 +316,7 @@ const Matchmaking = () => {
         </p>
 
         {/* Opportunity Cards */}
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((opp, idx) => {
             const score = calcMatchScore(opp);
             const applied = appliedIds.has(opp.id);
@@ -331,7 +331,7 @@ const Matchmaking = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-lg transition-shadow"
+                className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-lg transition-shadow flex flex-col"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
