@@ -55,20 +55,19 @@ const AdminSidebar = ({ activeSection, onSectionChange }: AdminSidebarProps) => 
           )}
 
           {/* Overview */}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => onSectionChange("overview")}
-                  isActive={activeSection === "overview"}
-                  tooltip="Overview"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  {!collapsed && <span>Overview</span>}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
+          <div className="px-2 mt-1 mb-1">
+            <button
+              onClick={() => onSectionChange("overview")}
+              className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${
+                activeSection === "overview"
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                  : "bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
+              }`}
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              {!collapsed && <span>Overview</span>}
+            </button>
+          </div>
 
           {/* Hero: Request & Order */}
           <div className="px-2 mt-1 mb-1">
