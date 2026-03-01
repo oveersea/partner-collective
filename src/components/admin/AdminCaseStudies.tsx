@@ -592,7 +592,7 @@ const AdminCaseStudies = () => {
                 <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
               ) : (
                 paged.map((cs) => (
-                  <tr key={cs.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                  <tr key={cs.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => openEdit(cs)}>
                     <td className="px-4 py-3 font-medium text-foreground max-w-[220px] truncate">{cs.title}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">{cs.company_name}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">{cs.industry || "—"}</td>
@@ -606,13 +606,10 @@ const AdminCaseStudies = () => {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(cs.created_at).toLocaleDateString("id-ID")}</td>
                     <td className="px-4 py-3 text-right space-x-1">
-                      <Button size="sm" variant="ghost" onClick={() => toggleActive(cs.id, !!cs.is_active)}>
+                      <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toggleActive(cs.id, !!cs.is_active); }}>
                         {cs.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => openEdit(cs)}>
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => handleDelete(cs.id)}>
+                      <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={(e) => { e.stopPropagation(); handleDelete(cs.id); }}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </td>
