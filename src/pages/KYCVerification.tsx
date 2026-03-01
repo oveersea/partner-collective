@@ -4,7 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Shield, Upload, FileText, CheckCircle2, Clock, XCircle, ArrowLeft, AlertTriangle, User, MapPin, Calendar, CreditCard } from "lucide-react";
+import { Shield, Upload, FileText, CheckCircle2, Clock, XCircle, AlertTriangle, User, MapPin, Calendar, CreditCard } from "lucide-react";
+import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -185,10 +186,8 @@ const KYCVerification = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
+      <DashboardBreadcrumb items={[{ label: "Verifikasi KYC" }]} />
       <div className="w-full px-6 py-8">
-        <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
-        </button>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left: Form (70%) */}

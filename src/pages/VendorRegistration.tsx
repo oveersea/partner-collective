@@ -5,9 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, Building2, Upload, FileText, CheckCircle2,
+  Upload, FileText, CheckCircle2,
   Trash2, Loader2,
 } from "lucide-react";
+import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -204,13 +205,8 @@ const VendorRegistration = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
+      <DashboardBreadcrumb items={[{ label: "Registrasi Vendor" }]} />
       <div className="w-full px-6 py-8">
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
-        </button>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left: Form (70%) */}
