@@ -21,7 +21,7 @@ interface Program {
   id: string;
   title: string;
   status: string;
-  program_type: string | null;
+  category: string | null;
   oveercode: string | null;
   created_at: string;
 }
@@ -45,11 +45,11 @@ const AdminContent = () => {
     const [oppRes, progRes] = await Promise.all([
       supabase
         .from("opportunities")
-        .select("id, title, status, category, job_type, location, created_at, business_profiles(name)")
+        .select("id, title, status, category, job_type, location, created_at, business_profiles!opportunities_business_id_fkey(name)")
         .order("created_at", { ascending: false }),
       supabase
         .from("programs")
-        .select("id, title, status, program_type, oveercode, created_at")
+        .select("id, title, status, category, oveercode, created_at")
         .order("created_at", { ascending: false }),
     ]);
 
@@ -205,7 +205,7 @@ const AdminContent = () => {
                   pagedProgs.map((p) => (
                     <tr key={p.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 font-medium text-foreground max-w-[200px] truncate">{p.title}</td>
-                      <td className="px-4 py-3"><Badge variant="secondary" className="text-xs">{p.program_type || "—"}</Badge></td>
+                      <td className="px-4 py-3"><Badge variant="secondary" className="text-xs">{p.category || "—"}</Badge></td>
                       <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{p.oveercode || "—"}</td>
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(p.status)}`}>{p.status}</span>
