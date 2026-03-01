@@ -7,7 +7,9 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft, MapPin, Clock, Briefcase, DollarSign, Users, Globe,
   Building2, TrendingUp, Star, Send, CheckCircle2, Calendar, XCircle, AlertCircle,
+  Lightbulb, GraduationCap, ChevronRight,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,6 +44,15 @@ interface UserProfile {
   highest_education: string | null;
 }
 
+interface RecommendedProgram {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  thumbnail_url: string | null;
+  price_cents: number;
+}
+
 interface MatchCriteria {
   label: string;
   weight: number;
@@ -69,11 +80,11 @@ const JobDetail = () => {
   const [loading, setLoading] = useState(true);
   const [applied, setApplied] = useState(false);
 
-  // Apply form
   const [showApplyForm, setShowApplyForm] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
   const [bidAmount, setBidAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [recommendedPrograms, setRecommendedPrograms] = useState<RecommendedProgram[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -108,17 +119,45 @@ const JobDetail = () => {
         .eq("user_id", user!.id)
         .maybeSingle();
       setApplied(!!appData);
+
+      // Fetch learning programs for recommendations
+      const oppSkills = (oppRes.data as Opportunity).skills_required || [];
+      const userSkills = (profileRes.data as UserProfile | null)?.skills || [];
+      const missing = oppSkills.filter(
+        (s) => !userSkills.some((ps) => ps.toLowerCase() === s.toLowerCase())
+      );
+      if (missing.length > 0) {
+        const { data: progData } = await supabase
+          .from("programs")
+          .select("id, title, slug, category, thumbnail_url, price_cents, description")
+          .eq("status", "approved")
+          .order("created_at", { ascending: false });
+        if (progData) {
+          const matched = progData.filter((p: any) =>
+            missing.some((skill) => {
+              const kw = skill.toLowerCase();
+              return (p.title?.toLowerCase().includes(kw)) || (p.description?.toLowerCase().includes(kw));
+            })
+          ).slice(0, 3);
+          setRecommendedPrograms(matched as RecommendedProgram[]);
+        }
+      }
     }
 
     if (profileRes.data) setProfile(profileRes.data as UserProfile);
     setLoading(false);
   };
 
-  const calcMatchDetails = (): { score: number; criteria: MatchCriteria[] } => {
-    if (!opp) return { score: 0, criteria: [] };
+  const calcMatchDetails = (): { score: number; criteria: MatchCriteria[]; missingSkills: string[] } => {
+    if (!opp) return { score: 0, criteria: [], missingSkills: [] };
     const criteria: MatchCriteria[] = [];
     const requiredSkills = opp.skills_required || [];
     const userSkills = profile?.skills || [];
+
+    // Missing skills
+    const missingSkills = requiredSkills.filter(
+      (s) => !userSkills.some((ps) => ps.toLowerCase() === s.toLowerCase())
+    );
 
     // 1. Skills match (50%)
     if (requiredSkills.length > 0) {
@@ -145,7 +184,6 @@ const JobDetail = () => {
     let expPts = 0;
     let expStatus: "pass" | "partial" | "fail" = "fail";
     if (minExp == null || minExp === 0) {
-      // Perusahaan tidak mengisi syarat pengalaman → skor 0
       criteria.push({
         label: "Pengalaman Kerja",
         weight: 30,
@@ -198,10 +236,10 @@ const JobDetail = () => {
     });
 
     const total = Math.min(criteria.reduce((a, c) => a + c.score, 0), 100);
-    return { score: total, criteria };
+    return { score: total, criteria, missingSkills };
   };
 
-  const { score, criteria: matchCriteria } = opp ? calcMatchDetails() : { score: 0, criteria: [] };
+  const { score, criteria: matchCriteria, missingSkills } = opp ? calcMatchDetails() : { score: 0, criteria: [], missingSkills: [] };
 
   const handleApply = async () => {
     if (!opp) return;
@@ -490,6 +528,83 @@ const JobDetail = () => {
                         ))}
                       </div>
                     </div>
+
+                    {/* Insight Section - show when score < 70 */}
+                    {score < 70 && (
+                      <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 mb-3">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Lightbulb className="w-4 h-4 text-amber-600" />
+                          <h4 className="text-xs font-semibold text-card-foreground">Cara Meningkatkan Skor Anda</h4>
+                        </div>
+
+                        <ul className="space-y-2 text-xs text-muted-foreground mb-3">
+                          {missingSkills.length > 0 && (
+                            <li className="flex items-start gap-2">
+                              <span className="text-amber-600 mt-0.5">•</span>
+                              <span>Tambahkan skill berikut ke profil: <strong className="text-card-foreground">{missingSkills.join(", ")}</strong></span>
+                            </li>
+                          )}
+                          {opp.min_experience_years && (profile?.years_of_experience || 0) < opp.min_experience_years && (
+                            <li className="flex items-start gap-2">
+                              <span className="text-amber-600 mt-0.5">•</span>
+                              <span>Tambahkan pengalaman kerja Anda (min {opp.min_experience_years} tahun)</span>
+                            </li>
+                          )}
+                          {(!profile?.skills?.length || !profile?.years_of_experience || !profile?.highest_education) && (
+                            <li className="flex items-start gap-2">
+                              <span className="text-amber-600 mt-0.5">•</span>
+                              <span>Lengkapi profil Anda: {[
+                                !profile?.skills?.length && "skill",
+                                !profile?.years_of_experience && "pengalaman",
+                                !profile?.highest_education && "pendidikan",
+                              ].filter(Boolean).join(", ")}</span>
+                            </li>
+                          )}
+                        </ul>
+
+                        {/* Recommended Learning Programs */}
+                        {missingSkills.length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium text-card-foreground mb-2 flex items-center gap-1.5">
+                              <GraduationCap className="w-3.5 h-3.5 text-primary" />
+                              Rekomendasi Learning
+                            </p>
+                            {recommendedPrograms.length > 0 ? (
+                              <div className="space-y-2">
+                                {recommendedPrograms.map((prog) => (
+                                  <Link
+                                    key={prog.id}
+                                    to={`/learning/${prog.slug}`}
+                                    className="flex items-center gap-3 p-2 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors group"
+                                  >
+                                    {prog.thumbnail_url ? (
+                                      <img src={prog.thumbnail_url} alt={prog.title} className="w-10 h-10 rounded object-cover shrink-0" />
+                                    ) : (
+                                      <div className="w-10 h-10 rounded bg-muted flex items-center justify-center shrink-0">
+                                        <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                                      </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-medium text-card-foreground line-clamp-1 group-hover:text-primary transition-colors">{prog.title}</p>
+                                      <p className="text-[10px] text-muted-foreground">{prog.category}</p>
+                                    </div>
+                                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                                  </Link>
+                                ))}
+                              </div>
+                            ) : (
+                              <Link
+                                to="/learning"
+                                className="flex items-center justify-center gap-1.5 p-2 rounded-lg bg-card border border-border hover:border-primary/30 text-xs text-primary font-medium transition-colors"
+                              >
+                                Jelajahi Program Learning <ChevronRight className="w-3.5 h-3.5" />
+                              </Link>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <Button className="w-full" size="lg" onClick={() => setShowApplyForm(true)} disabled={score < 70}>
                       <Send className="w-4 h-4" /> Lamar Sekarang
                     </Button>
