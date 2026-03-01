@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,7 @@ const AdminCredits = () => {
   const [deposits, setDeposits] = useState<WalletDeposit[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"orders" | "deposits">("orders");
-
+  const navigate = useNavigate();
   useEffect(() => {
     fetchData();
   }, []);
@@ -154,7 +155,7 @@ const AdminCredits = () => {
                   <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
                 ) : (
                   orders.map((o) => (
-                    <tr key={o.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                    <tr key={o.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/credit/${o.id}?type=order`)}>
                       <td className="px-4 py-3 font-mono text-xs text-foreground">{o.order_number}</td>
                       <td className="px-4 py-3 text-foreground text-xs">
                         {o.business_name || o.user_name || "—"}
@@ -168,18 +169,18 @@ const AdminCredits = () => {
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(o.status)}`}>{o.status}</span>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(o.created_at).toLocaleDateString("id-ID")}</td>
-                      <td className="px-4 py-3 text-right">
-                        {o.status === "pending" && (
-                          <div className="flex gap-1 justify-end">
-                            <Button size="sm" variant="outline" onClick={() => approveOrder(o.id)}>
-                              <CheckCircle2 className="w-3 h-3 mr-1" /> Approve
-                            </Button>
-                            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => rejectOrder(o.id)}>
-                              <XCircle className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        )}
-                      </td>
+                       <td className="px-4 py-3 text-right">
+                         {o.status === "pending" && (
+                           <div className="flex gap-1 justify-end">
+                             <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); approveOrder(o.id); }}>
+                               <CheckCircle2 className="w-3 h-3 mr-1" /> Approve
+                             </Button>
+                             <Button size="sm" variant="ghost" className="text-destructive" onClick={(e) => { e.stopPropagation(); rejectOrder(o.id); }}>
+                               <XCircle className="w-3 h-3" />
+                             </Button>
+                           </div>
+                         )}
+                       </td>
                     </tr>
                   ))
                 )}
@@ -209,7 +210,7 @@ const AdminCredits = () => {
                   <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
                 ) : (
                   deposits.map((d) => (
-                    <tr key={d.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                    <tr key={d.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/credit/${d.id}?type=deposit`)}>
                       <td className="px-4 py-3 font-mono text-xs text-foreground">{d.deposit_number}</td>
                       <td className="px-4 py-3 text-foreground text-xs">{d.user_name || "—"}</td>
                       <td className="px-4 py-3 font-semibold text-foreground">
@@ -220,13 +221,13 @@ const AdminCredits = () => {
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(d.status)}`}>{d.status}</span>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(d.created_at).toLocaleDateString("id-ID")}</td>
-                      <td className="px-4 py-3 text-right">
-                        {d.status === "pending" && (
-                          <Button size="sm" variant="outline" onClick={() => approveDeposit(d.id)}>
-                            <CheckCircle2 className="w-3 h-3 mr-1" /> Approve
-                          </Button>
-                        )}
-                      </td>
+                       <td className="px-4 py-3 text-right">
+                         {d.status === "pending" && (
+                           <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); approveDeposit(d.id); }}>
+                             <CheckCircle2 className="w-3 h-3 mr-1" /> Approve
+                           </Button>
+                         )}
+                       </td>
                     </tr>
                   ))
                 )}
