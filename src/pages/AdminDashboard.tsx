@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminSidebar, { adminSections } from "@/components/admin/AdminSidebar";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminUsers from "@/components/admin/AdminUsers";
 import AdminCompanies from "@/components/admin/AdminCompanies";
@@ -21,6 +21,7 @@ import AdminRequests from "@/components/admin/AdminRequests";
 import AdminApprovals from "@/components/admin/AdminApprovals";
 import AdminTeams from "@/components/admin/AdminTeams";
 import { LogOut, User, LayoutDashboard } from "lucide-react";
+import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -133,6 +134,10 @@ const AdminDashboard = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </header>
+          <DashboardBreadcrumb items={[
+            { label: "Admin", href: activeSection !== "overview" ? undefined : undefined },
+            ...(activeSection !== "overview" ? [{ label: adminSections.find(s => s.id === activeSection)?.label || activeSection }] : []),
+          ]} />
           <main className="flex-1 p-6 overflow-auto">
             {renderContent()}
           </main>

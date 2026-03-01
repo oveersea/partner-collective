@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Users, Shield, Briefcase, CreditCard, FileText, Building2, ChevronLeft,
+  LayoutDashboard, Users, Shield, Briefcase, CreditCard, FileText, Building2,
   GraduationCap, ClipboardCheck, BarChart3, Landmark, FolderKanban, UserCheck, UsersRound, Store,
   Image as ImageIcon,
 } from "lucide-react";
@@ -7,10 +7,10 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+
 import logoLight from "@/assets/logo-light.png";
 
-const sections = [
+export const adminSections = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "users", label: "Manajemen User", icon: Users },
   { id: "companies", label: "Manajemen Perusahaan", icon: Building2 },
@@ -42,21 +42,15 @@ const AdminSidebar = ({ activeSection, onSectionChange }: AdminSidebarProps) => 
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <div className="px-3 py-4">
-            <Link to="/dashboard" className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors">
-              <ChevronLeft className="w-3.5 h-3.5" />
-              {!collapsed && <span>Kembali</span>}
-            </Link>
-            {!collapsed && (
-              <div className="mt-4 flex items-center gap-2">
-                <img src={logoLight} alt="Oveersea" className="h-6" />
-              </div>
-            )}
-          </div>
+          {!collapsed && (
+            <div className="px-3 py-4">
+              <img src={logoLight} alt="Oveersea" className="h-6" />
+            </div>
+          )}
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {sections.map((s) => (
+              {adminSections.map((s) => (
                 <SidebarMenuItem key={s.id}>
                   <SidebarMenuButton
                     onClick={() => onSectionChange(s.id)}
