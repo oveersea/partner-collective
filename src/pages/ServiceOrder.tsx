@@ -416,8 +416,7 @@ const ServiceOrder = () => {
                 <div className="space-y-3 mb-5">
                   <div className="flex items-center gap-3 text-sm">
                     <Users className="w-4 h-4 text-primary" />
-                    <span className="text-muted-foreground">Talent Tersedia</span>
-                    <span className="ml-auto font-semibold text-foreground">{providerCount}</span>
+                    <span className="text-muted-foreground">Ribuan talent siap membantu Anda</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <Target className="w-4 h-4 text-primary" />
