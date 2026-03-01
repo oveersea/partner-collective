@@ -60,6 +60,14 @@ const KYCVerification = () => {
     if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
 
+  // Bypass KYC page if already verified
+  useEffect(() => {
+    if (!loading && (kycStatus === "verified" || kycStatus === "approved")) {
+      toast.success("Identitas Anda sudah terverifikasi");
+      navigate("/dashboard");
+    }
+  }, [kycStatus, loading, navigate]);
+
   useEffect(() => {
     if (user) fetchKycStatus();
   }, [user]);
