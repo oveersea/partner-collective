@@ -6483,6 +6483,24 @@ export type Database = {
           },
         ]
       }
+      login_logs: {
+        Row: {
+          id: string
+          logged_in_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          logged_in_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          logged_in_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       marketing_email_logs: {
         Row: {
           error_message: string | null
