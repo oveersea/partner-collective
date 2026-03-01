@@ -2,13 +2,13 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Star, Trophy, Play, Briefcase, GraduationCap, BarChart3, CreditCard, ShieldCheck, Search, LayoutDashboard, Layers } from "lucide-react";
+import { Star, Play, Briefcase, GraduationCap, BarChart3, CreditCard, ShieldCheck, Search, LayoutDashboard, Layers, Users, Building2, Zap } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 const socialProof = [
-  { stars: 5, source: "Clutch", sub: "4.9 star rating" },
-  { stars: 0, source: "Startup Award", sub: "Editor's Choice", icon: Trophy },
-  { stars: 5, source: "GoodFirms", sub: "4.9 star rating" },
+  { stars: 0, source: "2.000+", sub: "Talent Terdaftar", icon: Users },
+  { stars: 0, source: "120+", sub: "Perusahaan Partner", icon: Building2 },
+  { stars: 0, source: "80+", sub: "Lowongan Aktif", icon: Zap },
 ];
 
 const sidebarItems = [
