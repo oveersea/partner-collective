@@ -1,22 +1,48 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import case1 from "@/assets/case-1.jpg";
 import case2 from "@/assets/case-2.jpg";
 import case3 from "@/assets/case-3.jpg";
 import case4 from "@/assets/case-4.jpg";
-import case5 from "@/assets/case-5.jpg";
-import case6 from "@/assets/case-6.jpg";
 
-const caseStudies = [
-  { image: case1, company: "PT Nusantara Digital", industry: "Fintech" },
-  { image: case2, company: "Logistik Indonesia", industry: "Logistics" },
-  { image: case3, company: "TechVenture ID", industry: "Tech Startup" },
-  { image: case4, company: "MedikaCare", industry: "Healthcare" },
-  { image: case5, company: "Konsultan Prima", industry: "Consulting" },
-  { image: case6, company: "Universitas Maju", industry: "Education" },
-];
+// Fallback images for case studies without image_url
+const fallbackImages = [case1, case2, case3, case4];
+
+interface CaseStudy {
+  id: string;
+  title: string;
+  description: string | null;
+  company_name: string;
+  industry: string | null;
+  image_url: string | null;
+  cta_label: string | null;
+  cta_url: string | null;
+  is_featured: boolean | null;
+}
 
 const CaseStudiesSection = () => {
+  const [cases, setCases] = useState<CaseStudy[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCases = async () => {
+      const { data } = await supabase
+        .from("case_studies")
+        .select("id, title, description, company_name, industry, image_url, cta_label, cta_url, is_featured")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true })
+        .limit(4);
+
+      if (data) setCases(data as unknown as CaseStudy[]);
+      setLoading(false);
+    };
+    fetchCases();
+  }, []);
+
+  if (loading || cases.length === 0) return null;
+
   return (
     <section className="py-24 bg-background">
       <div className="container mx-auto px-6">
@@ -35,36 +61,49 @@ const CaseStudiesSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-5">
-          {caseStudies.map((item, i) => (
+        {/* Rippling-style card grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {cases.map((item, i) => (
             <motion.div
-              key={item.company}
+              key={item.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="group relative rounded-2xl overflow-hidden cursor-pointer aspect-[4/3]"
+              className="group bg-card rounded-2xl border border-border overflow-hidden flex flex-col hover:border-primary/30 transition-colors"
             >
-              <img
-                src={item.image}
-                alt={item.company}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30" />
-
-              {/* Company name */}
-              <div className="absolute top-5 left-5">
-                <h3 className="text-lg font-semibold text-white drop-shadow-lg">{item.company}</h3>
-                <p className="text-xs text-white/70 font-medium">{item.industry}</p>
+              {/* Image */}
+              <div className="aspect-[4/3] overflow-hidden bg-muted">
+                <img
+                  src={item.image_url || fallbackImages[i % fallbackImages.length]}
+                  alt={item.company_name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
               </div>
 
-              {/* Watch button */}
-              <div className="absolute bottom-5 left-5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:bg-white/30 transition-colors">
-                  <Play className="w-4 h-4 text-white fill-white" />
-                </div>
-                <span className="text-sm font-medium text-white">Lihat cerita mereka</span>
+              {/* Content */}
+              <div className="p-5 flex flex-col flex-1">
+                {item.industry && (
+                  <span className="text-xs font-medium text-primary mb-2">{item.industry}</span>
+                )}
+                <h3 className="text-base font-semibold text-foreground mb-2 leading-snug">
+                  {item.title}
+                </h3>
+                {item.description && (
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-3 flex-1">
+                    {item.description}
+                  </p>
+                )}
+                {item.cta_label && (
+                  <a
+                    href={item.cta_url || "#"}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground border-b-2 border-primary/60 hover:border-primary pb-0.5 w-fit mt-auto transition-colors"
+                  >
+                    {item.cta_label}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                )}
               </div>
             </motion.div>
           ))}
