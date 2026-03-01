@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { User, Briefcase, FolderKanban, GraduationCap, Users } from "lucide-react";
 import DashboardNav from "@/components/dashboard/DashboardNav";
+import KYCBanner from "@/components/dashboard/KYCBanner";
 import ProfileHeader from "@/components/dashboard/ProfileHeader";
 import ProfileEditForm from "@/components/dashboard/ProfileEditForm";
 import ProfileOverview from "@/components/dashboard/ProfileOverview";
@@ -119,6 +120,9 @@ const Dashboard = () => {
       <DashboardNav />
 
       <div className="container mx-auto px-6 py-8 max-w-5xl">
+        {/* KYC Banner */}
+        <KYCBanner kycStatus={profile.kyc_status} />
+
         {/* Profile Header */}
         <ProfileHeader
           profile={profile}

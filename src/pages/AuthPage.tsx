@@ -23,10 +23,23 @@ const AuthPage = () => {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        
+        // Check KYC status to redirect appropriately
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("kyc_status")
+          .eq("user_id", authData.user.id)
+          .single();
+
         toast.success("Login berhasil!");
-        navigate("/dashboard");
+        
+        if (profile?.kyc_status === "verified") {
+          navigate("/dashboard");
+        } else {
+          navigate("/kyc");
+        }
       } else {
         const { error } = await supabase.auth.signUp({
           email,
