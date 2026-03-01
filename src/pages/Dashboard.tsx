@@ -79,31 +79,44 @@ const Dashboard = () => {
   };
 
   const handleSave = async () => {
+    if (!user || !profile) return;
+
+    // Fields that require approval (excluding skills)
+    const approvalFields = [
+      "full_name", "headline", "city", "country", "phone_number",
+      "daily_rate", "highest_education", "opportunity_availability",
+      "professional_summary", "linkedin_url", "website_url",
+    ];
+
+    const changes: { field_name: string; old_value: string | null; new_value: string | null }[] = [];
+
+    for (const field of approvalFields) {
+      const oldVal = String((profile as any)[field] ?? "");
+      const newVal = String((editData as any)[field] ?? "");
+      if (oldVal !== newVal) {
+        changes.push({
+          field_name: field,
+          old_value: (profile as any)[field] != null ? oldVal : null,
+          new_value: (editData as any)[field] != null ? newVal : null,
+        });
+      }
+    }
+
+    if (changes.length === 0) {
+      toast.info("Tidak ada perubahan yang terdeteksi");
+      setEditing(false);
+      return;
+    }
+
     const { error } = await supabase
-      .from("profiles")
-      .update({
-        full_name: editData.full_name,
-        headline: editData.headline,
-        bio: editData.bio,
-        city: editData.city,
-        country: editData.country,
-        phone_number: editData.phone_number,
-        skills: editData.skills,
-        daily_rate: editData.daily_rate,
-        linkedin_url: editData.linkedin_url,
-        website_url: editData.website_url,
-        opportunity_availability: editData.opportunity_availability,
-        professional_summary: editData.professional_summary,
-        highest_education: editData.highest_education,
-      })
-      .eq("user_id", user!.id);
+      .from("profile_change_requests")
+      .insert(changes.map((c) => ({ ...c, user_id: user.id })));
 
     if (error) {
-      toast.error("Gagal menyimpan profil");
+      toast.error("Gagal mengirim perubahan");
     } else {
-      toast.success("Profil berhasil disimpan");
+      toast.success(`${changes.length} perubahan dikirim untuk persetujuan admin`);
       setEditing(false);
-      fetchProfile();
     }
   };
 
