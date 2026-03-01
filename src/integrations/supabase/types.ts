@@ -7598,6 +7598,8 @@ export type Database = {
           professional_summary: string | null
           role: string | null
           skills: string[] | null
+          soft_skills: Json | null
+          technical_skills: Json | null
           updated_at: string
           user_id: string
           username: string | null
@@ -7646,6 +7648,8 @@ export type Database = {
           professional_summary?: string | null
           role?: string | null
           skills?: string[] | null
+          soft_skills?: Json | null
+          technical_skills?: Json | null
           updated_at?: string
           user_id: string
           username?: string | null
@@ -7694,6 +7698,8 @@ export type Database = {
           professional_summary?: string | null
           role?: string | null
           skills?: string[] | null
+          soft_skills?: Json | null
+          technical_skills?: Json | null
           updated_at?: string
           user_id?: string
           username?: string | null
