@@ -231,16 +231,17 @@ const AdminApprovals = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Total", value: requests.length, icon: User, color: "text-foreground" },
-          { label: "Pending", value: pendingCount, icon: Clock, color: "text-amber-500" },
-          { label: "Approved", value: approvedCount, icon: CheckCircle2, color: "text-emerald-500" },
-          { label: "Rejected", value: rejectedCount, icon: XCircle, color: "text-destructive" },
+          { label: "Total", value: requests.length, icon: User, color: "text-foreground", filter: "all" },
+          { label: "Pending", value: pendingCount, icon: Clock, color: "text-amber-500", filter: "pending" },
+          { label: "Approved", value: approvedCount, icon: CheckCircle2, color: "text-emerald-500", filter: "approved" },
+          { label: "Rejected", value: rejectedCount, icon: XCircle, color: "text-destructive", filter: "rejected" },
         ].map((s) => (
           <motion.div
             key={s.label}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-card border border-border rounded-lg p-4"
+            onClick={() => setFilterStatus(s.filter)}
+            className={`bg-card border rounded-lg p-4 cursor-pointer transition-colors hover:bg-muted/40 ${filterStatus === s.filter ? "border-primary ring-1 ring-primary/20" : "border-border"}`}
           >
             <div className="flex items-center gap-3">
               <s.icon className={`w-5 h-5 ${s.color}`} />
