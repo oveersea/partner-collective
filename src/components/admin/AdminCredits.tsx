@@ -95,20 +95,20 @@ const AdminCredits = () => {
 
   const approveOrder = async (id: string) => {
     const { error } = await supabase.from("credit_orders").update({ status: "paid" }).eq("id", id);
-    if (error) toast.error("Gagal approve order: " + error.message);
-    else { toast.success("Order diapprove"); fetchData(); }
+    if (error) toast.error("Failed to approve order: " + error.message);
+    else { toast.success("Order approved"); fetchData(); }
   };
 
   const rejectOrder = async (id: string) => {
     const { error } = await supabase.from("credit_orders").update({ status: "rejected" }).eq("id", id);
-    if (error) toast.error("Gagal reject order");
-    else { toast.success("Order ditolak"); fetchData(); }
+    if (error) toast.error("Failed to reject order");
+    else { toast.success("Order rejected"); fetchData(); }
   };
 
   const approveDeposit = async (id: string) => {
     const { error } = await supabase.from("wallet_deposits").update({ status: "paid" }).eq("id", id);
-    if (error) toast.error("Gagal approve deposit: " + error.message);
-    else { toast.success("Deposit diapprove"); fetchData(); }
+    if (error) toast.error("Failed to approve deposit: " + error.message);
+    else { toast.success("Deposit approved"); fetchData(); }
   };
 
   const statusBadge = (s: string) => {
@@ -120,7 +120,7 @@ const AdminCredits = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-6">Kredit & Wallet</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-6">Credits & Wallet</h2>
 
       <div className="flex gap-2 mb-4">
         <Button size="sm" variant={tab === "orders" ? "default" : "outline"} onClick={() => setTab("orders")}>
@@ -139,11 +139,11 @@ const AdminCredits = () => {
                 <tr className="border-b border-border bg-muted/50">
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Order #</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">User / Company</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Kredit</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Amount</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Credits</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Amount</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
+                   <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -152,7 +152,7 @@ const AdminCredits = () => {
                     <tr key={i} className="border-b border-border"><td colSpan={7} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
                   ))
                 ) : orders.length === 0 ? (
-                  <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+                   <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">No data</td></tr>
                 ) : (
                   orders.map((o) => (
                     <tr key={o.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/credit/${o.id}?type=order`)}>
@@ -168,7 +168,7 @@ const AdminCredits = () => {
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(o.status)}`}>{o.status}</span>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(o.created_at).toLocaleDateString("id-ID")}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(o.created_at).toLocaleDateString("en-US")}</td>
                        <td className="px-4 py-3 text-right">
                          {o.status === "pending" && (
                            <div className="flex gap-1 justify-end">
@@ -198,16 +198,16 @@ const AdminCredits = () => {
                 <tr className="border-b border-border bg-muted/50">
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Deposit #</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">User</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Jumlah</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Metode</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Amount</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Method</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
+                   <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {deposits.length === 0 ? (
-                  <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">No data</td></tr>
                 ) : (
                   deposits.map((d) => (
                     <tr key={d.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/credit/${d.id}?type=deposit`)}>
@@ -220,7 +220,7 @@ const AdminCredits = () => {
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(d.status)}`}>{d.status}</span>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(d.created_at).toLocaleDateString("id-ID")}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(d.created_at).toLocaleDateString("en-US")}</td>
                        <td className="px-4 py-3 text-right">
                          {d.status === "pending" && (
                            <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); approveDeposit(d.id); }}>

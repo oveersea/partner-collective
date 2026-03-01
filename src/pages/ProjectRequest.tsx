@@ -14,10 +14,10 @@ import DashboardNav from "@/components/dashboard/DashboardNav";
 import { z } from "zod";
 
 const projectSchema = z.object({
-  title: z.string().trim().min(3, "Judul minimal 3 karakter").max(200, "Judul maksimal 200 karakter"),
-  description: z.string().trim().min(10, "Deskripsi minimal 10 karakter").max(5000, "Deskripsi maksimal 5000 karakter"),
-  category: z.string().min(1, "Kategori wajib dipilih"),
-  skills_required: z.array(z.string().trim()).min(1, "Minimal 1 skill diperlukan"),
+  title: z.string().trim().min(3, "Title must be at least 3 characters").max(200, "Title must be at most 200 characters"),
+  description: z.string().trim().min(10, "Description must be at least 10 characters").max(5000, "Description must be at most 5000 characters"),
+  category: z.string().min(1, "Category is required"),
+  skills_required: z.array(z.string().trim()).min(1, "At least 1 skill is required"),
   budget_min: z.number().min(0).nullable(),
   budget_max: z.number().min(0).nullable(),
   deadline: z.string().optional(),
@@ -30,8 +30,8 @@ const projectSchema = z.object({
 
 const categories = [
   "Web Development", "Mobile Development", "UI/UX Design", "Data Science",
-  "DevOps", "Cloud", "Cybersecurity", "AI/ML", "Marketing Digital",
-  "Content Writing", "Video Production", "Consulting", "Lainnya",
+  "DevOps", "Cloud", "Cybersecurity", "AI/ML", "Digital Marketing",
+  "Content Writing", "Video Production", "Consulting", "Other",
 ];
 
 const currencies = [
@@ -42,11 +42,11 @@ const currencies = [
 ];
 
 const durations = [
-  { value: "1-2 minggu", label: "1-2 Minggu" },
-  { value: "1 bulan", label: "1 Bulan" },
-  { value: "2-3 bulan", label: "2-3 Bulan" },
-  { value: "3-6 bulan", label: "3-6 Bulan" },
-  { value: "6+ bulan", label: "6+ Bulan" },
+  { value: "1-2 weeks", label: "1-2 Weeks" },
+  { value: "1 month", label: "1 Month" },
+  { value: "2-3 months", label: "2-3 Months" },
+  { value: "3-6 months", label: "3-6 Months" },
+  { value: "6+ months", label: "6+ Months" },
 ];
 
 const ProjectRequest = () => {
@@ -116,13 +116,12 @@ const ProjectRequest = () => {
         fieldErrors[field] = e.message;
       });
       setErrors(fieldErrors);
-      toast.error("Silakan periksa kembali form Anda");
+      toast.error("Please review the form");
       return;
     }
 
     setSubmitting(true);
     try {
-      // Generate a slug from title
       const slug = form.title
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, "")
@@ -151,10 +150,10 @@ const ProjectRequest = () => {
       });
 
       if (error) throw error;
-      toast.success("Project request berhasil dibuat!");
+      toast.success("Project request created successfully!");
       navigate("/dashboard");
     } catch (error: any) {
-      toast.error(error.message || "Gagal membuat project request");
+      toast.error(error.message || "Failed to create project request");
     } finally {
       setSubmitting(false);
     }
@@ -169,43 +168,42 @@ const ProjectRequest = () => {
       <div className="w-full px-6 py-8">
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left: Form (70%) */}
           <div className="lg:w-[70%]">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
               <h1 className="text-2xl font-semibold text-foreground mb-2">Project Request</h1>
-              <p className="text-muted-foreground text-sm">Temukan partner atau tim untuk mengerjakan project Anda</p>
+              <p className="text-muted-foreground text-sm">Find a partner or team to work on your project</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-6">
               {/* Demand Type */}
               <div>
-                <Label className="text-card-foreground">Cari Partner atau Tim?</Label>
+                <Label className="text-card-foreground">Looking for Partner or Team?</Label>
                 <div className="grid grid-cols-2 gap-3 mt-1.5">
                   <button type="button" onClick={() => set("demand_type", "partner")} className={`p-4 rounded-xl border text-center transition-all ${form.demand_type === "partner" ? "border-primary bg-primary/10" : "border-border hover:border-primary/30"}`}>
                     <span className="text-2xl">👤</span>
                     <p className="font-semibold text-sm text-card-foreground mt-1">Partner</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Individu freelancer</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Individual freelancer</p>
                   </button>
                   <button type="button" onClick={() => set("demand_type", "team")} className={`p-4 rounded-xl border text-center transition-all ${form.demand_type === "team" ? "border-primary bg-primary/10" : "border-border hover:border-primary/30"}`}>
                     <span className="text-2xl">👥</span>
-                    <p className="font-semibold text-sm text-card-foreground mt-1">Tim</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Tim kolaboratif</p>
+                    <p className="font-semibold text-sm text-card-foreground mt-1">Team</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Collaborative team</p>
                   </button>
                 </div>
               </div>
 
               {/* Title */}
               <div>
-                <Label className="text-card-foreground">Judul Project *</Label>
-                <Input className="mt-1.5" placeholder="Contoh: Redesign Website E-Commerce" value={form.title} onChange={(e) => set("title", e.target.value)} />
+                <Label className="text-card-foreground">Project Title *</Label>
+                <Input className="mt-1.5" placeholder="e.g. E-Commerce Website Redesign" value={form.title} onChange={(e) => set("title", e.target.value)} />
                 {errors.title && <p className="text-xs text-destructive mt-1">{errors.title}</p>}
               </div>
 
               {/* Category */}
               <div>
-                <Label className="text-card-foreground">Kategori *</Label>
+                <Label className="text-card-foreground">Category *</Label>
                 <select className="mt-1.5 w-full h-10 px-3 rounded-md border border-input bg-background text-sm" value={form.category} onChange={(e) => set("category", e.target.value)}>
-                  <option value="">Pilih kategori</option>
+                  <option value="">Select category</option>
                   {categories.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
                 </select>
                 {errors.category && <p className="text-xs text-destructive mt-1">{errors.category}</p>}
@@ -213,22 +211,22 @@ const ProjectRequest = () => {
 
               {/* Description */}
               <div>
-                <Label className="text-card-foreground">Deskripsi Project *</Label>
-                <Textarea className="mt-1.5" rows={4} placeholder="Jelaskan scope project, deliverables, dan ekspektasi..." value={form.description} onChange={(e) => set("description", e.target.value)} />
+                <Label className="text-card-foreground">Project Description *</Label>
+                <Textarea className="mt-1.5" rows={4} placeholder="Describe the project scope, deliverables, and expectations..." value={form.description} onChange={(e) => set("description", e.target.value)} />
                 {errors.description && <p className="text-xs text-destructive mt-1">{errors.description}</p>}
               </div>
 
               {/* Project Scope */}
               <div>
-                <Label className="text-card-foreground">Scope of Work (opsional)</Label>
-                <Textarea className="mt-1.5" rows={3} placeholder="Detail scope pekerjaan, milestone, dan deliverables..." value={form.project_scope} onChange={(e) => set("project_scope", e.target.value)} />
+                <Label className="text-card-foreground">Scope of Work (optional)</Label>
+                <Textarea className="mt-1.5" rows={3} placeholder="Detail the scope, milestones, and deliverables..." value={form.project_scope} onChange={(e) => set("project_scope", e.target.value)} />
               </div>
 
               {/* Skills */}
               <div>
-                <Label className="text-card-foreground">Skills yang Dibutuhkan *</Label>
+                <Label className="text-card-foreground">Required Skills *</Label>
                 <div className="flex gap-2 mt-1.5">
-                  <Input placeholder="Tambah skill, tekan Enter" value={form.skillsInput} onChange={(e) => set("skillsInput", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} />
+                  <Input placeholder="Add skill, press Enter" value={form.skillsInput} onChange={(e) => set("skillsInput", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} />
                   <Button type="button" variant="outline" onClick={addSkill} size="sm">+</Button>
                 </div>
                 {form.skills_required.length > 0 && (
@@ -244,7 +242,7 @@ const ProjectRequest = () => {
                 {errors.skills_required && <p className="text-xs text-destructive mt-1">{errors.skills_required}</p>}
               </div>
 
-              {/* Budget & Duration row */}
+              {/* Budget & Duration */}
               <div className="grid grid-cols-1 gap-6">
                 <div>
                   <Label className="text-card-foreground">Budget</Label>
@@ -269,15 +267,15 @@ const ProjectRequest = () => {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-card-foreground">Estimasi Durasi</Label>
+                  <Label className="text-card-foreground">Estimated Duration</Label>
                   <select className="mt-1.5 w-full h-10 px-3 rounded-md border border-input bg-background text-sm" value={form.project_duration} onChange={(e) => set("project_duration", e.target.value)}>
-                    <option value="">Pilih durasi</option>
+                    <option value="">Select duration</option>
                     {durations.map((d) => (<option key={d.value} value={d.value}>{d.label}</option>))}
                   </select>
                 </div>
               </div>
 
-              {/* Deadline & Mode row */}
+              {/* Deadline & Mode */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <Label className="text-card-foreground">Deadline</Label>
@@ -287,7 +285,7 @@ const ProjectRequest = () => {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-card-foreground">Mode Kerja</Label>
+                  <Label className="text-card-foreground">Work Mode</Label>
                   <div className="grid grid-cols-2 gap-3 mt-1.5">
                     <button type="button" onClick={() => set("is_remote", true)} className={`p-2.5 rounded-xl border text-sm font-medium transition-all text-center ${form.is_remote ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"}`}>
                       🌍 Remote
@@ -301,7 +299,7 @@ const ProjectRequest = () => {
 
               {!form.is_remote && (
                 <div>
-                  <Label className="text-card-foreground">Lokasi</Label>
+                  <Label className="text-card-foreground">Location</Label>
                   <div className="relative mt-1.5">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input className="pl-10" placeholder="Jakarta, Indonesia" value={form.location} onChange={(e) => set("location", e.target.value)} />
@@ -310,26 +308,26 @@ const ProjectRequest = () => {
               )}
 
               <Button className="w-full" size="lg" onClick={handleSubmit} disabled={submitting}>
-                {submitting ? "Mengirim..." : "Buat Project Request"}
+                {submitting ? "Submitting..." : "Create Project Request"}
               </Button>
             </motion.div>
           </div>
 
-          {/* Right: Summary sidebar (30%) */}
+          {/* Right: Summary sidebar */}
           <div className="lg:w-[30%]">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card rounded-2xl border border-border p-6 shadow-card sticky top-24">
-              <h3 className="text-sm font-semibold text-card-foreground mb-4">Ringkasan Project</h3>
+              <h3 className="text-sm font-semibold text-card-foreground mb-4">Project Summary</h3>
               <div className="space-y-4 text-sm">
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Tipe</p>
-                  <p className="text-card-foreground font-medium">{form.demand_type === "partner" ? "👤 Partner" : "👥 Tim"}</p>
+                  <p className="text-muted-foreground text-xs mb-1">Type</p>
+                  <p className="text-card-foreground font-medium">{form.demand_type === "partner" ? "👤 Partner" : "👥 Team"}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Judul</p>
+                  <p className="text-muted-foreground text-xs mb-1">Title</p>
                   <p className="text-card-foreground font-medium">{form.title || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Kategori</p>
+                  <p className="text-muted-foreground text-xs mb-1">Category</p>
                   <p className="text-card-foreground font-medium">{form.category || "—"}</p>
                 </div>
                 {form.skills_required.length > 0 && (
@@ -352,12 +350,12 @@ const ProjectRequest = () => {
                 )}
                 {form.project_duration && (
                   <div>
-                    <p className="text-muted-foreground text-xs mb-1">Durasi</p>
+                    <p className="text-muted-foreground text-xs mb-1">Duration</p>
                     <p className="text-card-foreground font-medium">{form.project_duration}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Mode Kerja</p>
+                  <p className="text-muted-foreground text-xs mb-1">Work Mode</p>
                   <p className="text-card-foreground font-medium">{form.is_remote ? "🌍 Full Remote" : "🏢 On-site"}</p>
                 </div>
               </div>

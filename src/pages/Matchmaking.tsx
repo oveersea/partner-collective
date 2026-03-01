@@ -259,12 +259,12 @@ const Matchmaking = () => {
       });
       if (error) throw error;
       setAppliedIds((prev) => new Set(prev).add(applyModal.id));
-      toast.success("Lamaran berhasil dikirim!");
+      toast.success("Application submitted successfully!");
       setApplyModal(null);
       setCoverLetter("");
       setBidAmount("");
     } catch (err: any) {
-      toast.error(err.message || "Gagal mengirim lamaran");
+      toast.error(err.message || "Failed to submit application");
     } finally {
       setSubmitting(false);
     }
@@ -287,16 +287,16 @@ const Matchmaking = () => {
       });
       if (error) throw error;
       setClaimedIds((prev) => new Set(prev).add(claimModal.id));
-      toast.success("Order berhasil diklaim! Menunggu persetujuan admin.");
+      toast.success("Order claimed successfully! Awaiting admin approval.");
       setClaimModal(null);
       setClaimNote("");
       setClaimBid("");
       setClaimAs("personal");
     } catch (err: any) {
       if (err.message?.includes("duplicate")) {
-        toast.error("Anda sudah mengklaim order ini");
+        toast.error("You have already claimed this order");
       } else {
-        toast.error(err.message || "Gagal mengklaim order");
+        toast.error(err.message || "Failed to claim order");
       }
     } finally {
       setClaimSubmitting(false);
@@ -311,7 +311,7 @@ const Matchmaking = () => {
 
   const formatBudget = (min: number | null, max: number | null) => {
     if (!min && !max) return null;
-    const fmt = (n: number) => n >= 1_000_000 ? `${(n / 1_000_000).toFixed(0)}jt` : `${(n / 1_000).toFixed(0)}rb`;
+    const fmt = (n: number) => n >= 1_000_000 ? `${(n / 1_000_000).toFixed(0)}M` : `${(n / 1_000).toFixed(0)}K`;
     if (min && max) return `${fmt(min)} - ${fmt(max)}`;
     if (min) return `Min ${fmt(min)}`;
     return `Max ${fmt(max!)}`;
@@ -353,22 +353,22 @@ const Matchmaking = () => {
             </div>
             <div>
               <h1 className="text-2xl font-semibold text-foreground">Matchmaking</h1>
-              <p className="text-muted-foreground text-sm">Temukan peluang & ambil order yang cocok dengan skill Anda</p>
+              <p className="text-muted-foreground text-sm">Find opportunities & claim orders that match your skills</p>
             </div>
           </div>
 
           {profile?.skills && profile.skills.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-1.5">
-              <span className="text-xs text-muted-foreground mr-1">Skill Anda:</span>
+              <span className="text-xs text-muted-foreground mr-1">Your Skills:</span>
               {profile.skills.slice(0, 8).map((s) => (
                 <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{s}</span>
               ))}
-              {profile.skills.length > 8 && <span className="text-xs text-muted-foreground">+{profile.skills.length - 8} lainnya</span>}
+              {profile.skills.length > 8 && <span className="text-xs text-muted-foreground">+{profile.skills.length - 8} more</span>}
             </div>
           )}
           {(!profile?.skills || profile.skills.length === 0) && (
             <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-sm text-amber-600">
-              ⚠️ Tambahkan skill di profil Anda untuk mendapatkan rekomendasi match yang lebih akurat.
+              ⚠️ Add skills to your profile for more accurate match recommendations.
             </div>
           )}
         </motion.div>
@@ -380,7 +380,7 @@ const Matchmaking = () => {
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "opportunities" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
           >
             <Briefcase className="w-4 h-4" />
-            Peluang Kerja
+            Opportunities
             <span className="text-xs px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{opportunities.length}</span>
           </button>
           <button
@@ -398,7 +398,7 @@ const Matchmaking = () => {
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input className="pl-10" placeholder={activeTab === "opportunities" ? "Cari berdasarkan judul, deskripsi, atau skill..." : "Cari order atau hiring..."} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} />
+              <Input className="pl-10" placeholder={activeTab === "opportunities" ? "Search by title, description, or skill..." : "Search orders or hiring..."} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} />
             </div>
             {activeTab === "opportunities" && (
               <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="shrink-0">
@@ -415,7 +415,7 @@ const Matchmaking = () => {
                   <div>
                     <Label className="text-xs text-muted-foreground">Kategori</Label>
                     <select className="mt-1 h-9 px-3 rounded-md border border-input bg-background text-sm" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-                      <option value="">Semua Kategori</option>
+                      <option value="">All Categories</option>
                       {categories.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
@@ -424,7 +424,7 @@ const Matchmaking = () => {
                     <div className="flex gap-1 mt-1">
                       {(["all", "remote", "onsite"] as const).map((f) => (
                         <button key={f} onClick={() => setRemoteFilter(f)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${remoteFilter === f ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"}`}>
-                          {f === "all" ? "Semua" : f === "remote" ? "Remote" : "On-site"}
+                          {f === "all" ? "All" : f === "remote" ? "Remote" : "On-site"}
                         </button>
                       ))}
                     </div>
@@ -438,7 +438,7 @@ const Matchmaking = () => {
         {/* Results count */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-muted-foreground">
-            {currentItems.length} {activeTab === "opportunities" ? "peluang" : "order"} ditemukan • Halaman {currentPage} dari {totalPages || 1}
+            {currentItems.length} {activeTab === "opportunities" ? "opportunities" : "orders"} found • Page {currentPage} of {totalPages || 1}
           </p>
         </div>
 
@@ -460,7 +460,7 @@ const Matchmaking = () => {
                         {opp.demand_type && (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-accent text-accent-foreground flex items-center gap-1">
                             {opp.demand_type === "team" ? <Users className="w-3 h-3" /> : <Briefcase className="w-3 h-3" />}
-                            {opp.demand_type === "team" ? "Tim" : "Partner"}
+                            {opp.demand_type === "team" ? "Team" : "Partner"}
                           </span>
                         )}
                         {opp.is_remote && (
@@ -494,16 +494,16 @@ const Matchmaking = () => {
                     {budget && <span className="flex items-center gap-1"><DollarSign className="w-3.5 h-3.5" /> {budget}</span>}
                     {opp.location && !opp.is_remote && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {opp.location}</span>}
                     {opp.project_duration && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {opp.project_duration}</span>}
-                    {opp.min_experience_years != null && <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5" /> Min {opp.min_experience_years} tahun</span>}
+                    {opp.min_experience_years != null && <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5" /> Min {opp.min_experience_years} yrs</span>}
                   </div>
 
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-                    <span className="text-xs text-muted-foreground">{new Date(opp.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span>
+                    <span className="text-xs text-muted-foreground">{new Date(opp.created_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}</span>
                     <div className="flex items-center gap-2">
                       {applied ? (
-                        <span className="flex items-center gap-1.5 text-sm text-primary font-medium"><CheckCircle2 className="w-4 h-4" /> Sudah Melamar</span>
+                        <span className="flex items-center gap-1.5 text-sm text-primary font-medium"><CheckCircle2 className="w-4 h-4" /> Applied</span>
                       ) : (
-                        <Button size="sm" onClick={(e) => { e.stopPropagation(); setApplyModal(opp); }}><Send className="w-3.5 h-3.5" /> Lamar</Button>
+                        <Button size="sm" onClick={(e) => { e.stopPropagation(); setApplyModal(opp); }}><Send className="w-3.5 h-3.5" /> Apply</Button>
                       )}
                       <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); navigate(`/job/${opp.slug}`); }}><Eye className="w-3.5 h-3.5" /> Detail</Button>
                     </div>
@@ -515,8 +515,8 @@ const Matchmaking = () => {
             {filtered.length === 0 && (
               <div className="text-center py-16 col-span-full">
                 <Search className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="text-lg font-semibold text-foreground mb-1">Tidak ada peluang ditemukan</h3>
-                <p className="text-sm text-muted-foreground">Coba ubah filter atau cari dengan kata kunci lain</p>
+                <h3 className="text-lg font-semibold text-foreground mb-1">No opportunities found</h3>
+                <p className="text-sm text-muted-foreground">Try changing your filters or searching with different keywords</p>
               </div>
             )}
           </div>
@@ -529,8 +529,8 @@ const Matchmaking = () => {
             <div className="flex items-start gap-3 p-4 rounded-xl bg-primary/5 border border-primary/10">
               <HandCoins className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <div className="text-sm">
-                <p className="font-medium text-foreground">Order & Hiring Request yang bisa Anda ambil</p>
-                <p className="text-muted-foreground mt-0.5">Sifatnya rebutan — siapa cepat dia dapat. Anda bisa mewakili diri sendiri, vendor, atau tim.</p>
+                <p className="font-medium text-foreground">Orders & Hiring Requests you can claim</p>
+                <p className="text-muted-foreground mt-0.5">First come, first served. You can represent yourself, a vendor, or a team.</p>
               </div>
             </div>
 
@@ -581,19 +581,19 @@ const Matchmaking = () => {
                     {/* Meta */}
                     <div className="flex flex-wrap items-center gap-3 mt-auto pt-4 text-xs text-muted-foreground">
                       {order && <span className="flex items-center gap-1 font-semibold text-foreground"><DollarSign className="w-3.5 h-3.5" /> {formatCurrency(order.total_cents, order.currency)}</span>}
-                      {isHiring && hiring?.positions_count && <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {hiring.positions_count} posisi</span>}
-                      {isHiring && hiring?.experience_min != null && <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5" /> {hiring.experience_min}{hiring.experience_max ? `-${hiring.experience_max}` : "+"} thn</span>}
-                      {order?.sla_deadline && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {new Date(order.sla_deadline).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}</span>}
-                      <span className="flex items-center gap-1">{new Date(item.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span>
+                      {isHiring && hiring?.positions_count && <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {hiring.positions_count} positions</span>}
+                      {isHiring && hiring?.experience_min != null && <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5" /> {hiring.experience_min}{hiring.experience_max ? `-${hiring.experience_max}` : "+"} yrs</span>}
+                      {order?.sla_deadline && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {new Date(order.sla_deadline).toLocaleDateString("en-US", { day: "numeric", month: "short" })}</span>}
+                      <span className="flex items-center gap-1">{new Date(item.created_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}</span>
                     </div>
 
                     {/* Action */}
                     <div className="mt-4 pt-4 border-t border-border">
                       {claimed ? (
-                        <span className="flex items-center gap-1.5 text-sm text-primary font-medium"><CheckCircle2 className="w-4 h-4" /> Sudah Diklaim</span>
+                        <span className="flex items-center gap-1.5 text-sm text-primary font-medium"><CheckCircle2 className="w-4 h-4" /> Claimed</span>
                       ) : (
                         <Button className="w-full gap-2" onClick={() => { setClaimModal(item); setClaimAs("personal"); }}>
-                          <HandCoins className="w-4 h-4" /> Ambil Order
+                          <HandCoins className="w-4 h-4" /> Claim Order
                         </Button>
                       )}
                     </div>
@@ -604,8 +604,8 @@ const Matchmaking = () => {
               {filteredOpen.length === 0 && (
                 <div className="text-center py-16 col-span-full">
                   <ShoppingBag className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                  <h3 className="text-lg font-semibold text-foreground mb-1">Belum ada order tersedia</h3>
-                  <p className="text-sm text-muted-foreground">Order baru akan muncul di sini saat ada klien yang membutuhkan bantuan</p>
+                   <h3 className="text-lg font-semibold text-foreground mb-1">No orders available yet</h3>
+                   <p className="text-sm text-muted-foreground">New orders will appear here when clients need help</p>
                 </div>
               )}
             </div>
@@ -615,7 +615,7 @@ const Matchmaking = () => {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 mt-8">
-            <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>Sebelumnya</Button>
+            <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>Previous</Button>
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
               .map((p, i, arr) => (
@@ -624,7 +624,7 @@ const Matchmaking = () => {
                   <button onClick={() => setCurrentPage(p)} className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${currentPage === p ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"}`}>{p}</button>
                 </span>
               ))}
-            <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}>Selanjutnya</Button>
+            <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}>Next</Button>
           </div>
         )}
       </div>
@@ -635,12 +635,12 @@ const Matchmaking = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setApplyModal(null)}>
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="bg-card rounded-2xl border border-border p-6 shadow-xl w-full max-w-lg">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-card-foreground">Lamar Peluang</h2>
+                <h2 className="text-lg font-bold text-card-foreground">Apply for Opportunity</h2>
                 <button onClick={() => setApplyModal(null)} className="text-muted-foreground hover:text-foreground transition-colors"><X className="w-5 h-5" /></button>
               </div>
               <div className="bg-muted rounded-xl p-3 mb-4">
                 <p className="font-semibold text-sm text-card-foreground">{applyModal.title}</p>
-                <p className="text-xs text-muted-foreground">{applyModal.category} • {applyModal.company_name || "Perusahaan"}</p>
+                <p className="text-xs text-muted-foreground">{applyModal.category} • {applyModal.company_name || "Company"}</p>
               </div>
               <div className="space-y-4">
                 <div>
@@ -653,12 +653,12 @@ const Matchmaking = () => {
                     <p className="text-xs text-muted-foreground mb-1.5">Budget: {formatBudget(applyModal.budget_min, applyModal.budget_max)}</p>
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input className="pl-10" type="number" placeholder="Masukkan penawaran Anda" value={bidAmount} onChange={(e) => setBidAmount(e.target.value)} />
+                      <Input className="pl-10" type="number" placeholder="Enter your bid" value={bidAmount} onChange={(e) => setBidAmount(e.target.value)} />
                     </div>
                   </div>
                 )}
                 <Button className="w-full" onClick={handleApply} disabled={submitting}>
-                  <Send className="w-4 h-4" /> {submitting ? "Mengirim..." : "Kirim Lamaran"}
+                  <Send className="w-4 h-4" /> {submitting ? "Submitting..." : "Submit Application"}
                 </Button>
               </div>
             </motion.div>
@@ -672,7 +672,7 @@ const Matchmaking = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setClaimModal(null)}>
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="bg-card rounded-2xl border border-border p-6 shadow-xl w-full max-w-lg">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-card-foreground">Ambil Order</h2>
+                <h2 className="text-lg font-bold text-card-foreground">Claim Order</h2>
                 <button onClick={() => setClaimModal(null)} className="text-muted-foreground hover:text-foreground transition-colors"><X className="w-5 h-5" /></button>
               </div>
 
@@ -692,8 +692,8 @@ const Matchmaking = () => {
               <div className="space-y-4">
                 {/* Mewakili siapa */}
                 <div>
-                  <Label className="text-card-foreground">Mewakili</Label>
-                  <p className="text-xs text-muted-foreground mb-2">Pilih apakah Anda mengambil order ini sebagai pribadi, vendor, atau tim</p>
+                  <Label className="text-card-foreground">Representing</Label>
+                  <p className="text-xs text-muted-foreground mb-2">Choose whether you're claiming this order as an individual, vendor, or team</p>
                   <div className="grid gap-2">
                     {representOptions.map((opt) => (
                       <button
@@ -707,7 +707,7 @@ const Matchmaking = () => {
                         <div>
                           <p className={`text-sm font-medium ${claimAs === opt.id ? "text-foreground" : "text-muted-foreground"}`}>{opt.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {opt.type === "personal" ? "Mewakili diri sendiri" : opt.type === "vendor" ? "Mewakili vendor/perusahaan" : "Mewakili tim"}
+                            {opt.type === "personal" ? "Representing yourself" : opt.type === "vendor" ? "Representing vendor/company" : "Representing team"}
                           </p>
                         </div>
                         {claimAs === opt.id && <CheckCircle2 className="w-4 h-4 text-primary ml-auto" />}
@@ -722,16 +722,16 @@ const Matchmaking = () => {
                 </div>
 
                 <div>
-                  <Label className="text-card-foreground">Penawaran Harga (opsional)</Label>
+                  <Label className="text-card-foreground">Price Offer (optional)</Label>
                   <div className="relative mt-1.5">
                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input className="pl-10" type="number" placeholder="Masukkan penawaran" value={claimBid} onChange={(e) => setClaimBid(e.target.value)} />
+                    <Input className="pl-10" type="number" placeholder="Enter your offer" value={claimBid} onChange={(e) => setClaimBid(e.target.value)} />
                   </div>
                 </div>
 
                 <Button className="w-full" onClick={handleClaim} disabled={claimSubmitting}>
                   {claimSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <HandCoins className="w-4 h-4" />}
-                  {claimSubmitting ? "Mengklaim..." : "Klaim Order Ini"}
+                  {claimSubmitting ? "Claiming..." : "Claim This Order"}
                 </Button>
               </div>
             </motion.div>
