@@ -21,6 +21,7 @@ import LearningDetail from "./pages/LearningDetail";
 import CreditBalance from "./pages/CreditBalance";
 import AdminProgramEdit from "./pages/AdminProgramEdit";
 import NotFound from "./pages/NotFound";
+import ServiceDetail from "./pages/ServiceDetail";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/learning" element={<Learning />} />
             <Route path="/learning/:slug" element={<LearningDetail />} />
             <Route path="/credit-balance" element={<CreditBalance />} />
+            <Route path="/services/:slug" element={<ServiceDetail />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
