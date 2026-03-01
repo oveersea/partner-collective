@@ -422,6 +422,19 @@ const ServiceDetailPage = () => {
                             </div>
                           </div>
                         )}
+
+                        {/* CTA to Learning filtered by missing skills */}
+                        {missingSkills.length > 0 && (
+                          <Link
+                            to={`/learning?skills=${encodeURIComponent(missingSkills.join(","))}`}
+                            className="mt-3 w-full flex items-center justify-center gap-2 py-2 text-xs font-semibold text-primary border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors"
+                            style={{ borderRadius: "5px" }}
+                          >
+                            <GraduationCap className="w-3.5 h-3.5" />
+                            Lihat Program untuk Skill yang Dibutuhkan
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
                       </div>
                     )}
 
