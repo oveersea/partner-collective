@@ -123,7 +123,7 @@ const ServiceShowcaseSection = () => {
         </div>
 
         {/* Services grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
           {loadingServices ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="rounded-2xl border border-border bg-card p-6 animate-pulse">
@@ -147,7 +147,7 @@ const ServiceShowcaseSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
-                className="group rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all p-6"
+                className="group border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all p-6" style={{ borderRadius: '5px' }}
               >
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
