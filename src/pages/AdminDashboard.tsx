@@ -106,10 +106,7 @@ const AdminDashboard = () => {
                   <LayoutDashboard className="w-4 h-4 mr-2" />
                   Dashboard
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/learning")} className="cursor-pointer">
-                  <GraduationCap className="w-4 h-4 mr-2" />
-                  Learning
-                </DropdownMenuItem>
+                
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={async () => { await signOut(); navigate("/"); }} className="cursor-pointer text-destructive focus:text-destructive">
                   <LogOut className="w-4 h-4 mr-2" />
