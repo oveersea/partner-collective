@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Briefcase, FolderKanban, GraduationCap, Users, UserSearch, Plus, Building2 } from "lucide-react";
+import { User, Briefcase, FolderKanban, GraduationCap, Users, UserSearch, Plus, Building2, Zap } from "lucide-react";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import KYCBanner from "@/components/dashboard/KYCBanner";
 import ProfileHeader from "@/components/dashboard/ProfileHeader";
@@ -151,6 +151,12 @@ const Dashboard = () => {
             <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
               <Building2 className="w-4 h-4" />
               Registrasi Vendor
+            </button>
+          </Link>
+          <Link to="/matchmaking">
+            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
+              <Zap className="w-4 h-4" />
+              Matchmaking
             </button>
           </Link>
         </div>
