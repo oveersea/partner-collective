@@ -6,6 +6,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminUsers from "@/components/admin/AdminUsers";
+import AdminCompanies from "@/components/admin/AdminCompanies";
 import AdminKYC from "@/components/admin/AdminKYC";
 import AdminHiring from "@/components/admin/AdminHiring";
 import AdminCredits from "@/components/admin/AdminCredits";
@@ -61,6 +62,7 @@ const AdminDashboard = () => {
     switch (activeSection) {
       case "overview": return <AdminOverview />;
       case "users": return <AdminUsers />;
+      case "companies": return <AdminCompanies />;
       case "kyc": return <AdminKYC />;
       case "hiring": return <AdminHiring />;
       case "credits": return <AdminCredits />;
