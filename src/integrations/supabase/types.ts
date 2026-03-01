@@ -1762,6 +1762,54 @@ export type Database = {
         }
         Relationships: []
       }
+      case_studies: {
+        Row: {
+          company_name: string
+          created_at: string
+          cta_label: string | null
+          cta_url: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          industry: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          sort_order: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          industry?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          industry?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_url: string | null

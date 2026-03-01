@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Eye, EyeOff, ChevronLeft, ChevronRight, Star } from "lucide-react";
 
 interface InsightService {
   id: string;
@@ -27,22 +27,37 @@ interface Survey {
   created_at: string;
 }
 
+interface CaseStudy {
+  id: string;
+  title: string;
+  company_name: string;
+  industry: string | null;
+  description: string | null;
+  cta_label: string | null;
+  sort_order: number | null;
+  is_active: boolean | null;
+  is_featured: boolean | null;
+  created_at: string;
+}
+
 const PAGE_SIZE = 20;
 
 const AdminInsights = () => {
   const [services, setServices] = useState<InsightService[]>([]);
   const [surveys, setSurveys] = useState<Survey[]>([]);
+  const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"services" | "surveys">("services");
+  const [tab, setTab] = useState<"services" | "surveys" | "cases">("services");
   const [search, setSearch] = useState("");
   const [svcPage, setSvcPage] = useState(1);
   const [surveyPage, setSurveyPage] = useState(1);
+  const [casePage, setCasePage] = useState(1);
 
   useEffect(() => { fetchData(); }, []);
-  useEffect(() => { setSvcPage(1); setSurveyPage(1); }, [search]);
+  useEffect(() => { setSvcPage(1); setSurveyPage(1); setCasePage(1); }, [search]);
 
   const fetchData = async () => {
-    const [svcRes, survRes] = await Promise.all([
+    const [svcRes, survRes, caseRes] = await Promise.all([
       supabase
         .from("insight_services")
         .select("id, title, tagline, icon_name, sort_order, is_active, created_at")
@@ -51,10 +66,15 @@ const AdminInsights = () => {
         .from("surveys")
         .select("id, title, category, status, total_responses, starts_at, ends_at, created_at")
         .order("created_at", { ascending: false }),
+      supabase
+        .from("case_studies")
+        .select("id, title, company_name, industry, description, cta_label, sort_order, is_active, is_featured, created_at")
+        .order("sort_order", { ascending: true }),
     ]);
 
     if (svcRes.data) setServices(svcRes.data as unknown as InsightService[]);
     if (survRes.data) setSurveys(survRes.data as unknown as Survey[]);
+    if (caseRes.data) setCaseStudies(caseRes.data as unknown as CaseStudy[]);
     setLoading(false);
   };
 
@@ -71,17 +91,30 @@ const AdminInsights = () => {
     else { toast.success("Status diperbarui"); fetchData(); }
   };
 
-  const filteredSvc = services.filter(
-    (s) => s.title.toLowerCase().includes(search.toLowerCase())
-  );
-  const filteredSurveys = surveys.filter(
-    (s) => s.title.toLowerCase().includes(search.toLowerCase())
+  const toggleCaseActive = async (id: string, current: boolean | null) => {
+    const { error } = await supabase.from("case_studies").update({ is_active: !current } as any).eq("id", id);
+    if (error) toast.error("Gagal update status");
+    else { toast.success("Status diperbarui"); fetchData(); }
+  };
+
+  const toggleCaseFeatured = async (id: string, current: boolean | null) => {
+    const { error } = await supabase.from("case_studies").update({ is_featured: !current } as any).eq("id", id);
+    if (error) toast.error("Gagal update featured");
+    else { toast.success("Featured diperbarui"); fetchData(); }
+  };
+
+  const filteredSvc = services.filter((s) => s.title.toLowerCase().includes(search.toLowerCase()));
+  const filteredSurveys = surveys.filter((s) => s.title.toLowerCase().includes(search.toLowerCase()));
+  const filteredCases = caseStudies.filter(
+    (c) => c.title.toLowerCase().includes(search.toLowerCase()) || c.company_name.toLowerCase().includes(search.toLowerCase())
   );
 
   const svcTotalPages = Math.max(1, Math.ceil(filteredSvc.length / PAGE_SIZE));
   const surveyTotalPages = Math.max(1, Math.ceil(filteredSurveys.length / PAGE_SIZE));
+  const caseTotalPages = Math.max(1, Math.ceil(filteredCases.length / PAGE_SIZE));
   const pagedSvc = filteredSvc.slice((svcPage - 1) * PAGE_SIZE, svcPage * PAGE_SIZE);
   const pagedSurveys = filteredSurveys.slice((surveyPage - 1) * PAGE_SIZE, surveyPage * PAGE_SIZE);
+  const pagedCases = filteredCases.slice((casePage - 1) * PAGE_SIZE, casePage * PAGE_SIZE);
 
   const statusBadge = (s: string) => {
     if (s === "active") return "bg-primary/10 text-primary";
@@ -124,8 +157,12 @@ const AdminInsights = () => {
         <Button size="sm" variant={tab === "surveys" ? "default" : "outline"} onClick={() => setTab("surveys")}>
           Surveys ({surveys.length})
         </Button>
+        <Button size="sm" variant={tab === "cases" ? "default" : "outline"} onClick={() => setTab("cases")}>
+          Case Studies ({caseStudies.length})
+        </Button>
       </div>
 
+      {/* ========== INSIGHT SERVICES ========== */}
       {tab === "services" && (
         <div className="bg-card rounded-2xl border border-border overflow-hidden">
           <div className="overflow-x-auto">
@@ -176,6 +213,7 @@ const AdminInsights = () => {
         </div>
       )}
 
+      {/* ========== SURVEYS ========== */}
       {tab === "surveys" && (
         <div className="bg-card rounded-2xl border border-border overflow-hidden">
           <div className="overflow-x-auto">
@@ -222,6 +260,65 @@ const AdminInsights = () => {
           </div>
           {!loading && filteredSurveys.length > PAGE_SIZE && (
             <PaginationBar page={surveyPage} totalPages={surveyTotalPages} total={filteredSurveys.length} onPrev={() => setSurveyPage(p => p - 1)} onNext={() => setSurveyPage(p => p + 1)} />
+          )}
+        </div>
+      )}
+
+      {/* ========== CASE STUDIES ========== */}
+      {tab === "cases" && (
+        <div className="bg-card rounded-2xl border border-border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Judul</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Perusahaan</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Industri</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Urutan</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Featured</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  Array.from({ length: 2 }).map((_, i) => (
+                    <tr key={i} className="border-b border-border"><td colSpan={8} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
+                  ))
+                ) : pagedCases.length === 0 ? (
+                  <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+                ) : (
+                  pagedCases.map((c) => (
+                    <tr key={c.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3 font-medium text-foreground max-w-[180px] truncate">{c.title}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{c.company_name}</td>
+                      <td className="px-4 py-3"><Badge variant="secondary" className="text-xs">{c.industry || "—"}</Badge></td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{c.sort_order ?? "—"}</td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => toggleCaseFeatured(c.id, c.is_featured)}>
+                          <Star className={`w-4 h-4 ${c.is_featured ? "text-amber-500 fill-amber-500" : "text-muted-foreground"}`} />
+                        </button>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${c.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                          {c.is_active ? "Aktif" : "Nonaktif"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(c.created_at).toLocaleDateString("id-ID")}</td>
+                      <td className="px-4 py-3 text-right">
+                        <Button size="sm" variant="ghost" onClick={() => toggleCaseActive(c.id, c.is_active)}>
+                          {c.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          {!loading && filteredCases.length > PAGE_SIZE && (
+            <PaginationBar page={casePage} totalPages={caseTotalPages} total={filteredCases.length} onPrev={() => setCasePage(p => p - 1)} onNext={() => setCasePage(p => p + 1)} />
           )}
         </div>
       )}
