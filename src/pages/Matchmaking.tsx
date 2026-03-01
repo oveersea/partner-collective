@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Search, MapPin, Clock, Briefcase, Zap, Filter,
   ChevronDown, Star, Send, X, DollarSign, Users, Globe,
-  Building2, TrendingUp, CheckCircle2,
+  Building2, TrendingUp, CheckCircle2, Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,9 @@ const Matchmaking = () => {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [remoteFilter, setRemoteFilter] = useState<"all" | "remote" | "onsite">("all");
   const [showFilters, setShowFilters] = useState(false);
+
+  // Detail modal
+  const [detailModal, setDetailModal] = useState<Opportunity | null>(null);
 
   // Apply modal
   const [applyModal, setApplyModal] = useState<Opportunity | null>(null);
@@ -331,7 +334,8 @@ const Matchmaking = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-lg transition-shadow flex flex-col"
+                className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-lg transition-shadow flex flex-col cursor-pointer"
+                onClick={() => setDetailModal(opp)}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -427,10 +431,13 @@ const Matchmaking = () => {
                       <CheckCircle2 className="w-4 h-4" /> Sudah Melamar
                     </span>
                   ) : (
-                    <Button size="sm" onClick={() => setApplyModal(opp)}>
+                    <Button size="sm" onClick={(e) => { e.stopPropagation(); setApplyModal(opp); }}>
                       <Send className="w-3.5 h-3.5" /> Lamar
                     </Button>
                   )}
+                  <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setDetailModal(opp); }}>
+                    <Eye className="w-3.5 h-3.5" /> Detail
+                  </Button>
                 </div>
               </motion.div>
             );
@@ -445,6 +452,133 @@ const Matchmaking = () => {
           )}
         </div>
       </div>
+
+      {/* Detail Modal */}
+      <AnimatePresence>
+        {detailModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setDetailModal(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-card rounded-2xl border border-border p-6 shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-card-foreground">{detailModal.title}</h2>
+                  {detailModal.company_name && (
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                      <Building2 className="w-3.5 h-3.5" /> {detailModal.company_name}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => setDetailModal(null)}
+                  className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">{detailModal.category}</span>
+                {detailModal.demand_type && (
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-accent text-accent-foreground">
+                    {detailModal.demand_type === "team" ? "👥 Tim" : "👤 Partner"}
+                  </span>
+                )}
+                {detailModal.is_remote && (
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary">🌍 Remote</span>
+                )}
+                {detailModal.job_type && (
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">{detailModal.job_type}</span>
+                )}
+              </div>
+
+              {/* Meta info */}
+              <div className="flex flex-wrap gap-4 mb-5 text-sm text-muted-foreground">
+                {formatBudget(detailModal.budget_min, detailModal.budget_max) && (
+                  <span className="flex items-center gap-1">
+                    <DollarSign className="w-4 h-4" /> {formatBudget(detailModal.budget_min, detailModal.budget_max)}
+                  </span>
+                )}
+                {detailModal.location && !detailModal.is_remote && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-4 h-4" /> {detailModal.location}
+                  </span>
+                )}
+                {detailModal.project_duration && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" /> {detailModal.project_duration}
+                  </span>
+                )}
+                {detailModal.min_experience_years != null && (
+                  <span className="flex items-center gap-1">
+                    <Star className="w-4 h-4" /> Min {detailModal.min_experience_years} tahun
+                  </span>
+                )}
+                {detailModal.deadline && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" /> Deadline: {new Date(detailModal.deadline).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                  </span>
+                )}
+              </div>
+
+              {/* Skills */}
+              {detailModal.skills_required && detailModal.skills_required.length > 0 && (
+                <div className="mb-5">
+                  <p className="text-sm font-semibold text-card-foreground mb-2">Skills yang Dibutuhkan</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {detailModal.skills_required.map((skill) => {
+                      const isMatched = profile?.skills?.some((ps) => ps.toLowerCase() === skill.toLowerCase());
+                      return (
+                        <span
+                          key={skill}
+                          className={`text-xs px-2.5 py-1 rounded-full ${
+                            isMatched ? "bg-primary/15 text-primary font-medium" : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {isMatched && "✓ "}{skill}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Description */}
+              {detailModal.description && (
+                <div className="mb-6">
+                  <p className="text-sm font-semibold text-card-foreground mb-2">Deskripsi</p>
+                  <div className="text-sm text-muted-foreground prose prose-sm max-w-none [&_p]:m-0 [&_p]:mb-2 [&_strong]:font-semibold [&_strong]:text-card-foreground" dangerouslySetInnerHTML={{ __html: detailModal.description }} />
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4 border-t border-border">
+                {!appliedIds.has(detailModal.id) ? (
+                  <Button className="flex-1" onClick={() => { setDetailModal(null); setApplyModal(detailModal); }}>
+                    <Send className="w-4 h-4" /> Lamar Sekarang
+                  </Button>
+                ) : (
+                  <span className="flex-1 flex items-center justify-center gap-1.5 text-sm text-primary font-medium">
+                    <CheckCircle2 className="w-4 h-4" /> Sudah Melamar
+                  </span>
+                )}
+                <Button variant="outline" onClick={() => setDetailModal(null)}>Tutup</Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Apply Modal */}
       <AnimatePresence>
