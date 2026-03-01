@@ -183,7 +183,7 @@ const CreditBalancePage = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
-      <div className="w-full px-6 py-8 max-w-5xl mx-auto">
+      <div className="w-full px-6 py-8 max-w-7xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
             <ChevronLeft className="w-4 h-4 mr-1" /> Kembali
@@ -213,96 +213,101 @@ const CreditBalancePage = () => {
 
         {/* ========== CREDITS TAB ========== */}
         {tab === "credits" && (
-          <div className="space-y-6">
-            {/* Balance Card */}
-            <div className="bg-card rounded-2xl border border-border p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Coins className="w-5 h-5 text-primary" />
+          <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-6">
+            {/* Left Column - 65% */}
+            <div className="space-y-6">
+              {/* Balance Card */}
+              <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Coins className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Saldo Kredit</p>
+                    <p className="text-3xl font-semibold text-foreground">{creditBal?.balance ?? 0}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Saldo Kredit</p>
-                  <p className="text-3xl font-semibold text-foreground">{creditBal?.balance ?? 0}</p>
+                <div className="flex gap-6 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Total dibeli: </span>
+                    <span className="font-medium text-foreground">{creditBal?.total_purchased ?? 0}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Total dipakai: </span>
+                    <span className="font-medium text-foreground">{creditBal?.total_used ?? 0}</span>
+                  </div>
                 </div>
               </div>
-              <div className="flex gap-6 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Total dibeli: </span>
-                  <span className="font-medium text-foreground">{creditBal?.total_purchased ?? 0}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Total dipakai: </span>
-                  <span className="font-medium text-foreground">{creditBal?.total_used ?? 0}</span>
+
+              {/* Order History */}
+              <div>
+                <h3 className="text-base font-semibold text-foreground mb-3">Riwayat Order</h3>
+                <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border bg-muted/50">
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Order #</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Kredit</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Jumlah</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pagedOrders.length === 0 ? (
+                          <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Belum ada order</td></tr>
+                        ) : (
+                          pagedOrders.map((o) => (
+                            <tr key={o.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                              <td className="px-4 py-3 font-mono text-xs">{o.order_number}</td>
+                              <td className="px-4 py-3 font-medium">{o.credits}</td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{formatCurrency(o.amount_cents)}</td>
+                              <td className="px-4 py-3">
+                                <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(o.status)}`}>{o.status}</span>
+                              </td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(o.created_at).toLocaleDateString("id-ID")}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  {creditOrders.length > PAGE_SIZE && (
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+                      <span className="text-xs text-muted-foreground">{orderPage} / {orderTotalPages}</span>
+                      <div className="flex gap-1">
+                        <Button size="sm" variant="ghost" disabled={orderPage <= 1} onClick={() => setOrderPage(p => p - 1)}><ChevronLeft className="w-4 h-4" /></Button>
+                        <Button size="sm" variant="ghost" disabled={orderPage >= orderTotalPages} onClick={() => setOrderPage(p => p + 1)}><ChevronRight className="w-4 h-4" /></Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Packages */}
+            {/* Right Column - 35% */}
             <div>
-              <h3 className="text-base font-semibold text-foreground mb-3">Beli Kredit</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {packages.map((pkg) => (
-                  <div key={pkg.id} className="bg-card rounded-2xl border border-border p-5 flex flex-col gap-3 hover:border-primary/40 transition-colors">
-                    <div>
-                      <p className="font-semibold text-foreground">{pkg.name}</p>
-                      {pkg.description && <p className="text-xs text-muted-foreground mt-1">{pkg.description}</p>}
+              <div className="bg-card rounded-2xl border border-border p-6 lg:sticky lg:top-6">
+                <h3 className="text-base font-semibold text-foreground mb-3">Beli Kredit</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  {packages.map((pkg) => (
+                    <div key={pkg.id} className="rounded-xl border border-border p-4 flex flex-col gap-2 hover:border-primary/40 transition-colors">
+                      <div>
+                        <p className="font-semibold text-foreground">{pkg.name}</p>
+                        {pkg.description && <p className="text-xs text-muted-foreground mt-0.5">{pkg.description}</p>}
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-xl font-semibold text-foreground">{pkg.credits}</span>
+                        <span className="text-sm text-muted-foreground">kredit</span>
+                        <span className="text-sm text-muted-foreground ml-auto">{formatCurrency(pkg.price_cents)}</span>
+                      </div>
+                      <Button size="sm" className="w-full mt-1" disabled={submitting} onClick={() => purchaseCredit(pkg)}>
+                        Beli Sekarang
+                      </Button>
                     </div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-semibold text-foreground">{pkg.credits}</span>
-                      <span className="text-sm text-muted-foreground">kredit</span>
-                    </div>
-                    <p className="text-sm font-medium text-foreground">{formatCurrency(pkg.price_cents)}</p>
-                    <Button size="sm" className="mt-auto" disabled={submitting} onClick={() => purchaseCredit(pkg)}>
-                      Beli Sekarang
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Order History */}
-            <div>
-              <h3 className="text-base font-semibold text-foreground mb-3">Riwayat Order</h3>
-              <div className="bg-card rounded-2xl border border-border overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/50">
-                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Order #</th>
-                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Kredit</th>
-                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Jumlah</th>
-                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pagedOrders.length === 0 ? (
-                        <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Belum ada order</td></tr>
-                      ) : (
-                        pagedOrders.map((o) => (
-                          <tr key={o.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                            <td className="px-4 py-3 font-mono text-xs">{o.order_number}</td>
-                            <td className="px-4 py-3 font-medium">{o.credits}</td>
-                            <td className="px-4 py-3 text-muted-foreground text-xs">{formatCurrency(o.amount_cents)}</td>
-                            <td className="px-4 py-3">
-                              <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(o.status)}`}>{o.status}</span>
-                            </td>
-                            <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(o.created_at).toLocaleDateString("id-ID")}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+                  ))}
                 </div>
-                {creditOrders.length > PAGE_SIZE && (
-                  <div className="flex items-center justify-between px-4 py-3 border-t border-border">
-                    <span className="text-xs text-muted-foreground">{orderPage} / {orderTotalPages}</span>
-                    <div className="flex gap-1">
-                      <Button size="sm" variant="ghost" disabled={orderPage <= 1} onClick={() => setOrderPage(p => p - 1)}><ChevronLeft className="w-4 h-4" /></Button>
-                      <Button size="sm" variant="ghost" disabled={orderPage >= orderTotalPages} onClick={() => setOrderPage(p => p + 1)}><ChevronRight className="w-4 h-4" /></Button>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -310,146 +315,152 @@ const CreditBalancePage = () => {
 
         {/* ========== WALLET TAB ========== */}
         {tab === "wallet" && (
-          <div className="space-y-6">
-            {/* Balance Card */}
-            <div className="bg-card rounded-2xl border border-border p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Wallet className="w-5 h-5 text-primary" />
+          <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-6">
+            {/* Left Column - 65% */}
+            <div className="space-y-6">
+              {/* Balance Card */}
+              <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Wallet className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Saldo Wallet</p>
+                    <p className="text-3xl font-semibold text-foreground">{formatCurrency(Number(walletBal?.balance ?? 0))}</p>
+                  </div>
                 </div>
+                <div className="flex gap-6 text-sm">
+                  <div className="flex items-center gap-1.5">
+                    <ArrowDownRight className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-muted-foreground">Masuk: </span>
+                    <span className="font-medium text-foreground">{formatCurrency(Number(walletBal?.total_deposited ?? 0))}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <ArrowUpRight className="w-3.5 h-3.5 text-destructive" />
+                    <span className="text-muted-foreground">Keluar: </span>
+                    <span className="font-medium text-foreground">{formatCurrency(Number(walletBal?.total_withdrawn ?? 0))}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Deposit History */}
+              {deposits.length > 0 && (
                 <div>
-                  <p className="text-sm text-muted-foreground">Saldo Wallet</p>
-                  <p className="text-3xl font-semibold text-foreground">{formatCurrency(Number(walletBal?.balance ?? 0))}</p>
+                  <h3 className="text-base font-semibold text-foreground mb-3">Riwayat Deposit</h3>
+                  <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-border bg-muted/50">
+                            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Deposit #</th>
+                            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Jumlah</th>
+                            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Metode</th>
+                            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+                            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {deposits.map((d) => (
+                            <tr key={d.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                              <td className="px-4 py-3 font-mono text-xs">{d.deposit_number}</td>
+                              <td className="px-4 py-3 font-medium">{formatCurrency(Number(d.amount))}</td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{d.method}</td>
+                              <td className="px-4 py-3">
+                                <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(d.status)}`}>{d.status}</span>
+                              </td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(d.created_at).toLocaleDateString("id-ID")}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex gap-6 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <ArrowDownRight className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-muted-foreground">Masuk: </span>
-                  <span className="font-medium text-foreground">{formatCurrency(Number(walletBal?.total_deposited ?? 0))}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <ArrowUpRight className="w-3.5 h-3.5 text-destructive" />
-                  <span className="text-muted-foreground">Keluar: </span>
-                  <span className="font-medium text-foreground">{formatCurrency(Number(walletBal?.total_withdrawn ?? 0))}</span>
-                </div>
-              </div>
-            </div>
+              )}
 
-            {/* Deposit Form */}
-            <div className="bg-card rounded-2xl border border-border p-6">
-              <h3 className="text-base font-semibold text-foreground mb-3">Deposit Saldo</h3>
-              <p className="text-sm text-muted-foreground mb-4">Masukkan jumlah yang ingin di-deposit. Minimum Rp 10.000.</p>
-              <div className="flex gap-3 items-end">
-                <div className="flex-1 max-w-xs">
-                  <label className="text-sm text-muted-foreground mb-1.5 block">Jumlah (IDR)</label>
-                  <Input
-                    type="number"
-                    min={10000}
-                    step={1000}
-                    placeholder="100000"
-                    value={depositAmount}
-                    onChange={(e) => setDepositAmount(e.target.value)}
-                  />
-                </div>
-                <Button disabled={depositSubmitting || !depositAmount} onClick={submitDeposit}>
-                  {depositSubmitting ? "Memproses..." : "Deposit"}
-                </Button>
-              </div>
-              {/* Quick amounts */}
-              <div className="flex gap-2 mt-3">
-                {[50000, 100000, 250000, 500000].map((amt) => (
-                  <button
-                    key={amt}
-                    onClick={() => setDepositAmount(String(amt))}
-                    className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors"
-                  >
-                    {formatCurrency(amt)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Deposit History */}
-            {deposits.length > 0 && (
+              {/* Transaction History */}
               <div>
-                <h3 className="text-base font-semibold text-foreground mb-3">Riwayat Deposit</h3>
+                <h3 className="text-base font-semibold text-foreground mb-3">Riwayat Transaksi</h3>
                 <div className="bg-card rounded-2xl border border-border overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-border bg-muted/50">
-                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Deposit #</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipe</th>
                           <th className="text-left px-4 py-3 font-medium text-muted-foreground">Jumlah</th>
-                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Metode</th>
-                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Saldo Setelah</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Deskripsi</th>
                           <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {deposits.map((d) => (
-                          <tr key={d.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                            <td className="px-4 py-3 font-mono text-xs">{d.deposit_number}</td>
-                            <td className="px-4 py-3 font-medium">{formatCurrency(Number(d.amount))}</td>
-                            <td className="px-4 py-3 text-muted-foreground text-xs">{d.method}</td>
-                            <td className="px-4 py-3">
-                              <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(d.status)}`}>{d.status}</span>
-                            </td>
-                            <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(d.created_at).toLocaleDateString("id-ID")}</td>
-                          </tr>
-                        ))}
+                        {pagedTx.length === 0 ? (
+                          <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Belum ada transaksi</td></tr>
+                        ) : (
+                          pagedTx.map((tx) => (
+                            <tr key={tx.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                              <td className="px-4 py-3">
+                                <Badge variant="secondary" className="text-xs capitalize">{tx.type}</Badge>
+                              </td>
+                              <td className={`px-4 py-3 font-medium text-xs ${Number(tx.amount) >= 0 ? "text-primary" : "text-destructive"}`}>
+                                {Number(tx.amount) >= 0 ? "+" : ""}{formatCurrency(Number(tx.amount))}
+                              </td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{formatCurrency(Number(tx.balance_after))}</td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs max-w-[200px] truncate">{tx.description || "—"}</td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(tx.created_at).toLocaleDateString("id-ID")}</td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
+                  {transactions.length > PAGE_SIZE && (
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+                      <span className="text-xs text-muted-foreground">{txPage} / {txTotalPages}</span>
+                      <div className="flex gap-1">
+                        <Button size="sm" variant="ghost" disabled={txPage <= 1} onClick={() => setTxPage(p => p - 1)}><ChevronLeft className="w-4 h-4" /></Button>
+                        <Button size="sm" variant="ghost" disabled={txPage >= txTotalPages} onClick={() => setTxPage(p => p + 1)}><ChevronRight className="w-4 h-4" /></Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* Transaction History */}
-            <div>
-              <h3 className="text-base font-semibold text-foreground mb-3">Riwayat Transaksi</h3>
-              <div className="bg-card rounded-2xl border border-border overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/50">
-                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipe</th>
-                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Jumlah</th>
-                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Saldo Setelah</th>
-                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Deskripsi</th>
-                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pagedTx.length === 0 ? (
-                        <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Belum ada transaksi</td></tr>
-                      ) : (
-                        pagedTx.map((tx) => (
-                          <tr key={tx.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                            <td className="px-4 py-3">
-                              <Badge variant="secondary" className="text-xs capitalize">{tx.type}</Badge>
-                            </td>
-                            <td className={`px-4 py-3 font-medium text-xs ${Number(tx.amount) >= 0 ? "text-primary" : "text-destructive"}`}>
-                              {Number(tx.amount) >= 0 ? "+" : ""}{formatCurrency(Number(tx.amount))}
-                            </td>
-                            <td className="px-4 py-3 text-muted-foreground text-xs">{formatCurrency(Number(tx.balance_after))}</td>
-                            <td className="px-4 py-3 text-muted-foreground text-xs max-w-[200px] truncate">{tx.description || "—"}</td>
-                            <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(tx.created_at).toLocaleDateString("id-ID")}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-                {transactions.length > PAGE_SIZE && (
-                  <div className="flex items-center justify-between px-4 py-3 border-t border-border">
-                    <span className="text-xs text-muted-foreground">{txPage} / {txTotalPages}</span>
-                    <div className="flex gap-1">
-                      <Button size="sm" variant="ghost" disabled={txPage <= 1} onClick={() => setTxPage(p => p - 1)}><ChevronLeft className="w-4 h-4" /></Button>
-                      <Button size="sm" variant="ghost" disabled={txPage >= txTotalPages} onClick={() => setTxPage(p => p + 1)}><ChevronRight className="w-4 h-4" /></Button>
-                    </div>
+            {/* Right Column - 35% */}
+            <div className="space-y-6">
+              {/* Deposit Form */}
+              <div className="bg-card rounded-2xl border border-border p-6 lg:sticky lg:top-6">
+                <h3 className="text-base font-semibold text-foreground mb-3">Deposit Saldo</h3>
+                <p className="text-sm text-muted-foreground mb-4">Masukkan jumlah yang ingin di-deposit. Minimum Rp 10.000.</p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-1.5 block">Jumlah (IDR)</label>
+                    <Input
+                      type="number"
+                      min={10000}
+                      step={1000}
+                      placeholder="100000"
+                      value={depositAmount}
+                      onChange={(e) => setDepositAmount(e.target.value)}
+                    />
                   </div>
-                )}
+                  <Button className="w-full" disabled={depositSubmitting || !depositAmount} onClick={submitDeposit}>
+                    {depositSubmitting ? "Memproses..." : "Deposit"}
+                  </Button>
+                </div>
+                {/* Quick amounts */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {[50000, 100000, 250000, 500000].map((amt) => (
+                    <button
+                      key={amt}
+                      onClick={() => setDepositAmount(String(amt))}
+                      className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors"
+                    >
+                      {formatCurrency(amt)}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
