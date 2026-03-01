@@ -49,7 +49,7 @@ const DashboardPanel = ({ activeTab }: { activeTab: string }) => {
             { label: "In Process", val: analyticsData.inProcess },
           ].map((s) => (
             <div key={s.label} className="rounded-lg p-2.5 text-center" style={{ background: "hsl(0 0% 15%)" }}>
-              <p className="text-base font-bold text-white">{s.val}</p>
+              <p className="text-base font-semibold text-white">{s.val}</p>
               <p className="text-[10px] text-white/50">{s.label}</p>
             </div>
           ))}
@@ -57,7 +57,7 @@ const DashboardPanel = ({ activeTab }: { activeTab: string }) => {
         <div className="space-y-2">
           {talentData.map((t) => (
             <div key={t.name} className="flex items-center gap-3 rounded-lg p-2.5" style={{ background: "hsl(0 0% 15%)" }}>
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "hsl(0 0% 22%)" }}>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style={{ background: "hsl(0 0% 22%)" }}>
                 {t.name[0]}
               </div>
               <div className="flex-1 min-w-0">
@@ -111,7 +111,7 @@ const DashboardPanel = ({ activeTab }: { activeTab: string }) => {
             { label: "Completion Rate", val: "96%" },
           ].map((s) => (
             <div key={s.label} className="rounded-lg p-3 text-center" style={{ background: "hsl(0 0% 15%)" }}>
-              <p className="text-lg font-bold text-white">{s.val}</p>
+              <p className="text-lg font-semibold text-white">{s.val}</p>
               <p className="text-[10px] text-white/50">{s.label}</p>
             </div>
           ))}
@@ -158,13 +158,13 @@ const HeroSection = () => {
           <div className="max-w-xl">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 mb-8">
               <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: "hsl(0 79% 47%)" }}>
-                <span className="text-xs font-bold text-white">G</span>
+                <span className="text-xs font-semibold text-white">G</span>
               </div>
               <span className="text-sm font-semibold text-white">4.8 stars</span>
               <span className="text-sm" style={{ color: "hsl(0 0% 55%)" }}>13k+ reviews</span>
             </motion.div>
 
-            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] mb-6">
+            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.1] mb-6">
               Partner & tim terbaik untuk bisnis Anda
             </motion.h1>
 
@@ -207,7 +207,7 @@ const HeroSection = () => {
                       <item.icon className="w-5 h-5 text-amber-400" />
                     </div>
                   ) : null}
-                  <p className="text-sm font-bold text-white">{item.source}</p>
+                  <p className="text-sm font-semibold text-white">{item.source}</p>
                   <p className="text-xs" style={{ color: "hsl(0 0% 45%)" }}>{item.sub}</p>
                 </div>
               ))}

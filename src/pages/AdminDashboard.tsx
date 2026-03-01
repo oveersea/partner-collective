@@ -57,7 +57,7 @@ const AdminDashboard = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Akses Ditolak</h1>
+          <h1 className="text-2xl font-semibold text-foreground mb-2">Akses Ditolak</h1>
           <p className="text-muted-foreground mb-4">Anda tidak memiliki izin untuk mengakses halaman ini.</p>
           <Button onClick={() => navigate("/dashboard")}>Kembali ke Dashboard</Button>
         </div>

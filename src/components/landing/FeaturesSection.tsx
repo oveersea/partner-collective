@@ -90,7 +90,7 @@ const FeaturesSection = () => {
                 viewport={{ once: true }}
                 transition={{ delay: 0.35 }}
               >
-                <h3 className="text-xl font-bold text-card-foreground mb-2">{categories[7].title}</h3>
+                <h3 className="text-xl font-semibold text-card-foreground mb-2">{categories[7].title}</h3>
                 <p className="text-muted-foreground leading-relaxed">{categories[7].description}</p>
                 <span className="inline-flex items-center gap-1 text-primary text-sm font-medium mt-3">
                   Lihat semua <ArrowRight className="w-4 h-4" />
@@ -121,7 +121,7 @@ const CategoryCard = ({ cat, index }: CategoryCardProps) => (
       <div className="w-14 h-14 rounded-xl border border-border bg-background flex items-center justify-center mb-5 group-hover:border-primary/30 transition-colors">
         <cat.icon className="w-6 h-6 text-primary/70 group-hover:text-primary transition-colors" />
       </div>
-      <h3 className="text-lg font-bold text-card-foreground mb-2">{cat.title}</h3>
+      <h3 className="text-lg font-semibold text-card-foreground mb-2">{cat.title}</h3>
       <p className="text-sm text-muted-foreground leading-relaxed">{cat.description}</p>
       <span className="inline-flex items-center gap-1 text-primary text-sm font-medium mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
         Lihat detail <ArrowRight className="w-4 h-4" />

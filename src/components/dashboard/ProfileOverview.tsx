@@ -20,7 +20,7 @@ const ProfileOverview = ({ profile }: ProfileOverviewProps) => {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-2xl border border-border p-8 shadow-card">
-        <h2 className="text-lg font-bold text-card-foreground mb-4">Tentang</h2>
+        <h2 className="text-lg font-semibold text-card-foreground mb-4">Tentang</h2>
         <p className="text-muted-foreground text-sm leading-relaxed">
           {profile.professional_summary || profile.bio || "Belum ada deskripsi."}
         </p>
@@ -65,7 +65,7 @@ const ProfileOverview = ({ profile }: ProfileOverviewProps) => {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card rounded-2xl border border-border p-8 shadow-card">
-        <h2 className="text-lg font-bold text-card-foreground mb-4">Skills</h2>
+        <h2 className="text-lg font-semibold text-card-foreground mb-4">Skills</h2>
         <div className="flex flex-wrap gap-2">
           {profile.skills && profile.skills.length > 0 ? (
             profile.skills.map((skill) => (

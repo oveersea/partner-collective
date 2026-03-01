@@ -44,7 +44,7 @@ const AdminOverview = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-foreground mb-6">Dashboard Overview</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-6">Dashboard Overview</h2>
       {!stats ? (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -66,7 +66,7 @@ const AdminOverview = () => {
                   <card.icon className="w-4.5 h-4.5" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-foreground">{card.value}</p>
+              <p className="text-2xl font-semibold text-foreground">{card.value}</p>
               <p className="text-xs text-muted-foreground mt-1">{card.label}</p>
             </motion.div>
           ))}

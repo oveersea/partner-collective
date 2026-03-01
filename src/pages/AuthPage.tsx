@@ -80,12 +80,12 @@ const AuthPage = () => {
           {/* Logo */}
           <div className="flex items-center gap-2 mb-6">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">O</span>
+              <span className="text-primary-foreground font-semibold text-sm">O</span>
             </div>
-            <span className="font-display text-lg font-bold text-card-foreground">Oveersea</span>
+            <span className="font-display text-lg font-semibold text-card-foreground">Oveersea</span>
           </div>
 
-          <h1 className="text-2xl font-bold text-card-foreground mb-1">
+          <h1 className="text-2xl font-semibold text-card-foreground mb-1">
             {isLogin ? "Masuk ke Akun" : "Buat Akun Baru"}
           </h1>
           <p className="text-muted-foreground text-sm mb-6">

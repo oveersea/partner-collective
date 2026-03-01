@@ -29,7 +29,7 @@ const HowItWorksSection = () => {
           className="text-center mb-20"
         >
           <span className="text-sm font-semibold text-primary uppercase tracking-widest">Cara Kerja</span>
-          <h2 className="text-4xl md:text-5xl font-bold mt-3 mb-5 text-foreground">
+          <h2 className="text-4xl md:text-5xl font-semibold mt-3 mb-5 text-foreground">
             Dari Request ke <span className="text-gradient-accent">Hasil Nyata</span>
           </h2>
           <p className="text-lg max-w-2xl mx-auto text-muted-foreground">
@@ -70,10 +70,10 @@ const HowItWorksSection = () => {
               >
                 {/* Numbered circle */}
                 <div className="w-20 h-20 rounded-full border-2 border-primary/40 flex items-center justify-center bg-background mb-8">
-                  <span className="text-2xl font-display font-bold text-primary">{step.number}</span>
+                  <span className="text-2xl font-display font-semibold text-primary">{step.number}</span>
                 </div>
 
-                <h3 className="text-lg font-bold mb-3 text-foreground">{step.title}</h3>
+                <h3 className="text-lg font-semibold mb-3 text-foreground">{step.title}</h3>
                 <p className="text-sm leading-relaxed text-muted-foreground max-w-xs">{step.description}</p>
               </motion.div>
             ))}

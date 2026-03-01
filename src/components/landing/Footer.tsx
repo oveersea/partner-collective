@@ -6,9 +6,9 @@ const Footer = () => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">O</span>
+                <span className="text-primary-foreground font-semibold text-sm">O</span>
               </div>
-              <span className="font-display text-lg font-bold" style={{ color: "hsl(0 0% 93%)" }}>Oveersea</span>
+              <span className="font-display text-lg font-semibold" style={{ color: "hsl(0 0% 93%)" }}>Oveersea</span>
             </div>
             <p className="text-sm leading-relaxed" style={{ color: "hsl(0 0% 50%)" }}>
               Platform matchmaking untuk menemukan partner dan tim berkualitas tinggi yang terverifikasi.

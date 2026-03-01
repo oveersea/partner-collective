@@ -159,7 +159,7 @@ const HiringRequest = () => {
           {/* Left: Form (70%) */}
           <div className="lg:w-[70%]">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Hiring Request</h1>
+              <h1 className="text-2xl font-semibold text-foreground mb-2">Hiring Request</h1>
               <p className="text-muted-foreground text-sm">Temukan partner atau tim untuk bekerja bersama Anda</p>
             </motion.div>
 
@@ -368,7 +368,7 @@ const HiringRequest = () => {
                 <div className="border-t border-border pt-3">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Estimasi kredit:</span>
-                    <span className="font-bold text-card-foreground">{creditCost} kredit</span>
+                    <span className="font-semibold text-card-foreground">{creditCost} kredit</span>
                   </div>
                 </div>
               </div>

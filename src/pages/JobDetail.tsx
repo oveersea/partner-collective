@@ -279,7 +279,7 @@ const JobDetail = () => {
       <div className="min-h-screen bg-background">
         <DashboardNav />
         <div className="container mx-auto px-6 py-16 text-center">
-          <h1 className="text-xl font-bold text-foreground mb-2">Job tidak ditemukan</h1>
+          <h1 className="text-xl font-semibold text-foreground mb-2">Job tidak ditemukan</h1>
           <p className="text-muted-foreground mb-4">Peluang ini mungkin sudah tidak tersedia.</p>
           <Button onClick={() => navigate("/matchmaking")}>Kembali ke Matchmaking</Button>
         </div>
@@ -333,7 +333,7 @@ const JobDetail = () => {
                         <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">{opp.job_type}</span>
                       )}
                     </div>
-                    <h1 className="text-2xl font-bold text-foreground">{opp.title}</h1>
+                    <h1 className="text-2xl font-semibold text-foreground">{opp.title}</h1>
                     {opp.company_name && (
                       <p className="text-muted-foreground flex items-center gap-1.5 mt-2">
                         <Building2 className="w-4 h-4" /> {opp.company_name}
@@ -342,7 +342,7 @@ const JobDetail = () => {
                   </div>
                   <div className={`shrink-0 w-20 h-20 rounded-2xl border flex flex-col items-center justify-center ${getScoreColor(score)}`}>
                     <TrendingUp className="w-4 h-4 mb-1" />
-                    <span className="text-2xl font-bold leading-none">{score}%</span>
+                    <span className="text-2xl font-semibold leading-none">{score}%</span>
                     <span className="text-[10px] mt-0.5">Match</span>
                   </div>
                 </div>

@@ -21,7 +21,7 @@ const CTASection = () => {
 
             {/* Text content */}
             <div className="flex-1 text-center md:text-left">
-              <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">
+              <h3 className="text-xl md:text-2xl font-semibold text-foreground mb-2">
                 Kelola seluruh workforce Anda secara global
               </h3>
               <p className="text-muted-foreground text-sm md:text-base max-w-xl">

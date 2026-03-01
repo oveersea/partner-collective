@@ -186,7 +186,7 @@ const KYCVerification = () => {
           {/* Left: Form (70%) */}
           <div className="lg:w-[70%]">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Verifikasi KYC</h1>
+              <h1 className="text-2xl font-semibold text-foreground mb-2">Verifikasi KYC</h1>
               <p className="text-muted-foreground text-sm">Verifikasi identitas Anda untuk mulai menggunakan platform</p>
             </motion.div>
 
@@ -194,7 +194,7 @@ const KYCVerification = () => {
             {(kycStatus === "verified" || kycStatus === "approved") && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-primary/10 border border-primary/20 rounded-2xl p-6 text-center mb-6">
                 <CheckCircle2 className="w-12 h-12 text-primary mx-auto mb-3" />
-                <h2 className="text-lg font-bold text-card-foreground mb-1">Identitas Terverifikasi</h2>
+                <h2 className="text-lg font-semibold text-card-foreground mb-1">Identitas Terverifikasi</h2>
                 <p className="text-sm text-muted-foreground">Akun Anda telah terverifikasi. Anda dapat menggunakan semua fitur platform.</p>
                 <Button className="mt-4" onClick={() => navigate("/dashboard")}>Ke Dashboard</Button>
               </motion.div>
@@ -203,7 +203,7 @@ const KYCVerification = () => {
             {kycStatus === "pending" && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6 text-center mb-6">
                 <Clock className="w-12 h-12 text-amber-600 mx-auto mb-3" />
-                <h2 className="text-lg font-bold text-card-foreground mb-1">Menunggu Verifikasi</h2>
+                <h2 className="text-lg font-semibold text-card-foreground mb-1">Menunggu Verifikasi</h2>
                 <p className="text-sm text-muted-foreground">Dokumen Anda sedang ditinjau. Proses verifikasi membutuhkan 1-3 hari kerja.</p>
                 {submission && (
                   <div className="mt-4 bg-card rounded-xl p-4 border border-border text-left">
@@ -224,7 +224,7 @@ const KYCVerification = () => {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-destructive/10 border border-destructive/20 rounded-2xl p-6 mb-6">
                 <div className="text-center">
                   <XCircle className="w-12 h-12 text-destructive mx-auto mb-3" />
-                  <h2 className="text-lg font-bold text-card-foreground mb-1">Verifikasi Ditolak</h2>
+                  <h2 className="text-lg font-semibold text-card-foreground mb-1">Verifikasi Ditolak</h2>
                   <p className="text-sm text-muted-foreground">Dokumen Anda tidak memenuhi persyaratan. Silakan kirim ulang.</p>
                 </div>
                 {submission?.rejection_reason && (
@@ -268,7 +268,7 @@ const KYCVerification = () => {
                 {step === 1 && (
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-6">
                     <div>
-                      <h2 className="text-lg font-bold text-card-foreground mb-1">Data Pribadi</h2>
+                      <h2 className="text-lg font-semibold text-card-foreground mb-1">Data Pribadi</h2>
                       <p className="text-sm text-muted-foreground">Isi data sesuai dengan dokumen identitas Anda</p>
                     </div>
 

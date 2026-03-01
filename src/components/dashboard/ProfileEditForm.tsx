@@ -17,7 +17,7 @@ const ProfileEditForm = ({ editData, onChange, onSave, onCancel }: ProfileEditFo
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-5">
-      <h2 className="text-lg font-bold text-card-foreground">Edit Informasi Profil</h2>
+      <h2 className="text-lg font-semibold text-card-foreground">Edit Informasi Profil</h2>
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <Label className="text-card-foreground">Nama Lengkap</Label>
