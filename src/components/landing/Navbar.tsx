@@ -253,10 +253,10 @@ const megaMenus: MegaMenuData[] = [
         description: "Kisah sukses klien kami",
         icon: FolderOpen,
         subItems: [
-          { icon: FolderOpen, title: "Semua Case Studies", description: "Lihat semua studi kasus klien", href: "/services" },
-          { icon: Building2, title: "Enterprise", description: "Studi kasus perusahaan besar", href: "/services" },
-          { icon: Briefcase, title: "Startup & SME", description: "Studi kasus startup & UKM", href: "/services" },
-          { icon: Globe, title: "Cross-Border", description: "Studi kasus penempatan internasional", href: "/services" },
+          { icon: FolderOpen, title: "Semua Case Studies", description: "Lihat semua studi kasus & portfolio", href: "/case-studies" },
+          { icon: Building2, title: "Enterprise", description: "Studi kasus perusahaan besar", href: "/case-studies" },
+          { icon: Briefcase, title: "Startup & SME", description: "Studi kasus startup & UKM", href: "/case-studies" },
+          { icon: Globe, title: "Cross-Border", description: "Studi kasus penempatan internasional", href: "/case-studies" },
         ],
       },
       {
