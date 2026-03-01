@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
-import { format, formatDistanceToNow, isPast } from "date-fns";
+import { format, formatDistanceToNow, isPast, differenceInHours } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import {
   FolderKanban, ShoppingCart, Clock, AlertTriangle, CheckCircle2,
   User, Building2, ChevronDown, ChevronUp, Send, Loader2, Search,
-  Filter, ArrowUpDown,
+  Filter, ArrowUpDown, Zap, TrendingUp, XCircle, BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 
 type RequestType = "project" | "service";
 
@@ -39,12 +40,10 @@ interface UnifiedRequest {
   user_id: string;
   user_name?: string;
   user_email?: string;
-  // project specific
   category?: string;
   skills_required?: string[];
   budget_min?: number | null;
   budget_max?: number | null;
-  // service specific
   service_slug?: string;
   order_number?: string;
   items?: any;
@@ -72,17 +71,18 @@ const statusColors: Record<string, string> = {
   closed: "bg-muted text-muted-foreground",
 };
 
+type TabKey = "all" | "urgent" | "pending" | "assigned" | "overdue" | "completed";
+
 const AdminRequests = () => {
   const { user } = useAuth();
   const [requests, setRequests] = useState<UnifiedRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<"all" | RequestType>("all");
-  const [filterStatus, setFilterStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<"created_at" | "sla_deadline">("sla_deadline");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [activeTab, setActiveTab] = useState<TabKey>("all");
 
-  // Assignment dialog
   const [assignDialog, setAssignDialog] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<UnifiedRequest | null>(null);
   const [assignOptions, setAssignOptions] = useState<AssignOption[]>([]);
@@ -100,20 +100,17 @@ const AdminRequests = () => {
   const fetchRequests = async () => {
     setLoading(true);
 
-    // Fetch project requests (opportunities with job_type = 'project')
     const { data: projects } = await supabase
       .from("opportunities")
       .select("id, title, description, status, sla_type, sla_deadline, assigned_to, assigned_vendor_id, admin_notes, created_at, user_id, category, skills_required, budget_min, budget_max")
       .eq("job_type", "project")
       .order("created_at", { ascending: false });
 
-    // Fetch service orders
     const { data: orders } = await supabase
       .from("orders")
       .select("id, order_number, service_slug, items, status, sla_type, sla_deadline, assigned_to, assigned_vendor_id, admin_notes, created_at, user_id")
       .order("created_at", { ascending: false });
 
-    // Get user profiles for names
     const userIds = [
       ...(projects || []).map((p) => p.user_id),
       ...(orders || []).map((o) => o.user_id),
@@ -171,27 +168,73 @@ const AdminRequests = () => {
     setLoading(false);
   };
 
+  // Stats
+  const stats = useMemo(() => {
+    const active = requests.filter(r => !["completed", "cancelled", "closed"].includes(r.status));
+    const pending = requests.filter(r => ["pending", "open"].includes(r.status));
+    const assigned = requests.filter(r => ["assigned", "in_progress"].includes(r.status));
+    const overdue = active.filter(r => r.sla_deadline && isPast(new Date(r.sla_deadline)));
+    const urgent = active.filter(r => r.sla_type === "urgent");
+    const completed = requests.filter(r => r.status === "completed");
+    const projectCount = requests.filter(r => r.type === "project").length;
+    const serviceCount = requests.filter(r => r.type === "service").length;
+
+    // SLA health: percentage of active that are NOT overdue
+    const slaHealth = active.length > 0 ? Math.round(((active.length - overdue.length) / active.length) * 100) : 100;
+
+    return { total: requests.length, pending: pending.length, assigned: assigned.length, overdue: overdue.length, urgent: urgent.length, completed: completed.length, projectCount, serviceCount, slaHealth, activeCount: active.length };
+  }, [requests]);
+
+  // Tab filtering
+  const tabFiltered = useMemo(() => {
+    let result = requests;
+    switch (activeTab) {
+      case "urgent":
+        result = result.filter(r => r.sla_type === "urgent" && !["completed", "cancelled", "closed"].includes(r.status));
+        break;
+      case "pending":
+        result = result.filter(r => ["pending", "open"].includes(r.status));
+        break;
+      case "assigned":
+        result = result.filter(r => ["assigned", "in_progress"].includes(r.status));
+        break;
+      case "overdue":
+        result = result.filter(r => r.sla_deadline && isPast(new Date(r.sla_deadline)) && !["completed", "cancelled", "closed"].includes(r.status));
+        break;
+      case "completed":
+        result = result.filter(r => r.status === "completed");
+        break;
+    }
+    if (filterType !== "all") result = result.filter(r => r.type === filterType);
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(r =>
+        r.title.toLowerCase().includes(q) ||
+        r.user_name?.toLowerCase().includes(q) ||
+        r.order_number?.toLowerCase().includes(q)
+      );
+    }
+    return result.sort((a, b) => {
+      if (sortField === "sla_deadline") {
+        const aVal = a.sla_deadline ? new Date(a.sla_deadline).getTime() : Infinity;
+        const bVal = b.sla_deadline ? new Date(b.sla_deadline).getTime() : Infinity;
+        return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+      }
+      return sortDir === "asc"
+        ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        : new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }, [requests, activeTab, filterType, searchQuery, sortField, sortDir]);
+
   const fetchAssignOptions = async () => {
-    // Fetch users (talents)
     const { data: users } = await supabase
-      .from("profiles")
-      .select("user_id, full_name")
-      .not("full_name", "eq", "")
-      .order("full_name")
-      .limit(100);
-
-    // Fetch vendors
+      .from("profiles").select("user_id, full_name").not("full_name", "eq", "").order("full_name").limit(100);
     const { data: vendors } = await supabase
-      .from("business_profiles")
-      .select("id, name")
-      .order("name")
-      .limit(100);
-
-    const options: AssignOption[] = [
-      ...(users || []).map((u) => ({ id: u.user_id, label: u.full_name || u.user_id, type: "user" as const })),
-      ...(vendors || []).map((v) => ({ id: v.id, label: v.name, type: "vendor" as const })),
-    ];
-    setAssignOptions(options);
+      .from("business_profiles").select("id, name").order("name").limit(100);
+    setAssignOptions([
+      ...(users || []).map(u => ({ id: u.user_id, label: u.full_name || u.user_id, type: "user" as const })),
+      ...(vendors || []).map(v => ({ id: v.id, label: v.name, type: "vendor" as const })),
+    ]);
   };
 
   const openAssignDialog = (req: UnifiedRequest) => {
@@ -207,7 +250,6 @@ const AdminRequests = () => {
   const handleAssign = async () => {
     if (!selectedRequest || !user) return;
     setSubmitting(true);
-
     try {
       const updates: any = {
         sla_type: newSlaType,
@@ -216,36 +258,20 @@ const AdminRequests = () => {
         reviewed_at: new Date().toISOString(),
         status: assignTo ? "assigned" : selectedRequest.status,
       };
-
-      // Calculate new SLA deadline based on sla_type
       if (newSlaType !== selectedRequest.sla_type) {
-        const now = new Date();
         const days = newSlaType === "urgent" ? 3 : newSlaType === "priority" ? 7 : 14;
-        updates.sla_deadline = new Date(now.getTime() + days * 86400000).toISOString();
+        updates.sla_deadline = new Date(Date.now() + days * 86400000).toISOString();
       }
-
-      if (assignType === "user" && assignTo) {
-        updates.assigned_to = assignTo;
-        updates.assigned_vendor_id = null;
-      } else if (assignType === "vendor" && assignTo) {
-        updates.assigned_vendor_id = assignTo;
-        updates.assigned_to = null;
-      }
+      if (assignType === "user" && assignTo) { updates.assigned_to = assignTo; updates.assigned_vendor_id = null; }
+      else if (assignType === "vendor" && assignTo) { updates.assigned_vendor_id = assignTo; updates.assigned_to = null; }
 
       if (selectedRequest.type === "project") {
-        const { error } = await supabase
-          .from("opportunities")
-          .update(updates)
-          .eq("id", selectedRequest.id);
+        const { error } = await supabase.from("opportunities").update(updates).eq("id", selectedRequest.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from("orders")
-          .update(updates)
-          .eq("id", selectedRequest.id);
+        const { error } = await supabase.from("orders").update(updates).eq("id", selectedRequest.id);
         if (error) throw error;
       }
-
       toast.success("Request berhasil diupdate!");
       setAssignDialog(false);
       fetchRequests();
@@ -256,34 +282,29 @@ const AdminRequests = () => {
     }
   };
 
-  // Filtering & sorting
-  const filtered = requests
-    .filter((r) => {
-      if (filterType !== "all" && r.type !== filterType) return false;
-      if (filterStatus !== "all" && r.status !== filterStatus) return false;
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        return (
-          r.title.toLowerCase().includes(q) ||
-          r.user_name?.toLowerCase().includes(q) ||
-          r.order_number?.toLowerCase().includes(q)
-        );
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortField === "sla_deadline") {
-        const aVal = a.sla_deadline ? new Date(a.sla_deadline).getTime() : Infinity;
-        const bVal = b.sla_deadline ? new Date(b.sla_deadline).getTime() : Infinity;
-        return sortDir === "asc" ? aVal - bVal : bVal - aVal;
-      }
-      const aVal = new Date(a.created_at).getTime();
-      const bVal = new Date(b.created_at).getTime();
-      return sortDir === "asc" ? aVal - bVal : bVal - aVal;
-    });
+  const handleQuickStatusChange = async (req: UnifiedRequest, newStatus: string) => {
+    try {
+      const table = req.type === "project" ? "opportunities" : "orders";
+      const { error } = await supabase.from(table).update({ status: newStatus }).eq("id", req.id);
+      if (error) throw error;
+      toast.success(`Status diubah ke ${newStatus}`);
+      fetchRequests();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal mengubah status");
+    }
+  };
 
-  const pendingCount = requests.filter((r) => ["pending", "open"].includes(r.status)).length;
-  const overdueCount = requests.filter((r) => r.sla_deadline && isPast(new Date(r.sla_deadline)) && !["completed", "cancelled", "closed"].includes(r.status)).length;
+  // SLA remaining helper
+  const getSlaProgress = (req: UnifiedRequest) => {
+    if (!req.sla_deadline) return null;
+    const deadline = new Date(req.sla_deadline);
+    const created = new Date(req.created_at);
+    const total = deadline.getTime() - created.getTime();
+    const elapsed = Date.now() - created.getTime();
+    const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
+    const hoursLeft = differenceInHours(deadline, new Date());
+    return { pct, hoursLeft, isOverdue: hoursLeft < 0 };
+  };
 
   if (loading) {
     return (
@@ -295,43 +316,101 @@ const AdminRequests = () => {
     );
   }
 
+  const tabs: { key: TabKey; label: string; count: number; icon: typeof Clock; color?: string }[] = [
+    { key: "all", label: "Semua", count: stats.total, icon: FolderKanban },
+    { key: "urgent", label: "Urgent", count: stats.urgent, icon: Zap, color: "text-destructive" },
+    { key: "pending", label: "Pending", count: stats.pending, icon: Clock, color: "text-amber-500" },
+    { key: "assigned", label: "In Progress", count: stats.assigned, icon: TrendingUp, color: "text-blue-500" },
+    { key: "overdue", label: "Overdue", count: stats.overdue, icon: AlertTriangle, color: "text-destructive" },
+    { key: "completed", label: "Selesai", count: stats.completed, icon: CheckCircle2, color: "text-emerald-500" },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: "Total Request", value: requests.length, icon: FolderKanban, color: "text-primary" },
-          { label: "Pending", value: pendingCount, icon: Clock, color: "text-amber-500" },
-          { label: "Overdue SLA", value: overdueCount, icon: AlertTriangle, color: "text-destructive" },
-          { label: "Completed", value: requests.filter((r) => r.status === "completed").length, icon: CheckCircle2, color: "text-emerald-500" },
-        ].map((stat) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-card border border-border rounded-lg p-4"
+      {/* Command Center Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Active requests */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          className="bg-card border border-border rounded-xl p-5 col-span-2 lg:col-span-1"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Aktif</span>
+            <FolderKanban className="w-4 h-4 text-primary" />
+          </div>
+          <p className="text-3xl font-bold text-foreground">{stats.activeCount}</p>
+          <div className="flex gap-3 mt-2 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1"><FolderKanban className="w-3 h-3" /> {stats.projectCount} project</span>
+            <span className="flex items-center gap-1"><ShoppingCart className="w-3 h-3" /> {stats.serviceCount} service</span>
+          </div>
+        </motion.div>
+
+        {/* SLA Health */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+          className="bg-card border border-border rounded-xl p-5"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">SLA Health</span>
+            <BarChart3 className="w-4 h-4 text-emerald-500" />
+          </div>
+          <p className={`text-3xl font-bold ${stats.slaHealth >= 80 ? "text-emerald-500" : stats.slaHealth >= 50 ? "text-amber-500" : "text-destructive"}`}>
+            {stats.slaHealth}%
+          </p>
+          <Progress value={stats.slaHealth} className="mt-2 h-1.5" />
+        </motion.div>
+
+        {/* Overdue */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+          onClick={() => setActiveTab("overdue")}
+          className={`bg-card border rounded-xl p-5 cursor-pointer transition-all hover:bg-muted/40 ${stats.overdue > 0 ? "border-destructive/30 bg-destructive/5" : "border-border"}`}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Overdue</span>
+            <AlertTriangle className={`w-4 h-4 ${stats.overdue > 0 ? "text-destructive" : "text-muted-foreground"}`} />
+          </div>
+          <p className={`text-3xl font-bold ${stats.overdue > 0 ? "text-destructive" : "text-foreground"}`}>{stats.overdue}</p>
+          <p className="text-xs text-muted-foreground mt-1">request melewati deadline</p>
+        </motion.div>
+
+        {/* Urgent */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+          onClick={() => setActiveTab("urgent")}
+          className={`bg-card border rounded-xl p-5 cursor-pointer transition-all hover:bg-muted/40 ${stats.urgent > 0 ? "border-amber-500/30 bg-amber-500/5" : "border-border"}`}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Urgent SLA</span>
+            <Zap className={`w-4 h-4 ${stats.urgent > 0 ? "text-amber-500" : "text-muted-foreground"}`} />
+          </div>
+          <p className={`text-3xl font-bold ${stats.urgent > 0 ? "text-amber-600" : "text-foreground"}`}>{stats.urgent}</p>
+          <p className="text-xs text-muted-foreground mt-1">deadline 3 hari</p>
+        </motion.div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-border pb-px">
+        {tabs.map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap border-b-2 -mb-px ${
+              activeTab === tab.key
+                ? "border-primary text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
           >
-            <div className="flex items-center gap-3">
-              <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              <div>
-                <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                <p className="text-xs text-muted-foreground">{stat.label}</p>
-              </div>
-            </div>
-          </motion.div>
+            <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.key ? (tab.color || "text-primary") : ""}`} />
+            {tab.label}
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+              activeTab === tab.key ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+            }`}>{tab.count}</span>
+          </button>
         ))}
       </div>
 
-      {/* Filters */}
+      {/* Search & filters */}
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            className="pl-9"
-            placeholder="Cari judul, nama user, atau nomor order..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+          <Input className="pl-9" placeholder="Cari judul, nama user, atau nomor order..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
         </div>
         <Select value={filterType} onValueChange={(v) => setFilterType(v as any)}>
           <SelectTrigger className="w-[160px]">
@@ -344,49 +423,26 @@ const AdminRequests = () => {
             <SelectItem value="service">Service Order</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="open">Open</SelectItem>
-            <SelectItem value="assigned">Assigned</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setSortField((f) => (f === "sla_deadline" ? "created_at" : "sla_deadline"));
-          }}
-          className="gap-1.5"
-        >
+        <Button variant="outline" size="sm" onClick={() => setSortField(f => f === "sla_deadline" ? "created_at" : "sla_deadline")} className="gap-1.5">
           <ArrowUpDown className="w-3.5 h-3.5" />
           {sortField === "sla_deadline" ? "SLA" : "Tanggal"}
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
-        >
+        <Button variant="ghost" size="sm" onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")}>
           {sortDir === "asc" ? "↑" : "↓"}
         </Button>
       </div>
 
       {/* Request List */}
       <div className="space-y-3">
-        {filtered.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
-            Tidak ada request yang ditemukan.
+        {tabFiltered.length === 0 && (
+          <div className="text-center py-16 text-muted-foreground">
+            <FolderKanban className="w-12 h-12 mx-auto mb-3 text-muted-foreground/20" />
+            <p className="font-medium">Tidak ada request di tab ini.</p>
           </div>
         )}
-        {filtered.map((req) => {
-          const isOverdue = req.sla_deadline && isPast(new Date(req.sla_deadline)) && !["completed", "cancelled", "closed"].includes(req.status);
+        {tabFiltered.map((req) => {
+          const sla = getSlaProgress(req);
+          const isOverdue = sla?.isOverdue && !["completed", "cancelled", "closed"].includes(req.status);
           const isExpanded = expandedId === req.id;
 
           return (
@@ -394,27 +450,20 @@ const AdminRequests = () => {
               key={req.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`bg-card border rounded-lg overflow-hidden transition-colors ${isOverdue ? "border-destructive/40" : "border-border"}`}
+              className={`bg-card border rounded-xl overflow-hidden transition-colors ${isOverdue ? "border-destructive/40" : "border-border"}`}
             >
-              {/* Header row */}
               <div
                 className="p-4 flex items-start gap-4 cursor-pointer hover:bg-muted/30 transition-colors"
                 onClick={() => setExpandedId(isExpanded ? null : req.id)}
               >
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${req.type === "project" ? "bg-blue-500/10" : "bg-primary/10"}`}>
-                  {req.type === "project" ? (
-                    <FolderKanban className="w-4 h-4 text-blue-500" />
-                  ) : (
-                    <ShoppingCart className="w-4 h-4 text-primary" />
-                  )}
+                  {req.type === "project" ? <FolderKanban className="w-4 h-4 text-blue-500" /> : <ShoppingCart className="w-4 h-4 text-primary" />}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <h3 className="text-sm font-semibold text-foreground truncate">{req.title}</h3>
-                    <Badge variant="outline" className={`text-[10px] ${statusColors[req.status] || ""}`}>
-                      {req.status}
-                    </Badge>
+                    <Badge variant="outline" className={`text-[10px] ${statusColors[req.status] || ""}`}>{req.status}</Badge>
                     <Badge variant="outline" className={`text-[10px] border ${slaColors[req.sla_type] || slaColors.normal}`}>
                       SLA: {req.sla_type}
                     </Badge>
@@ -424,10 +473,9 @@ const AdminRequests = () => {
                       </Badge>
                     )}
                   </div>
+
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <User className="w-3 h-3" /> {req.user_name}
-                    </span>
+                    <span className="flex items-center gap-1"><User className="w-3 h-3" /> {req.user_name}</span>
                     {req.order_number && <span>#{req.order_number}</span>}
                     <span>{format(new Date(req.created_at), "dd MMM yyyy", { locale: localeId })}</span>
                     {req.sla_deadline && (
@@ -437,17 +485,33 @@ const AdminRequests = () => {
                       </span>
                     )}
                   </div>
+
+                  {/* SLA progress bar */}
+                  {sla && !["completed", "cancelled", "closed"].includes(req.status) && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="flex-1 max-w-[200px]">
+                        <Progress
+                          value={sla.pct}
+                          className={`h-1 ${sla.isOverdue ? "[&>div]:bg-destructive" : sla.pct > 75 ? "[&>div]:bg-amber-500" : "[&>div]:bg-emerald-500"}`}
+                        />
+                      </div>
+                      <span className={`text-[10px] font-medium ${sla.isOverdue ? "text-destructive" : sla.hoursLeft < 24 ? "text-amber-500" : "text-muted-foreground"}`}>
+                        {sla.isOverdue ? `${Math.abs(sla.hoursLeft)}h overdue` : `${sla.hoursLeft}h left`}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); openAssignDialog(req); }}>
-                    Assign
-                  </Button>
+                  {!["completed", "cancelled", "closed"].includes(req.status) && (
+                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); openAssignDialog(req); }}>
+                      Assign
+                    </Button>
+                  )}
                   {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                 </div>
               </div>
 
-              {/* Expanded details */}
               {isExpanded && (
                 <div className="px-4 pb-4 border-t border-border pt-4 space-y-3">
                   {req.description && (
@@ -459,36 +523,19 @@ const AdminRequests = () => {
 
                   <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                     {req.type === "project" && req.category && (
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Kategori</Label>
-                        <p className="text-foreground">{req.category}</p>
-                      </div>
+                      <div><Label className="text-xs text-muted-foreground">Kategori</Label><p className="text-foreground">{req.category}</p></div>
                     )}
                     {req.type === "project" && (req.budget_min || req.budget_max) && (
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Budget</Label>
-                        <p className="text-foreground">
-                          {req.budget_min?.toLocaleString("id-ID")} - {req.budget_max?.toLocaleString("id-ID")}
-                        </p>
-                      </div>
+                      <div><Label className="text-xs text-muted-foreground">Budget</Label><p className="text-foreground">{req.budget_min?.toLocaleString("id-ID")} - {req.budget_max?.toLocaleString("id-ID")}</p></div>
                     )}
                     {req.type === "service" && req.items && (
                       <>
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Service</Label>
-                          <p className="text-foreground">{req.service_slug}</p>
-                        </div>
+                        <div><Label className="text-xs text-muted-foreground">Service</Label><p className="text-foreground">{req.service_slug}</p></div>
                         {(req.items as any)?.urgency && (
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Urgensi</Label>
-                            <p className="text-foreground">{(req.items as any).urgency}</p>
-                          </div>
+                          <div><Label className="text-xs text-muted-foreground">Urgensi</Label><p className="text-foreground">{(req.items as any).urgency}</p></div>
                         )}
                         {(req.items as any)?.budget_range && (
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Budget Range</Label>
-                            <p className="text-foreground">{(req.items as any).budget_range}</p>
-                          </div>
+                          <div><Label className="text-xs text-muted-foreground">Budget Range</Label><p className="text-foreground">{(req.items as any).budget_range}</p></div>
                         )}
                       </>
                     )}
@@ -501,16 +548,10 @@ const AdminRequests = () => {
                       </div>
                     )}
                     {req.assigned_to && (
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Assigned To (User)</Label>
-                        <p className="text-foreground">{req.assigned_to}</p>
-                      </div>
+                      <div><Label className="text-xs text-muted-foreground">Assigned To</Label><p className="text-foreground">{req.assigned_to}</p></div>
                     )}
                     {req.assigned_vendor_id && (
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Assigned Vendor</Label>
-                        <p className="text-foreground">{req.assigned_vendor_id}</p>
-                      </div>
+                      <div><Label className="text-xs text-muted-foreground">Assigned Vendor</Label><p className="text-foreground">{req.assigned_vendor_id}</p></div>
                     )}
                   </div>
 
@@ -518,7 +559,7 @@ const AdminRequests = () => {
                     <div>
                       <Label className="text-xs text-muted-foreground">Skills Required</Label>
                       <div className="flex flex-wrap gap-1.5 mt-1">
-                        {req.skills_required.map((s) => (
+                        {req.skills_required.map(s => (
                           <span key={s} className="text-xs px-2 py-0.5 rounded-md bg-primary/10 text-primary">{s}</span>
                         ))}
                       </div>
@@ -529,6 +570,22 @@ const AdminRequests = () => {
                     <div>
                       <Label className="text-xs text-muted-foreground">Admin Notes</Label>
                       <p className="text-sm text-foreground bg-muted/50 rounded-md p-2 mt-0.5">{req.admin_notes}</p>
+                    </div>
+                  )}
+
+                  {/* Quick status actions */}
+                  {!["completed", "cancelled", "closed"].includes(req.status) && (
+                    <div className="flex gap-2 pt-2 border-t border-border">
+                      <Button size="sm" variant="outline" className="gap-1.5 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                        onClick={() => handleQuickStatusChange(req, "completed")}
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Selesai
+                      </Button>
+                      <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/20 hover:bg-destructive/5"
+                        onClick={() => handleQuickStatusChange(req, "cancelled")}
+                      >
+                        <XCircle className="w-3.5 h-3.5" /> Batalkan
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -544,7 +601,6 @@ const AdminRequests = () => {
           <DialogHeader>
             <DialogTitle>Assign & Set SLA</DialogTitle>
           </DialogHeader>
-
           {selectedRequest && (
             <div className="space-y-5">
               <div className="bg-muted/50 rounded-lg p-3">
@@ -553,14 +609,10 @@ const AdminRequests = () => {
                   {selectedRequest.type === "project" ? "Project Request" : "Service Order"} • oleh {selectedRequest.user_name}
                 </p>
               </div>
-
-              {/* SLA Type */}
               <div className="space-y-2">
                 <Label>SLA Type</Label>
                 <Select value={newSlaType} onValueChange={setNewSlaType}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="normal">Normal — 14 hari</SelectItem>
                     <SelectItem value="priority">Priority — 7 hari</SelectItem>
@@ -568,56 +620,31 @@ const AdminRequests = () => {
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* Assignment type */}
               <div className="space-y-2">
                 <Label>Assign Ke</Label>
                 <div className="grid grid-cols-2 gap-2 mb-2">
-                  <button
-                    type="button"
-                    onClick={() => setAssignType("user")}
+                  <button type="button" onClick={() => setAssignType("user")}
                     className={`p-2.5 rounded-lg border text-sm font-medium transition-all text-center flex items-center justify-center gap-2 ${assignType === "user" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"}`}
-                  >
-                    <User className="w-4 h-4" /> User / Talent
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAssignType("vendor")}
+                  ><User className="w-4 h-4" /> User / Talent</button>
+                  <button type="button" onClick={() => setAssignType("vendor")}
                     className={`p-2.5 rounded-lg border text-sm font-medium transition-all text-center flex items-center justify-center gap-2 ${assignType === "vendor" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"}`}
-                  >
-                    <Building2 className="w-4 h-4" /> Vendor
-                  </button>
+                  ><Building2 className="w-4 h-4" /> Vendor</button>
                 </div>
-
                 <Select value={assignTo} onValueChange={setAssignTo}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={`Pilih ${assignType === "user" ? "user/talent" : "vendor"}...`} />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={`Pilih ${assignType === "user" ? "user/talent" : "vendor"}...`} /></SelectTrigger>
                   <SelectContent>
-                    {assignOptions
-                      .filter((o) => o.type === assignType)
-                      .map((o) => (
-                        <SelectItem key={o.id} value={o.id}>
-                          {o.label}
-                        </SelectItem>
-                      ))}
+                    {assignOptions.filter(o => o.type === assignType).map(o => (
+                      <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* Admin Notes */}
               <div className="space-y-2">
                 <Label>Admin Notes</Label>
-                <Textarea
-                  placeholder="Catatan internal untuk assignment ini..."
-                  rows={3}
-                  value={adminNotes}
-                  onChange={(e) => setAdminNotes(e.target.value)}
-                />
+                <Textarea placeholder="Catatan internal..." rows={3} value={adminNotes} onChange={(e) => setAdminNotes(e.target.value)} />
               </div>
             </div>
           )}
-
           <DialogFooter>
             <Button variant="outline" onClick={() => setAssignDialog(false)}>Batal</Button>
             <Button onClick={handleAssign} disabled={submitting}>
