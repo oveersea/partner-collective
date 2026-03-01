@@ -245,7 +245,7 @@ const ProjectRequest = () => {
               </div>
 
               {/* Budget & Duration row */}
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 <div>
                   <Label className="text-card-foreground">Budget</Label>
                   <div className="flex gap-2 mt-1.5">
