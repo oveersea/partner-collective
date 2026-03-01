@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Megaphone, Code, Palette, Briefcase, FileText, Calculator, Users, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Megaphone, Code, Palette, Briefcase, FileText, Calculator, ChevronRight, CheckCircle2, ArrowRight } from "lucide-react";
 
 const iconMap: Record<string, React.ElementType> = {
   Megaphone, Code, Palette, Briefcase, FileText, Calculator,
@@ -23,6 +23,7 @@ interface ServiceWithCount {
   description: string | null;
   required_skills: string[];
   provider_count: number;
+  category_id: string;
 }
 
 const ServiceShowcaseSection = () => {
@@ -51,7 +52,7 @@ const ServiceShowcaseSection = () => {
       setLoadingServices(true);
       let query = supabase
         .from("services")
-        .select("id, name, slug, description, required_skills")
+        .select("id, name, slug, description, required_skills, category_id")
         .eq("is_active", true)
         .order("sort_order");
 
@@ -141,14 +142,18 @@ const ServiceShowcaseSection = () => {
         {/* Services grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
           {loadingServices ? (
-            Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="border border-border bg-card p-6 animate-pulse" style={{ borderRadius: '5px' }}>
-                <div className="h-5 bg-muted rounded w-2/3 mb-3" />
-                <div className="h-4 bg-muted rounded w-full mb-4" />
-                <div className="flex gap-2">
-                  <div className="h-6 bg-muted rounded-full w-16" />
-                  <div className="h-6 bg-muted rounded-full w-20" />
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-border bg-card animate-pulse overflow-hidden">
+                <div className="p-6 space-y-4">
+                  <div className="w-12 h-12 bg-muted rounded-lg" />
+                  <div className="h-5 bg-muted rounded w-1/2" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="flex gap-2">
+                    <div className="h-6 bg-muted rounded-full w-16" />
+                    <div className="h-6 bg-muted rounded-full w-20" />
+                  </div>
                 </div>
+                <div className="h-12 border-t border-border bg-muted/30" />
               </div>
             ))
           ) : services.length === 0 ? (
@@ -156,51 +161,68 @@ const ServiceShowcaseSection = () => {
               Belum ada layanan di kategori ini.
             </div>
           ) : (
-            services.map((service, i) => (
-              <Link key={service.id} to={`/services/${service.slug}`}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                  className="group border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all p-6 h-full cursor-pointer" style={{ borderRadius: '5px' }}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
-                      {service.name}
-                    </h3>
-                    {service.provider_count > 0 && (
-                      <span className="flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full shrink-0">
-                        <Users className="w-3 h-3" />
-                        {service.provider_count}
+            services.map((service, i) => {
+              const cat = categories.find(c => c.id === service.category_id);
+              const Icon = iconMap[cat?.icon || ""] || Briefcase;
+              return (
+                <Link key={service.id} to={`/services/${service.slug}`}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.04 }}
+                    className="group rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all h-full flex flex-col overflow-hidden"
+                  >
+                    {/* Card body */}
+                    <div className="p-6 flex-1 flex flex-col">
+                      {/* Icon */}
+                      <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center mb-5">
+                        <Icon className="w-5 h-5 text-primary" />
+                      </div>
+
+                      {/* Title with chevron */}
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+                          {service.name}
+                        </h3>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-5 line-clamp-2 flex-1">
+                        {service.description}
+                      </p>
+
+                      {/* Skill tags */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {service.required_skills.slice(0, 4).map((skill) => (
+                          <span
+                            key={skill}
+                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground"
+                          >
+                            <CheckCircle2 className="w-3 h-3 text-primary/50" />
+                            {skill}
+                          </span>
+                        ))}
+                        {service.required_skills.length > 4 && (
+                          <span className="text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
+                            +{service.required_skills.length - 4}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Card footer */}
+                    <div className="px-6 py-3.5 border-t border-border bg-muted/30 flex items-center justify-between group-hover:bg-primary/5 transition-colors">
+                      <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                        Lihat detail
                       </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {service.description}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {service.required_skills.slice(0, 4).map((skill) => (
-                      <span
-                        key={skill}
-                        className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground"
-                      >
-                        <CheckCircle2 className="w-3 h-3 text-primary/60" />
-                        {skill}
-                      </span>
-                    ))}
-                    {service.required_skills.length > 4 && (
-                      <span className="text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
-                        +{service.required_skills.length - 4}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-4 flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    Lihat detail <ArrowRight className="w-3 h-3" />
-                  </div>
-                </motion.div>
-              </Link>
-            ))
+                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                  </motion.div>
+                </Link>
+              );
+            })
           )}
         </div>
 
