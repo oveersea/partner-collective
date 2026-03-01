@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Shield, User, MoreVertical, Trash2, UserX, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, Shield, User, MoreVertical, Trash2, UserX, ArrowUpDown, ArrowUp, ArrowDown, CalendarDays } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -37,7 +38,8 @@ interface UserProfile {
 interface LoginActivity {
   user_id: string;
   total_logins: number;
-  daily_breakdown: Record<string, number>; // "Sen","Sel",...
+  daily_breakdown: Record<string, number>;
+  timestamps: string[]; // raw sign-in timestamps
 }
 
 const DAY_NAMES = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
@@ -116,9 +118,10 @@ const AdminUsers = () => {
       const map: Record<string, LoginActivity> = {};
       for (const log of data) {
         if (!map[log.user_id]) {
-          map[log.user_id] = { user_id: log.user_id, total_logins: 0, daily_breakdown: {} };
+          map[log.user_id] = { user_id: log.user_id, total_logins: 0, daily_breakdown: {}, timestamps: [] };
         }
         map[log.user_id].total_logins++;
+        map[log.user_id].timestamps.push(log.logged_in_at);
         const dayName = DAY_NAMES[new Date(log.logged_in_at).getDay()];
         map[log.user_id].daily_breakdown[dayName] = (map[log.user_id].daily_breakdown[dayName] || 0) + 1;
       }
@@ -297,32 +300,87 @@ const AdminUsers = () => {
                         {pScore}%
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-col gap-1">
-                        <span className={`text-xs font-semibold ${totalLogins > 5 ? "text-primary" : totalLogins > 0 ? "text-amber-600" : "text-muted-foreground"}`}>
-                          {totalLogins}x /minggu
-                        </span>
-                        {activity && totalLogins > 0 && (
-                          <div className="flex gap-0.5">
-                            {DAY_NAMES.map((day) => {
-                              const count = activity.daily_breakdown[day] || 0;
-                              return (
-                                <div
-                                  key={day}
-                                  title={`${day}: ${count}x`}
-                                  className={`w-3 h-3 rounded-sm text-[6px] flex items-center justify-center font-bold ${
-                                    count > 2 ? "bg-primary text-primary-foreground" :
-                                    count > 0 ? "bg-primary/30 text-primary" :
-                                    "bg-muted text-muted-foreground/50"
-                                  }`}
-                                >
-                                  {day[0]}
-                                </div>
-                              );
-                            })}
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button className="flex flex-col gap-1 text-left hover:bg-muted/50 rounded-lg px-1.5 py-1 -mx-1.5 -my-1 transition-colors">
+                            <span className={`text-xs font-semibold ${totalLogins > 5 ? "text-primary" : totalLogins > 0 ? "text-amber-600" : "text-muted-foreground"}`}>
+                              {totalLogins}x /minggu
+                            </span>
+                            {activity && totalLogins > 0 && (
+                              <div className="flex gap-0.5">
+                                {DAY_NAMES.map((day) => {
+                                  const count = activity.daily_breakdown[day] || 0;
+                                  return (
+                                    <div
+                                      key={day}
+                                      title={`${day}: ${count}x`}
+                                      className={`w-3 h-3 rounded-sm text-[6px] flex items-center justify-center font-bold ${
+                                        count > 2 ? "bg-primary text-primary-foreground" :
+                                        count > 0 ? "bg-primary/30 text-primary" :
+                                        "bg-muted text-muted-foreground/50"
+                                      }`}
+                                    >
+                                      {day[0]}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0" align="start">
+                          <div className="p-3 border-b border-border">
+                            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                              <CalendarDays className="w-4 h-4 text-primary" />
+                              Riwayat Sign In (7 hari)
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5">{u.full_name || u.oveercode}</p>
                           </div>
-                        )}
-                      </div>
+                          {activity && activity.timestamps.length > 0 ? (
+                            <>
+                              <div className="p-3 border-b border-border">
+                                <div className="grid grid-cols-7 gap-1">
+                                  {DAY_NAMES.map((day) => {
+                                    const count = activity.daily_breakdown[day] || 0;
+                                    return (
+                                      <div key={day} className="flex flex-col items-center gap-1">
+                                        <span className="text-[10px] text-muted-foreground font-medium">{day}</span>
+                                        <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${
+                                          count > 2 ? "bg-primary text-primary-foreground" :
+                                          count > 0 ? "bg-primary/20 text-primary" :
+                                          "bg-muted text-muted-foreground/40"
+                                        }`}>
+                                          {count}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                              <div className="max-h-40 overflow-y-auto p-2">
+                                {activity.timestamps.map((ts, idx) => {
+                                  const d = new Date(ts);
+                                  return (
+                                    <div key={idx} className="flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-muted/50 text-xs">
+                                      <span className="text-muted-foreground">
+                                        {d.toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short" })}
+                                      </span>
+                                      <span className="font-mono text-foreground">
+                                        {d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </>
+                          ) : (
+                            <div className="p-4 text-center text-xs text-muted-foreground">
+                              Belum ada data sign in minggu ini
+                            </div>
+                          )}
+                        </PopoverContent>
+                      </Popover>
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
