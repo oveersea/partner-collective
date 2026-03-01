@@ -346,7 +346,7 @@ const ProjectRequest = () => {
                   <div>
                     <p className="text-muted-foreground text-xs mb-1">Budget</p>
                     <p className="text-card-foreground font-medium">
-                      {form.budget_min ? `Rp ${Number(form.budget_min).toLocaleString("id-ID")}` : "—"} - {form.budget_max ? `Rp ${Number(form.budget_max).toLocaleString("id-ID")}` : "—"}
+                      {form.budget_min ? `${currencies.find(c => c.value === form.currency)?.symbol} ${Number(form.budget_min).toLocaleString("id-ID")}` : "—"} - {form.budget_max ? `${currencies.find(c => c.value === form.currency)?.symbol} ${Number(form.budget_max).toLocaleString("id-ID")}` : "—"}
                     </p>
                   </div>
                 )}
