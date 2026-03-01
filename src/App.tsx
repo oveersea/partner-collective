@@ -16,6 +16,8 @@ import JobDetail from "./pages/JobDetail";
 import Features from "./pages/Features";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUserDetail from "./pages/AdminUserDetail";
+import Learning from "./pages/Learning";
+import LearningDetail from "./pages/LearningDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +42,8 @@ const App = () => (
             <Route path="/features" element={<Features />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/user/:userId" element={<AdminUserDetail />} />
+            <Route path="/learning" element={<Learning />} />
+            <Route path="/learning/:slug" element={<LearningDetail />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

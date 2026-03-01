@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User, LayoutDashboard, ShieldCheck, ChevronDown } from "lucide-react";
+import { LogOut, User, LayoutDashboard, ShieldCheck, GraduationCap } from "lucide-react";
 
 const DashboardNav = () => {
   const { user, signOut } = useAuth();
@@ -54,6 +54,10 @@ const DashboardNav = () => {
             <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
               <LayoutDashboard className="w-4 h-4 mr-2" />
               Dashboard
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/learning")} className="cursor-pointer">
+              <GraduationCap className="w-4 h-4 mr-2" />
+              Learning
             </DropdownMenuItem>
             {isAdmin && (
               <DropdownMenuItem onClick={() => navigate("/admin")} className="cursor-pointer">
