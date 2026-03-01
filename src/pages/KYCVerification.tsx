@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 
-type KycStatus = "unverified" | "pending" | "verified" | "rejected";
+type KycStatus = "unverified" | "pending" | "verified" | "approved" | "rejected";
 
 interface KycSubmission {
   id: string;
@@ -191,7 +191,7 @@ const KYCVerification = () => {
             </motion.div>
 
             {/* Status banners */}
-            {kycStatus === "verified" && (
+            {(kycStatus === "verified" || kycStatus === "approved") && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-primary/10 border border-primary/20 rounded-2xl p-6 text-center mb-6">
                 <CheckCircle2 className="w-12 h-12 text-primary mx-auto mb-3" />
                 <h2 className="text-lg font-bold text-card-foreground mb-1">Identitas Terverifikasi</h2>
