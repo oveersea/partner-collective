@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
-import { ExternalLink, Search, Image as ImageIcon, User, X, ArrowRight, Building2, FolderOpen } from "lucide-react";
+import { ExternalLink, Search, Image as ImageIcon, ThumbsUp, Eye, Building2, FolderOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import case1 from "@/assets/case-1.jpg";
 import case2 from "@/assets/case-2.jpg";
@@ -195,99 +195,73 @@ const CaseStudies = () => {
             <p className="text-muted-foreground text-sm">Coba ubah kata kunci atau reset filter.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {columns.map((col, colIdx) => (
-              <div key={colIdx} className="flex flex-col gap-5">
-                {col.map((item, i) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: (colIdx * col.length + i) * 0.03, duration: 0.4 }}
-                    className="group relative bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-lg transition-all"
-                  >
-                    {/* Image */}
-                    {(item.image_url || item.type === "case_study") ? (
-                      <div className="relative overflow-hidden aspect-[4/3]">
-                        <img
-                          src={item.image_url || (item.type === "case_study" ? fallbackImages[i % fallbackImages.length] : "")}
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
-                        />
-                        {/* Type badge */}
-                        <div className="absolute top-3 left-3">
-                          <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-md ${
-                            item.type === "case_study"
-                              ? "bg-primary/90 text-primary-foreground"
-                              : "bg-background/90 text-foreground border border-border"
-                          }`}>
-                            {item.type === "case_study" ? "Case Study" : "Portfolio"}
-                          </span>
-                        </div>
-                      </div>
-                    ) : item.type === "portfolio" && !item.image_url ? (
-                      <div className="bg-muted flex items-center justify-center aspect-[4/3]">
-                        <ImageIcon className="w-10 h-10 text-muted-foreground/20" />
-                      </div>
-                    ) : null}
-
-                    {/* Content */}
-                    <div className="p-5 flex flex-col flex-1">
-                      {item.type === "case_study" && item.industry && (
-                        <span className="text-xs font-medium text-primary mb-2">{item.industry}</span>
-                      )}
-                      <h3 className="text-base font-semibold text-foreground mb-2 leading-snug line-clamp-2">
-                        {item.title}
-                      </h3>
-                      {item.description && (
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{item.description}</p>
-                      )}
-
-                      {/* Footer */}
-                      <div className="mt-auto flex items-center justify-between">
-                        {item.type === "case_study" ? (
-                          <>
-                            <span className="text-xs text-muted-foreground">{item.company_name}</span>
-                            {item.cta_label && (
-                              <a
-                                href={item.cta_url || "#"}
-                                className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                              >
-                                {item.cta_label}
-                                <ArrowRight className="w-3.5 h-3.5" />
-                              </a>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex items-center gap-2">
-                              {item.owner_avatar ? (
-                                <img src={item.owner_avatar} alt={item.owner_name} className="w-5 h-5 rounded-full object-cover" />
-                              ) : (
-                                <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-[9px] font-bold text-muted-foreground">
-                                  {item.owner_name.charAt(0)}
-                                </div>
-                              )}
-                              <span className="text-xs text-muted-foreground">{item.owner_name}</span>
-                            </div>
-                            {item.project_url && (
-                              <a
-                                href={item.project_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-1.5 rounded-full bg-muted hover:bg-muted/80 transition-colors"
-                              >
-                                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                              </a>
-                            )}
-                          </>
-                        )}
-                      </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {filtered.map((item, i) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.02, duration: 0.35 }}
+                className="group"
+              >
+                {/* Image card */}
+                <a
+                  href={item.type === "portfolio" && item.project_url ? item.project_url : item.type === "case_study" && item.cta_url ? item.cta_url : "#"}
+                  target={item.type === "portfolio" && item.project_url ? "_blank" : undefined}
+                  rel="noopener noreferrer"
+                  className="block relative rounded-xl overflow-hidden aspect-[4/3] bg-muted"
+                >
+                  {(item.image_url || item.type === "case_study") ? (
+                    <img
+                      src={item.image_url || fallbackImages[i % fallbackImages.length]}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageIcon className="w-10 h-10 text-muted-foreground/20" />
                     </div>
-                  </motion.div>
-                ))}
-              </div>
+                  )}
+                  {/* Hover overlay with title */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                    <h3 className="text-white text-sm font-semibold line-clamp-2 leading-snug">{item.title}</h3>
+                  </div>
+                </a>
+
+                {/* Owner info row — Behance style */}
+                <div className="flex items-center gap-2 mt-2.5 px-0.5">
+                  {/* Avatar */}
+                  {item.type === "portfolio" ? (
+                    item.owner_avatar ? (
+                      <img src={item.owner_avatar} alt={item.owner_name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground flex-shrink-0">
+                        {item.owner_name.charAt(0)}
+                      </div>
+                    )
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Building2 className="w-3 h-3 text-primary" />
+                    </div>
+                  )}
+
+                  {/* Name */}
+                  <span className="text-xs font-medium text-foreground truncate flex-1">
+                    {item.type === "portfolio" ? item.owner_name : item.company_name}
+                  </span>
+
+                  {/* Stats (placeholder style like Behance) */}
+                  <div className="flex items-center gap-2.5 text-muted-foreground flex-shrink-0">
+                    <span className="inline-flex items-center gap-0.5 text-[11px]">
+                      <ThumbsUp className="w-3 h-3" />
+                    </span>
+                    <span className="inline-flex items-center gap-0.5 text-[11px]">
+                      <Eye className="w-3 h-3" />
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
         )}
