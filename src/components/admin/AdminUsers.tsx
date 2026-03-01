@@ -96,7 +96,7 @@ const AdminUsers = () => {
       .from("profiles")
       .select("user_id, full_name, oveercode, account_type, kyc_status, city, country, created_at, last_online, skills, years_of_experience, highest_education, phone_number, bio, professional_summary, avatar_url, linkedin_url")
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(1000);
 
     if (data) setUsers(data);
     if (error) toast.error("Gagal memuat data user");
