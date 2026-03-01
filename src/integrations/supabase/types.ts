@@ -10519,10 +10519,13 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          media_urls: string[] | null
           project_url: string | null
           title: string
           updated_at: string
           user_id: string
+          video_type: string | null
+          video_url: string | null
         }
         Insert: {
           business_id?: string | null
@@ -10530,10 +10533,13 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          media_urls?: string[] | null
           project_url?: string | null
           title: string
           updated_at?: string
           user_id: string
+          video_type?: string | null
+          video_url?: string | null
         }
         Update: {
           business_id?: string | null
@@ -10541,10 +10547,13 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          media_urls?: string[] | null
           project_url?: string | null
           title?: string
           updated_at?: string
           user_id?: string
+          video_type?: string | null
+          video_url?: string | null
         }
         Relationships: [
           {
@@ -10705,6 +10714,30 @@ export type Database = {
           status?: string
           user_id?: string
           verified?: boolean
+        }
+        Relationships: []
+      }
+      user_storage_usage: {
+        Row: {
+          id: string
+          max_bytes: number
+          total_bytes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          max_bytes?: number
+          total_bytes?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          max_bytes?: number
+          total_bytes?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
