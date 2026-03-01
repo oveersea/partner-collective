@@ -222,8 +222,7 @@ const ServiceDetailPage = () => {
                 <div className="space-y-4 mb-6">
                   <div className="flex items-center gap-3 text-sm">
                     <Users className="w-4 h-4 text-primary" />
-                    <span className="text-muted-foreground">Talent Tersedia</span>
-                    <span className="ml-auto font-semibold text-foreground">{providerCount}</span>
+                    <span className="text-muted-foreground">Ribuan talent terverifikasi siap membantu Anda</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-primary" />
