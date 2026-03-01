@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Star, Trophy, Play, Users, Briefcase, GraduationCap, BarChart3, Wallet, Bell, Settings, Search } from "lucide-react";
+import { Star, Trophy, Play, Briefcase, GraduationCap, BarChart3, CreditCard, ShieldCheck, Search, LayoutDashboard, Layers } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 const socialProof = [
@@ -12,14 +12,14 @@ const socialProof = [
 ];
 
 const sidebarItems = [
-  { id: "talent", label: "Talent Pool", icon: Users },
+  { id: "talent", label: "Dashboard", icon: LayoutDashboard },
   { id: "hiring", label: "Hiring", icon: Briefcase },
+  { id: "services", label: "Services", icon: Layers },
+  { id: "matchmaking", label: "Matchmaking", icon: Search },
   { id: "learning", label: "Learning", icon: GraduationCap },
-  { id: "assessment", label: "Assessment", icon: Search },
+  { id: "kyc", label: "KYC", icon: ShieldCheck },
+  { id: "credits", label: "Credits", icon: CreditCard },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
-  { id: "wallet", label: "Wallet", icon: Wallet },
-  { id: "alerts", label: "Alerts", icon: Bell },
-  { id: "settings", label: "Settings", icon: Settings },
 ];
 
 const talentData = [
@@ -41,7 +41,7 @@ const DashboardPanel = ({ activeTab }: { activeTab: string }) => {
   if (activeTab === "talent") {
     return (
       <div>
-        <h3 className="text-sm font-semibold text-white mb-3">Talent Pool</h3>
+        <h3 className="text-sm font-semibold text-white mb-3">Dashboard Overview</h3>
         <div className="grid grid-cols-3 gap-2 mb-4">
           {[
             { label: "Total Talent", val: analyticsData.totalTalent },
@@ -99,6 +99,131 @@ const DashboardPanel = ({ activeTab }: { activeTab: string }) => {
     );
   }
 
+  if (activeTab === "services") {
+    return (
+      <div>
+        <h3 className="text-sm font-semibold text-white mb-3">Katalog Layanan</h3>
+        <div className="space-y-2">
+          {[
+            { name: "Digital Marketing", category: "Marketing", providers: 24 },
+            { name: "Web Development", category: "Teknologi", providers: 38 },
+            { name: "UI/UX Design", category: "Desain", providers: 19 },
+            { name: "Content Writing", category: "Konten", providers: 15 },
+          ].map((s) => (
+            <div key={s.name} className="rounded-lg p-3 flex items-center justify-between" style={{ background: "hsl(0 0% 15%)" }}>
+              <div>
+                <p className="text-xs font-medium text-white">{s.name}</p>
+                <p className="text-[10px] text-white/40">{s.category}</p>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/60">{s.providers} talent</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (activeTab === "matchmaking") {
+    return (
+      <div>
+        <h3 className="text-sm font-semibold text-white mb-3">Job Matchmaking</h3>
+        <div className="space-y-2">
+          {[
+            { title: "Full Stack Developer", match: 96, location: "Remote" },
+            { title: "Product Manager", match: 91, location: "Jakarta" },
+            { title: "Data Scientist", match: 87, location: "Singapore" },
+          ].map((j) => (
+            <div key={j.title} className="rounded-lg p-3" style={{ background: "hsl(0 0% 15%)" }}>
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-xs font-medium text-white">{j.title}</p>
+                <span className="text-[10px] font-semibold text-emerald-400">{j.match}% match</span>
+              </div>
+              <p className="text-[10px] text-white/40">{j.location}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (activeTab === "learning") {
+    return (
+      <div>
+        <h3 className="text-sm font-semibold text-white mb-3">Learning Programs</h3>
+        <div className="space-y-2">
+          {[
+            { title: "React Advanced Patterns", progress: 75, provider: "Dicoding" },
+            { title: "Data Engineering", progress: 40, provider: "Coursera" },
+            { title: "UI Design Masterclass", progress: 90, provider: "Udemy" },
+          ].map((l) => (
+            <div key={l.title} className="rounded-lg p-3" style={{ background: "hsl(0 0% 15%)" }}>
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-xs font-medium text-white">{l.title}</p>
+                <span className="text-[10px] text-white/50">{l.provider}</span>
+              </div>
+              <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(0 0% 20%)" }}>
+                <div className="h-full rounded-full" style={{ width: `${l.progress}%`, background: "hsl(var(--primary))" }} />
+              </div>
+              <p className="text-[10px] text-white/40 mt-1">{l.progress}% selesai</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (activeTab === "kyc") {
+    return (
+      <div>
+        <h3 className="text-sm font-semibold text-white mb-3">KYC Verification</h3>
+        <div className="space-y-2">
+          {[
+            { step: "Identitas", status: "Verified", icon: "✓" },
+            { step: "Dokumen Bisnis", status: "Verified", icon: "✓" },
+            { step: "Verifikasi Wajah", status: "Pending", icon: "…" },
+          ].map((k) => (
+            <div key={k.step} className="rounded-lg p-3 flex items-center gap-3" style={{ background: "hsl(0 0% 15%)" }}>
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${k.status === "Verified" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
+                {k.icon}
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-medium text-white">{k.step}</p>
+                <p className="text-[10px] text-white/40">{k.status}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (activeTab === "credits") {
+    return (
+      <div>
+        <h3 className="text-sm font-semibold text-white mb-3">Credit Balance</h3>
+        <div className="rounded-lg p-4 text-center mb-4" style={{ background: "hsl(0 0% 15%)" }}>
+          <p className="text-2xl font-semibold text-white">1,250</p>
+          <p className="text-[10px] text-white/50">Credits tersedia</p>
+        </div>
+        <div className="space-y-2">
+          {[
+            { desc: "Pembelian paket Pro", amount: "+500", date: "28 Feb" },
+            { desc: "Unlock kandidat", amount: "-50", date: "27 Feb" },
+            { desc: "Assessment order", amount: "-100", date: "25 Feb" },
+          ].map((t) => (
+            <div key={t.desc} className="rounded-lg p-3 flex items-center justify-between" style={{ background: "hsl(0 0% 15%)" }}>
+              <div>
+                <p className="text-xs font-medium text-white">{t.desc}</p>
+                <p className="text-[10px] text-white/40">{t.date}</p>
+              </div>
+              <span className={`text-xs font-semibold ${t.amount.startsWith("+") ? "text-emerald-400" : "text-red-400"}`}>{t.amount}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (activeTab === "analytics") {
     return (
       <div>
@@ -116,7 +241,6 @@ const DashboardPanel = ({ activeTab }: { activeTab: string }) => {
             </div>
           ))}
         </div>
-        {/* Mini bar chart */}
         <div className="flex items-end gap-1.5 h-20 px-2">
           {[40, 65, 50, 80, 60, 90, 75, 85, 70, 95, 80, 88].map((h, i) => (
             <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, background: i >= 10 ? "hsl(var(--primary))" : "hsl(0 0% 25%)" }} />
@@ -130,12 +254,7 @@ const DashboardPanel = ({ activeTab }: { activeTab: string }) => {
     );
   }
 
-  // Default for other tabs
-  return (
-    <div className="flex items-center justify-center h-40">
-      <p className="text-xs text-white/40">Coming soon...</p>
-    </div>
-  );
+  return null;
 };
 
 const HeroSection = () => {
