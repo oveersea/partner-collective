@@ -139,7 +139,7 @@ const ServiceShowcaseSection = () => {
         </div>
 
         {/* Services grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 w-full">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
           {loadingServices ? (
             Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="border border-border bg-card p-6 animate-pulse" style={{ borderRadius: '5px' }}>
