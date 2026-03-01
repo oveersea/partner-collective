@@ -15,6 +15,7 @@ import Matchmaking from "./pages/Matchmaking";
 import JobDetail from "./pages/JobDetail";
 import Features from "./pages/Features";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminUserDetail from "./pages/AdminUserDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/job/:slug" element={<JobDetail />} />
             <Route path="/features" element={<Features />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/user/:userId" element={<AdminUserDetail />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
