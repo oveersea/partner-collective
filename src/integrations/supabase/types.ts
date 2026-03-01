@@ -1473,6 +1473,7 @@ export type Database = {
         Row: {
           address: string | null
           akta_number: string | null
+          business_type: string
           city: string | null
           company_size: string | null
           country: string | null
@@ -1503,6 +1504,7 @@ export type Database = {
         Insert: {
           address?: string | null
           akta_number?: string | null
+          business_type?: string
           city?: string | null
           company_size?: string | null
           country?: string | null
@@ -1533,6 +1535,7 @@ export type Database = {
         Update: {
           address?: string | null
           akta_number?: string | null
+          business_type?: string
           city?: string | null
           company_size?: string | null
           country?: string | null

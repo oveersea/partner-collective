@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import {
   Search, Building2, MapPin, Globe, ChevronLeft, ChevronRight, ExternalLink,
   MoreVertical, Shield, ShieldCheck, ShieldX, Users, UserPlus, Crown, Trash2,
-  Loader2, X,
+  Loader2, X, Briefcase,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -20,7 +20,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 
-interface Company {
+interface Vendor {
   id: string;
   name: string;
   slug: string;
@@ -43,30 +43,28 @@ interface VendorMember {
   status: string;
   created_at: string;
   user_name?: string;
-  user_email?: string;
 }
 
 const PAGE_SIZE = 20;
 
-const AdminCompanies = () => {
-  const [companies, setCompanies] = useState<Company[]>([]);
+const AdminVendors = () => {
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [oppCounts, setOppCounts] = useState<Record<string, number>>({});
-  const [expCounts, setExpCounts] = useState<Record<string, number>>({});
   const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
+  const [orderCounts, setOrderCounts] = useState<Record<string, number>>({});
 
-  // Vendor detail dialog
+  // Detail dialog
   const [detailOpen, setDetailOpen] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [members, setMembers] = useState<VendorMember[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
 
   // Add member dialog
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [userSearch, setUserSearch] = useState("");
-  const [userResults, setUserResults] = useState<{ user_id: string; full_name: string; email?: string }[]>([]);
+  const [userResults, setUserResults] = useState<{ user_id: string; full_name: string }[]>([]);
   const [searchingUsers, setSearchingUsers] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [newMemberRole, setNewMemberRole] = useState("member");
@@ -78,35 +76,18 @@ const AdminCompanies = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const [compRes, oppRes, expRes, memRes] = await Promise.all([
+    const [vendorRes, memRes, claimRes] = await Promise.all([
       supabase
         .from("business_profiles")
         .select("id, name, slug, oveercode, kyc_status, industry, city, country, company_size, email, phone, website, created_at")
-        .eq("business_type", "company")
+        .eq("business_type", "vendor")
         .order("created_at", { ascending: false }),
-      supabase.from("opportunities").select("business_id"),
-      supabase.from("user_experiences").select("business_id"),
       supabase.from("business_members").select("business_id"),
+      supabase.from("order_claims").select("business_id"),
     ]);
 
-    if (compRes.data) setCompanies(compRes.data as Company[]);
-    if (compRes.error) toast.error("Gagal memuat data perusahaan");
-
-    if (oppRes.data) {
-      const counts: Record<string, number> = {};
-      oppRes.data.forEach((o: any) => {
-        if (o.business_id) counts[o.business_id] = (counts[o.business_id] || 0) + 1;
-      });
-      setOppCounts(counts);
-    }
-
-    if (expRes.data) {
-      const counts: Record<string, number> = {};
-      expRes.data.forEach((e: any) => {
-        if (e.business_id) counts[e.business_id] = (counts[e.business_id] || 0) + 1;
-      });
-      setExpCounts(counts);
-    }
+    if (vendorRes.data) setVendors(vendorRes.data as Vendor[]);
+    if (vendorRes.error) toast.error("Gagal memuat data vendor");
 
     if (memRes.data) {
       const counts: Record<string, number> = {};
@@ -114,6 +95,14 @@ const AdminCompanies = () => {
         if (m.business_id) counts[m.business_id] = (counts[m.business_id] || 0) + 1;
       });
       setMemberCounts(counts);
+    }
+
+    if (claimRes.data) {
+      const counts: Record<string, number> = {};
+      claimRes.data.forEach((c: any) => {
+        if (c.business_id) counts[c.business_id] = (counts[c.business_id] || 0) + 1;
+      });
+      setOrderCounts(counts);
     }
 
     setLoading(false);
@@ -127,17 +116,17 @@ const AdminCompanies = () => {
     if (error) toast.error("Gagal update status: " + error.message);
     else {
       toast.success(`Status KYC diubah ke "${status}"`);
-      setCompanies((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, kyc_status: status } : c))
+      setVendors((prev) =>
+        prev.map((v) => (v.id === id ? { ...v, kyc_status: status } : v))
       );
     }
   };
 
   // ── Vendor Detail ──
-  const openVendorDetail = async (company: Company) => {
-    setSelectedCompany(company);
+  const openVendorDetail = async (vendor: Vendor) => {
+    setSelectedVendor(vendor);
     setDetailOpen(true);
-    await fetchMembers(company.id);
+    await fetchMembers(vendor.id);
   };
 
   const fetchMembers = async (businessId: string) => {
@@ -156,14 +145,12 @@ const AdminCompanies = () => {
         .in("user_id", userIds);
 
       const profileMap = new Map((profiles || []).map((p) => [p.user_id, p.full_name]));
-
-      // Get emails via function
-      const enriched: VendorMember[] = membersData.map((m) => ({
-        ...m,
-        user_name: profileMap.get(m.user_id) || "—",
-      }));
-
-      setMembers(enriched);
+      setMembers(
+        membersData.map((m) => ({
+          ...m,
+          user_name: profileMap.get(m.user_id) || "—",
+        }))
+      );
     } else {
       setMembers([]);
     }
@@ -175,9 +162,8 @@ const AdminCompanies = () => {
       .from("business_members")
       .update({ role, updated_at: new Date().toISOString() })
       .eq("id", memberId);
-    if (error) {
-      toast.error("Gagal update role: " + error.message);
-    } else {
+    if (error) toast.error("Gagal update role: " + error.message);
+    else {
       toast.success(`Role diubah ke "${role}"`);
       setMembers((prev) => prev.map((m) => (m.id === memberId ? { ...m, role } : m)));
     }
@@ -186,14 +172,13 @@ const AdminCompanies = () => {
   const removeMember = async (memberId: string, userName: string) => {
     if (!confirm(`Hapus "${userName}" dari vendor ini?`)) return;
     const { error } = await supabase.from("business_members").delete().eq("id", memberId);
-    if (error) {
-      toast.error("Gagal menghapus: " + error.message);
-    } else {
+    if (error) toast.error("Gagal menghapus: " + error.message);
+    else {
       toast.success("Member dihapus");
       setMembers((prev) => prev.filter((m) => m.id !== memberId));
       setMemberCounts((prev) => ({
         ...prev,
-        [selectedCompany!.id]: Math.max(0, (prev[selectedCompany!.id] || 1) - 1),
+        [selectedVendor!.id]: Math.max(0, (prev[selectedVendor!.id] || 1) - 1),
       }));
     }
   };
@@ -201,10 +186,7 @@ const AdminCompanies = () => {
   // ── Add Member ──
   const searchUsers = async (q: string) => {
     setUserSearch(q);
-    if (q.length < 2) {
-      setUserResults([]);
-      return;
-    }
+    if (q.length < 2) { setUserResults([]); return; }
     setSearchingUsers(true);
     const { data } = await supabase
       .from("profiles")
@@ -216,14 +198,12 @@ const AdminCompanies = () => {
   };
 
   const addMember = async () => {
-    if (!selectedUserId || !selectedCompany) return;
+    if (!selectedUserId || !selectedVendor) return;
     setAddingMember(true);
-
-    // Check if already member
     const { data: existing } = await supabase
       .from("business_members")
       .select("id")
-      .eq("business_id", selectedCompany.id)
+      .eq("business_id", selectedVendor.id)
       .eq("user_id", selectedUserId)
       .maybeSingle();
 
@@ -234,42 +214,39 @@ const AdminCompanies = () => {
     }
 
     const { error } = await supabase.from("business_members").insert({
-      business_id: selectedCompany.id,
+      business_id: selectedVendor.id,
       user_id: selectedUserId,
       role: newMemberRole,
       status: "active",
     });
 
-    if (error) {
-      toast.error("Gagal menambahkan: " + error.message);
-    } else {
+    if (error) toast.error("Gagal menambahkan: " + error.message);
+    else {
       toast.success("Member berhasil ditambahkan");
       setAddMemberOpen(false);
       setUserSearch("");
       setSelectedUserId("");
       setNewMemberRole("member");
       setUserResults([]);
-      await fetchMembers(selectedCompany.id);
+      await fetchMembers(selectedVendor.id);
       setMemberCounts((prev) => ({
         ...prev,
-        [selectedCompany.id]: (prev[selectedCompany.id] || 0) + 1,
+        [selectedVendor.id]: (prev[selectedVendor.id] || 0) + 1,
       }));
     }
     setAddingMember(false);
   };
 
   // ── Filters ──
-  const filtered = companies.filter(
-    (c) =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      (c.oveercode || "").toLowerCase().includes(search.toLowerCase()) ||
-      (c.industry || "").toLowerCase().includes(search.toLowerCase()) ||
-      (c.city || "").toLowerCase().includes(search.toLowerCase())
+  const filtered = vendors.filter(
+    (v) =>
+      v.name.toLowerCase().includes(search.toLowerCase()) ||
+      (v.oveercode || "").toLowerCase().includes(search.toLowerCase()) ||
+      (v.industry || "").toLowerCase().includes(search.toLowerCase()) ||
+      (v.city || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  useEffect(() => {
-    setPage(1);
-  }, [search]);
+  useEffect(() => { setPage(1); }, [search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -292,18 +269,18 @@ const AdminCompanies = () => {
   };
 
   const stats = {
-    total: companies.length,
-    verified: companies.filter((c) => c.kyc_status === "verified" || c.kyc_status === "approved").length,
-    pending: companies.filter((c) => c.kyc_status === "pending").length,
-    unverified: companies.filter((c) => c.kyc_status === "unverified").length,
+    total: vendors.length,
+    verified: vendors.filter((v) => v.kyc_status === "verified" || v.kyc_status === "approved").length,
+    pending: vendors.filter((v) => v.kyc_status === "pending").length,
+    unverified: vendors.filter((v) => v.kyc_status === "unverified").length,
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-foreground">Manajemen Perusahaan</h2>
-          <p className="text-sm text-muted-foreground">Perusahaan adalah pemberi job / klien</p>
+          <h2 className="text-xl font-semibold text-foreground">Manajemen Vendor</h2>
+          <p className="text-sm text-muted-foreground">Vendor adalah penerima job / penyedia layanan</p>
         </div>
         <div className="relative w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -319,7 +296,7 @@ const AdminCompanies = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Total Perusahaan", value: stats.total, icon: Building2, color: "text-foreground" },
+          { label: "Total Vendor", value: stats.total, icon: Briefcase, color: "text-foreground" },
           { label: "Terverifikasi", value: stats.verified, icon: ShieldCheck, color: "text-primary" },
           { label: "Pending", value: stats.pending, icon: Shield, color: "text-amber-600" },
           { label: "Belum Verifikasi", value: stats.unverified, icon: ShieldX, color: "text-muted-foreground" },
@@ -342,12 +319,12 @@ const AdminCompanies = () => {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50">
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Perusahaan</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Vendor</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Oveercode</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Industri</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Lokasi</th>
                 <th className="text-center px-4 py-3 font-medium text-muted-foreground">Member</th>
-                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Jobs</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Orders</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">KYC</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Bergabung</th>
                 <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
@@ -365,103 +342,90 @@ const AdminCompanies = () => {
               ) : paged.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
-                    Tidak ada data perusahaan
+                    Tidak ada data vendor
                   </td>
                 </tr>
               ) : (
-                paged.map((c) => (
+                paged.map((v) => (
                   <tr
-                    key={c.id}
+                    key={v.id}
                     className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer"
-                    onClick={() => openVendorDetail(c)}
+                    onClick={() => openVendorDetail(v)}
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                          <Building2 className="w-4 h-4 text-muted-foreground" />
+                          <Briefcase className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-medium text-foreground truncate max-w-[180px]">{c.name}</p>
-                          {c.website && (
+                          <p className="font-medium text-foreground truncate max-w-[180px]">{v.name}</p>
+                          {v.website && (
                             <a
-                              href={c.website.startsWith("http") ? c.website : `https://${c.website}`}
+                              href={v.website.startsWith("http") ? v.website : `https://${v.website}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <Globe className="w-2.5 h-2.5" /> {c.website}
+                              <Globe className="w-2.5 h-2.5" /> {v.website}
                             </a>
                           )}
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.oveercode || "—"}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{v.oveercode || "—"}</td>
                     <td className="px-4 py-3">
-                      {c.industry ? (
-                        <Badge variant="secondary" className="text-xs truncate max-w-[120px]">
-                          {c.industry}
-                        </Badge>
+                      {v.industry ? (
+                        <Badge variant="secondary" className="text-xs truncate max-w-[120px]">{v.industry}</Badge>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {c.city || c.country ? (
+                      {v.city || v.country ? (
                         <span className="flex items-center gap-1 truncate max-w-[150px]">
                           <MapPin className="w-3 h-3 shrink-0" />
-                          {[c.city, c.country].filter(Boolean).join(", ")}
+                          {[v.city, v.country].filter(Boolean).join(", ")}
                         </span>
-                      ) : (
-                        "—"
-                      )}
+                      ) : "—"}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <span className="text-xs font-medium text-foreground flex items-center justify-center gap-1">
-                        <Users className="w-3 h-3" /> {memberCounts[c.id] || 0}
+                        <Users className="w-3 h-3" /> {memberCounts[v.id] || 0}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className="text-xs font-medium text-foreground">{oppCounts[c.id] || 0}</span>
+                      <span className="text-xs font-medium text-foreground">{orderCounts[v.id] || 0}</span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${kycBadge(c.kyc_status)}`}>
-                        {c.kyc_status}
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${kycBadge(v.kyc_status)}`}>
+                        {v.kyc_status}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
-                      {new Date(c.created_at).toLocaleDateString("id-ID")}
+                      {new Date(v.created_at).toLocaleDateString("id-ID")}
                     </td>
                     <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
+                          <Button variant="ghost" size="sm"><MoreVertical className="w-4 h-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openVendorDetail(c)}>
+                          <DropdownMenuItem onClick={() => openVendorDetail(v)}>
                             <Users className="w-4 h-4 mr-2" /> Kelola Member
                           </DropdownMenuItem>
-                          {c.website && (
-                            <DropdownMenuItem
-                              onClick={() =>
-                                window.open(
-                                  c.website!.startsWith("http") ? c.website! : `https://${c.website}`,
-                                  "_blank"
-                                )
-                              }
-                            >
+                          {v.website && (
+                            <DropdownMenuItem onClick={() => window.open(v.website!.startsWith("http") ? v.website! : `https://${v.website}`, "_blank")}>
                               <ExternalLink className="w-4 h-4 mr-2" /> Buka Website
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuItem onClick={() => updateKycStatus(c.id, "verified")}>
+                          <DropdownMenuItem onClick={() => updateKycStatus(v.id, "verified")}>
                             <ShieldCheck className="w-4 h-4 mr-2" /> Set Verified
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => updateKycStatus(c.id, "pending")}>
+                          <DropdownMenuItem onClick={() => updateKycStatus(v.id, "pending")}>
                             <Shield className="w-4 h-4 mr-2" /> Set Pending
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => updateKycStatus(c.id, "rejected")}>
+                          <DropdownMenuItem onClick={() => updateKycStatus(v.id, "rejected")}>
                             <ShieldX className="w-4 h-4 mr-2" /> Set Rejected
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -483,9 +447,7 @@ const AdminCompanies = () => {
               <Button size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <span className="text-xs text-muted-foreground px-2">
-                {page} / {totalPages}
-              </span>
+              <span className="text-xs text-muted-foreground px-2">{page} / {totalPages}</span>
               <Button size="sm" variant="ghost" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -499,37 +461,36 @@ const AdminCompanies = () => {
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-primary" />
-              {selectedCompany?.name}
+              <Briefcase className="w-5 h-5 text-primary" />
+              {selectedVendor?.name}
             </DialogTitle>
           </DialogHeader>
 
-          {selectedCompany && (
+          {selectedVendor && (
             <div className="space-y-6">
-              {/* Company info */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <Label className="text-xs text-muted-foreground">Oveercode</Label>
-                  <p className="font-mono text-foreground">{selectedCompany.oveercode || "—"}</p>
+                  <p className="font-mono text-foreground">{selectedVendor.oveercode || "—"}</p>
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">KYC Status</Label>
                   <p>
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${kycBadge(selectedCompany.kyc_status)}`}>
-                      {selectedCompany.kyc_status}
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${kycBadge(selectedVendor.kyc_status)}`}>
+                      {selectedVendor.kyc_status}
                     </span>
                   </p>
                 </div>
-                {selectedCompany.industry && (
+                {selectedVendor.industry && (
                   <div>
                     <Label className="text-xs text-muted-foreground">Industri</Label>
-                    <p className="text-foreground">{selectedCompany.industry}</p>
+                    <p className="text-foreground">{selectedVendor.industry}</p>
                   </div>
                 )}
-                {(selectedCompany.city || selectedCompany.country) && (
+                {(selectedVendor.city || selectedVendor.country) && (
                   <div>
                     <Label className="text-xs text-muted-foreground">Lokasi</Label>
-                    <p className="text-foreground">{[selectedCompany.city, selectedCompany.country].filter(Boolean).join(", ")}</p>
+                    <p className="text-foreground">{[selectedVendor.city, selectedVendor.country].filter(Boolean).join(", ")}</p>
                   </div>
                 )}
               </div>
@@ -538,13 +499,9 @@ const AdminCompanies = () => {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <Users className="w-4 h-4" /> Member Perusahaan ({members.length})
+                    <Users className="w-4 h-4" /> Member Vendor ({members.length})
                   </h3>
-                  <Button
-                    size="sm"
-                    onClick={() => setAddMemberOpen(true)}
-                    className="gap-1.5"
-                  >
+                  <Button size="sm" onClick={() => setAddMemberOpen(true)} className="gap-1.5">
                     <UserPlus className="w-3.5 h-3.5" /> Tambah Member
                   </Button>
                 </div>
@@ -562,10 +519,7 @@ const AdminCompanies = () => {
                 ) : (
                   <div className="space-y-2">
                     {members.map((m) => (
-                      <div
-                        key={m.id}
-                        className="flex items-center justify-between p-3 bg-muted/30 border border-border rounded-lg"
-                      >
+                      <div key={m.id} className="flex items-center justify-between p-3 bg-muted/30 border border-border rounded-lg">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
                             {m.role === "owner" || m.role === "admin" ? (
@@ -581,29 +535,16 @@ const AdminCompanies = () => {
                             </p>
                           </div>
                         </div>
-
                         <div className="flex items-center gap-2">
-                          <Select
-                            value={m.role}
-                            onValueChange={(v) => updateMemberRole(m.id, v)}
-                          >
-                            <SelectTrigger className="w-[120px] h-8 text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
+                          <Select value={m.role} onValueChange={(v) => updateMemberRole(m.id, v)}>
+                            <SelectTrigger className="w-[120px] h-8 text-xs"><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="owner">Owner</SelectItem>
                               <SelectItem value="admin">Admin</SelectItem>
                               <SelectItem value="member">Member</SelectItem>
                             </SelectContent>
                           </Select>
-
-                          <Badge
-                            variant="outline"
-                            className={`text-[10px] border ${roleBadge(m.role)}`}
-                          >
-                            {m.role}
-                          </Badge>
-
+                          <Badge variant="outline" className={`text-[10px] border ${roleBadge(m.role)}`}>{m.role}</Badge>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -627,11 +568,9 @@ const AdminCompanies = () => {
       <Dialog open={addMemberOpen} onOpenChange={setAddMemberOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Tambah Member ke {selectedCompany?.name}</DialogTitle>
+            <DialogTitle>Tambah Member ke {selectedVendor?.name}</DialogTitle>
           </DialogHeader>
-
           <div className="space-y-4">
-            {/* User search */}
             <div className="space-y-2">
               <Label>Cari User</Label>
               <div className="relative">
@@ -646,7 +585,6 @@ const AdminCompanies = () => {
                   <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
                 )}
               </div>
-
               {userResults.length > 0 && (
                 <div className="border border-border rounded-lg max-h-40 overflow-y-auto">
                   {userResults.map((u) => (
@@ -670,7 +608,6 @@ const AdminCompanies = () => {
                   ))}
                 </div>
               )}
-
               {selectedUserId && (
                 <div className="flex items-center gap-2 text-xs text-primary bg-primary/5 rounded-md px-3 py-2">
                   <Users className="w-3.5 h-3.5" />
@@ -684,14 +621,10 @@ const AdminCompanies = () => {
                 </div>
               )}
             </div>
-
-            {/* Role */}
             <div className="space-y-2">
               <Label>Role</Label>
               <Select value={newMemberRole} onValueChange={setNewMemberRole}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Admin — bisa mengelola vendor</SelectItem>
                   <SelectItem value="member">Member — anggota biasa</SelectItem>
@@ -700,7 +633,6 @@ const AdminCompanies = () => {
               </Select>
             </div>
           </div>
-
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddMemberOpen(false)}>Batal</Button>
             <Button onClick={addMember} disabled={!selectedUserId || addingMember}>
@@ -714,4 +646,4 @@ const AdminCompanies = () => {
   );
 };
 
-export default AdminCompanies;
+export default AdminVendors;
