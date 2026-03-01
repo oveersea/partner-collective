@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, MapPin, Clock, Briefcase, DollarSign, Users, Globe,
-  Building2, TrendingUp, Star, Send, CheckCircle2, Calendar,
+  Building2, TrendingUp, Star, Send, CheckCircle2, Calendar, XCircle, AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,16 @@ interface Opportunity {
 interface UserProfile {
   skills: string[] | null;
   years_of_experience: number | null;
+  highest_education: string | null;
+}
+
+interface MatchCriteria {
+  label: string;
+  weight: number;
+  score: number;
+  maxScore: number;
+  detail: string;
+  status: "pass" | "partial" | "fail";
 }
 
 const formatBudget = (min: number | null, max: number | null): string => {
@@ -82,7 +92,7 @@ const JobDetail = () => {
         .single(),
       supabase
         .from("profiles")
-        .select("skills, years_of_experience")
+        .select("skills, years_of_experience, highest_education")
         .eq("user_id", user!.id)
         .maybeSingle(),
     ]);
@@ -104,22 +114,69 @@ const JobDetail = () => {
     setLoading(false);
   };
 
-  const calcMatchScore = (): number => {
-    if (!opp || !profile?.skills?.length) return 0;
+  const calcMatchDetails = (): { score: number; criteria: MatchCriteria[] } => {
+    if (!opp) return { score: 0, criteria: [] };
+    const criteria: MatchCriteria[] = [];
     const requiredSkills = opp.skills_required || [];
-    if (!requiredSkills.length) return 50;
-    let score = 0;
-    const matched = requiredSkills.filter((s) =>
-      profile.skills!.some((ps) => ps.toLowerCase() === s.toLowerCase())
-    );
-    score += (matched.length / requiredSkills.length) * 60;
+    const userSkills = profile?.skills || [];
+
+    // 1. Skills match (50%)
+    if (requiredSkills.length > 0) {
+      const matched = requiredSkills.filter((s) =>
+        userSkills.some((ps) => ps.toLowerCase() === s.toLowerCase())
+      );
+      const pct = matched.length / requiredSkills.length;
+      const pts = Math.round(pct * 50);
+      criteria.push({
+        label: "Kecocokan Skill",
+        weight: 50,
+        score: pts,
+        maxScore: 50,
+        detail: `${matched.length}/${requiredSkills.length} skill cocok`,
+        status: pct >= 0.7 ? "pass" : pct >= 0.4 ? "partial" : "fail",
+      });
+    } else {
+      criteria.push({ label: "Kecocokan Skill", weight: 50, score: 25, maxScore: 50, detail: "Tidak ada syarat skill", status: "partial" });
+    }
+
+    // 2. Experience (30%)
     const minExp = opp.min_experience_years || 0;
-    const userExp = profile.years_of_experience || 0;
-    if (userExp >= minExp) score += 25;
-    else if (userExp >= minExp - 1) score += 15;
-    score += 15;
-    return Math.round(Math.min(score, 100));
+    const userExp = profile?.years_of_experience || 0;
+    let expPts = 0;
+    let expStatus: "pass" | "partial" | "fail" = "fail";
+    if (minExp === 0) { expPts = 30; expStatus = "pass"; }
+    else if (userExp >= minExp) { expPts = 30; expStatus = "pass"; }
+    else if (userExp >= minExp - 1) { expPts = 20; expStatus = "partial"; }
+    else if (userExp > 0) { expPts = 10; expStatus = "fail"; }
+    criteria.push({
+      label: "Pengalaman Kerja",
+      weight: 30,
+      score: expPts,
+      maxScore: 30,
+      detail: minExp > 0 ? `${userExp} tahun (min ${minExp} tahun)` : "Tidak ada syarat pengalaman",
+      status: expStatus,
+    });
+
+    // 3. Profile completeness (20%)
+    let completePts = 0;
+    const checks: string[] = [];
+    if (userSkills.length > 0) { completePts += 8; checks.push("skill"); }
+    if (userExp > 0) { completePts += 6; checks.push("pengalaman"); }
+    if (profile?.highest_education) { completePts += 6; checks.push("pendidikan"); }
+    criteria.push({
+      label: "Kelengkapan Profil",
+      weight: 20,
+      score: completePts,
+      maxScore: 20,
+      detail: checks.length > 0 ? `${checks.join(", ")} terisi` : "Profil belum lengkap",
+      status: completePts >= 14 ? "pass" : completePts >= 8 ? "partial" : "fail",
+    });
+
+    const total = Math.min(criteria.reduce((a, c) => a + c.score, 0), 100);
+    return { score: total, criteria };
   };
+
+  const { score, criteria: matchCriteria } = opp ? calcMatchDetails() : { score: 0, criteria: [] };
 
   const handleApply = async () => {
     if (!opp) return;
@@ -167,7 +224,7 @@ const JobDetail = () => {
     );
   }
 
-  const score = calcMatchScore();
+  // score is already computed via calcMatchDetails above
   const budget = formatBudget(opp.budget_min, opp.budget_max);
   const matchedSkills = opp.skills_required?.filter((s) =>
     profile?.skills?.some((ps) => ps.toLowerCase() === s.toLowerCase())
@@ -370,11 +427,43 @@ const JobDetail = () => {
                 ) : (
                   <div>
                     {/* Match Score Indicator */}
-                    <div className={`rounded-xl p-3 mb-3 text-center ${score >= 70 ? "bg-primary/10" : "bg-destructive/10"}`}>
-                      <p className={`text-2xl font-bold ${score >= 70 ? "text-primary" : "text-destructive"}`}>{score}%</p>
-                      <p className={`text-xs font-medium ${score >= 70 ? "text-primary" : "text-destructive"}`}>
-                        {score >= 70 ? "Match — Anda memenuhi syarat" : "Match terlalu rendah (min 70%)"}
-                      </p>
+                    <div className={`rounded-xl p-4 mb-3 ${score >= 70 ? "bg-primary/10 border border-primary/20" : "bg-destructive/10 border border-destructive/20"}`}>
+                      <div className="text-center mb-3">
+                        <p className={`text-3xl font-bold ${score >= 70 ? "text-primary" : "text-destructive"}`}>{score}%</p>
+                        <p className={`text-xs font-medium ${score >= 70 ? "text-primary" : "text-destructive"}`}>
+                          {score >= 70 ? "Match — Anda memenuhi syarat" : "Match terlalu rendah (min 70%)"}
+                        </p>
+                      </div>
+                      {/* Progress bar */}
+                      <div className="w-full h-2 bg-muted rounded-full mb-4 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${score >= 70 ? "bg-primary" : score >= 40 ? "bg-amber-500" : "bg-destructive"}`}
+                          style={{ width: `${score}%` }}
+                        />
+                      </div>
+                      {/* Criteria breakdown */}
+                      <div className="space-y-2.5">
+                        {matchCriteria.map((c, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            {c.status === "pass" ? (
+                              <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                            ) : c.status === "partial" ? (
+                              <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-medium text-card-foreground">{c.label}</span>
+                                <span className={`text-xs font-bold ${c.status === "pass" ? "text-primary" : c.status === "partial" ? "text-amber-600" : "text-destructive"}`}>
+                                  {c.score}/{c.maxScore}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground">{c.detail}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                     <Button className="w-full" size="lg" onClick={() => setShowApplyForm(true)} disabled={score < 70}>
                       <Send className="w-4 h-4" /> Lamar Sekarang
