@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown, Building2, Users, Briefcase, Globe, Monitor, Clock, Search, GraduationCap, BookOpen, Award, FileText, BarChart3, Shield, Zap, Target, Layers, Settings, HeadphonesIcon, MessageSquare, ArrowUpRight } from "lucide-react";
+import { Menu, X, ChevronDown, Building2, Users, Briefcase, Globe, Monitor, Search, GraduationCap, BookOpen, Award, FileText, BarChart3, Shield, Zap, Target, Layers, HeadphonesIcon, ArrowUpRight, Wallet, ClipboardCheck, Landmark, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -23,93 +23,75 @@ interface MegaMenuData {
 
 const megaMenus: MegaMenuData[] = [
   {
-    label: "Products",
-    tagline: "End-to-end talent solutions by Oveersea",
-    cta: { label: "Explore products", href: "/features" },
+    label: "Layanan",
+    tagline: "Solusi end-to-end untuk kebutuhan talent & bisnis Anda",
+    cta: { label: "Lihat semua layanan", href: "/features" },
     leftLinks: [
       { label: "Talent Matchmaking", href: "/matchmaking" },
       { label: "Hiring Request", href: "/hiring-request" },
       { label: "Project Request", href: "/project-request" },
       { label: "Vendor Registration", href: "/vendor-registration" },
     ],
-    leftDescription: "Discover our suite of products designed to connect businesses with top-tier talent.",
+    leftDescription: "Temukan talent terbaik, ajukan kebutuhan hiring, atau daftarkan bisnis Anda sebagai vendor terverifikasi.",
     items: [
-      { icon: Search, title: "Talent Matchmaking", description: "AI-powered talent discovery", href: "/matchmaking" },
-      { icon: Briefcase, title: "Hiring Request", description: "Submit hiring needs instantly", href: "/hiring-request" },
-      { icon: FileText, title: "Project Request", description: "Post project requirements", href: "/project-request" },
-      { icon: Building2, title: "Vendor Registration", description: "Register as a verified vendor", href: "/vendor-registration" },
+      { icon: Search, title: "Talent Matchmaking", description: "Temukan talent dengan AI matching", href: "/matchmaking" },
+      { icon: Briefcase, title: "Hiring Request", description: "Ajukan kebutuhan rekrutmen", href: "/hiring-request" },
+      { icon: FileText, title: "Project Request", description: "Posting kebutuhan proyek", href: "/project-request" },
+      { icon: Building2, title: "Vendor Registration", description: "Daftar sebagai vendor terverifikasi", href: "/vendor-registration" },
     ],
   },
   {
     label: "Platform",
-    tagline: "Powerful infrastructure for workforce management",
-    cta: { label: "View platform", href: "/features" },
+    tagline: "Infrastruktur lengkap untuk manajemen workforce",
+    cta: { label: "Masuk ke platform", href: "/dashboard" },
     leftLinks: [
       { label: "Dashboard", href: "/dashboard" },
       { label: "KYC Verification", href: "/kyc" },
-      { label: "Credit System", href: "/dashboard" },
-      { label: "Analytics", href: "/dashboard" },
+      { label: "Kredit & Saldo", href: "/credit-balance" },
+      { label: "Fitur Lengkap", href: "/features" },
     ],
-    leftDescription: "A robust platform built for seamless talent operations and workforce management.",
+    leftDescription: "Platform terpadu untuk mengelola profil, verifikasi, kredit, dan seluruh aktivitas workforce.",
     items: [
-      { icon: Layers, title: "Dashboard", description: "Centralized workspace", href: "/dashboard" },
-      { icon: Shield, title: "KYC Verification", description: "Identity & credential checks", href: "/kyc" },
-      { icon: Zap, title: "Credit System", description: "Flexible credit-based access", href: "/dashboard" },
-      { icon: BarChart3, title: "Analytics", description: "Data-driven insights", href: "/dashboard" },
+      { icon: Layers, title: "Dashboard", description: "Pusat kendali profil & aktivitas", href: "/dashboard" },
+      { icon: Shield, title: "KYC Verification", description: "Verifikasi identitas & kredensial", href: "/kyc" },
+      { icon: Wallet, title: "Kredit & Saldo", description: "Top-up kredit & kelola saldo wallet", href: "/credit-balance" },
+      { icon: CreditCard, title: "Fitur Lengkap", description: "Semua fitur platform Oveersea", href: "/features" },
     ],
   },
   {
-    label: "Solutions",
-    tagline: "Tailored solutions for every business need",
-    cta: { label: "View solutions", href: "/features" },
+    label: "Learning",
+    tagline: "Tingkatkan skill dengan program & assessment terstruktur",
+    cta: { label: "Jelajahi program", href: "/learning" },
     leftLinks: [
-      { label: "For Enterprises", href: "/features" },
-      { label: "For Startups", href: "/features" },
-      { label: "For Agencies", href: "/features" },
-      { label: "For Freelancers", href: "/features" },
+      { label: "Program Pelatihan", href: "/learning" },
+      { label: "Assessment & Sertifikasi", href: "/learning" },
+      { label: "Career Path", href: "/learning" },
+      { label: "Katalog Kursus", href: "/learning" },
     ],
-    leftDescription: "Whether you're a startup or enterprise, we have the right solution for your team.",
+    leftDescription: "Akses program pelatihan, assessment kompetensi, dan sertifikasi untuk meningkatkan karir Anda.",
     items: [
-      { icon: Building2, title: "For Enterprises", description: "Scale your workforce globally", href: "/features" },
-      { icon: Target, title: "For Startups", description: "Build your dream team fast", href: "/features" },
-      { icon: Users, title: "For Agencies", description: "Manage client projects", href: "/features" },
-      { icon: Globe, title: "For Freelancers", description: "Find overseas opportunities", href: "/features" },
-    ],
-  },
-  {
-    label: "Resources",
-    tagline: "Learn, grow, and stay informed with Oveersea",
-    cta: { label: "Browse resources", href: "/learning" },
-    leftLinks: [
-      { label: "Learning Hub", href: "/learning" },
-      { label: "Certifications", href: "/learning" },
-      { label: "Blog & Insights", href: "/learning" },
-      { label: "Help Center", href: "/learning" },
-    ],
-    leftDescription: "Access learning materials, certifications, and industry insights to level up your career.",
-    items: [
-      { icon: GraduationCap, title: "Learning Hub", description: "Courses & skill development", href: "/learning" },
-      { icon: Award, title: "Certifications", description: "Get certified credentials", href: "/learning" },
-      { icon: BookOpen, title: "Blog & Insights", description: "Industry news & trends", href: "/learning" },
-      { icon: HeadphonesIcon, title: "Help Center", description: "Support & documentation", href: "/learning" },
+      { icon: GraduationCap, title: "Program Pelatihan", description: "Kursus & pengembangan skill", href: "/learning" },
+      { icon: ClipboardCheck, title: "Assessment", description: "Uji kompetensi & skill scoring", href: "/learning" },
+      { icon: Award, title: "Sertifikasi", description: "Raih kredensial terverifikasi", href: "/learning" },
+      { icon: Target, title: "Career Path", description: "Pemetaan jalur karir ideal", href: "/learning" },
     ],
   },
   {
     label: "Jobs",
-    tagline: "Career-ready ecosystem by Oveersea",
-    cta: { label: "View all jobs", href: "/matchmaking" },
+    tagline: "Temukan peluang karir terbaik melalui Oveersea",
+    cta: { label: "Lihat semua lowongan", href: "/matchmaking" },
     leftLinks: [
-      { label: "All Jobs", href: "/matchmaking" },
+      { label: "Semua Lowongan", href: "/matchmaking" },
       { label: "Overseas Jobs", href: "/matchmaking" },
       { label: "Remote Jobs", href: "/matchmaking" },
       { label: "Full-time", href: "/matchmaking" },
     ],
-    leftDescription: "Discover the best career opportunities domestically and internationally through Oveersea.",
+    leftDescription: "Jelajahi peluang karir domestik & internasional dengan sistem matchmaking bertenaga AI.",
     items: [
-      { icon: Briefcase, title: "All Jobs", description: "Browse all latest job openings", href: "/matchmaking" },
-      { icon: Globe, title: "Overseas Jobs", description: "International career opportunities", href: "/matchmaking" },
-      { icon: Monitor, title: "Remote Jobs", description: "Work from anywhere", href: "/matchmaking" },
-      { icon: Building2, title: "Full-time", description: "Full-time positions", href: "/matchmaking" },
+      { icon: Briefcase, title: "Semua Lowongan", description: "Telusuri semua posisi tersedia", href: "/matchmaking" },
+      { icon: Globe, title: "Overseas Jobs", description: "Peluang karir internasional", href: "/matchmaking" },
+      { icon: Monitor, title: "Remote Jobs", description: "Kerja dari mana saja", href: "/matchmaking" },
+      { icon: Users, title: "Full-time", description: "Posisi penuh waktu", href: "/matchmaking" },
     ],
   },
 ];
