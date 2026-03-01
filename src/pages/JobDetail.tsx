@@ -369,11 +369,18 @@ const JobDetail = () => {
                   </div>
                 ) : (
                   <div>
-                    <Button className="w-full" size="lg" onClick={() => setShowApplyForm(true)}>
+                    {/* Match Score Indicator */}
+                    <div className={`rounded-xl p-3 mb-3 text-center ${score >= 70 ? "bg-primary/10" : "bg-destructive/10"}`}>
+                      <p className={`text-2xl font-bold ${score >= 70 ? "text-primary" : "text-destructive"}`}>{score}%</p>
+                      <p className={`text-xs font-medium ${score >= 70 ? "text-primary" : "text-destructive"}`}>
+                        {score >= 70 ? "Match — Anda memenuhi syarat" : "Match terlalu rendah (min 70%)"}
+                      </p>
+                    </div>
+                    <Button className="w-full" size="lg" onClick={() => setShowApplyForm(true)} disabled={score < 70}>
                       <Send className="w-4 h-4" /> Lamar Sekarang
                     </Button>
                     <p className="text-xs text-muted-foreground text-center mt-2">
-                      Gratis, tanpa biaya
+                      {score >= 70 ? "Gratis, tanpa biaya" : "Tingkatkan skill & pengalaman Anda untuk melamar"}
                     </p>
                   </div>
                 )}
