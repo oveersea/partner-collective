@@ -133,7 +133,7 @@ const AdminUserDetail = () => {
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
-  const [skillInput, setSkillInput] = useState("");
+  
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -229,17 +229,6 @@ const AdminUserDetail = () => {
 
   const set = (key: string, value: any) => setEditData((prev) => ({ ...prev, [key]: value }));
 
-  const addSkill = () => {
-    const s = skillInput.trim();
-    if (s && !(editData.skills || []).includes(s)) {
-      set("skills", [...(editData.skills || []), s]);
-      setSkillInput("");
-    }
-  };
-
-  const removeSkill = (skill: string) => {
-    set("skills", (editData.skills || []).filter((s) => s !== skill));
-  };
 
   const kycColor = (s: string) => {
     if (s === "approved" || s === "verified") return "text-primary bg-primary/10";
@@ -432,37 +421,7 @@ const AdminUserDetail = () => {
                 </div>
               </div>
 
-              {/* General Skills Tags */}
-              <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
-                <h2 className="text-sm font-semibold text-card-foreground mb-3">Skills (Tags)</h2>
-                {editing ? (
-                  <div>
-                    <div className="flex gap-2 mb-3">
-                      <Input
-                        placeholder="Tambah skill..."
-                        value={skillInput}
-                        onChange={(e) => setSkillInput(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
-                      />
-                      <Button variant="outline" size="sm" onClick={addSkill}>Tambah</Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {(editData.skills || []).map((s) => (
-                        <span key={s} className="text-sm px-3 py-1.5 rounded-full bg-muted text-muted-foreground flex items-center gap-1">
-                          {s}
-                          <button onClick={() => removeSkill(s)} className="hover:text-destructive ml-1">&times;</button>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {(profile.skills || []).length > 0 ? profile.skills!.map((s) => (
-                      <span key={s} className="text-sm px-3 py-1.5 rounded-full bg-muted text-muted-foreground">{s}</span>
-                    )) : <p className="text-sm text-muted-foreground">—</p>}
-                  </div>
-                )}
-              </div>
+
             </div>
 
             {/* Right: Sidebar */}
