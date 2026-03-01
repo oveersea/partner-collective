@@ -136,40 +136,65 @@ const JobDetail = () => {
         status: pct >= 0.7 ? "pass" : pct >= 0.4 ? "partial" : "fail",
       });
     } else {
-      criteria.push({ label: "Kecocokan Skill", weight: 50, score: 25, maxScore: 50, detail: "Tidak ada syarat skill", status: "partial" });
+      criteria.push({ label: "Kecocokan Skill", weight: 50, score: 0, maxScore: 50, detail: "Perusahaan belum mengisi skill", status: "fail" });
     }
 
     // 2. Experience (30%)
-    const minExp = opp.min_experience_years || 0;
+    const minExp = opp.min_experience_years;
     const userExp = profile?.years_of_experience || 0;
     let expPts = 0;
     let expStatus: "pass" | "partial" | "fail" = "fail";
-    if (minExp === 0) { expPts = 30; expStatus = "pass"; }
-    else if (userExp >= minExp) { expPts = 30; expStatus = "pass"; }
-    else if (userExp >= minExp - 1) { expPts = 20; expStatus = "partial"; }
-    else if (userExp > 0) { expPts = 10; expStatus = "fail"; }
-    criteria.push({
-      label: "Pengalaman Kerja",
-      weight: 30,
-      score: expPts,
-      maxScore: 30,
-      detail: minExp > 0 ? `${userExp} tahun (min ${minExp} tahun)` : "Tidak ada syarat pengalaman",
-      status: expStatus,
-    });
+    if (minExp == null || minExp === 0) {
+      // Perusahaan tidak mengisi syarat pengalaman → skor 0
+      criteria.push({
+        label: "Pengalaman Kerja",
+        weight: 30,
+        score: 0,
+        maxScore: 30,
+        detail: "Perusahaan belum mengisi syarat pengalaman",
+        status: "fail",
+      });
+    } else {
+      if (userExp >= minExp) { expPts = 30; expStatus = "pass"; }
+      else if (userExp >= minExp - 1) { expPts = 20; expStatus = "partial"; }
+      else if (userExp > 0) { expPts = 10; expStatus = "fail"; }
+      criteria.push({
+        label: "Pengalaman Kerja",
+        weight: 30,
+        score: expPts,
+        maxScore: 30,
+        detail: `${userExp} tahun (min ${minExp} tahun)`,
+        status: expStatus,
+      });
+    }
 
-    // 3. Profile completeness (20%)
+    // 3. Lokasi / Remote (10%)
+    if (opp.is_remote != null || (opp.location && opp.location.trim() !== "")) {
+      criteria.push({
+        label: "Lokasi / Remote",
+        weight: 10,
+        score: 10,
+        maxScore: 10,
+        detail: opp.is_remote ? "Remote — cocok untuk semua" : `Lokasi: ${opp.location}`,
+        status: "pass",
+      });
+    } else {
+      criteria.push({ label: "Lokasi / Remote", weight: 10, score: 0, maxScore: 10, detail: "Perusahaan belum mengisi lokasi", status: "fail" });
+    }
+
+    // 4. Kelengkapan Profil (10%)
     let completePts = 0;
     const checks: string[] = [];
-    if (userSkills.length > 0) { completePts += 8; checks.push("skill"); }
-    if (userExp > 0) { completePts += 6; checks.push("pengalaman"); }
-    if (profile?.highest_education) { completePts += 6; checks.push("pendidikan"); }
+    if (userSkills.length > 0) { completePts += 4; checks.push("skill"); }
+    if (userExp > 0) { completePts += 3; checks.push("pengalaman"); }
+    if (profile?.highest_education) { completePts += 3; checks.push("pendidikan"); }
     criteria.push({
       label: "Kelengkapan Profil",
-      weight: 20,
+      weight: 10,
       score: completePts,
-      maxScore: 20,
+      maxScore: 10,
       detail: checks.length > 0 ? `${checks.join(", ")} terisi` : "Profil belum lengkap",
-      status: completePts >= 14 ? "pass" : completePts >= 8 ? "partial" : "fail",
+      status: completePts >= 7 ? "pass" : completePts >= 4 ? "partial" : "fail",
     });
 
     const total = Math.min(criteria.reduce((a, c) => a + c.score, 0), 100);
