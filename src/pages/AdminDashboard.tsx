@@ -21,7 +21,6 @@ import AdminRequests from "@/components/admin/AdminRequests";
 import AdminApprovals from "@/components/admin/AdminApprovals";
 import AdminTeams from "@/components/admin/AdminTeams";
 import { LogOut, User, LayoutDashboard } from "lucide-react";
-import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -105,7 +104,15 @@ const AdminDashboard = () => {
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4 sticky top-0 z-40">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
-              <h1 className="text-sm font-semibold text-foreground capitalize">{activeSection === "overview" ? "Dashboard Admin" : activeSection.replace("_", " ")}</h1>
+              <span className="text-sm font-semibold text-foreground">Dashboard Admin</span>
+              {activeSection !== "overview" && (
+                <>
+                  <span className="mx-1 h-4 w-px bg-border" />
+                  <span className="text-sm text-muted-foreground">
+                    {adminSections.find(s => s.id === activeSection)?.label || activeSection}
+                  </span>
+                </>
+              )}
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -125,7 +132,6 @@ const AdminDashboard = () => {
                   <LayoutDashboard className="w-4 h-4 mr-2" />
                   Dashboard
                 </DropdownMenuItem>
-                
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={async () => { await signOut(); navigate("/"); }} className="cursor-pointer text-destructive focus:text-destructive">
                   <LogOut className="w-4 h-4 mr-2" />
@@ -134,10 +140,6 @@ const AdminDashboard = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </header>
-          <DashboardBreadcrumb items={[
-            { label: "Admin", href: activeSection !== "overview" ? undefined : undefined },
-            ...(activeSection !== "overview" ? [{ label: adminSections.find(s => s.id === activeSection)?.label || activeSection }] : []),
-          ]} />
           <main className="flex-1 p-6 overflow-auto">
             {renderContent()}
           </main>
