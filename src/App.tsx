@@ -20,6 +20,7 @@ import Learning from "./pages/Learning";
 import LearningDetail from "./pages/LearningDetail";
 import CreditBalance from "./pages/CreditBalance";
 import AdminProgramEdit from "./pages/AdminProgramEdit";
+import AdminAssessmentDetail from "./pages/AdminAssessmentDetail";
 import NotFound from "./pages/NotFound";
 import ServiceDetail from "./pages/ServiceDetail";
 import ServiceOrder from "./pages/ServiceOrder";
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/user/:userId" element={<AdminUserDetail />} />
             <Route path="/admin/program/:programId" element={<AdminProgramEdit />} />
+            <Route path="/admin/assessment/:testId" element={<AdminAssessmentDetail />} />
             <Route path="/learning" element={<Learning />} />
             <Route path="/learning/:slug" element={<LearningDetail />} />
             <Route path="/credit-balance" element={<CreditBalance />} />

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,7 @@ interface AssessmentEvidence {
 const PAGE_SIZE = 20;
 
 const AdminAssessment = () => {
+  const navigate = useNavigate();
   const [tests, setTests] = useState<CompetencyTest[]>([]);
   const [orders, setOrders] = useState<AssessmentOrder[]>([]);
   const [attempts, setAttempts] = useState<AssessmentAttempt[]>([]);
@@ -275,19 +277,18 @@ const AdminAssessment = () => {
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Waktu</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Harga</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   Array.from({ length: 3 }).map((_, i) => (
-                    <tr key={i} className="border-b border-border"><td colSpan={10} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
+                    <tr key={i} className="border-b border-border"><td colSpan={9} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
                   ))
                 ) : pagedTests.length === 0 ? (
-                  <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+                  <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
                 ) : (
                   pagedTests.map((t) => (
-                    <tr key={t.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                    <tr key={t.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/assessment/${t.id}`)}>
                       <td className="px-4 py-3 font-medium text-foreground max-w-[200px] truncate">{t.title}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{t.skill_name}</td>
                       <td className="px-4 py-3"><Badge variant="secondary" className="text-xs">{t.assessment_type}</Badge></td>
@@ -300,11 +301,6 @@ const AdminAssessment = () => {
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${t.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                           {t.is_active ? "Aktif" : "Nonaktif"}
                         </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Button size="sm" variant="ghost" onClick={() => toggleActive(t.id, t.is_active)}>
-                          {t.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </Button>
                       </td>
                     </tr>
                   ))
