@@ -93,7 +93,6 @@ const HiringRequest = () => {
 
     setSubmitting(true);
     try {
-      // Ensure client_profile exists
       const { data: existing } = await supabase
         .from("client_profiles")
         .select("id")
@@ -144,191 +143,238 @@ const HiringRequest = () => {
 
   if (authLoading) return null;
 
+  const creditCost = form.hiring_type === "fast" ? 10 * (Number(form.positions_count) || 1) : Number(form.positions_count) || 1;
+  const employmentLabels: Record<string, string> = { fulltime: "Full-time", parttime: "Part-time", freelance: "Freelance", contract: "Kontrak" };
+  const workModeLabels: Record<string, string> = { remote: "🌍 Remote", onsite: "🏢 On-site", hybrid: "🔄 Hybrid" };
+
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
-      <div className="container mx-auto px-6 py-8 max-w-2xl">
+      <div className="w-full px-6 py-8">
         <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
         </button>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <UserSearch className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">Hiring Request</h1>
-          <p className="text-muted-foreground text-sm">Temukan partner atau tim untuk bekerja bersama Anda</p>
-        </motion.div>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left: Form (70%) */}
+          <div className="lg:w-[70%]">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+              <h1 className="text-2xl font-bold text-foreground mb-2">Hiring Request</h1>
+              <p className="text-muted-foreground text-sm">Temukan partner atau tim untuk bekerja bersama Anda</p>
+            </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-6">
-          {/* Title */}
-          <div>
-            <Label className="text-card-foreground">Judul Posisi *</Label>
-            <Input className="mt-1.5" placeholder="Contoh: Senior React Developer" value={form.title} onChange={(e) => set("title", e.target.value)} />
-            {errors.title && <p className="text-xs text-destructive mt-1">{errors.title}</p>}
-          </div>
-
-          {/* Description */}
-          <div>
-            <Label className="text-card-foreground">Deskripsi Pekerjaan *</Label>
-            <Textarea className="mt-1.5" rows={4} placeholder="Jelaskan tanggung jawab, kualifikasi, dan detail posisi..." value={form.description} onChange={(e) => set("description", e.target.value)} />
-            {errors.description && <p className="text-xs text-destructive mt-1">{errors.description}</p>}
-          </div>
-
-          {/* Employment Type */}
-          <div>
-            <Label className="text-card-foreground">Tipe Pekerjaan</Label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1.5">
-              {[
-                { value: "fulltime", label: "Full-time", icon: Briefcase },
-                { value: "parttime", label: "Part-time", icon: Clock },
-                { value: "freelance", label: "Freelance", icon: UserSearch },
-                { value: "contract", label: "Kontrak", icon: Briefcase },
-              ].map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => set("employment_type", opt.value)}
-                  className={`p-3 rounded-xl border text-sm font-medium transition-all text-center ${
-                    form.employment_type === opt.value
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:border-primary/30"
-                  }`}
-                >
-                  <opt.icon className="w-4 h-4 mx-auto mb-1" />
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Work Mode */}
-          <div>
-            <Label className="text-card-foreground">Mode Kerja</Label>
-            <div className="grid grid-cols-3 gap-2 mt-1.5">
-              {[
-                { value: "remote", label: "Remote", icon: "🌍" },
-                { value: "onsite", label: "On-site", icon: "🏢" },
-                { value: "hybrid", label: "Hybrid", icon: "🔄" },
-              ].map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => set("work_mode", opt.value)}
-                  className={`p-3 rounded-xl border text-sm font-medium transition-all text-center ${
-                    form.work_mode === opt.value
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:border-primary/30"
-                  }`}
-                >
-                  <span className="text-lg">{opt.icon}</span>
-                  <p className="mt-0.5">{opt.label}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Location (conditional) */}
-          {form.work_mode !== "remote" && (
-            <div>
-              <Label className="text-card-foreground">Lokasi</Label>
-              <div className="relative mt-1.5">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input className="pl-10" placeholder="Jakarta, Indonesia" value={form.location} onChange={(e) => set("location", e.target.value)} />
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-6">
+              {/* Title */}
+              <div>
+                <Label className="text-card-foreground">Judul Posisi *</Label>
+                <Input className="mt-1.5" placeholder="Contoh: Senior React Developer" value={form.title} onChange={(e) => set("title", e.target.value)} />
+                {errors.title && <p className="text-xs text-destructive mt-1">{errors.title}</p>}
               </div>
-            </div>
-          )}
 
-          {/* Skills */}
-          <div>
-            <Label className="text-card-foreground">Skills yang Dibutuhkan *</Label>
-            <div className="flex gap-2 mt-1.5">
-              <Input
-                placeholder="Tambah skill, tekan Enter"
-                value={form.skillsInput}
-                onChange={(e) => set("skillsInput", e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }}
-              />
-              <Button type="button" variant="outline" onClick={addSkill} size="sm">+</Button>
-            </div>
-            {form.required_skills.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {form.required_skills.map((skill) => (
-                  <span key={skill} className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary flex items-center gap-1">
-                    {skill}
-                    <button onClick={() => removeSkill(skill)} className="hover:text-destructive ml-0.5">&times;</button>
-                  </span>
-                ))}
+              {/* Description */}
+              <div>
+                <Label className="text-card-foreground">Deskripsi Pekerjaan *</Label>
+                <Textarea className="mt-1.5" rows={4} placeholder="Jelaskan tanggung jawab, kualifikasi, dan detail posisi..." value={form.description} onChange={(e) => set("description", e.target.value)} />
+                {errors.description && <p className="text-xs text-destructive mt-1">{errors.description}</p>}
               </div>
-            )}
-            {errors.required_skills && <p className="text-xs text-destructive mt-1">{errors.required_skills}</p>}
+
+              {/* Employment Type */}
+              <div>
+                <Label className="text-card-foreground">Tipe Pekerjaan</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1.5">
+                  {[
+                    { value: "fulltime", label: "Full-time", icon: Briefcase },
+                    { value: "parttime", label: "Part-time", icon: Clock },
+                    { value: "freelance", label: "Freelance", icon: UserSearch },
+                    { value: "contract", label: "Kontrak", icon: Briefcase },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => set("employment_type", opt.value)}
+                      className={`p-3 rounded-xl border text-sm font-medium transition-all text-center ${
+                        form.employment_type === opt.value
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:border-primary/30"
+                      }`}
+                    >
+                      <opt.icon className="w-4 h-4 mx-auto mb-1" />
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Work Mode */}
+              <div>
+                <Label className="text-card-foreground">Mode Kerja</Label>
+                <div className="grid grid-cols-3 gap-2 mt-1.5">
+                  {[
+                    { value: "remote", label: "Remote", icon: "🌍" },
+                    { value: "onsite", label: "On-site", icon: "🏢" },
+                    { value: "hybrid", label: "Hybrid", icon: "🔄" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => set("work_mode", opt.value)}
+                      className={`p-3 rounded-xl border text-sm font-medium transition-all text-center ${
+                        form.work_mode === opt.value
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:border-primary/30"
+                      }`}
+                    >
+                      <span className="text-lg">{opt.icon}</span>
+                      <p className="mt-0.5">{opt.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Location (conditional) */}
+              {form.work_mode !== "remote" && (
+                <div>
+                  <Label className="text-card-foreground">Lokasi</Label>
+                  <div className="relative mt-1.5">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input className="pl-10" placeholder="Jakarta, Indonesia" value={form.location} onChange={(e) => set("location", e.target.value)} />
+                  </div>
+                </div>
+              )}
+
+              {/* Skills */}
+              <div>
+                <Label className="text-card-foreground">Skills yang Dibutuhkan *</Label>
+                <div className="flex gap-2 mt-1.5">
+                  <Input
+                    placeholder="Tambah skill, tekan Enter"
+                    value={form.skillsInput}
+                    onChange={(e) => set("skillsInput", e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }}
+                  />
+                  <Button type="button" variant="outline" onClick={addSkill} size="sm">+</Button>
+                </div>
+                {form.required_skills.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {form.required_skills.map((skill) => (
+                      <span key={skill} className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary flex items-center gap-1">
+                        {skill}
+                        <button onClick={() => removeSkill(skill)} className="hover:text-destructive ml-0.5">&times;</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {errors.required_skills && <p className="text-xs text-destructive mt-1">{errors.required_skills}</p>}
+              </div>
+
+              {/* Experience & Positions */}
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-card-foreground">Pengalaman Min (tahun)</Label>
+                  <Input className="mt-1.5" type="number" min="0" max="50" placeholder="0" value={form.experience_min} onChange={(e) => set("experience_min", e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-card-foreground">Pengalaman Max (tahun)</Label>
+                  <Input className="mt-1.5" type="number" min="0" max="50" placeholder="10" value={form.experience_max} onChange={(e) => set("experience_max", e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-card-foreground">Jumlah Posisi</Label>
+                  <Input className="mt-1.5" type="number" min="1" max="100" value={form.positions_count} onChange={(e) => set("positions_count", e.target.value)} />
+                </div>
+              </div>
+
+              {/* Hiring Type (SLA) */}
+              <div>
+                <Label className="text-card-foreground">Kecepatan Pencarian</Label>
+                <div className="grid grid-cols-2 gap-3 mt-1.5">
+                  <button
+                    type="button"
+                    onClick={() => set("hiring_type", "normal")}
+                    className={`p-4 rounded-xl border text-left transition-all ${
+                      form.hiring_type === "normal"
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-primary/30"
+                    }`}
+                  >
+                    <Clock className={`w-5 h-5 mb-2 ${form.hiring_type === "normal" ? "text-primary" : "text-muted-foreground"}`} />
+                    <p className="font-semibold text-sm text-card-foreground">Normal</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">SLA 14 hari • 1 kredit/posisi</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => set("hiring_type", "fast")}
+                    className={`p-4 rounded-xl border text-left transition-all ${
+                      form.hiring_type === "fast"
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-primary/30"
+                    }`}
+                  >
+                    <Zap className={`w-5 h-5 mb-2 ${form.hiring_type === "fast" ? "text-primary" : "text-muted-foreground"}`} />
+                    <p className="font-semibold text-sm text-card-foreground">Fast Track</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">SLA 3 hari • 10 kredit/posisi</p>
+                  </button>
+                </div>
+              </div>
+
+              <Button className="w-full" size="lg" onClick={handleSubmit} disabled={submitting}>
+                {submitting ? "Mengirim..." : "Buat Hiring Request"}
+              </Button>
+            </motion.div>
           </div>
 
-          {/* Experience */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-card-foreground">Pengalaman Min (tahun)</Label>
-              <Input className="mt-1.5" type="number" min="0" max="50" placeholder="0" value={form.experience_min} onChange={(e) => set("experience_min", e.target.value)} />
-            </div>
-            <div>
-              <Label className="text-card-foreground">Pengalaman Max (tahun)</Label>
-              <Input className="mt-1.5" type="number" min="0" max="50" placeholder="10" value={form.experience_max} onChange={(e) => set("experience_max", e.target.value)} />
-            </div>
+          {/* Right: Summary sidebar (30%) */}
+          <div className="lg:w-[30%]">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card rounded-2xl border border-border p-6 shadow-card sticky top-24">
+              <h3 className="text-sm font-semibold text-card-foreground mb-4">Ringkasan Hiring</h3>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground text-xs mb-1">Judul Posisi</p>
+                  <p className="text-card-foreground font-medium">{form.title || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs mb-1">Tipe Pekerjaan</p>
+                  <p className="text-card-foreground font-medium">{employmentLabels[form.employment_type]}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs mb-1">Mode Kerja</p>
+                  <p className="text-card-foreground font-medium">{workModeLabels[form.work_mode]}</p>
+                </div>
+                {form.required_skills.length > 0 && (
+                  <div>
+                    <p className="text-muted-foreground text-xs mb-1">Skills</p>
+                    <div className="flex flex-wrap gap-1">
+                      {form.required_skills.map((s) => (
+                        <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {(form.experience_min || form.experience_max) && (
+                  <div>
+                    <p className="text-muted-foreground text-xs mb-1">Pengalaman</p>
+                    <p className="text-card-foreground font-medium">
+                      {form.experience_min || "0"} - {form.experience_max || "∞"} tahun
+                    </p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-muted-foreground text-xs mb-1">Jumlah Posisi</p>
+                  <p className="text-card-foreground font-medium">{form.positions_count || "1"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs mb-1">Kecepatan</p>
+                  <p className="text-card-foreground font-medium">{form.hiring_type === "fast" ? "⚡ Fast Track" : "🕐 Normal"}</p>
+                </div>
+                <div className="border-t border-border pt-3">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Estimasi kredit:</span>
+                    <span className="font-bold text-card-foreground">{creditCost} kredit</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
-
-          {/* Positions */}
-          <div>
-            <Label className="text-card-foreground">Jumlah Posisi</Label>
-            <Input className="mt-1.5" type="number" min="1" max="100" value={form.positions_count} onChange={(e) => set("positions_count", e.target.value)} />
-          </div>
-
-          {/* Hiring Type (SLA) */}
-          <div>
-            <Label className="text-card-foreground">Kecepatan Pencarian</Label>
-            <div className="grid grid-cols-2 gap-3 mt-1.5">
-              <button
-                type="button"
-                onClick={() => set("hiring_type", "normal")}
-                className={`p-4 rounded-xl border text-left transition-all ${
-                  form.hiring_type === "normal"
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/30"
-                }`}
-              >
-                <Clock className={`w-5 h-5 mb-2 ${form.hiring_type === "normal" ? "text-primary" : "text-muted-foreground"}`} />
-                <p className="font-semibold text-sm text-card-foreground">Normal</p>
-                <p className="text-xs text-muted-foreground mt-0.5">SLA 14 hari • 1 kredit/posisi</p>
-              </button>
-              <button
-                type="button"
-                onClick={() => set("hiring_type", "fast")}
-                className={`p-4 rounded-xl border text-left transition-all ${
-                  form.hiring_type === "fast"
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/30"
-                }`}
-              >
-                <Zap className={`w-5 h-5 mb-2 ${form.hiring_type === "fast" ? "text-primary" : "text-muted-foreground"}`} />
-                <p className="font-semibold text-sm text-card-foreground">Fast Track</p>
-                <p className="text-xs text-muted-foreground mt-0.5">SLA 3 hari • 10 kredit/posisi</p>
-              </button>
-            </div>
-          </div>
-
-          {/* Cost summary */}
-          <div className="bg-muted rounded-xl p-4">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Estimasi biaya kredit:</span>
-              <span className="font-bold text-card-foreground">
-                {form.hiring_type === "fast" ? 10 * (Number(form.positions_count) || 1) : Number(form.positions_count) || 1} kredit
-              </span>
-            </div>
-          </div>
-
-          <Button className="w-full" size="lg" onClick={handleSubmit} disabled={submitting}>
-            {submitting ? "Mengirim..." : "Buat Hiring Request"}
-          </Button>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

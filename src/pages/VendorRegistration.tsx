@@ -134,7 +134,6 @@ const VendorRegistration = () => {
 
     setSubmitting(true);
     try {
-      // Generate slug
       const slug = form.name
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, "")
@@ -142,7 +141,6 @@ const VendorRegistration = () => {
         .replace(/-+/g, "-")
         .slice(0, 100) + "-" + Date.now();
 
-      // 1. Create business profile
       const { data: business, error: bizErr } = await supabase
         .from("business_profiles")
         .insert({
@@ -167,7 +165,6 @@ const VendorRegistration = () => {
 
       if (bizErr) throw bizErr;
 
-      // 2. Add user as owner
       await supabase.from("business_members").insert({
         business_id: business.id,
         user_id: user!.id,
@@ -175,7 +172,6 @@ const VendorRegistration = () => {
         status: "active",
       });
 
-      // 3. Upload documents
       const docsToUpload = docs.filter((d) => d.file);
       for (const doc of docsToUpload) {
         const uploaded = await uploadFile(doc.file!, doc.type);
@@ -201,10 +197,14 @@ const VendorRegistration = () => {
 
   if (authLoading) return null;
 
+  const uploadedCount = docs.filter((d) => d.file).length;
+  const requiredCount = docs.filter((d) => d.required).length;
+  const requiredUploaded = docs.filter((d) => d.required && d.file).length;
+
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
-      <div className="container mx-auto px-6 py-8 max-w-2xl">
+      <div className="w-full px-6 py-8">
         <button
           onClick={() => navigate("/dashboard")}
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
@@ -212,249 +212,291 @@ const VendorRegistration = () => {
           <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
         </button>
 
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <Building2 className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">Registrasi Vendor</h1>
-          <p className="text-muted-foreground text-sm">
-            Daftarkan perusahaan Anda dan upload dokumen legalitas
-          </p>
-        </motion.div>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left: Form (70%) */}
+          <div className="lg:w-[70%]">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+              <h1 className="text-2xl font-bold text-foreground mb-2">Registrasi Vendor</h1>
+              <p className="text-muted-foreground text-sm">Daftarkan perusahaan Anda dan upload dokumen legalitas</p>
+            </motion.div>
 
-        {/* Step indicator */}
-        <div className="flex items-center gap-3 mb-8 justify-center">
-          {[1, 2].map((s) => (
-            <div key={s} className="flex items-center gap-2">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-                  step >= s
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {step > s ? <CheckCircle2 className="w-4 h-4" /> : s}
-              </div>
-              <span className={`text-sm font-medium ${step >= s ? "text-foreground" : "text-muted-foreground"}`}>
-                {s === 1 ? "Info Perusahaan" : "Dokumen Legalitas"}
-              </span>
-              {s === 1 && <div className="w-8 h-0.5 bg-border mx-1" />}
-            </div>
-          ))}
-        </div>
-
-        {/* Step 1: Company Info */}
-        {step === 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-5"
-          >
-            <div>
-              <Label className="text-card-foreground">Nama Perusahaan *</Label>
-              <Input className="mt-1.5" placeholder="PT Contoh Indonesia" value={form.name} onChange={(e) => set("name", e.target.value)} />
-              {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
-            </div>
-
-            <div>
-              <Label className="text-card-foreground">Deskripsi Perusahaan</Label>
-              <Textarea className="mt-1.5" rows={3} placeholder="Deskripsi singkat tentang perusahaan Anda..." value={form.description} onChange={(e) => set("description", e.target.value)} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-card-foreground">Industri *</Label>
-                <select
-                  className="mt-1.5 w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
-                  value={form.industry}
-                  onChange={(e) => set("industry", e.target.value)}
-                >
-                  <option value="">Pilih industri</option>
-                  {industries.map((i) => (
-                    <option key={i} value={i}>{i}</option>
-                  ))}
-                </select>
-                {errors.industry && <p className="text-xs text-destructive mt-1">{errors.industry}</p>}
-              </div>
-              <div>
-                <Label className="text-card-foreground">Ukuran Perusahaan *</Label>
-                <select
-                  className="mt-1.5 w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
-                  value={form.company_size}
-                  onChange={(e) => set("company_size", e.target.value)}
-                >
-                  <option value="">Pilih ukuran</option>
-                  {companySizes.map((s) => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </select>
-                {errors.company_size && <p className="text-xs text-destructive mt-1">{errors.company_size}</p>}
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-card-foreground">Alamat *</Label>
-              <Textarea className="mt-1.5" rows={2} placeholder="Jl. Sudirman No. 1, Jakarta" value={form.address} onChange={(e) => set("address", e.target.value)} />
-              {errors.address && <p className="text-xs text-destructive mt-1">{errors.address}</p>}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-card-foreground">Kota *</Label>
-                <Input className="mt-1.5" placeholder="Jakarta" value={form.city} onChange={(e) => set("city", e.target.value)} />
-                {errors.city && <p className="text-xs text-destructive mt-1">{errors.city}</p>}
-              </div>
-              <div>
-                <Label className="text-card-foreground">Telepon *</Label>
-                <Input className="mt-1.5" placeholder="021-12345678" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
-                {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-card-foreground">Email Perusahaan *</Label>
-                <Input className="mt-1.5" type="email" placeholder="info@perusahaan.com" value={form.email} onChange={(e) => set("email", e.target.value)} />
-                {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
-              </div>
-              <div>
-                <Label className="text-card-foreground">Website</Label>
-                <Input className="mt-1.5" placeholder="https://perusahaan.com" value={form.website} onChange={(e) => set("website", e.target.value)} />
-                {errors.website && <p className="text-xs text-destructive mt-1">{errors.website}</p>}
-              </div>
-            </div>
-
-            {/* Legal numbers */}
-            <div className="border-t border-border pt-5">
-              <p className="text-sm font-semibold text-card-foreground mb-3">Nomor Legalitas (opsional di tahap ini)</p>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <Label className="text-card-foreground text-xs">NIB</Label>
-                  <Input className="mt-1" placeholder="1234567890" value={form.nib} onChange={(e) => set("nib", e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-card-foreground text-xs">NPWP</Label>
-                  <Input className="mt-1" placeholder="01.234.567.8-901.000" value={form.npwp} onChange={(e) => set("npwp", e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-card-foreground text-xs">No. Akta</Label>
-                  <Input className="mt-1" placeholder="AHU-00000" value={form.akta_number} onChange={(e) => set("akta_number", e.target.value)} />
-                </div>
-              </div>
-            </div>
-
-            <Button
-              className="w-full"
-              size="lg"
-              onClick={() => { if (validateStep1()) setStep(2); }}
-            >
-              Lanjut ke Upload Dokumen
-            </Button>
-          </motion.div>
-        )}
-
-        {/* Step 2: Document Upload */}
-        {step === 2 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-5"
-          >
-            <div>
-              <h2 className="text-lg font-bold text-card-foreground mb-1">Upload Dokumen Legalitas</h2>
-              <p className="text-sm text-muted-foreground">
-                Upload dokumen perusahaan Anda. Format: JPG, PNG, PDF. Maks 10MB per file.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {docs.map((doc, idx) => (
-                <div
-                  key={doc.type}
-                  className={`rounded-xl border p-4 transition-colors ${
-                    doc.file
-                      ? "border-primary/30 bg-primary/5"
-                      : doc.required
-                      ? "border-border"
-                      : "border-dashed border-border"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <FileText className={`w-4 h-4 ${doc.file ? "text-primary" : "text-muted-foreground"}`} />
-                      <span className="text-sm font-medium text-card-foreground">
-                        {doc.label}
-                        {doc.required && <span className="text-destructive ml-1">*</span>}
-                      </span>
-                    </div>
-                    {doc.file && (
-                      <button
-                        onClick={() => setDocFile(idx, null)}
-                        className="text-muted-foreground hover:text-destructive transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
+            {/* Step indicator */}
+            <div className="flex items-center gap-3 mb-8">
+              {[1, 2].map((s) => (
+                <div key={s} className="flex items-center gap-2">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                      step >= s
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {step > s ? <CheckCircle2 className="w-4 h-4" /> : s}
                   </div>
-
-                  {doc.file ? (
-                    <p className="text-xs text-primary flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      {doc.file.name} ({(doc.file.size / 1024 / 1024).toFixed(2)} MB)
-                    </p>
-                  ) : (
-                    <div className="relative">
-                      <Input
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.pdf"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file && file.size > 10 * 1024 * 1024) {
-                            toast.error("File terlalu besar. Maks 10MB.");
-                            return;
-                          }
-                          setDocFile(idx, file || null);
-                        }}
-                        className="cursor-pointer text-xs"
-                      />
-                    </div>
-                  )}
+                  <span className={`text-sm font-medium ${step >= s ? "text-foreground" : "text-muted-foreground"}`}>
+                    {s === 1 ? "Info Perusahaan" : "Dokumen Legalitas"}
+                  </span>
+                  {s === 1 && <div className="w-8 h-0.5 bg-border mx-1" />}
                 </div>
               ))}
             </div>
 
-            {/* Info */}
-            <div className="bg-muted rounded-xl p-4 text-sm text-muted-foreground space-y-1">
-              <p className="font-medium text-card-foreground">Informasi:</p>
-              <ul className="list-disc list-inside space-y-0.5 text-xs">
-                <li>Dokumen bertanda * wajib diunggah</li>
-                <li>Dokumen akan diverifikasi dalam 1-3 hari kerja</li>
-                <li>Pastikan dokumen masih berlaku dan terbaca jelas</li>
-                <li>Data perusahaan dijaga kerahasiaannya</li>
-              </ul>
-            </div>
+            {/* Step 1: Company Info */}
+            {step === 1 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-5"
+              >
+                <div>
+                  <Label className="text-card-foreground">Nama Perusahaan *</Label>
+                  <Input className="mt-1.5" placeholder="PT Contoh Indonesia" value={form.name} onChange={(e) => set("name", e.target.value)} />
+                  {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
+                </div>
 
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
-                Kembali
-              </Button>
-              <Button className="flex-1" size="lg" onClick={handleSubmit} disabled={submitting}>
-                {submitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Mendaftarkan...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4" />
-                    Daftarkan Vendor
-                  </>
+                <div>
+                  <Label className="text-card-foreground">Deskripsi Perusahaan</Label>
+                  <Textarea className="mt-1.5" rows={3} placeholder="Deskripsi singkat tentang perusahaan Anda..." value={form.description} onChange={(e) => set("description", e.target.value)} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-card-foreground">Industri *</Label>
+                    <select
+                      className="mt-1.5 w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                      value={form.industry}
+                      onChange={(e) => set("industry", e.target.value)}
+                    >
+                      <option value="">Pilih industri</option>
+                      {industries.map((i) => (
+                        <option key={i} value={i}>{i}</option>
+                      ))}
+                    </select>
+                    {errors.industry && <p className="text-xs text-destructive mt-1">{errors.industry}</p>}
+                  </div>
+                  <div>
+                    <Label className="text-card-foreground">Ukuran Perusahaan *</Label>
+                    <select
+                      className="mt-1.5 w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                      value={form.company_size}
+                      onChange={(e) => set("company_size", e.target.value)}
+                    >
+                      <option value="">Pilih ukuran</option>
+                      {companySizes.map((s) => (
+                        <option key={s.value} value={s.value}>{s.label}</option>
+                      ))}
+                    </select>
+                    {errors.company_size && <p className="text-xs text-destructive mt-1">{errors.company_size}</p>}
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-card-foreground">Alamat *</Label>
+                  <Textarea className="mt-1.5" rows={2} placeholder="Jl. Sudirman No. 1, Jakarta" value={form.address} onChange={(e) => set("address", e.target.value)} />
+                  {errors.address && <p className="text-xs text-destructive mt-1">{errors.address}</p>}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-card-foreground">Kota *</Label>
+                    <Input className="mt-1.5" placeholder="Jakarta" value={form.city} onChange={(e) => set("city", e.target.value)} />
+                    {errors.city && <p className="text-xs text-destructive mt-1">{errors.city}</p>}
+                  </div>
+                  <div>
+                    <Label className="text-card-foreground">Telepon *</Label>
+                    <Input className="mt-1.5" placeholder="021-12345678" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+                    {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-card-foreground">Email Perusahaan *</Label>
+                    <Input className="mt-1.5" type="email" placeholder="info@perusahaan.com" value={form.email} onChange={(e) => set("email", e.target.value)} />
+                    {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
+                  </div>
+                  <div>
+                    <Label className="text-card-foreground">Website</Label>
+                    <Input className="mt-1.5" placeholder="https://perusahaan.com" value={form.website} onChange={(e) => set("website", e.target.value)} />
+                    {errors.website && <p className="text-xs text-destructive mt-1">{errors.website}</p>}
+                  </div>
+                </div>
+
+                {/* Legal numbers */}
+                <div className="border-t border-border pt-5">
+                  <p className="text-sm font-semibold text-card-foreground mb-3">Nomor Legalitas (opsional di tahap ini)</p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <Label className="text-card-foreground text-xs">NIB</Label>
+                      <Input className="mt-1" placeholder="1234567890" value={form.nib} onChange={(e) => set("nib", e.target.value)} />
+                    </div>
+                    <div>
+                      <Label className="text-card-foreground text-xs">NPWP</Label>
+                      <Input className="mt-1" placeholder="01.234.567.8-901.000" value={form.npwp} onChange={(e) => set("npwp", e.target.value)} />
+                    </div>
+                    <div>
+                      <Label className="text-card-foreground text-xs">No. Akta</Label>
+                      <Input className="mt-1" placeholder="AHU-00000" value={form.akta_number} onChange={(e) => set("akta_number", e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => { if (validateStep1()) setStep(2); }}
+                >
+                  Lanjut ke Upload Dokumen
+                </Button>
+              </motion.div>
+            )}
+
+            {/* Step 2: Document Upload */}
+            {step === 2 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-5"
+              >
+                <div>
+                  <h2 className="text-lg font-bold text-card-foreground mb-1">Upload Dokumen Legalitas</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Upload dokumen perusahaan Anda. Format: JPG, PNG, PDF. Maks 10MB per file.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {docs.map((doc, idx) => (
+                    <div
+                      key={doc.type}
+                      className={`rounded-xl border p-4 transition-colors ${
+                        doc.file
+                          ? "border-primary/30 bg-primary/5"
+                          : doc.required
+                          ? "border-border"
+                          : "border-dashed border-border"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <FileText className={`w-4 h-4 ${doc.file ? "text-primary" : "text-muted-foreground"}`} />
+                          <span className="text-sm font-medium text-card-foreground">
+                            {doc.label}
+                            {doc.required && <span className="text-destructive ml-1">*</span>}
+                          </span>
+                        </div>
+                        {doc.file && (
+                          <button
+                            onClick={() => setDocFile(idx, null)}
+                            className="text-muted-foreground hover:text-destructive transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+
+                      {doc.file ? (
+                        <p className="text-xs text-primary flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          {doc.file.name} ({(doc.file.size / 1024 / 1024).toFixed(2)} MB)
+                        </p>
+                      ) : (
+                        <div className="relative">
+                          <Input
+                            type="file"
+                            accept=".jpg,.jpeg,.png,.pdf"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file && file.size > 10 * 1024 * 1024) {
+                                toast.error("File terlalu besar. Maks 10MB.");
+                                return;
+                              }
+                              setDocFile(idx, file || null);
+                            }}
+                            className="cursor-pointer text-xs"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Info */}
+                <div className="bg-muted rounded-xl p-4 text-sm text-muted-foreground space-y-1">
+                  <p className="font-medium text-card-foreground">Informasi:</p>
+                  <ul className="list-disc list-inside space-y-0.5 text-xs">
+                    <li>Dokumen bertanda * wajib diunggah</li>
+                    <li>Dokumen akan diverifikasi dalam 1-3 hari kerja</li>
+                    <li>Pastikan dokumen masih berlaku dan terbaca jelas</li>
+                    <li>Data perusahaan dijaga kerahasiaannya</li>
+                  </ul>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
+                    Kembali
+                  </Button>
+                  <Button className="flex-1" size="lg" onClick={handleSubmit} disabled={submitting}>
+                    {submitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Mendaftarkan...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        Daftarkan Vendor
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Right: Summary sidebar (30%) */}
+          <div className="lg:w-[30%]">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card rounded-2xl border border-border p-6 shadow-card sticky top-24">
+              <h3 className="text-sm font-semibold text-card-foreground mb-4">Ringkasan Vendor</h3>
+              <div className="space-y-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground text-xs mb-1">Nama Perusahaan</p>
+                  <p className="text-card-foreground font-medium">{form.name || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs mb-1">Industri</p>
+                  <p className="text-card-foreground font-medium">{form.industry || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs mb-1">Ukuran</p>
+                  <p className="text-card-foreground font-medium">{form.company_size || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs mb-1">Kota</p>
+                  <p className="text-card-foreground font-medium">{form.city || "—"}</p>
+                </div>
+                {form.email && (
+                  <div>
+                    <p className="text-muted-foreground text-xs mb-1">Email</p>
+                    <p className="text-card-foreground font-medium">{form.email}</p>
+                  </div>
                 )}
-              </Button>
-            </div>
-          </motion.div>
-        )}
+                <div>
+                  <p className="text-muted-foreground text-xs mb-1">Tahap</p>
+                  <p className="text-card-foreground font-medium">
+                    {step === 1 ? "📝 Info Perusahaan" : "📄 Upload Dokumen"}
+                  </p>
+                </div>
+                <div className="border-t border-border pt-3">
+                  <p className="text-muted-foreground text-xs mb-1">Dokumen</p>
+                  <p className="text-card-foreground font-medium">
+                    {uploadedCount} terupload ({requiredUploaded}/{requiredCount} wajib)
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </div>
     </div>
   );
