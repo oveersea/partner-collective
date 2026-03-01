@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { ExternalLink, Search, Image as ImageIcon, ThumbsUp, Eye, Building2, FolderOpen } from "lucide-react";
@@ -15,6 +16,7 @@ const fallbackImages = [case1, case2, case3, case4];
 interface CaseStudy {
   id: string;
   type: "case_study";
+  slug: string;
   title: string;
   description: string | null;
   image_url: string | null;
@@ -51,7 +53,7 @@ const CaseStudies = () => {
       const [csRes, pfRes] = await Promise.all([
         supabase
           .from("case_studies")
-          .select("id, title, description, company_name, industry, image_url, cta_label, cta_url")
+          .select("id, title, slug, description, company_name, industry, image_url, cta_label, cta_url")
           .eq("is_active", true)
           .order("sort_order", { ascending: true }),
         supabase
@@ -205,29 +207,36 @@ const CaseStudies = () => {
                 className="group"
               >
                 {/* Image card */}
-                <a
-                  href={item.type === "portfolio" && item.project_url ? item.project_url : item.type === "case_study" && item.cta_url ? item.cta_url : "#"}
-                  target={item.type === "portfolio" && item.project_url ? "_blank" : undefined}
-                  rel="noopener noreferrer"
-                  className="block relative rounded-xl overflow-hidden aspect-[4/3] bg-muted"
-                >
-                  {(item.image_url || item.type === "case_study") ? (
-                    <img
-                      src={item.image_url || fallbackImages[i % fallbackImages.length]}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                      loading="lazy"
-                    />
+                {(() => {
+                  const cardContent = (
+                    <>
+                      {(item.image_url || item.type === "case_study") ? (
+                        <img
+                          src={item.image_url || fallbackImages[i % fallbackImages.length]}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImageIcon className="w-10 h-10 text-muted-foreground/20" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                        <h3 className="text-white text-sm font-semibold line-clamp-2 leading-snug">{item.title}</h3>
+                      </div>
+                    </>
+                  );
+                  return item.type === "case_study" ? (
+                    <Link to={`/case-studies/${item.slug}`} className="block relative rounded-xl overflow-hidden aspect-[4/3] bg-muted">
+                      {cardContent}
+                    </Link>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="w-10 h-10 text-muted-foreground/20" />
-                    </div>
-                  )}
-                  {/* Hover overlay with title */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                    <h3 className="text-white text-sm font-semibold line-clamp-2 leading-snug">{item.title}</h3>
-                  </div>
-                </a>
+                    <a href={(item as PortfolioItem).project_url || "#"} target={(item as PortfolioItem).project_url ? "_blank" : undefined} rel="noopener noreferrer" className="block relative rounded-xl overflow-hidden aspect-[4/3] bg-muted">
+                      {cardContent}
+                    </a>
+                  );
+                })()}
 
                 {/* Owner info row — Behance style */}
                 <div className="flex items-center gap-2 mt-2.5 px-0.5">
