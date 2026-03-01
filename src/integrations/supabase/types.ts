@@ -7562,6 +7562,7 @@ export type Database = {
       profiles: {
         Row: {
           account_type: string
+          address: string | null
           avatar_url: string | null
           bio: string | null
           certifications: Json | null
@@ -7571,6 +7572,7 @@ export type Database = {
           credit_score: number | null
           daily_rate: number | null
           date_of_birth: string | null
+          district: string | null
           education: Json | null
           email_verified: boolean
           email_verified_at: string | null
@@ -7595,10 +7597,13 @@ export type Database = {
           opportunity_availability: string | null
           oveercode: string
           phone_number: string | null
+          postal_code: string | null
           professional_summary: string | null
+          province: string | null
           role: string | null
           skills: string[] | null
           soft_skills: Json | null
+          subdistrict: string | null
           technical_skills: Json | null
           updated_at: string
           user_id: string
@@ -7612,6 +7617,7 @@ export type Database = {
         }
         Insert: {
           account_type?: string
+          address?: string | null
           avatar_url?: string | null
           bio?: string | null
           certifications?: Json | null
@@ -7621,6 +7627,7 @@ export type Database = {
           credit_score?: number | null
           daily_rate?: number | null
           date_of_birth?: string | null
+          district?: string | null
           education?: Json | null
           email_verified?: boolean
           email_verified_at?: string | null
@@ -7645,10 +7652,13 @@ export type Database = {
           opportunity_availability?: string | null
           oveercode: string
           phone_number?: string | null
+          postal_code?: string | null
           professional_summary?: string | null
+          province?: string | null
           role?: string | null
           skills?: string[] | null
           soft_skills?: Json | null
+          subdistrict?: string | null
           technical_skills?: Json | null
           updated_at?: string
           user_id: string
@@ -7662,6 +7672,7 @@ export type Database = {
         }
         Update: {
           account_type?: string
+          address?: string | null
           avatar_url?: string | null
           bio?: string | null
           certifications?: Json | null
@@ -7671,6 +7682,7 @@ export type Database = {
           credit_score?: number | null
           daily_rate?: number | null
           date_of_birth?: string | null
+          district?: string | null
           education?: Json | null
           email_verified?: boolean
           email_verified_at?: string | null
@@ -7695,10 +7707,13 @@ export type Database = {
           opportunity_availability?: string | null
           oveercode?: string
           phone_number?: string | null
+          postal_code?: string | null
           professional_summary?: string | null
+          province?: string | null
           role?: string | null
           skills?: string[] | null
           soft_skills?: Json | null
+          subdistrict?: string | null
           technical_skills?: Json | null
           updated_at?: string
           user_id?: string
