@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Briefcase, FolderKanban, GraduationCap, Users, UserSearch, Plus, Building2, Zap } from "lucide-react";
+import { User, Briefcase, FolderKanban, GraduationCap, Users, UserSearch, Plus, Building2, Zap, CreditCard } from "lucide-react";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import KYCBanner from "@/components/dashboard/KYCBanner";
 import ProfileHeader from "@/components/dashboard/ProfileHeader";
@@ -163,6 +163,12 @@ const Dashboard = () => {
             <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
               <GraduationCap className="w-4 h-4" />
               Learning
+            </button>
+          </Link>
+          <Link to="/credit-balance">
+            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
+              <CreditCard className="w-4 h-4" />
+              Kredit & Saldo
             </button>
           </Link>
         </div>
