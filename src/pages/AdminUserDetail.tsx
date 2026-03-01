@@ -485,10 +485,6 @@ const AdminUserDetail = () => {
                       <Input className="mt-1" value={editData.website_url || ""} onChange={(e) => set("website_url", e.target.value)} />
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">Pendidikan Tertinggi</Label>
-                      <Input className="mt-1" value={editData.highest_education || ""} onChange={(e) => set("highest_education", e.target.value)} />
-                    </div>
-                    <div>
                       <Label className="text-xs text-muted-foreground">Daily Rate (IDR)</Label>
                       <Input className="mt-1" type="number" value={editData.daily_rate ?? ""} onChange={(e) => set("daily_rate", e.target.value ? Number(e.target.value) : null)} />
                     </div>
@@ -528,11 +524,6 @@ const AdminUserDetail = () => {
                     {profile.years_of_experience != null && (
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Briefcase className="w-4 h-4 shrink-0" /> {profile.years_of_experience} tahun pengalaman
-                      </div>
-                    )}
-                    {profile.highest_education && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <GraduationCap className="w-4 h-4 shrink-0" /> {profile.highest_education}
                       </div>
                     )}
                     {profile.daily_rate != null && (
