@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Shield, User, MoreVertical, Trash2, UserX, ArrowUpDown, ArrowUp, ArrowDown, CalendarDays } from "lucide-react";
+import { Search, Shield, User, MoreVertical, Trash2, UserX, ArrowUpDown, ArrowUp, ArrowDown, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -42,6 +42,7 @@ interface LoginActivity {
   timestamps: string[]; // raw sign-in timestamps
 }
 
+const PAGE_SIZE = 25;
 const DAY_NAMES = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 const calcProfileScore = (u: UserProfile): number => {
@@ -83,6 +84,7 @@ const AdminUsers = () => {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>(null);
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [page, setPage] = useState(1);
   const [activityMap, setActivityMap] = useState<Record<string, LoginActivity>>({});
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; type: "deactivate" | "delete"; userId: string; name: string }>({ open: false, type: "deactivate", userId: "", name: "" });
 
@@ -221,6 +223,11 @@ const AdminUsers = () => {
     return list;
   }, [users, search, sortKey, sortDir, activityMap]);
 
+  useEffect(() => { setPage(1); }, [search]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / PAGE_SIZE));
+  const pagedUsers = sortedFiltered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   const kycBadge = (status: string) => {
     const map: Record<string, string> = {
       approved: "bg-primary/10 text-primary",
@@ -279,7 +286,7 @@ const AdminUsers = () => {
               ) : sortedFiltered.length === 0 ? (
                 <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
               ) : (
-                sortedFiltered.map((u) => {
+                pagedUsers.map((u) => {
                   const pScore = calcProfileScore(u);
                   const scoreColor = pScore >= 70 ? "text-primary bg-primary/10" : pScore >= 40 ? "text-amber-600 bg-amber-500/10" : "text-destructive bg-destructive/10";
                   const activity = activityMap[u.user_id];
@@ -431,6 +438,22 @@ const AdminUsers = () => {
             </tbody>
           </table>
         </div>
+        {!loading && sortedFiltered.length > PAGE_SIZE && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+            <span className="text-xs text-muted-foreground">
+              Menampilkan {Math.min((page - 1) * PAGE_SIZE + 1, sortedFiltered.length)}–{Math.min(page * PAGE_SIZE, sortedFiltered.length)} dari {sortedFiltered.length}
+            </span>
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <span className="text-xs text-muted-foreground px-2">{page} / {totalPages}</span>
+              <Button size="sm" variant="ghost" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, open }))}>
