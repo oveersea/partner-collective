@@ -4,8 +4,47 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Megaphone, Code, Palette, Briefcase, FileText, Calculator, ChevronRight, CheckCircle2, ArrowRight } from "lucide-react";
 
+// Service thumbnail imports
+import imgDigitalMarketing from "@/assets/services/digital-marketing.jpg";
+import imgWebDevelopment from "@/assets/services/web-development.jpg";
+import imgUiUxDesign from "@/assets/services/ui-ux-design.jpg";
+import imgBusinessConsulting from "@/assets/services/business-consulting.jpg";
+import imgContentWriting from "@/assets/services/content-writing.jpg";
+import imgAccountingTax from "@/assets/services/accounting-tax.jpg";
+import imgMobileDevelopment from "@/assets/services/mobile-development.jpg";
+import imgFinancialPlanning from "@/assets/services/financial-planning.jpg";
+import imgGraphicDesign from "@/assets/services/graphic-design.jpg";
+import imgVideoProduction from "@/assets/services/video-production.jpg";
+import imgSocialMedia from "@/assets/services/social-media.jpg";
+import imgHrRecruitment from "@/assets/services/hr-recruitment.jpg";
+import imgDataAnalytics from "@/assets/services/data-analytics.jpg";
+import imgSeoSem from "@/assets/services/seo-sem.jpg";
+import imgMotionGraphics from "@/assets/services/motion-graphics.jpg";
+import imgCloudDevops from "@/assets/services/cloud-devops.jpg";
+import imgEmailMarketing from "@/assets/services/email-marketing.jpg";
+
 const iconMap: Record<string, React.ElementType> = {
   Megaphone, Code, Palette, Briefcase, FileText, Calculator,
+};
+
+const serviceImageMap: Record<string, string> = {
+  "digital-marketing": imgDigitalMarketing,
+  "web-development": imgWebDevelopment,
+  "ui-ux-design": imgUiUxDesign,
+  "business-consulting": imgBusinessConsulting,
+  "content-writing": imgContentWriting,
+  "accounting-tax": imgAccountingTax,
+  "mobile-development": imgMobileDevelopment,
+  "financial-planning": imgFinancialPlanning,
+  "graphic-design": imgGraphicDesign,
+  "video-production": imgVideoProduction,
+  "social-media-management": imgSocialMedia,
+  "hr-recruitment": imgHrRecruitment,
+  "data-analytics": imgDataAnalytics,
+  "seo-sem": imgSeoSem,
+  "motion-graphics": imgMotionGraphics,
+  "cloud-devops": imgCloudDevops,
+  "email-marketing": imgEmailMarketing,
 };
 
 interface ServiceCategory {
@@ -161,6 +200,7 @@ const ServiceShowcaseSection = () => {
             services.map((service, i) => {
               const cat = categories.find(c => c.id === service.category_id);
               const Icon = iconMap[cat?.icon || ""] || Briefcase;
+              const thumbnailImg = serviceImageMap[service.slug];
               return (
                 <Link key={service.id} to={`/services/${service.slug}`}>
                   <motion.div
@@ -170,17 +210,19 @@ const ServiceShowcaseSection = () => {
                     transition={{ delay: i * 0.04 }}
                     className="group rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all h-full flex flex-col overflow-hidden"
                   >
-                    {/* Thumbnail area with icon pattern */}
-                    <div className="h-40 bg-gradient-to-br from-primary/5 via-muted/50 to-accent/10 flex items-center justify-center gap-6 px-6">
-                      <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                        <Icon className="w-8 h-8 text-primary" />
-                      </div>
-                      <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center opacity-60">
-                        <Icon className="w-6 h-6 text-accent-foreground" />
-                      </div>
-                      <div className="w-10 h-10 rounded-lg bg-muted border border-border flex items-center justify-center opacity-40">
-                        <Icon className="w-5 h-5 text-muted-foreground" />
-                      </div>
+                    {/* Thumbnail image */}
+                    <div className="h-40 bg-muted overflow-hidden">
+                      {thumbnailImg ? (
+                        <img
+                          src={thumbnailImg}
+                          alt={service.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary/10 via-muted to-accent/10 flex items-center justify-center">
+                          <Icon className="w-10 h-10 text-muted-foreground/40" />
+                        </div>
+                      )}
                     </div>
 
                     {/* Card body */}
