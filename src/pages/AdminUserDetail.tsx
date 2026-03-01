@@ -30,8 +30,16 @@ interface Profile {
   headline: string | null;
   bio: string | null;
   avatar_url: string | null;
+  address: string | null;
   city: string | null;
+  district: string | null;
+  subdistrict: string | null;
+  province: string | null;
   country: string | null;
+  postal_code: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  formatted_address: string | null;
   phone_number: string | null;
   skills: string[] | null;
   soft_skills: SkillScore[] | null;
@@ -186,7 +194,7 @@ const AdminUserDetail = () => {
     const [profileRes, rolesRes] = await Promise.all([
       supabase
         .from("profiles")
-        .select("user_id, full_name, headline, bio, avatar_url, city, country, phone_number, skills, soft_skills, technical_skills, kyc_status, account_type, oveercode, years_of_experience, daily_rate, linkedin_url, website_url, opportunity_availability, professional_summary, highest_education, created_at")
+        .select("user_id, full_name, headline, bio, avatar_url, address, city, district, subdistrict, province, country, postal_code, latitude, longitude, formatted_address, phone_number, skills, soft_skills, technical_skills, kyc_status, account_type, oveercode, years_of_experience, daily_rate, linkedin_url, website_url, opportunity_availability, professional_summary, highest_education, created_at")
         .eq("user_id", userId!)
         .single(),
       supabase
@@ -251,8 +259,16 @@ const AdminUserDetail = () => {
         full_name: editData.full_name,
         headline: editData.headline,
         bio: editData.bio,
+        address: editData.address,
         city: editData.city,
+        district: editData.district,
+        subdistrict: editData.subdistrict,
+        province: editData.province,
         country: editData.country,
+        postal_code: editData.postal_code,
+        latitude: editData.latitude,
+        longitude: editData.longitude,
+        formatted_address: editData.formatted_address,
         phone_number: editData.phone_number,
         skills: editData.skills,
         soft_skills: editData.soft_skills as any,
@@ -307,7 +323,7 @@ const AdminUserDetail = () => {
     );
   }
 
-  const location = [profile.city, profile.country].filter(Boolean).join(", ");
+  const location = [profile.address, profile.subdistrict, profile.district, profile.city, profile.province, profile.country, profile.postal_code].filter(Boolean).join(", ") || profile.formatted_address;
 
   return (
     <div className="min-h-screen bg-background">
@@ -671,12 +687,48 @@ const AdminUserDetail = () => {
                 {editing ? (
                   <div className="space-y-3">
                     <div>
-                      <Label className="text-xs text-muted-foreground">Kota</Label>
-                      <Input className="mt-1" value={editData.city || ""} onChange={(e) => set("city", e.target.value)} />
+                      <Label className="text-xs text-muted-foreground">Alamat</Label>
+                      <Input className="mt-1" value={editData.address || ""} onChange={(e) => set("address", e.target.value)} placeholder="Jl. Contoh No. 123" />
                     </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Negara</Label>
-                      <Input className="mt-1" value={editData.country || ""} onChange={(e) => set("country", e.target.value)} />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Kelurahan</Label>
+                        <Input className="mt-1" value={editData.subdistrict || ""} onChange={(e) => set("subdistrict", e.target.value)} />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Kecamatan</Label>
+                        <Input className="mt-1" value={editData.district || ""} onChange={(e) => set("district", e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Kota</Label>
+                        <Input className="mt-1" value={editData.city || ""} onChange={(e) => set("city", e.target.value)} />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Provinsi</Label>
+                        <Input className="mt-1" value={editData.province || ""} onChange={(e) => set("province", e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Negara</Label>
+                        <Input className="mt-1" value={editData.country || ""} onChange={(e) => set("country", e.target.value)} />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Kode Pos</Label>
+                        <Input className="mt-1" value={editData.postal_code || ""} onChange={(e) => set("postal_code", e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Latitude</Label>
+                        <Input className="mt-1" type="number" step="any" value={editData.latitude ?? ""} onChange={(e) => set("latitude", e.target.value ? Number(e.target.value) : null)} />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Longitude</Label>
+                        <Input className="mt-1" type="number" step="any" value={editData.longitude ?? ""} onChange={(e) => set("longitude", e.target.value ? Number(e.target.value) : null)} />
+                      </div>
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">No. Telepon</Label>
@@ -708,8 +760,21 @@ const AdminUserDetail = () => {
                 ) : (
                   <div className="space-y-3 text-sm">
                     {location && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <MapPin className="w-4 h-4 shrink-0" /> {location}
+                      <div className="flex items-start gap-2 text-muted-foreground">
+                        <MapPin className="w-4 h-4 shrink-0 mt-0.5" /> <span>{location}</span>
+                      </div>
+                    )}
+                    {/* OpenStreetMap */}
+                    {profile.latitude && profile.longitude && (
+                      <div className="rounded-xl overflow-hidden border border-border h-48">
+                        <iframe
+                          title="Location Map"
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          loading="lazy"
+                          src={`https://www.openstreetmap.org/export/embed.html?bbox=${profile.longitude - 0.01},${profile.latitude - 0.01},${profile.longitude + 0.01},${profile.latitude + 0.01}&layer=mapnik&marker=${profile.latitude},${profile.longitude}`}
+                        />
                       </div>
                     )}
                     {profile.phone_number && (
