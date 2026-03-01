@@ -1,6 +1,7 @@
 import {
   LayoutDashboard, Users, Shield, Briefcase, CreditCard, FileText, Building2, ChevronLeft,
   GraduationCap, ClipboardCheck, BarChart3, Landmark, FolderKanban, UserCheck, UsersRound, Store,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -20,6 +21,7 @@ const sections = [
   { id: "requests", label: "Request & Order", icon: FolderKanban },
   { id: "credits", label: "Kredit & Wallet", icon: CreditCard },
   { id: "content", label: "Konten & Program", icon: FileText },
+  { id: "case_studies", label: "Case Studies", icon: ImageIcon },
   { id: "learning", label: "Learning Program", icon: GraduationCap },
   { id: "institutions", label: "Institusi", icon: Landmark },
   { id: "assessment", label: "Assessment", icon: ClipboardCheck },
