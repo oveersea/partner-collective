@@ -25,9 +25,9 @@ interface KycSubmission {
 }
 
 const docTypes = [
-  { value: "ktp", label: "KTP (Kartu Tanda Penduduk)" },
-  { value: "passport", label: "Paspor" },
-  { value: "sim", label: "SIM (Surat Izin Mengemudi)" },
+  { value: "ktp", label: "National ID Card (KTP)" },
+  { value: "passport", label: "Passport" },
+  { value: "sim", label: "Driver's License (SIM)" },
 ];
 
 const KYCVerification = () => {
@@ -64,7 +64,7 @@ const KYCVerification = () => {
   // Bypass KYC page if already verified
   useEffect(() => {
     if (!loading && (kycStatus === "verified" || kycStatus === "approved")) {
-      toast.success("Identitas Anda sudah terverifikasi");
+      toast.success("Your identity is already verified");
       navigate("/dashboard");
     }
   }, [kycStatus, loading, navigate]);
@@ -109,12 +109,12 @@ const KYCVerification = () => {
   };
 
   const validateStep1 = () => {
-    if (!fullName.trim()) { toast.error("Nama lengkap wajib diisi"); return false; }
-    if (!nik.trim() || nik.length < 10) { toast.error("Nomor identitas wajib diisi (min. 10 digit)"); return false; }
-    if (!birthDate) { toast.error("Tanggal lahir wajib diisi"); return false; }
-    if (!gender) { toast.error("Jenis kelamin wajib dipilih"); return false; }
-    if (!address.trim()) { toast.error("Alamat wajib diisi"); return false; }
-    if (!city.trim()) { toast.error("Kota wajib diisi"); return false; }
+    if (!fullName.trim()) { toast.error("Full name is required"); return false; }
+    if (!nik.trim() || nik.length < 10) { toast.error("ID number is required (min. 10 digits)"); return false; }
+    if (!birthDate) { toast.error("Date of birth is required"); return false; }
+    if (!gender) { toast.error("Gender is required"); return false; }
+    if (!address.trim()) { toast.error("Address is required"); return false; }
+    if (!city.trim()) { toast.error("City is required"); return false; }
     return true;
   };
 
@@ -124,7 +124,7 @@ const KYCVerification = () => {
 
   const handleSubmit = async () => {
     if (!primaryFile || !selfieFile) {
-      toast.error("Dokumen identitas dan foto selfie wajib diunggah");
+      toast.error("ID document and selfie photo are required");
       return;
     }
 
@@ -141,10 +141,10 @@ const KYCVerification = () => {
         primary_doc_file_url: primary.url,
         support_doc1_file_name: selfie.name,
         support_doc1_file_url: selfie.url,
-        support_doc1_label: "Foto Selfie dengan Dokumen",
+        support_doc1_label: "Selfie with Document",
         support_doc2_file_name: support?.name || "",
         support_doc2_file_url: support?.url || "",
-        support_doc2_label: support ? "Dokumen Pendukung" : "",
+        support_doc2_label: support ? "Supporting Document" : "",
         status: "pending",
       });
 
@@ -160,11 +160,11 @@ const KYCVerification = () => {
         })
         .eq("user_id", user!.id);
 
-      toast.success("Dokumen KYC berhasil dikirim! Kami akan memverifikasi dalam 1-3 hari kerja.");
+      toast.success("KYC documents submitted successfully! We will verify within 1-3 business days.");
       setKycStatus("pending");
       fetchKycStatus();
     } catch (error: any) {
-      toast.error(error.message || "Gagal mengirim dokumen");
+      toast.error(error.message || "Failed to submit documents");
     } finally {
       setSubmitting(false);
     }
@@ -179,48 +179,48 @@ const KYCVerification = () => {
   }
 
   const steps = [
-    { num: 1, label: "Data Pribadi" },
-    { num: 2, label: "Upload Dokumen" },
+    { num: 1, label: "Personal Data" },
+    { num: 2, label: "Upload Documents" },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
-      <DashboardBreadcrumb items={[{ label: "Verifikasi KYC" }]} />
+       <DashboardBreadcrumb items={[{ label: "KYC Verification" }]} />
       <div className="w-full px-6 py-8">
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left: Form (70%) */}
           <div className="lg:w-[70%]">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-              <h1 className="text-2xl font-semibold text-foreground mb-2">Verifikasi KYC</h1>
-              <p className="text-muted-foreground text-sm">Verifikasi identitas Anda untuk mulai menggunakan platform</p>
+              <h1 className="text-2xl font-semibold text-foreground mb-2">KYC Verification</h1>
+              <p className="text-muted-foreground text-sm">Verify your identity to start using the platform</p>
             </motion.div>
 
             {/* Status banners */}
             {(kycStatus === "verified" || kycStatus === "approved") && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-primary/10 border border-primary/20 rounded-2xl p-6 text-center mb-6">
                 <CheckCircle2 className="w-12 h-12 text-primary mx-auto mb-3" />
-                <h2 className="text-lg font-semibold text-card-foreground mb-1">Identitas Terverifikasi</h2>
-                <p className="text-sm text-muted-foreground">Akun Anda telah terverifikasi. Anda dapat menggunakan semua fitur platform.</p>
-                <Button className="mt-4" onClick={() => navigate("/dashboard")}>Ke Dashboard</Button>
+                <h2 className="text-lg font-semibold text-card-foreground mb-1">Identity Verified</h2>
+                <p className="text-sm text-muted-foreground">Your account has been verified. You can use all platform features.</p>
+                <Button className="mt-4" onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
               </motion.div>
             )}
 
             {kycStatus === "pending" && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6 text-center mb-6">
                 <Clock className="w-12 h-12 text-amber-600 mx-auto mb-3" />
-                <h2 className="text-lg font-semibold text-card-foreground mb-1">Menunggu Verifikasi</h2>
-                <p className="text-sm text-muted-foreground">Dokumen Anda sedang ditinjau. Proses verifikasi membutuhkan 1-3 hari kerja.</p>
+                <h2 className="text-lg font-semibold text-card-foreground mb-1">Pending Verification</h2>
+                <p className="text-sm text-muted-foreground">Your documents are being reviewed. Verification takes 1-3 business days.</p>
                 {submission && (
                   <div className="mt-4 bg-card rounded-xl p-4 border border-border text-left">
-                    <p className="text-xs text-muted-foreground">Dokumen utama</p>
+                    <p className="text-xs text-muted-foreground">Primary document</p>
                     <p className="text-sm font-medium text-card-foreground flex items-center gap-2">
                       <FileText className="w-4 h-4 text-primary" />
                       {submission.primary_doc_file_name}
                     </p>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Dikirim {new Date(submission.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                      Submitted {new Date(submission.created_at).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })}
                     </p>
                   </div>
                 )}
@@ -231,12 +231,12 @@ const KYCVerification = () => {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-destructive/10 border border-destructive/20 rounded-2xl p-6 mb-6">
                 <div className="text-center">
                   <XCircle className="w-12 h-12 text-destructive mx-auto mb-3" />
-                  <h2 className="text-lg font-semibold text-card-foreground mb-1">Verifikasi Ditolak</h2>
-                  <p className="text-sm text-muted-foreground">Dokumen Anda tidak memenuhi persyaratan. Silakan kirim ulang.</p>
+                   <h2 className="text-lg font-semibold text-card-foreground mb-1">Verification Rejected</h2>
+                  <p className="text-sm text-muted-foreground">Your documents did not meet the requirements. Please resubmit.</p>
                 </div>
                 {submission?.rejection_reason && (
                   <div className="mt-4 bg-card rounded-xl p-4 border border-border">
-                    <p className="text-xs text-muted-foreground mb-1">Alasan penolakan:</p>
+                    <p className="text-xs text-muted-foreground mb-1">Rejection reason:</p>
                     <p className="text-sm text-destructive font-medium flex items-start gap-2">
                       <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                       {submission.rejection_reason}
@@ -275,21 +275,21 @@ const KYCVerification = () => {
                 {step === 1 && (
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-6">
                     <div>
-                      <h2 className="text-lg font-semibold text-card-foreground mb-1">Data Pribadi</h2>
-                      <p className="text-sm text-muted-foreground">Isi data sesuai dengan dokumen identitas Anda</p>
+                     <h2 className="text-lg font-semibold text-card-foreground mb-1">Personal Data</h2>
+                      <p className="text-sm text-muted-foreground">Fill in the data according to your identity document</p>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="md:col-span-2">
-                        <Label className="text-card-foreground">Nama Lengkap (sesuai KTP) *</Label>
+                        <Label className="text-card-foreground">Full Name (as per ID) *</Label>
                         <div className="relative mt-1.5">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input className="pl-10" placeholder="Nama lengkap sesuai dokumen" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                          <Input className="pl-10" placeholder="Full name as per document" value={fullName} onChange={(e) => setFullName(e.target.value)} />
                         </div>
                       </div>
 
                       <div>
-                        <Label className="text-card-foreground">Nomor Identitas (NIK/Paspor) *</Label>
+                        <Label className="text-card-foreground">ID Number (NIK/Passport) *</Label>
                         <div className="relative mt-1.5">
                           <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <Input className="pl-10" placeholder="3171XXXXXXXXXXXX" value={nik} onChange={(e) => setNik(e.target.value.replace(/\D/g, "").slice(0, 16))} />
@@ -297,17 +297,17 @@ const KYCVerification = () => {
                       </div>
 
                       <div>
-                        <Label className="text-card-foreground">Nomor Telepon</Label>
+                        <Label className="text-card-foreground">Phone Number</Label>
                         <Input className="mt-1.5" placeholder="+62 812-XXXX-XXXX" value={phone} onChange={(e) => setPhone(e.target.value)} />
                       </div>
 
                       <div>
-                        <Label className="text-card-foreground">Tempat Lahir *</Label>
+                        <Label className="text-card-foreground">Place of Birth *</Label>
                         <Input className="mt-1.5" placeholder="Jakarta" value={birthPlace} onChange={(e) => setBirthPlace(e.target.value)} />
                       </div>
 
                       <div>
-                        <Label className="text-card-foreground">Tanggal Lahir *</Label>
+                        <Label className="text-card-foreground">Date of Birth *</Label>
                         <div className="relative mt-1.5">
                           <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <Input className="pl-10" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
@@ -315,24 +315,24 @@ const KYCVerification = () => {
                       </div>
 
                       <div className="md:col-span-2">
-                        <Label className="text-card-foreground">Jenis Kelamin *</Label>
+                        <Label className="text-card-foreground">Gender *</Label>
                         <div className="grid grid-cols-2 gap-3 mt-1.5">
                           <button type="button" onClick={() => setGender("male")} className={`p-3 rounded-xl border text-sm font-medium text-center transition-all ${gender === "male" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"}`}>
-                            Laki-laki
+                            Male
                           </button>
                           <button type="button" onClick={() => setGender("female")} className={`p-3 rounded-xl border text-sm font-medium text-center transition-all ${gender === "female" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"}`}>
-                            Perempuan
+                            Female
                           </button>
                         </div>
                       </div>
 
                       <div className="md:col-span-2">
-                        <Label className="text-card-foreground">Alamat Lengkap *</Label>
+                        <Label className="text-card-foreground">Full Address *</Label>
                         <Textarea className="mt-1.5" rows={2} placeholder="Jl. Contoh No. 123, RT 01/RW 02, Kel. ..." value={address} onChange={(e) => setAddress(e.target.value)} />
                       </div>
 
                       <div>
-                        <Label className="text-card-foreground">Kota/Kabupaten *</Label>
+                        <Label className="text-card-foreground">City *</Label>
                         <div className="relative mt-1.5">
                           <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <Input className="pl-10" placeholder="Jakarta Selatan" value={city} onChange={(e) => setCity(e.target.value)} />
@@ -340,18 +340,18 @@ const KYCVerification = () => {
                       </div>
 
                       <div>
-                        <Label className="text-card-foreground">Provinsi</Label>
+                        <Label className="text-card-foreground">Province</Label>
                         <Input className="mt-1.5" placeholder="DKI Jakarta" value={province} onChange={(e) => setProvince(e.target.value)} />
                       </div>
 
                       <div>
-                        <Label className="text-card-foreground">Kode Pos</Label>
+                        <Label className="text-card-foreground">Postal Code</Label>
                         <Input className="mt-1.5" placeholder="12345" value={postalCode} onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 5))} />
                       </div>
                     </div>
 
                     <Button className="w-full" size="lg" onClick={handleNext}>
-                      Lanjut ke Upload Dokumen
+                      Continue to Document Upload
                     </Button>
                   </motion.div>
                 )}
@@ -360,52 +360,52 @@ const KYCVerification = () => {
                 {step === 2 && (
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-6">
                     <div>
-                      <h2 className="text-lg font-bold text-card-foreground mb-1">Upload Dokumen</h2>
-                      <p className="text-sm text-muted-foreground">Lengkapi dokumen berikut untuk verifikasi identitas</p>
+                      <h2 className="text-lg font-bold text-card-foreground mb-1">Upload Documents</h2>
+                      <p className="text-sm text-muted-foreground">Complete the following documents for identity verification</p>
                     </div>
 
                     <div>
-                      <Label className="text-card-foreground">Tipe Dokumen Identitas</Label>
+                      <Label className="text-card-foreground">ID Document Type</Label>
                       <select className="mt-1.5 w-full h-10 px-3 rounded-md border border-input bg-background text-sm" value={docType} onChange={(e) => setDocType(e.target.value)}>
                         {docTypes.map((dt) => (<option key={dt.value} value={dt.value}>{dt.label}</option>))}
                       </select>
                     </div>
 
                     <div>
-                      <Label className="text-card-foreground">Upload Dokumen Identitas *</Label>
-                      <p className="text-xs text-muted-foreground mb-2">Foto atau scan dokumen yang jelas dan terbaca. Format: JPG, PNG, PDF. Maks 5MB.</p>
+                       <Label className="text-card-foreground">Upload ID Document *</Label>
+                      <p className="text-xs text-muted-foreground mb-2">Clear and readable photo or scan of your document. Format: JPG, PNG, PDF. Max 5MB.</p>
                       <Input type="file" accept=".jpg,.jpeg,.png,.pdf" onChange={(e) => setPrimaryFile(e.target.files?.[0] || null)} className="cursor-pointer" />
                       {primaryFile && <span className="flex items-center gap-1.5 mt-2 text-sm text-primary"><FileText className="w-4 h-4" />{primaryFile.name}</span>}
                     </div>
 
                     <div>
-                      <Label className="text-card-foreground">Foto Selfie dengan Dokumen *</Label>
-                      <p className="text-xs text-muted-foreground mb-2">Foto diri Anda memegang dokumen identitas di samping wajah Anda.</p>
+                       <Label className="text-card-foreground">Selfie with Document *</Label>
+                      <p className="text-xs text-muted-foreground mb-2">Photo of yourself holding the ID document next to your face.</p>
                       <Input type="file" accept=".jpg,.jpeg,.png" onChange={(e) => setSelfieFile(e.target.files?.[0] || null)} className="cursor-pointer" />
                       {selfieFile && <span className="flex items-center gap-1.5 mt-2 text-sm text-primary"><FileText className="w-4 h-4" />{selfieFile.name}</span>}
                     </div>
 
                     <div>
-                      <Label className="text-card-foreground">Dokumen Pendukung (opsional)</Label>
-                      <p className="text-xs text-muted-foreground mb-2">NPWP, SKCK, atau dokumen pendukung lainnya.</p>
+                       <Label className="text-card-foreground">Supporting Document (optional)</Label>
+                      <p className="text-xs text-muted-foreground mb-2">Tax ID, police clearance, or other supporting documents.</p>
                       <Input type="file" accept=".jpg,.jpeg,.png,.pdf" onChange={(e) => setSupportFile(e.target.files?.[0] || null)} className="cursor-pointer" />
                       {supportFile && <span className="flex items-center gap-1.5 mt-2 text-sm text-primary"><FileText className="w-4 h-4" />{supportFile.name}</span>}
                     </div>
 
                     <div className="bg-muted rounded-xl p-4 text-sm text-muted-foreground space-y-1">
-                      <p className="font-medium text-card-foreground">Informasi Penting:</p>
+                       <p className="font-medium text-card-foreground">Important Information:</p>
                       <ul className="list-disc list-inside space-y-0.5 text-xs">
-                        <li>Dokumen akan diverifikasi dalam 1-3 hari kerja</li>
-                        <li>Pastikan dokumen asli, tidak buram, dan masih berlaku</li>
-                        <li>Data Anda akan dijaga kerahasiaannya</li>
+                        <li>Documents will be verified within 1-3 business days</li>
+                        <li>Ensure documents are original, clear, and still valid</li>
+                        <li>Your data will be kept confidential</li>
                       </ul>
                     </div>
 
                     <div className="flex gap-3">
-                      <Button variant="outline" size="lg" onClick={() => setStep(1)} className="flex-1">Kembali</Button>
+                       <Button variant="outline" size="lg" onClick={() => setStep(1)} className="flex-1">Back</Button>
                       <Button className="flex-1" size="lg" onClick={handleSubmit} disabled={submitting}>
                         <Upload className="w-4 h-4" />
-                        {submitting ? "Mengunggah..." : "Kirim Verifikasi"}
+                        {submitting ? "Uploading..." : "Submit Verification"}
                       </Button>
                     </div>
                   </motion.div>
@@ -429,43 +429,43 @@ const KYCVerification = () => {
                     kycStatus === "rejected" ? "bg-destructive/10 text-destructive" :
                     "bg-muted text-muted-foreground"
                   }`}>
-                    {kycStatus === "verified" ? "Terverifikasi" :
-                     kycStatus === "pending" ? "Menunggu Review" :
-                     kycStatus === "rejected" ? "Ditolak" : "Belum Verifikasi"}
+                     {kycStatus === "verified" ? "Verified" :
+                     kycStatus === "pending" ? "Pending Review" :
+                     kycStatus === "rejected" ? "Rejected" : "Unverified"}
                   </span>
                 </div>
               </div>
 
               <div className="border-t border-border pt-4 space-y-3 text-sm">
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Nama Lengkap</p>
+                  <p className="text-muted-foreground text-xs mb-1">Full Name</p>
                   <p className="text-card-foreground font-medium">{fullName || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Nomor Identitas</p>
+                  <p className="text-muted-foreground text-xs mb-1">ID Number</p>
                   <p className="text-card-foreground font-medium">{nik ? nik.replace(/(\d{4})(?=\d)/g, "$1-") : "—"}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Tempat, Tanggal Lahir</p>
+                  <p className="text-muted-foreground text-xs mb-1">Place & Date of Birth</p>
                   <p className="text-card-foreground font-medium">
                     {birthPlace && birthDate ? `${birthPlace}, ${new Date(birthDate).toLocaleDateString("id-ID")}` : "—"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Alamat</p>
+                  <p className="text-muted-foreground text-xs mb-1">Address</p>
                   <p className="text-card-foreground font-medium">{address ? `${address}, ${city}` : "—"}</p>
                 </div>
               </div>
 
               <div className="border-t border-border pt-4 space-y-3 text-sm">
-                <p className="text-muted-foreground text-xs font-medium">Dokumen</p>
+                <p className="text-muted-foreground text-xs font-medium">Documents</p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${primaryFile ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                       {primaryFile ? "✓" : "1"}
                     </div>
                     <span className={`text-xs ${primaryFile ? "text-card-foreground" : "text-muted-foreground"}`}>
-                      {primaryFile ? primaryFile.name : "Dokumen Identitas"}
+                      {primaryFile ? primaryFile.name : "ID Document"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -473,7 +473,7 @@ const KYCVerification = () => {
                       {selfieFile ? "✓" : "2"}
                     </div>
                     <span className={`text-xs ${selfieFile ? "text-card-foreground" : "text-muted-foreground"}`}>
-                      {selfieFile ? selfieFile.name : "Foto Selfie"}
+                      {selfieFile ? selfieFile.name : "Selfie Photo"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -481,7 +481,7 @@ const KYCVerification = () => {
                       {supportFile ? "✓" : "3"}
                     </div>
                     <span className={`text-xs ${supportFile ? "text-card-foreground" : "text-muted-foreground"}`}>
-                      {supportFile ? supportFile.name : "Dokumen Pendukung (opsional)"}
+                      {supportFile ? supportFile.name : "Supporting Document (optional)"}
                     </span>
                   </div>
                 </div>
