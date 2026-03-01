@@ -42,13 +42,11 @@ const AdminContent = () => {
       supabase
         .from("opportunities")
         .select("id, title, status, category, job_type, location, created_at, business_profiles(name)")
-        .order("created_at", { ascending: false })
-        .limit(50),
+        .order("created_at", { ascending: false }),
       supabase
         .from("programs")
         .select("id, title, status, program_type, oveercode, created_at")
-        .order("created_at", { ascending: false })
-        .limit(50),
+        .order("created_at", { ascending: false }),
     ]);
 
     if (oppRes.data) setOpportunities(oppRes.data as unknown as Opportunity[]);
