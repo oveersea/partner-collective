@@ -1,76 +1,63 @@
 
-# Fitur Learning - Halaman Program & Detail
+
+# Insight & Rekomendasi Learning untuk Match Score
 
 ## Overview
-Membangun halaman Learning yang menampilkan semua program dari tabel `programs` (Certification & Bootcamp), lengkap dengan filter, search, dan halaman detail program.
+Menambahkan section insight di bawah breakdown kriteria match score pada halaman Job Detail. Section ini menampilkan:
+1. Daftar aksi konkret yang harus dilakukan user untuk mencapai 70% match
+2. Rekomendasi program Learning dari tabel `programs` yang relevan dengan skill yang belum dimiliki user
 
-## Halaman yang Dibuat
+## Perubahan pada `src/pages/JobDetail.tsx`
 
-### 1. Halaman Learning (`/learning`)
-Halaman katalog yang menampilkan semua program dengan status `approved`.
+### 1. Fetch Program Learning yang Relevan
+- Setelah fetch data opportunity dan profile, query tabel `programs` untuk mencari program yang mengandung skill yang dibutuhkan job tapi belum dimiliki user
+- Query: cari program `approved` yang title/description mengandung keyword dari missing skills
+- Simpan di state `recommendedPrograms`
 
-**Komponen:**
-- **Header** dengan judul "Learning Programs" dan deskripsi singkat
-- **Search bar** untuk cari berdasarkan judul
-- **Filter** berdasarkan:
-  - Kategori (Certification, Bootcamp)
-  - Level (Beginner, Intermediate, Beginner - Intermediate)
-  - Delivery mode (Offline / In-Person, Intensive)
-- **Grid kartu program** menampilkan:
-  - Thumbnail gambar
-  - Badge (Popular, dll) jika ada
-  - Judul, kategori, level
-  - Durasi, delivery mode
-  - Rating dan jumlah siswa
-  - Harga (format Rupiah)
-- **Pagination** (20 item per halaman)
+### 2. Hitung Missing Skills
+- Di dalam `calcMatchDetails`, tambahkan return value `missingSkills` (array skill yang dibutuhkan job tapi tidak dimiliki user)
+- Gunakan data ini untuk menampilkan insight dan filter program learning
 
-### 2. Halaman Detail Program (`/learning/:slug`)
-Halaman detail lengkap untuk satu program.
+### 3. Section Insight (di bawah criteria breakdown, sebelum tombol Lamar)
+Tampilkan hanya jika `score < 70`. Berisi:
 
-**Komponen:**
-- Thumbnail besar
-- Judul, deskripsi, badge
-- Info: kategori, level, durasi, delivery mode, lokasi
-- Harga dan tombol "Daftar Program"
-- Rating dan jumlah siswa
-- Syllabus (dari JSON)
-- Learning outcomes, target audience, prerequisites (dari array)
-- Info instruktur (nama, bio, avatar)
-- FAQ (dari JSON)
+**Aksi yang Harus Dilakukan:**
+- Jika skill kurang: "Tambahkan skill berikut ke profil Anda: [list missing skills]"
+- Jika pengalaman kurang: "Tambahkan pengalaman kerja Anda (min X tahun)"
+- Jika profil belum lengkap: "Lengkapi profil: skill, pengalaman, pendidikan"
 
-## Integrasi Navigasi
-- Tambahkan link "Learning" di `DashboardNav` (dropdown menu)
-- Tambahkan route `/learning` dan `/learning/:slug` di `App.tsx`
-- Gunakan `DashboardNav` sebagai navigasi di halaman learning
+**Rekomendasi Learning:**
+- Tampilkan 1-3 program dari tabel `programs` yang cocok dengan missing skills
+- Setiap kartu berisi: judul program, kategori, dan link ke `/learning/:slug`
+- Jika tidak ada program yang cocok, tampilkan link umum ke `/learning`
 
-## File yang Dibuat/Diubah
-
-| File | Aksi |
-|------|------|
-| `src/pages/Learning.tsx` | Buat baru - halaman katalog |
-| `src/pages/LearningDetail.tsx` | Buat baru - halaman detail |
-| `src/App.tsx` | Tambah 2 route baru |
-| `src/components/dashboard/DashboardNav.tsx` | Tambah link Learning |
+### 4. UI Design
+- Card dengan background `bg-amber-50` / `bg-amber-500/5` dan border kuning
+- Icon `Lightbulb` sebagai header "Cara Meningkatkan Skor Anda"
+- List aksi dengan bullet points
+- Kartu mini program learning yang bisa diklik (link ke detail)
 
 ## Detail Teknis
 
-**Query Supabase untuk katalog:**
+**Query program learning:**
 ```sql
-SELECT id, title, slug, description, category, level, 
-       duration, delivery_mode, price_cents, currency, 
-       rating, student_count, badge, thumbnail_url, 
-       location, instructor_name
-FROM programs 
+SELECT id, title, slug, category, thumbnail_url, price_cents
+FROM programs
 WHERE status = 'approved'
 ORDER BY created_at DESC
 ```
+Kemudian filter di client-side: cocokkan `title` atau `description` terhadap missing skills menggunakan `.toLowerCase().includes()`.
 
-**Query Supabase untuk detail:**
-```sql
-SELECT * FROM programs WHERE slug = :slug AND status = 'approved'
-```
+**State baru:**
+- `recommendedPrograms: Program[]` - program yang relevan dengan missing skills
 
-**Format harga:** `price_cents` dibagi 1 (sudah dalam Rupiah cents) lalu format dengan `toLocaleString("id-ID")`.
+**Komponen baru (inline):**
+- Insight card dengan aksi dan rekomendasi learning
+- Mini card program learning (clickable link ke `/learning/:slug`)
 
-**Styling:** Mengikuti pola yang sama dengan Matchmaking page - menggunakan DashboardNav, kartu dengan border/shadow, badge warna, dan animasi framer-motion.
+## File yang Diubah
+
+| File | Perubahan |
+|------|-----------|
+| `src/pages/JobDetail.tsx` | Tambah fetch programs, hitung missing skills, tampilkan insight section dengan rekomendasi learning |
+
