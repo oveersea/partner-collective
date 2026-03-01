@@ -55,7 +55,37 @@ interface Profile {
   professional_summary: string | null;
   highest_education: string | null;
   created_at: string;
+  last_online: string | null;
 }
+
+const calcProfileCompleteness = (p: Profile): number => {
+  let score = 0;
+  const total = 10;
+  if (p.full_name) score++;
+  if (p.avatar_url) score++;
+  if (p.phone_number) score++;
+  if (p.skills && p.skills.length > 0) score++;
+  if (p.years_of_experience != null && p.years_of_experience > 0) score++;
+  if (p.highest_education) score++;
+  if (p.bio || p.professional_summary) score++;
+  if (p.city || p.country) score++;
+  if (p.linkedin_url) score++;
+  if (p.kyc_status === 'approved' || p.kyc_status === 'verified') score++;
+  return Math.round((score / total) * 100);
+};
+
+const formatLastOnline = (d: string | null): string => {
+  if (!d) return "Belum pernah";
+  const diff = Date.now() - new Date(d).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Online sekarang";
+  if (mins < 60) return `${mins} menit lalu`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} jam lalu`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} hari lalu`;
+  return new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+};
 
 interface UserRole {
   role: string;
@@ -194,7 +224,7 @@ const AdminUserDetail = () => {
     const [profileRes, rolesRes] = await Promise.all([
       supabase
         .from("profiles")
-        .select("user_id, full_name, headline, bio, avatar_url, address, city, district, subdistrict, province, country, postal_code, latitude, longitude, formatted_address, phone_number, skills, soft_skills, technical_skills, kyc_status, account_type, oveercode, years_of_experience, daily_rate, linkedin_url, website_url, opportunity_availability, professional_summary, highest_education, created_at")
+        .select("user_id, full_name, headline, bio, avatar_url, address, city, district, subdistrict, province, country, postal_code, latitude, longitude, formatted_address, phone_number, skills, soft_skills, technical_skills, kyc_status, account_type, oveercode, years_of_experience, daily_rate, linkedin_url, website_url, opportunity_availability, professional_summary, highest_education, created_at, last_online")
         .eq("user_id", userId!)
         .single(),
       supabase
@@ -428,11 +458,27 @@ const AdminUserDetail = () => {
                           <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${kycColor(profile.kyc_status)}`}>
                             KYC: {profile.kyc_status}
                           </span>
+                          {(() => {
+                            const pScore = calcProfileCompleteness(profile);
+                            const scoreColor = pScore >= 70 ? "text-primary bg-primary/10" : pScore >= 40 ? "text-amber-600 bg-amber-500/10" : "text-destructive bg-destructive/10";
+                            return (
+                              <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${scoreColor}`}>
+                                Profil: {pScore}%
+                              </span>
+                            );
+                          })()}
                           {roles.map((r) => (
                             <span key={r.role} className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1">
                               <Shield className="w-3 h-3" /> {r.role}
                             </span>
                           ))}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>Last online: {formatLastOnline(profile.last_online)}</span>
+                          {profile.last_online && Date.now() - new Date(profile.last_online).getTime() < 300000 && (
+                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                          )}
                         </div>
                       </>
                     )}

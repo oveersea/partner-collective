@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Shield, User, MoreVertical, Trash2, UserX } from "lucide-react";
+import { Search, Shield, User, MoreVertical, Trash2, UserX, Clock, Activity } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -23,7 +23,45 @@ interface UserProfile {
   city: string | null;
   country: string | null;
   created_at: string;
+  last_online: string | null;
+  skills: string[] | null;
+  years_of_experience: number | null;
+  highest_education: string | null;
+  phone_number: string | null;
+  bio: string | null;
+  professional_summary: string | null;
+  avatar_url: string | null;
+  linkedin_url: string | null;
 }
+
+const calcProfileScore = (u: UserProfile): number => {
+  let score = 0;
+  const total = 10;
+  if (u.full_name) score++;
+  if (u.avatar_url) score++;
+  if (u.phone_number) score++;
+  if (u.skills && u.skills.length > 0) score++;
+  if (u.years_of_experience != null && u.years_of_experience > 0) score++;
+  if (u.highest_education) score++;
+  if (u.bio || u.professional_summary) score++;
+  if (u.city || u.country) score++;
+  if (u.linkedin_url) score++;
+  if (u.kyc_status === 'approved' || u.kyc_status === 'verified') score++;
+  return Math.round((score / total) * 100);
+};
+
+const formatLastOnline = (d: string | null): string => {
+  if (!d) return "—";
+  const diff = Date.now() - new Date(d).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Baru saja";
+  if (mins < 60) return `${mins}m lalu`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}j lalu`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}h lalu`;
+  return new Date(d).toLocaleDateString("id-ID");
+};
 
 const AdminUsers = () => {
   const navigate = useNavigate();
@@ -39,7 +77,7 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     const { data, error } = await supabase
       .from("profiles")
-      .select("user_id, full_name, oveercode, account_type, kyc_status, city, country, created_at")
+      .select("user_id, full_name, oveercode, account_type, kyc_status, city, country, created_at, last_online, skills, years_of_experience, highest_education, phone_number, bio, professional_summary, avatar_url, linkedin_url")
       .order("created_at", { ascending: false })
       .limit(100);
 
@@ -119,6 +157,8 @@ const AdminUsers = () => {
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Oveercode</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipe</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">KYC</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Profil</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Last Online</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Lokasi</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Bergabung</th>
                 <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
@@ -128,13 +168,16 @@ const AdminUsers = () => {
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-b border-border">
-                    <td colSpan={7} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td>
+                    <td colSpan={9} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td>
                   </tr>
                 ))
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+                <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
               ) : (
-                filtered.map((u) => (
+                filtered.map((u) => {
+                  const pScore = calcProfileScore(u);
+                  const scoreColor = pScore >= 70 ? "text-primary bg-primary/10" : pScore >= 40 ? "text-amber-600 bg-amber-500/10" : "text-destructive bg-destructive/10";
+                  return (
                   <tr key={u.user_id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/user/${u.user_id}`)}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -151,6 +194,17 @@ const AdminUsers = () => {
                     <td className="px-4 py-3">
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${kycBadge(u.kyc_status)}`}>
                         {u.kyc_status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${scoreColor}`}>
+                        {pScore}%
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        {u.last_online && <span className={`w-1.5 h-1.5 rounded-full ${Date.now() - new Date(u.last_online).getTime() < 300000 ? "bg-primary" : "bg-muted-foreground/40"}`} />}
+                        {formatLastOnline(u.last_online)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
@@ -182,7 +236,8 @@ const AdminUsers = () => {
                       </DropdownMenu>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>
