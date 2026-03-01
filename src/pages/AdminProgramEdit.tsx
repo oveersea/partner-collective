@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Save, Calendar, Users, Star, MapPin, Award, X, Plus, Building2 } from "lucide-react";
+import { ArrowLeft, Save, Calendar, Users, Star, MapPin, Award, X, Plus, Building2, Upload, Trash2 } from "lucide-react";
 
 const STATUS_OPTIONS = ["draft", "pending", "approved", "rejected", "archived"];
 const LEVEL_OPTIONS = ["beginner", "intermediate", "advanced"];
@@ -77,6 +77,26 @@ const AdminProgramEdit = () => {
   const [newOutcome, setNewOutcome] = useState("");
   const [newAudience, setNewAudience] = useState("");
   const [newPrereq, setNewPrereq] = useState("");
+  const [uploadingThumb, setUploadingThumb] = useState(false);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !data) return;
+    setUploadingThumb(true);
+    const ext = file.name.split(".").pop();
+    const path = `${data.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("program-thumbnails").upload(path, file, { upsert: true });
+    if (error) {
+      toast.error("Gagal upload: " + error.message);
+      setUploadingThumb(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("program-thumbnails").getPublicUrl(path);
+    update("thumbnail_url", urlData.publicUrl);
+    setUploadingThumb(false);
+    if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
+  };
 
   useEffect(() => {
     fetchProgram();
@@ -241,11 +261,40 @@ const AdminProgramEdit = () => {
                 <Textarea rows={4} value={data.description || ""} onChange={(e) => update("description", e.target.value)} />
               </div>
               <div>
-                <Label>Thumbnail URL</Label>
-                <Input value={data.thumbnail_url || ""} onChange={(e) => update("thumbnail_url", e.target.value)} placeholder="https://..." />
-                {data.thumbnail_url && (
-                  <img src={data.thumbnail_url} alt="Thumbnail" className="mt-2 h-32 rounded-[5px] object-cover border border-border" />
+                <Label>Thumbnail</Label>
+                {data.thumbnail_url ? (
+                  <div className="mt-1 relative group w-fit">
+                    <img src={data.thumbnail_url} alt="Thumbnail" className="h-32 rounded-[5px] object-cover border border-border" />
+                    <button
+                      type="button"
+                      onClick={() => update("thumbnail_url", null)}
+                      className="absolute top-1.5 right-1.5 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => thumbnailInputRef.current?.click()}
+                    className="mt-1 flex flex-col items-center justify-center h-32 rounded-[5px] border-2 border-dashed border-border hover:border-primary/50 cursor-pointer transition-colors bg-muted/30"
+                  >
+                    {uploadingThumb ? (
+                      <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
+                    ) : (
+                      <>
+                        <Upload className="w-5 h-5 text-muted-foreground mb-1" />
+                        <span className="text-xs text-muted-foreground">Klik untuk upload</span>
+                      </>
+                    )}
+                  </div>
                 )}
+                <input
+                  ref={thumbnailInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleThumbnailUpload}
+                />
               </div>
             </CardContent>
           </Card>
