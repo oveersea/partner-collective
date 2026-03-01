@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import { Input } from "@/components/ui/input";
@@ -53,6 +53,10 @@ const formatRupiah = (cents: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(cents);
 
 const Learning = () => {
+  const [searchParams] = useSearchParams();
+  const skillsFilter = searchParams.get("skills");
+  const skillsList = skillsFilter ? skillsFilter.split(",").map(s => s.trim().toLowerCase()) : [];
+
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -77,12 +81,20 @@ const Learning = () => {
 
   const filtered = useMemo(() => {
     let list = programs;
+    // If skills filter from URL, only show programs matching those skills
+    if (skillsList.length > 0) {
+      list = list.filter((p) =>
+        skillsList.some((kw) =>
+          p.title.toLowerCase().includes(kw) || (p.description?.toLowerCase().includes(kw))
+        )
+      );
+    }
     if (search) list = list.filter((p) => p.title.toLowerCase().includes(search.toLowerCase()));
     if (category !== "all") list = list.filter((p) => p.category === category);
     if (level !== "all") list = list.filter((p) => p.level === level);
     if (deliveryMode !== "all") list = list.filter((p) => p.delivery_mode === deliveryMode);
     return list;
-  }, [programs, search, category, level, deliveryMode]);
+  }, [programs, search, category, level, deliveryMode, skillsList.join(",")]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -93,9 +105,15 @@ const Learning = () => {
   const levels = [...new Set(programs.map((p) => p.level).filter(Boolean))];
   const modes = [...new Set(programs.map((p) => p.delivery_mode).filter(Boolean))];
 
-  const activeFilters = [category !== "all", level !== "all", deliveryMode !== "all"].filter(Boolean).length;
+  const activeFilters = [category !== "all", level !== "all", deliveryMode !== "all", skillsList.length > 0].filter(Boolean).length;
 
-  const clearFilters = () => { setCategory("all"); setLevel("all"); setDeliveryMode("all"); setSearch(""); };
+  const clearFilters = () => {
+    setCategory("all"); setLevel("all"); setDeliveryMode("all"); setSearch("");
+    if (skillsFilter) {
+      window.history.replaceState({}, "", "/learning");
+      window.location.reload();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,6 +161,17 @@ const Learning = () => {
             </SelectContent>
           </Select>
         </motion.div>
+
+        {skillsList.length > 0 && (
+          <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm">
+              <GraduationCap className="w-4 h-4 text-amber-600" />
+              <span className="text-card-foreground font-medium">Menampilkan program untuk skill:</span>
+              <span className="text-muted-foreground">{skillsFilter}</span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs gap-1"><X className="w-3 h-3" /> Hapus filter</Button>
+          </div>
+        )}
 
         {activeFilters > 0 && (
           <div className="mb-4 flex items-center gap-2">
