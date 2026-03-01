@@ -24,6 +24,7 @@ import AdminAssessmentDetail from "./pages/AdminAssessmentDetail";
 import NotFound from "./pages/NotFound";
 import ServiceDetail from "./pages/ServiceDetail";
 import ServiceOrder from "./pages/ServiceOrder";
+import Portfolios from "./pages/Portfolios";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/credit-balance" element={<CreditBalance />} />
             <Route path="/services/:slug" element={<ServiceDetail />} />
             <Route path="/services/:slug/order" element={<ServiceOrder />} />
+            <Route path="/portfolios" element={<Portfolios />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
