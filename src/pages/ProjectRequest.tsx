@@ -155,7 +155,7 @@ const ProjectRequest = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
-      <div className="container mx-auto px-6 py-8 max-w-2xl">
+      <div className="w-full px-6 py-8">
         <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
         </button>
