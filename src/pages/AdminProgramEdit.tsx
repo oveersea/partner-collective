@@ -300,11 +300,11 @@ const AdminProgramEdit = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Jumlah Peserta</Label>
-                  <Input type="number" value={data.student_count ?? 0} onChange={(e) => update("student_count", Number(e.target.value))} />
+                  <p className="text-sm font-medium mt-1">{data.student_count ?? 0}</p>
                 </div>
                 <div>
                   <Label>Rating</Label>
-                  <Input type="number" step="0.1" min="0" max="5" value={data.rating ?? ""} onChange={(e) => update("rating", e.target.value ? Number(e.target.value) : null)} placeholder="0.0 - 5.0" />
+                  <p className="text-sm font-medium mt-1">{data.rating ?? "—"}</p>
                 </div>
               </div>
               <div>
