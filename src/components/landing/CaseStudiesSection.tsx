@@ -13,10 +13,10 @@ import case6 from "@/assets/case-6.jpg";
 const fallbackImages = [case1, case2, case3, case4, case5, case6];
 
 const placeholderCases: CaseStudy[] = [
-  { id: "1", title: "Transformasi Digital untuk Perusahaan Logistik", description: "Membangun platform end-to-end yang meningkatkan efisiensi operasional hingga 40%.", company_name: "LogiTech Indonesia", industry: "Logistik", image_url: null, cta_label: "Lihat Detail", cta_url: "/case-studies", is_featured: true },
-  { id: "2", title: "Rebranding & Digital Marketing untuk F&B Chain", description: "Strategi brand baru yang meningkatkan awareness 3x lipat dalam 6 bulan.", company_name: "Warung Nusantara", industry: "F&B", image_url: null, cta_label: "Lihat Detail", cta_url: "/case-studies", is_featured: true },
-  { id: "3", title: "Sistem HR Terpadu untuk Startup Fintech", description: "Otomasi proses recruitment dan onboarding yang menghemat 60% waktu HR.", company_name: "PayEase", industry: "Fintech", image_url: null, cta_label: "Lihat Detail", cta_url: "/case-studies", is_featured: false },
-  { id: "4", title: "E-Commerce Platform untuk Brand Fashion Lokal", description: "Platform custom yang meningkatkan konversi penjualan online hingga 250%.", company_name: "Batik Moderna", industry: "Fashion", image_url: null, cta_label: "Lihat Detail", cta_url: "/case-studies", is_featured: false },
+  { id: "1", title: "Digital Transformation for a Logistics Company", description: "Built an end-to-end platform that improved operational efficiency by 40%.", company_name: "LogiTech Indonesia", industry: "Logistics", image_url: null, cta_label: "View Details", cta_url: "/case-studies", is_featured: true },
+  { id: "2", title: "Rebranding & Digital Marketing for F&B Chain", description: "A new brand strategy that increased awareness 3x in 6 months.", company_name: "Warung Nusantara", industry: "F&B", image_url: null, cta_label: "View Details", cta_url: "/case-studies", is_featured: true },
+  { id: "3", title: "Integrated HR System for a Fintech Startup", description: "Automated recruitment and onboarding processes, saving 60% of HR time.", company_name: "PayEase", industry: "Fintech", image_url: null, cta_label: "View Details", cta_url: "/case-studies", is_featured: false },
+  { id: "4", title: "E-Commerce Platform for a Local Fashion Brand", description: "A custom platform that increased online sales conversion by 250%.", company_name: "Batik Moderna", industry: "Fashion", image_url: null, cta_label: "View Details", cta_url: "/case-studies", is_featured: false },
 ];
 
 interface CaseStudy {
@@ -65,12 +65,12 @@ const CaseStudiesSection = () => {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <span className="text-sm font-semibold text-primary uppercase tracking-widest">Studi Kasus</span>
+          <span className="text-sm font-semibold text-primary uppercase tracking-widest">Case Studies</span>
           <h2 className="text-4xl md:text-5xl font-semibold mt-3 mb-5 text-foreground">
-            Dipercaya oleh <span className="text-gradient-accent">Berbagai Industri</span>
+            Trusted Across <span className="text-gradient-accent">Industries</span>
           </h2>
           <p className="text-lg max-w-2xl mx-auto text-muted-foreground">
-            Lihat bagaimana klien kami berhasil menemukan talenta terbaik dan menyelesaikan proyek mereka.
+            See how our clients found the best talent and completed their projects.
           </p>
         </motion.div>
 

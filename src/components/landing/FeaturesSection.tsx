@@ -75,13 +75,13 @@ const FeaturesSection = () => {
             >
               <div className="flex items-center gap-3 mb-2">
                 <Sparkles className="w-5 h-5 text-primary" />
-                <h3 className="text-xl font-semibold text-card-foreground">Plus Ribuan Skill Lainnya</h3>
+                <h3 className="text-xl font-semibold text-card-foreground">Plus Thousands of Other Skills</h3>
               </div>
               <p className="text-muted-foreground leading-relaxed">
-                Apapun skill atau spesialisasi yang bisnis Anda butuhkan, kami memiliki talenta terbaik untuk memenuhinya.
+                Whatever skill or specialization your business needs, we have the best talent to fulfill it.
               </p>
               <span className="inline-flex items-center gap-1 text-primary text-sm font-medium mt-3">
-                Lihat semua layanan <ArrowRight className="w-4 h-4" />
+                View all services <ArrowRight className="w-4 h-4" />
               </span>
             </motion.div>
           </Link>
@@ -108,7 +108,7 @@ const CategoryCard = ({ cat, index }: { cat: ServiceCategory; index: number }) =
         <h3 className="text-lg font-semibold text-card-foreground mb-2">{cat.name}</h3>
         <p className="text-sm text-muted-foreground leading-relaxed">{cat.description}</p>
         <span className="inline-flex items-center gap-1 text-primary text-sm font-medium mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-          Lihat detail <ArrowRight className="w-4 h-4" />
+          View details <ArrowRight className="w-4 h-4" />
         </span>
       </motion.div>
     </Link>

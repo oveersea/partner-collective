@@ -10,32 +10,32 @@ const Footer = () => {
               <img src={logoDark} alt="Oveersea" className="h-7" />
             </div>
             <p className="text-sm leading-relaxed" style={{ color: "hsl(0 0% 50%)" }}>
-              Platform matchmaking untuk menemukan partner dan tim berkualitas tinggi yang terverifikasi.
+              A matchmaking platform to find high-quality, verified partners and teams.
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4 text-sm" style={{ color: "hsl(0 0% 85%)" }}>Untuk Client</h4>
+            <h4 className="font-semibold mb-4 text-sm" style={{ color: "hsl(0 0% 85%)" }}>For Clients</h4>
             <ul className="space-y-2">
-              {["Hiring Request", "Project Request", "Cari Partner", "Cari Tim"].map((item) => (
+              {["Hiring Request", "Project Request", "Find Partners", "Find Teams"].map((item) => (
                 <li key={item}><a href="#" className="text-sm hover:text-primary transition-colors" style={{ color: "hsl(0 0% 50%)" }}>{item}</a></li>
               ))}
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4 text-sm" style={{ color: "hsl(0 0% 85%)" }}>Untuk Partner</h4>
+            <h4 className="font-semibold mb-4 text-sm" style={{ color: "hsl(0 0% 85%)" }}>For Partners</h4>
             <ul className="space-y-2">
-              {["Daftar Partner", "Bentuk Tim", "Vendor Account", "Verifikasi KYC"].map((item) => (
+              {["Register as Partner", "Build a Team", "Vendor Account", "KYC Verification"].map((item) => (
                 <li key={item}><a href="#" className="text-sm hover:text-primary transition-colors" style={{ color: "hsl(0 0% 50%)" }}>{item}</a></li>
               ))}
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4 text-sm" style={{ color: "hsl(0 0% 85%)" }}>Perusahaan</h4>
+            <h4 className="font-semibold mb-4 text-sm" style={{ color: "hsl(0 0% 85%)" }}>Company</h4>
             <ul className="space-y-2">
-              {["Tentang Kami", "Blog", "Karir", "Hubungi Kami"].map((item) => (
+              {["About Us", "Blog", "Careers", "Contact Us"].map((item) => (
                 <li key={item}><a href="#" className="text-sm hover:text-primary transition-colors" style={{ color: "hsl(0 0% 50%)" }}>{item}</a></li>
               ))}
             </ul>
