@@ -29,11 +29,23 @@ interface Profile {
   oveercode: string;
   years_of_experience: number | null;
   daily_rate: number | null;
+  monthly_salary_rate: number | null;
+  expected_salary_currency: string | null;
   linkedin_url: string | null;
   website_url: string | null;
   opportunity_availability: string | null;
   professional_summary: string | null;
   highest_education: string | null;
+  date_of_birth: string | null;
+  gender: string | null;
+  nationality: string | null;
+  languages: string | null;
+  marital_status: string | null;
+  address: string | null;
+  province: string | null;
+  district: string | null;
+  subdistrict: string | null;
+  postal_code: string | null;
 }
 
 const tabs = [
@@ -65,7 +77,7 @@ const Dashboard = () => {
   const fetchProfile = async () => {
     const { data, error } = await supabase
       .from("profiles")
-      .select("full_name, headline, bio, avatar_url, city, country, phone_number, skills, kyc_status, account_type, oveercode, years_of_experience, daily_rate, linkedin_url, website_url, opportunity_availability, professional_summary, highest_education")
+      .select("full_name, headline, bio, avatar_url, city, country, phone_number, skills, kyc_status, account_type, oveercode, years_of_experience, daily_rate, monthly_salary_rate, expected_salary_currency, linkedin_url, website_url, opportunity_availability, professional_summary, highest_education, date_of_birth, gender, nationality, languages, marital_status, address, province, district, subdistrict, postal_code")
       .eq("user_id", user!.id)
       .single();
 
@@ -84,8 +96,11 @@ const Dashboard = () => {
     // Fields that require approval (excluding skills)
     const approvalFields = [
       "full_name", "headline", "city", "country", "phone_number",
-      "daily_rate", "highest_education", "opportunity_availability",
-      "professional_summary", "linkedin_url", "website_url",
+      "daily_rate", "monthly_salary_rate", "expected_salary_currency",
+      "highest_education", "opportunity_availability",
+      "professional_summary", "bio", "linkedin_url", "website_url",
+      "date_of_birth", "gender", "nationality", "languages", "marital_status",
+      "address", "province", "district", "subdistrict", "postal_code",
     ];
 
     const changes: { field_name: string; old_value: string | null; new_value: string | null }[] = [];
