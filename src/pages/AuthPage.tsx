@@ -80,9 +80,9 @@ const AuthPage = () => {
           {/* Logo */}
           <div className="flex items-center gap-2 mb-6">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">P</span>
+              <span className="text-primary-foreground font-bold text-sm">O</span>
             </div>
-            <span className="font-display text-lg font-bold text-card-foreground">PartnerHub</span>
+            <span className="font-display text-lg font-bold text-card-foreground">Oveersea</span>
           </div>
 
           <h1 className="text-2xl font-bold text-card-foreground mb-1">

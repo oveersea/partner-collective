@@ -18,14 +18,14 @@ const Navbar = () => {
   const { user } = useAuth();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: "hsla(270 50% 14% / 0.9)", backdropFilter: "blur(16px)", borderColor: "hsl(270 30% 25%)" }}>
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: "hsla(0 0% 4% / 0.95)", backdropFilter: "blur(16px)", borderColor: "hsl(0 0% 18%)" }}>
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "hsl(160 84% 39%)" }}>
-            <span className="text-white font-bold text-sm">P</span>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "hsl(0 79% 47%)" }}>
+            <span className="text-white font-bold text-sm">O</span>
           </div>
-          <span className="font-display text-lg font-bold text-white">PartnerHub</span>
+          <span className="font-display text-lg font-bold text-white">Oveersea</span>
         </a>
 
         {/* Desktop links */}
@@ -35,9 +35,9 @@ const Navbar = () => {
               key={link.label}
               href={link.href}
               className="flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors"
-              style={{ color: "hsl(270 20% 75%)" }}
+              style={{ color: "hsl(0 0% 60%)" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "white")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(270, 20%, 75%)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "hsl(0, 0%, 60%)")}
             >
               {link.label}
               <ChevronDown className="w-3.5 h-3.5 opacity-60" />
@@ -49,17 +49,17 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-4">
           {user ? (
             <Link to="/dashboard">
-              <button className="px-5 py-2 text-sm font-semibold rounded-lg border transition-colors" style={{ borderColor: "hsl(270 30% 40%)", color: "white" }}>
+              <button className="px-5 py-2 text-sm font-semibold rounded-lg border transition-colors" style={{ borderColor: "hsl(0 0% 30%)", color: "white" }}>
                 Dashboard
               </button>
             </Link>
           ) : (
             <>
               <Link to="/auth">
-                <span className="text-sm font-medium cursor-pointer transition-colors" style={{ color: "hsl(270 20% 75%)" }}>Login</span>
+                <span className="text-sm font-medium cursor-pointer transition-colors" style={{ color: "hsl(0 0% 60%)" }}>Login</span>
               </Link>
               <Link to="/auth">
-                <button className="px-5 py-2 text-sm font-semibold rounded-lg border transition-colors" style={{ borderColor: "hsl(270 30% 40%)", color: "white" }}>
+                <button className="px-5 py-2 text-sm font-semibold rounded-lg border transition-colors" style={{ borderColor: "hsl(0 0% 30%)", color: "white" }}>
                   See a demo
                 </button>
               </Link>
@@ -81,7 +81,7 @@ const Navbar = () => {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden overflow-hidden border-t"
-            style={{ background: "hsl(270 50% 14%)", borderColor: "hsl(270 30% 25%)" }}
+            style={{ background: "hsl(0 0% 4%)", borderColor: "hsl(0 0% 18%)" }}
           >
             <div className="px-6 py-4 flex flex-col gap-3">
               {navLinks.map((link) => (
@@ -89,18 +89,18 @@ const Navbar = () => {
                   key={link.label}
                   href={link.href}
                   className="text-sm font-medium py-2"
-                  style={{ color: "hsl(270 20% 75%)" }}
+                  style={{ color: "hsl(0 0% 60%)" }}
                   onClick={() => setIsOpen(false)}
                 >
                   {link.label}
                 </a>
               ))}
-              <div className="flex gap-3 pt-3" style={{ borderTop: "1px solid hsl(270 30% 25%)" }}>
+              <div className="flex gap-3 pt-3" style={{ borderTop: "1px solid hsl(0 0% 18%)" }}>
                 <Link to="/auth" className="flex-1">
-                  <button className="w-full py-2 text-sm font-medium rounded-lg" style={{ color: "hsl(270 20% 75%)" }}>Login</button>
+                  <button className="w-full py-2 text-sm font-medium rounded-lg" style={{ color: "hsl(0 0% 60%)" }}>Login</button>
                 </Link>
                 <Link to="/auth" className="flex-1">
-                  <button className="w-full py-2 text-sm font-semibold rounded-lg border" style={{ borderColor: "hsl(270 30% 40%)", color: "white" }}>See a demo</button>
+                  <button className="w-full py-2 text-sm font-semibold rounded-lg border" style={{ borderColor: "hsl(0 0% 30%)", color: "white" }}>See a demo</button>
                 </Link>
               </div>
             </div>
