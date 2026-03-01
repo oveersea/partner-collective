@@ -8641,6 +8641,42 @@ export type Database = {
         }
         Relationships: []
       }
+      service_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       service_packages: {
         Row: {
           created_at: string
@@ -8709,6 +8745,59 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      services: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          min_match_pct: number
+          name: string
+          required_skills: string[]
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          min_match_pct?: number
+          name: string
+          required_skills?: string[]
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          min_match_pct?: number
+          name?: string
+          required_skills?: string[]
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_settings: {
         Row: {
@@ -10445,50 +10534,38 @@ export type Database = {
       }
       user_services: {
         Row: {
-          business_id: string | null
           created_at: string
-          currency: string
-          description: string | null
           id: string
-          is_active: boolean
-          rate: number
-          rate_type: string
-          service_name: string
+          is_active: boolean | null
+          match_score: number | null
+          service_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          business_id?: string | null
           created_at?: string
-          currency?: string
-          description?: string | null
           id?: string
-          is_active?: boolean
-          rate?: number
-          rate_type?: string
-          service_name: string
+          is_active?: boolean | null
+          match_score?: number | null
+          service_id: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          business_id?: string | null
           created_at?: string
-          currency?: string
-          description?: string | null
           id?: string
-          is_active?: boolean
-          rate?: number
-          rate_type?: string
-          service_name?: string
+          is_active?: boolean | null
+          match_score?: number | null
+          service_id?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "user_services_business_id_fkey"
-            columns: ["business_id"]
+            foreignKeyName: "user_services_service_id_fkey"
+            columns: ["service_id"]
             isOneToOne: false
-            referencedRelation: "business_profiles"
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
@@ -10968,6 +11045,10 @@ export type Database = {
           p_job_exp_min: number
           p_job_skills: string[]
         }
+        Returns: number
+      }
+      calculate_service_match: {
+        Args: { p_required_skills: string[]; p_user_skills: string[] }
         Returns: number
       }
       generate_certificate_serial: { Args: never; Returns: string }
