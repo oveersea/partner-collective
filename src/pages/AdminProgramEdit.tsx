@@ -31,6 +31,7 @@ interface ProgramData {
   student_count: number | null;
   oveercode: string | null;
   thumbnail_url: string | null;
+  instructor_id: string | null;
   instructor_name: string | null;
   instructor_bio: string | null;
   instructor_avatar_url: string | null;
@@ -57,6 +58,13 @@ interface Institution {
   name: string;
 }
 
+interface Instructor {
+  user_id: string;
+  full_name: string;
+  avatar_url: string | null;
+  bio: string | null;
+}
+
 const AdminProgramEdit = () => {
   const { programId } = useParams();
   const navigate = useNavigate();
@@ -64,6 +72,7 @@ const AdminProgramEdit = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
 
   const [newOutcome, setNewOutcome] = useState("");
   const [newAudience, setNewAudience] = useState("");
@@ -72,6 +81,7 @@ const AdminProgramEdit = () => {
   useEffect(() => {
     fetchProgram();
     fetchInstitutions();
+    fetchInstructors();
   }, [programId]);
 
   const fetchProgram = async () => {
@@ -98,6 +108,39 @@ const AdminProgramEdit = () => {
       .select("id, name")
       .order("name");
     if (inst) setInstitutions(inst as Institution[]);
+  };
+
+  const fetchInstructors = async () => {
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "instructor");
+    if (!roles || roles.length === 0) return;
+    const ids = roles.map((r) => r.user_id);
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, full_name, avatar_url, bio")
+      .in("user_id", ids)
+      .order("full_name");
+    if (profiles) setInstructors(profiles as Instructor[]);
+  };
+
+  const handleInstructorChange = (userId: string) => {
+    if (!data) return;
+    if (userId === "none") {
+      setData({ ...data, instructor_id: null, instructor_name: null, instructor_avatar_url: null, instructor_bio: null });
+      return;
+    }
+    const inst = instructors.find((i) => i.user_id === userId);
+    if (inst) {
+      setData({
+        ...data,
+        instructor_id: userId,
+        instructor_name: inst.full_name,
+        instructor_avatar_url: inst.avatar_url,
+        instructor_bio: inst.bio,
+      });
+    }
   };
 
   const update = (field: string, value: any) => {
@@ -389,20 +432,38 @@ const AdminProgramEdit = () => {
           <Card>
             <CardHeader><CardTitle className="text-base">Instruktur</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Nama Instruktur</Label>
-                  <Input value={data.instructor_name || ""} onChange={(e) => update("instructor_name", e.target.value)} />
-                </div>
-                <div>
-                  <Label>Avatar URL</Label>
-                  <Input value={data.instructor_avatar_url || ""} onChange={(e) => update("instructor_avatar_url", e.target.value)} placeholder="https://..." />
-                </div>
-              </div>
               <div>
-                <Label>Bio Instruktur</Label>
-                <Textarea rows={3} value={data.instructor_bio || ""} onChange={(e) => update("instructor_bio", e.target.value)} />
+                <Label>Pilih Instruktur</Label>
+                <Select value={data.instructor_id || "none"} onValueChange={handleInstructorChange}>
+                  <SelectTrigger><SelectValue placeholder="Pilih instruktur..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— Tidak ada —</SelectItem>
+                    {instructors.map((inst) => (
+                      <SelectItem key={inst.user_id} value={inst.user_id}>{inst.full_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+              {data.instructor_id && (
+                <div className="rounded-[5px] border border-border p-4 space-y-2">
+                  <div className="flex items-center gap-3">
+                    {data.instructor_avatar_url ? (
+                      <img src={data.instructor_avatar_url} alt="" className="w-10 h-10 rounded-full object-cover border border-border" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-sm font-medium">
+                        {(data.instructor_name || "?")[0]}
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{data.instructor_name}</p>
+                      <p className="text-xs text-muted-foreground">Instruktur</p>
+                    </div>
+                  </div>
+                  {data.instructor_bio && (
+                    <p className="text-xs text-muted-foreground leading-relaxed">{data.instructor_bio}</p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
