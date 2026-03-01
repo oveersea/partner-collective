@@ -43,15 +43,39 @@ const AdminKYC = () => {
     setLoading(true);
     let query = supabase
       .from("kyc_submissions")
-      .select("*, profiles!kyc_submissions_user_id_fkey(full_name, oveercode)")
+      .select("*")
       .order("created_at", { ascending: false })
       .limit(50);
 
     if (filter !== "all") query = query.eq("status", filter);
 
     const { data, error } = await query;
-    if (data) setSubmissions(data as unknown as KycSubmission[]);
-    if (error) toast.error("Gagal memuat data KYC");
+    if (error) {
+      toast.error("Gagal memuat data KYC");
+      setLoading(false);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      const userIds = [...new Set(data.map((d: any) => d.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, oveercode")
+        .in("user_id", userIds);
+
+      const profileMap = new Map(
+        (profiles || []).map((p) => [p.user_id, { full_name: p.full_name, oveercode: p.oveercode }])
+      );
+
+      setSubmissions(
+        data.map((d: any) => ({
+          ...d,
+          profiles: profileMap.get(d.user_id) || null,
+        })) as KycSubmission[]
+      );
+    } else {
+      setSubmissions([]);
+    }
     setLoading(false);
   };
 
