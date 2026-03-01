@@ -180,6 +180,46 @@ const megaMenus: MegaMenuData[] = [
     ],
   },
   {
+    label: "Jobs",
+    tagline: "Temukan peluang karir terbaik melalui Oveersea",
+    cta: { label: "Lihat semua lowongan", href: "/matchmaking" },
+    masters: [
+      {
+        label: "Semua Lowongan",
+        description: "Telusuri semua posisi tersedia",
+        icon: Briefcase,
+        subItems: [
+          { icon: Briefcase, title: "Browse Lowongan", description: "Lihat semua posisi yang sedang dibuka", href: "/matchmaking" },
+          { icon: Star, title: "Rekomendasi Untukmu", description: "Lowongan yang cocok berdasarkan profil", href: "/matchmaking" },
+          { icon: Clock, title: "Baru Ditambahkan", description: "Lowongan terbaru minggu ini", href: "/matchmaking" },
+          { icon: Bell, title: "Job Alert", description: "Terima notifikasi lowongan baru", href: "/matchmaking" },
+        ],
+      },
+      {
+        label: "Overseas Jobs",
+        description: "Peluang karir internasional",
+        icon: Globe,
+        subItems: [
+          { icon: Globe, title: "Semua Negara", description: "Lowongan dari berbagai negara", href: "/matchmaking" },
+          { icon: MapPin, title: "Asia Tenggara", description: "Singapura, Malaysia, Thailand, dll.", href: "/matchmaking" },
+          { icon: MapPin, title: "Timur Tengah", description: "UAE, Qatar, Arab Saudi, dll.", href: "/matchmaking" },
+          { icon: MapPin, title: "Asia Timur & Eropa", description: "Jepang, Korea, Jerman, dll.", href: "/matchmaking" },
+        ],
+      },
+      {
+        label: "Remote & Freelance",
+        description: "Kerja dari mana saja",
+        icon: Monitor,
+        subItems: [
+          { icon: Monitor, title: "Remote Full-time", description: "Posisi tetap dengan kerja remote", href: "/matchmaking" },
+          { icon: Clock, title: "Part-time", description: "Kerja paruh waktu fleksibel", href: "/matchmaking" },
+          { icon: FileText, title: "Freelance Project", description: "Proyek berbasis kontrak jangka pendek", href: "/matchmaking" },
+          { icon: Handshake, title: "Contract", description: "Posisi kontrak jangka menengah", href: "/matchmaking" },
+        ],
+      },
+    ],
+  },
+  {
     label: "Resources",
     tagline: "Insight, riset, dan tools untuk keputusan bisnis lebih baik",
     cta: { label: "Lihat semua resources", href: "/features" },
