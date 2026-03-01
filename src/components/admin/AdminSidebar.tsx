@@ -42,7 +42,7 @@ const AdminSidebar = ({ activeSection, onSectionChange }: AdminSidebarProps) => 
                 </div>
                 <div>
                   <p className="text-sm font-bold text-foreground">Admin Panel</p>
-                  <p className="text-[10px] text-muted-foreground">PartnerHub</p>
+                  <p className="text-[10px] text-muted-foreground">Oveersea</p>
                 </div>
               </div>
             )}
