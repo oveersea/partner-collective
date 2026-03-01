@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Pencil, ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Users } from "lucide-react";
 
 interface Program {
   id: string;
@@ -94,16 +94,16 @@ const AdminLearning = () => {
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Oveercode</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
-                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 Array.from({ length: 3 }).map((_, i) => (
-                  <tr key={i} className="border-b border-border"><td colSpan={11} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
+                  <tr key={i} className="border-b border-border"><td colSpan={10} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
                 ))
               ) : paged.length === 0 ? (
-                <tr><td colSpan={11} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+                <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
               ) : (
                 paged.map((p) => (
                   <tr key={p.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/program/${p.id}`)}>
@@ -121,11 +121,6 @@ const AdminLearning = () => {
                     </td>
                     <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{p.oveercode || "—"}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(p.created_at).toLocaleDateString("id-ID")}</td>
-                    <td className="px-4 py-3 text-right">
-                      <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); navigate(`/admin/program/${p.id}`); }}>
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                    </td>
                   </tr>
                 ))
               )}
