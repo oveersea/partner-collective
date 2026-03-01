@@ -37,6 +37,25 @@ interface RecommendedProgram {
   thumbnail_url: string | null;
 }
 
+interface ProviderProfile {
+  user_id: string;
+  match_score: number;
+  full_name: string;
+  avatar_url: string | null;
+  headline: string | null;
+  skills: string[];
+  years_of_experience: number | null;
+}
+
+interface ProviderPortfolio {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  project_url: string | null;
+}
+
 const ServiceDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
@@ -46,6 +65,8 @@ const ServiceDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [userSkills, setUserSkills] = useState<string[]>([]);
   const [recommendedPrograms, setRecommendedPrograms] = useState<RecommendedProgram[]>([]);
+  const [seniorProviders, setSeniorProviders] = useState<ProviderProfile[]>([]);
+  const [providerPortfolios, setProviderPortfolios] = useState<ProviderPortfolio[]>([]);
 
   useEffect(() => {
     if (!slug) return;
@@ -137,6 +158,63 @@ const ServiceDetailPage = () => {
     };
     fetchPrograms();
   }, [service, userSkills, user]);
+
+  // Fetch senior-level providers (match_score >= 50%) and their portfolios
+  useEffect(() => {
+    if (!service) return;
+    const fetchProviders = async () => {
+      const { data: providers } = await supabase
+        .from("user_services")
+        .select("user_id, match_score")
+        .eq("service_id", service.id)
+        .eq("is_active", true)
+        .gte("match_score", 50)
+        .order("match_score", { ascending: false })
+        .limit(12);
+
+      if (!providers || providers.length === 0) {
+        setSeniorProviders([]);
+        setProviderPortfolios([]);
+        return;
+      }
+
+      const userIds = providers.map(p => p.user_id);
+
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, avatar_url, headline, skills, years_of_experience")
+        .in("user_id", userIds);
+
+      const profileMap = new Map((profiles || []).map(p => [p.user_id, p]));
+      const merged: ProviderProfile[] = providers
+        .map(p => {
+          const prof = profileMap.get(p.user_id);
+          if (!prof) return null;
+          return {
+            user_id: p.user_id,
+            match_score: Number(p.match_score),
+            full_name: prof.full_name || "Talent",
+            avatar_url: prof.avatar_url,
+            headline: prof.headline,
+            skills: prof.skills || [],
+            years_of_experience: prof.years_of_experience,
+          };
+        })
+        .filter(Boolean) as ProviderProfile[];
+
+      setSeniorProviders(merged);
+
+      const { data: portfolios } = await supabase
+        .from("user_portfolios")
+        .select("id, user_id, title, description, image_url, project_url")
+        .in("user_id", userIds)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      setProviderPortfolios(portfolios || []);
+    };
+    fetchProviders();
+  }, [service]);
 
   // Calculate skill match
   const calcSkillMatch = () => {
@@ -277,6 +355,144 @@ const ServiceDetailPage = () => {
                   ))}
                 </div>
               </motion.div>
+
+              {/* Senior Providers */}
+              {seniorProviders.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="border border-border bg-card p-6"
+                  style={{ borderRadius: "5px" }}
+                >
+                  <h2 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
+                    <Star className="w-5 h-5 text-primary" />
+                    Penyedia Layanan Senior
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-5">Talent dengan skill match di atas 50% untuk layanan ini.</p>
+
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {seniorProviders.map((provider) => {
+                      const tierInfo = provider.match_score >= 90
+                        ? { label: "Advisor", color: "text-amber-500", bg: "bg-amber-500/10", Icon: Crown }
+                        : provider.match_score >= 70
+                        ? { label: "Expert", color: "text-primary", bg: "bg-primary/10", Icon: Award }
+                        : { label: "Senior", color: "text-blue-500", bg: "bg-blue-500/10", Icon: Star };
+
+                      return (
+                        <div
+                          key={provider.user_id}
+                          className="flex items-start gap-3 p-3 border border-border bg-background hover:border-primary/30 transition-colors"
+                          style={{ borderRadius: "5px" }}
+                        >
+                          <div className="shrink-0">
+                            {provider.avatar_url ? (
+                              <img src={provider.avatar_url} alt={provider.full_name} className="w-10 h-10 rounded-full object-cover" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground">
+                                {provider.full_name.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="text-sm font-semibold text-foreground truncate">{provider.full_name}</span>
+                              <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded ${tierInfo.bg} ${tierInfo.color}`}>
+                                <tierInfo.Icon className="w-2.5 h-2.5" />
+                                {tierInfo.label}
+                              </span>
+                            </div>
+                            {provider.headline && (
+                              <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{provider.headline}</p>
+                            )}
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                              <span className="font-medium text-primary">{provider.match_score}% match</span>
+                              {provider.years_of_experience != null && provider.years_of_experience > 0 && (
+                                <span>{provider.years_of_experience} thn pengalaman</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Provider Portfolios */}
+              {providerPortfolios.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="border border-border bg-card p-6"
+                  style={{ borderRadius: "5px" }}
+                >
+                  <h2 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
+                    <Briefcase className="w-5 h-5 text-primary" />
+                    Portfolio Penyedia
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-5">Hasil kerja dari talent penyedia layanan ini.</p>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {providerPortfolios.map((portfolio) => {
+                      const owner = seniorProviders.find(p => p.user_id === portfolio.user_id);
+                      return (
+                        <div
+                          key={portfolio.id}
+                          className="group border border-border bg-background overflow-hidden hover:border-primary/30 hover:shadow-md transition-all"
+                          style={{ borderRadius: "5px" }}
+                        >
+                          {portfolio.image_url ? (
+                            <div className="h-36 overflow-hidden">
+                              <img
+                                src={portfolio.image_url}
+                                alt={portfolio.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                            </div>
+                          ) : (
+                            <div className="h-36 bg-muted flex items-center justify-center">
+                              <Briefcase className="w-8 h-8 text-muted-foreground/30" />
+                            </div>
+                          )}
+                          <div className="p-3">
+                            <h3 className="text-sm font-semibold text-foreground line-clamp-1 mb-1 group-hover:text-primary transition-colors">
+                              {portfolio.title}
+                            </h3>
+                            {portfolio.description && (
+                              <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{portfolio.description}</p>
+                            )}
+                            {owner && (
+                              <div className="flex items-center gap-2">
+                                {owner.avatar_url ? (
+                                  <img src={owner.avatar_url} alt={owner.full_name} className="w-5 h-5 rounded-full object-cover" />
+                                ) : (
+                                  <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-[9px] font-bold text-muted-foreground">
+                                    {owner.full_name.charAt(0)}
+                                  </div>
+                                )}
+                                <span className="text-xs text-muted-foreground">{owner.full_name}</span>
+                              </div>
+                            )}
+                            {portfolio.project_url && (
+                              <a
+                                href={portfolio.project_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs text-primary font-medium mt-2 hover:underline"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Lihat Project <ArrowRight className="w-3 h-3" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
             </div>
 
             {/* Sidebar */}
