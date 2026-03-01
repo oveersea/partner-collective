@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Users, Shield, Briefcase, CreditCard, FileText, Building2, ChevronLeft,
-  GraduationCap, ClipboardCheck, BarChart3, Landmark, FolderKanban, UserCheck, UsersRound,
+  GraduationCap, ClipboardCheck, BarChart3, Landmark, FolderKanban, UserCheck, UsersRound, Store,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -13,6 +13,7 @@ const sections = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "users", label: "Manajemen User", icon: Users },
   { id: "companies", label: "Manajemen Perusahaan", icon: Building2 },
+  { id: "vendors", label: "Manajemen Vendor", icon: Store },
   { id: "teams", label: "Manajemen Tim", icon: UsersRound },
   { id: "kyc", label: "Verifikasi KYC", icon: Shield },
   { id: "hiring", label: "Hiring & Matching", icon: Briefcase },
