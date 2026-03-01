@@ -1,5 +1,6 @@
 import {
   LayoutDashboard, Users, Shield, Briefcase, CreditCard, FileText, Building2, ChevronLeft,
+  GraduationCap, ClipboardCheck, BarChart3,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -15,6 +16,9 @@ const sections = [
   { id: "hiring", label: "Hiring & Matching", icon: Briefcase },
   { id: "credits", label: "Kredit & Wallet", icon: CreditCard },
   { id: "content", label: "Konten & Program", icon: FileText },
+  { id: "learning", label: "Learning Program", icon: GraduationCap },
+  { id: "assessment", label: "Assessment", icon: ClipboardCheck },
+  { id: "insights", label: "Insights & Survey", icon: BarChart3 },
 ];
 
 interface AdminSidebarProps {

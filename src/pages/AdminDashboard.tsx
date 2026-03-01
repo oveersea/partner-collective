@@ -11,7 +11,10 @@ import AdminKYC from "@/components/admin/AdminKYC";
 import AdminHiring from "@/components/admin/AdminHiring";
 import AdminCredits from "@/components/admin/AdminCredits";
 import AdminContent from "@/components/admin/AdminContent";
-import { LogOut, User, LayoutDashboard, GraduationCap } from "lucide-react";
+import AdminLearning from "@/components/admin/AdminLearning";
+import AdminAssessment from "@/components/admin/AdminAssessment";
+import AdminInsights from "@/components/admin/AdminInsights";
+import { LogOut, User, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -74,6 +77,9 @@ const AdminDashboard = () => {
       case "hiring": return <AdminHiring />;
       case "credits": return <AdminCredits />;
       case "content": return <AdminContent />;
+      case "learning": return <AdminLearning />;
+      case "assessment": return <AdminAssessment />;
+      case "insights": return <AdminInsights />;
       default: return <AdminOverview />;
     }
   };
