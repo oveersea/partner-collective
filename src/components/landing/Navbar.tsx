@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { label: "Fitur", href: "#fitur" },
@@ -12,6 +14,7 @@ const navLinks = [
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
@@ -39,8 +42,16 @@ const Navbar = () => {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm">Masuk</Button>
-          <Button variant="nav" size="sm">Daftar</Button>
+          {user ? (
+            <Link to="/dashboard">
+              <Button variant="nav" size="sm">Dashboard</Button>
+            </Link>
+          ) : (
+            <>
+              <Link to="/auth"><Button variant="ghost" size="sm">Masuk</Button></Link>
+              <Link to="/auth"><Button variant="nav" size="sm">Daftar</Button></Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu button */}

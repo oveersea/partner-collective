@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, Users, Briefcase } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const stats = [
   { value: "10K+", label: "Partner Terverifikasi" },
@@ -70,15 +71,19 @@ const HeroSection = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
           >
-            <Button variant="hero" size="lg" className="text-base px-8 py-6 rounded-xl">
-              <Briefcase className="w-5 h-5" />
-              Mulai Sebagai Client
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-            <Button variant="hero-outline" size="lg" className="text-base px-8 py-6 rounded-xl">
-              <Users className="w-5 h-5" />
-              Daftar Sebagai Partner
-            </Button>
+            <Link to="/auth">
+              <Button variant="hero" size="lg" className="text-base px-8 py-6 rounded-xl">
+                <Briefcase className="w-5 h-5" />
+                Mulai Sebagai Client
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            </Link>
+            <Link to="/auth">
+              <Button variant="hero-outline" size="lg" className="text-base px-8 py-6 rounded-xl">
+                <Users className="w-5 h-5" />
+                Daftar Sebagai Partner
+              </Button>
+            </Link>
           </motion.div>
 
           {/* Stats */}
