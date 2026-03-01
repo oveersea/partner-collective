@@ -75,7 +75,7 @@ const ServicesTab = () => {
     if (!user) return;
     const matchScore = calculateMatch(service.required_skills);
     if (matchScore < service.min_match_pct) {
-      toast.error(`Skill match Anda ${matchScore}%, minimum ${service.min_match_pct}% diperlukan`);
+      toast.error(`Your skill match is ${matchScore}%, minimum ${service.min_match_pct}% required`);
       return;
     }
 
@@ -91,9 +91,9 @@ const ServicesTab = () => {
         .eq("service_id", service.id);
 
       if (error) {
-        toast.error("Gagal mengubah status layanan");
+        toast.error("Failed to update service status");
       } else {
-        toast.success(existing.is_active ? "Layanan dinonaktifkan" : "Layanan diaktifkan");
+        toast.success(existing.is_active ? "Service deactivated" : "Service activated");
         setUserServices(prev => {
           const next = new Map(prev);
           next.set(service.id, { ...existing, is_active: !existing.is_active, match_score: matchScore });
@@ -107,9 +107,9 @@ const ServicesTab = () => {
         .insert({ user_id: user.id, service_id: service.id, match_score: matchScore, is_active: true });
 
       if (error) {
-        toast.error("Gagal menambahkan layanan");
+        toast.error("Failed to add service");
       } else {
-        toast.success("Layanan berhasil ditambahkan!");
+        toast.success("Service added successfully!");
         setUserServices(prev => {
           const next = new Map(prev);
           next.set(service.id, { service_id: service.id, match_score: matchScore, is_active: true });
@@ -136,26 +136,26 @@ const ServicesTab = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="rounded-xl bg-card border border-border p-4">
           <p className="text-2xl font-bold text-foreground">{activeCount}</p>
-          <p className="text-xs text-muted-foreground mt-1">Layanan Aktif</p>
+          <p className="text-xs text-muted-foreground mt-1">Active Services</p>
         </div>
         <div className="rounded-xl bg-card border border-border p-4">
           <p className="text-2xl font-bold text-foreground">{userSkills.length}</p>
-          <p className="text-xs text-muted-foreground mt-1">Skill Anda</p>
+          <p className="text-xs text-muted-foreground mt-1">Your Skills</p>
         </div>
         <div className="rounded-xl bg-card border border-border p-4">
           <p className="text-2xl font-bold text-foreground">{services.length}</p>
-          <p className="text-xs text-muted-foreground mt-1">Total Layanan</p>
+          <p className="text-xs text-muted-foreground mt-1">Total Services</p>
         </div>
         <div className="rounded-xl bg-card border border-border p-4">
           <p className="text-2xl font-bold text-foreground">{categories.length}</p>
-          <p className="text-xs text-muted-foreground mt-1">Kategori</p>
+          <p className="text-xs text-muted-foreground mt-1">Categories</p>
         </div>
       </div>
 
       {userSkills.length === 0 && (
         <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
           <p className="text-sm text-destructive font-medium">
-            ⚠️ Anda belum menambahkan skill di profil. Tambahkan skill terlebih dahulu agar bisa mengaktifkan layanan.
+            ⚠️ You haven't added any skills to your profile yet. Add skills first to activate services.
           </p>
         </div>
       )}
@@ -176,11 +176,11 @@ const ServicesTab = () => {
                 <div className="flex items-center gap-3">
                   <span className="text-base font-semibold text-foreground">{cat.name}</span>
                   <span className="text-xs text-muted-foreground">
-                    {catServices.length} layanan
+                    {catServices.length} services
                   </span>
                   {activatedInCat > 0 && (
                     <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
-                      {activatedInCat} aktif
+                      {activatedInCat} active
                     </span>
                   )}
                 </div>
@@ -207,7 +207,7 @@ const ServicesTab = () => {
                           <div className="flex items-center gap-2 mb-1">
                             <h4 className="text-sm font-semibold text-foreground">{service.name}</h4>
                             {isActive && (
-                              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">Aktif</span>
+                              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">Active</span>
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground mb-2">{service.description}</p>
@@ -271,7 +271,7 @@ const ServicesTab = () => {
                           ) : (
                             <Lock className="w-3.5 h-3.5" />
                           )}
-                          {isActive ? "Nonaktifkan" : meetsMin ? "Aktifkan" : "Skill Kurang"}
+                          {isActive ? "Deactivate" : meetsMin ? "Activate" : "Insufficient Skills"}
                         </button>
                       </div>
                     );

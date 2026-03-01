@@ -21,9 +21,9 @@ interface ProfileHeaderProps {
 }
 
 const kycBadgeMap: Record<string, { label: string; color: string }> = {
-  verified: { label: "Terverifikasi", color: "bg-primary/10 text-primary border-primary/20" },
-  pending: { label: "Menunggu Verifikasi", color: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
-  unverified: { label: "Belum Verifikasi", color: "bg-destructive/10 text-destructive border-destructive/20" },
+  verified: { label: "Verified", color: "bg-primary/10 text-primary border-primary/20" },
+  pending: { label: "Pending Verification", color: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
+  unverified: { label: "Unverified", color: "bg-destructive/10 text-destructive border-destructive/20" },
 };
 
 const availabilityMap: Record<string, { emoji: string; label: string; color: string }> = {
@@ -56,13 +56,13 @@ const ProfileHeader = ({ profile, editing, onToggleEdit }: ProfileHeaderProps) =
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-2xl font-semibold text-card-foreground">
-                {profile.full_name || "Nama belum diisi"}
+                {profile.full_name || "Name not set"}
               </h1>
-              <p className="text-muted-foreground">{profile.headline || "Headline belum diisi"}</p>
+              <p className="text-muted-foreground">{profile.headline || "Headline not set"}</p>
             </div>
             <Button variant={editing ? "ghost" : "outline"} size="sm" onClick={onToggleEdit}>
               {editing ? <X className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
-              {editing ? "Batal" : "Edit Profil"}
+              {editing ? "Cancel" : "Edit Profile"}
             </Button>
           </div>
 

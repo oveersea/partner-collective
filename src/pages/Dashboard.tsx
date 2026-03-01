@@ -49,12 +49,12 @@ interface Profile {
 }
 
 const tabs = [
-  { id: "profile", label: "Profil", icon: User },
-  { id: "experience", label: "Pengalaman", icon: Briefcase },
-  { id: "education", label: "Pendidikan", icon: GraduationCap },
-  { id: "portfolio", label: "Portofolio", icon: FolderKanban },
-  { id: "teams", label: "Tim", icon: Users },
-  { id: "services", label: "Layanan", icon: Layers },
+  { id: "profile", label: "Profile", icon: User },
+  { id: "experience", label: "Experience", icon: Briefcase },
+  { id: "education", label: "Education", icon: GraduationCap },
+  { id: "portfolio", label: "Portfolio", icon: FolderKanban },
+  { id: "teams", label: "Teams", icon: Users },
+  { id: "services", label: "Services", icon: Layers },
 ];
 
 const Dashboard = () => {
@@ -82,7 +82,7 @@ const Dashboard = () => {
       .single();
 
     if (error) {
-      toast.error("Gagal memuat profil");
+      toast.error("Failed to load profile");
     } else {
       setProfile(data as Profile);
       setEditData(data as Profile);
@@ -118,7 +118,7 @@ const Dashboard = () => {
     }
 
     if (changes.length === 0) {
-      toast.info("Tidak ada perubahan yang terdeteksi");
+      toast.info("No changes detected");
       setEditing(false);
       return;
     }
@@ -128,9 +128,9 @@ const Dashboard = () => {
       .insert(changes.map((c) => ({ ...c, user_id: user.id })));
 
     if (error) {
-      toast.error("Gagal mengirim perubahan");
+      toast.error("Failed to submit changes");
     } else {
-      toast.success(`${changes.length} perubahan dikirim untuk persetujuan admin`);
+      toast.success(`${changes.length} changes submitted for admin approval`);
       setEditing(false);
     }
   };
@@ -180,7 +180,7 @@ const Dashboard = () => {
           <Link to="/vendor-registration">
             <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
               <Building2 className="w-4 h-4" />
-              Registrasi Vendor
+              Vendor Registration
             </button>
           </Link>
           <Link to="/matchmaking">
@@ -198,7 +198,7 @@ const Dashboard = () => {
           <Link to="/credit-balance">
             <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
               <CreditCard className="w-4 h-4" />
-              Kredit & Saldo
+              Credits & Balance
             </button>
           </Link>
         </div>
