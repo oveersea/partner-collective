@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ interface Program {
 const PAGE_SIZE = 20;
 
 const AdminContent = () => {
+  const navigate = useNavigate();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
@@ -171,7 +173,7 @@ const AdminContent = () => {
                   <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
                 ) : (
                   pagedOpps.map((o) => (
-                    <tr key={o.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                    <tr key={o.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/opportunity/${o.id}`)}>
                       <td className="px-4 py-3 font-medium text-foreground max-w-[200px] truncate">{o.title}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{o.business_profiles?.name || "—"}</td>
                       <td className="px-4 py-3"><Badge variant="secondary" className="text-xs">{o.category || "—"}</Badge></td>
@@ -181,7 +183,7 @@ const AdminContent = () => {
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(o.created_at).toLocaleDateString("id-ID")}</td>
                       <td className="px-4 py-3 text-right">
-                        <Button size="sm" variant="ghost" onClick={() => toggleOppStatus(o.id, o.status)}>
+                        <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toggleOppStatus(o.id, o.status); }}>
                           {o.status === "open" ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </Button>
                       </td>
