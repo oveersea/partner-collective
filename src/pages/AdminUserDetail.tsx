@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft, User, MapPin, Phone, Globe, Linkedin, Briefcase,
   Calendar, Shield, Star, GraduationCap, Clock, Pencil, Save, X, Camera,
+  Award, Heart, CreditCard, Building2, Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -150,7 +151,16 @@ const AdminUserDetail = () => {
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
-  
+
+  // Related data
+  const [education, setEducation] = useState<any[]>([]);
+  const [experiences, setExperiences] = useState<any[]>([]);
+  const [organizations, setOrganizations] = useState<any[]>([]);
+  const [certifications, setCertifications] = useState<any[]>([]);
+  const [trainings, setTrainings] = useState<any[]>([]);
+  const [awards, setAwards] = useState<any[]>([]);
+  const [creditScores, setCreditScores] = useState<any[]>([]);
+  const [medicalRecords, setMedicalRecords] = useState<any[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -193,6 +203,28 @@ const AdminUserDetail = () => {
       setEditData({ ...p } as Profile);
     }
     if (rolesRes.data) setRoles(rolesRes.data as UserRole[]);
+
+    // Fetch related data in parallel
+    const [eduRes, expRes, orgRes, certRes, trainRes, awardRes, creditRes, medRes] = await Promise.all([
+      supabase.from("user_education").select("*").eq("user_id", userId!).order("start_date", { ascending: false }),
+      supabase.from("user_experiences").select("*").eq("user_id", userId!).order("start_date", { ascending: false }),
+      supabase.from("user_organizations").select("*").eq("user_id", userId!).order("start_date", { ascending: false }),
+      supabase.from("user_certifications").select("*").eq("user_id", userId!).order("issue_date", { ascending: false }),
+      supabase.from("user_trainings").select("*").eq("user_id", userId!).order("start_date", { ascending: false }),
+      supabase.from("user_awards").select("*").eq("user_id", userId!).order("date_received", { ascending: false }),
+      supabase.from("user_credit_scores").select("*").eq("user_id", userId!).order("report_date", { ascending: false }),
+      supabase.from("user_medical_records").select("*").eq("user_id", userId!).order("record_date", { ascending: false }),
+    ]);
+
+    if (eduRes.data) setEducation(eduRes.data);
+    if (expRes.data) setExperiences(expRes.data);
+    if (orgRes.data) setOrganizations(orgRes.data);
+    if (certRes.data) setCertifications(certRes.data);
+    if (trainRes.data) setTrainings(trainRes.data);
+    if (awardRes.data) setAwards(awardRes.data);
+    if (creditRes.data) setCreditScores(creditRes.data);
+    if (medRes.data) setMedicalRecords(medRes.data);
+
     setLoading(false);
   };
 
@@ -208,6 +240,8 @@ const AdminUserDetail = () => {
       if (data) setRoles(data as UserRole[]);
     }
   };
+
+  const formatDate = (d: string | null) => d ? new Date(d).toLocaleDateString("id-ID", { month: "short", year: "numeric" }) : "";
 
   const handleSave = async () => {
     setSaving(true);
@@ -455,6 +489,178 @@ const AdminUserDetail = () => {
                 </div>
               </div>
 
+              {/* Education Background */}
+              <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4" /> Education Background
+                </h2>
+                {education.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Belum ada data</p>
+                ) : (
+                  <div className="space-y-4">
+                    {education.map((e) => (
+                      <div key={e.id} className="border-l-2 border-primary/30 pl-4">
+                        <p className="text-sm font-medium text-card-foreground">{e.degree} — {e.field_of_study}</p>
+                        <p className="text-xs text-muted-foreground">{e.institution}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(e.start_date)} – {e.end_date ? formatDate(e.end_date) : "Sekarang"}</p>
+                        {e.status !== "approved" && <Badge variant="outline" className="text-xs mt-1">{e.status}</Badge>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Work Experience */}
+              <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" /> Experience
+                </h2>
+                {experiences.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Belum ada data</p>
+                ) : (
+                  <div className="space-y-4">
+                    {experiences.map((e) => (
+                      <div key={e.id} className="border-l-2 border-primary/30 pl-4">
+                        <p className="text-sm font-medium text-card-foreground">{e.position}</p>
+                        <p className="text-xs text-muted-foreground">{e.company}{e.location ? ` • ${e.location}` : ""}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(e.start_date)} – {e.is_current ? "Sekarang" : formatDate(e.end_date)}</p>
+                        {e.description && <p className="text-xs text-muted-foreground mt-1">{e.description}</p>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Organization Experience */}
+              <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                  <Users className="w-4 h-4" /> Organization Experience
+                </h2>
+                {organizations.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Belum ada data</p>
+                ) : (
+                  <div className="space-y-4">
+                    {organizations.map((o) => (
+                      <div key={o.id} className="border-l-2 border-primary/30 pl-4">
+                        <p className="text-sm font-medium text-card-foreground">{o.role}</p>
+                        <p className="text-xs text-muted-foreground">{o.organization_name}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(o.start_date)} – {o.is_current ? "Sekarang" : formatDate(o.end_date)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Certifications & Training/Workshop - side by side */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                  <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                    <Shield className="w-4 h-4" /> Certifications
+                  </h2>
+                  {certifications.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Belum ada data</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {certifications.map((c) => (
+                        <div key={c.id} className="border-l-2 border-primary/30 pl-3">
+                          <p className="text-sm font-medium text-card-foreground">{c.name}</p>
+                          <p className="text-xs text-muted-foreground">{c.issuing_organization}</p>
+                          {c.issue_date && <p className="text-xs text-muted-foreground">{formatDate(c.issue_date)}{c.expiry_date ? ` – ${formatDate(c.expiry_date)}` : ""}</p>}
+                          {c.credential_url && <a href={c.credential_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">Lihat Kredensial</a>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                  <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                    <Star className="w-4 h-4" /> Training & Workshop
+                  </h2>
+                  {trainings.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Belum ada data</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {trainings.map((t) => (
+                        <div key={t.id} className="border-l-2 border-primary/30 pl-3">
+                          <p className="text-sm font-medium text-card-foreground">{t.title}</p>
+                          {t.organizer && <p className="text-xs text-muted-foreground">{t.organizer}</p>}
+                          <p className="text-xs text-muted-foreground">{formatDate(t.start_date)}{t.end_date ? ` – ${formatDate(t.end_date)}` : ""}</p>
+                          {t.training_type && <Badge variant="outline" className="text-xs mt-1">{t.training_type}</Badge>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Awards */}
+              <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                  <Award className="w-4 h-4" /> Awards
+                </h2>
+                {awards.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Belum ada data</p>
+                ) : (
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {awards.map((a) => (
+                      <div key={a.id} className="border border-border rounded-xl p-3">
+                        <p className="text-sm font-medium text-card-foreground">{a.title}</p>
+                        {a.issuer && <p className="text-xs text-muted-foreground">{a.issuer}</p>}
+                        {a.date_received && <p className="text-xs text-muted-foreground">{formatDate(a.date_received)}</p>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Credit Score & Medical History - side by side */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                  <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" /> Credit Score
+                  </h2>
+                  {creditScores.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Belum ada data</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {creditScores.map((c) => (
+                        <div key={c.id} className="border border-border rounded-xl p-3">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium text-card-foreground">{c.provider_name}</p>
+                            {c.score_value != null && (
+                              <span className="text-lg font-bold text-primary">{c.score_value}</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{c.score_type}{c.score_grade ? ` • Grade: ${c.score_grade}` : ""}</p>
+                          {c.report_date && <p className="text-xs text-muted-foreground">{formatDate(c.report_date)}</p>}
+                          <Badge variant="outline" className="text-xs mt-1">{c.status}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                  <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                    <Heart className="w-4 h-4" /> Medical History
+                  </h2>
+                  {medicalRecords.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Belum ada data</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {medicalRecords.map((m) => (
+                        <div key={m.id} className="border border-border rounded-xl p-3">
+                          <p className="text-sm font-medium text-card-foreground">{m.title}</p>
+                          <p className="text-xs text-muted-foreground">{m.record_type}{m.provider ? ` • ${m.provider}` : ""}</p>
+                          {m.record_date && <p className="text-xs text-muted-foreground">{formatDate(m.record_date)}</p>}
+                          <Badge variant="outline" className="text-xs mt-1">{m.status}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
 
             </div>
 
