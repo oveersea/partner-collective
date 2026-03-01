@@ -101,7 +101,7 @@ const ServiceShowcaseSection = () => {
         </motion.div>
 
         {/* Category pills */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12 p-1.5 bg-muted/50 rounded-lg border border-border w-fit mx-auto">
+        <div className="flex flex-wrap justify-center gap-3 mb-12 p-1.5 bg-muted/50 border border-border w-fit mx-auto" style={{ borderRadius: '5px' }}>
           {categories.map((cat) => {
             const Icon = iconMap[cat.icon || ""] || Briefcase;
             const isActive = activeCategory === cat.id;
@@ -127,7 +127,7 @@ const ServiceShowcaseSection = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
           {loadingServices ? (
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="rounded-2xl border border-border bg-card p-6 animate-pulse">
+              <div key={i} className="border border-border bg-card p-6 animate-pulse" style={{ borderRadius: '5px' }}>
                 <div className="h-5 bg-muted rounded w-2/3 mb-3" />
                 <div className="h-4 bg-muted rounded w-full mb-4" />
                 <div className="flex gap-2">
@@ -193,7 +193,7 @@ const ServiceShowcaseSection = () => {
           className="text-center mt-12"
         >
           <Link to="/auth">
-            <button className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity">
+            <button className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity" style={{ borderRadius: '5px' }}>
               Tawarkan Layanan Anda
               <ArrowRight className="w-4 h-4" />
             </button>
