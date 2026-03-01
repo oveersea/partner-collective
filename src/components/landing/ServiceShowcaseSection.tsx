@@ -124,9 +124,9 @@ const ServiceShowcaseSection = () => {
         </div>
 
         {/* Services grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 w-full">
           {loadingServices ? (
-            Array.from({ length: 3 }).map((_, i) => (
+            Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="border border-border bg-card p-6 animate-pulse" style={{ borderRadius: '5px' }}>
                 <div className="h-5 bg-muted rounded w-2/3 mb-3" />
                 <div className="h-4 bg-muted rounded w-full mb-4" />
@@ -142,45 +142,49 @@ const ServiceShowcaseSection = () => {
             </div>
           ) : (
             services.map((service, i) => (
-              <motion.div
-                key={service.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className="group border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all p-6" style={{ borderRadius: '5px' }}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {service.name}
-                  </h3>
-                  {service.provider_count > 0 && (
-                    <span className="flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full shrink-0">
-                      <Users className="w-3 h-3" />
-                      {service.provider_count}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {service.description}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {service.required_skills.slice(0, 4).map((skill) => (
-                    <span
-                      key={skill}
-                      className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground"
-                    >
-                      <CheckCircle2 className="w-3 h-3 text-primary/60" />
-                      {skill}
-                    </span>
-                  ))}
-                  {service.required_skills.length > 4 && (
-                    <span className="text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
-                      +{service.required_skills.length - 4}
-                    </span>
-                  )}
-                </div>
-              </motion.div>
+              <Link key={service.id} to={`/services/${service.slug}`}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  className="group border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all p-6 h-full cursor-pointer" style={{ borderRadius: '5px' }}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
+                      {service.name}
+                    </h3>
+                    {service.provider_count > 0 && (
+                      <span className="flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full shrink-0">
+                        <Users className="w-3 h-3" />
+                        {service.provider_count}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    {service.description}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {service.required_skills.slice(0, 4).map((skill) => (
+                      <span
+                        key={skill}
+                        className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground"
+                      >
+                        <CheckCircle2 className="w-3 h-3 text-primary/60" />
+                        {skill}
+                      </span>
+                    ))}
+                    {service.required_skills.length > 4 && (
+                      <span className="text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
+                        +{service.required_skills.length - 4}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-4 flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    Lihat detail <ArrowRight className="w-3 h-3" />
+                  </div>
+                </motion.div>
+              </Link>
             ))
           )}
         </div>
