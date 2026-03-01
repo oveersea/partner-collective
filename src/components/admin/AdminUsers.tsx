@@ -73,7 +73,7 @@ const formatLastOnline = (d: string | null): string => {
   return new Date(d).toLocaleDateString("id-ID");
 };
 
-type SortKey = "profile" | "activity" | "last_online" | "created_at" | null;
+type SortKey = "profile" | "activity" | "last_online" | "created_at" | "kyc" | null;
 type SortDir = "asc" | "desc";
 
 const AdminUsers = () => {
@@ -206,6 +206,12 @@ const AdminUsers = () => {
             va = new Date(a.created_at).getTime();
             vb = new Date(b.created_at).getTime();
             break;
+          case "kyc": {
+            const kycOrder: Record<string, number> = { approved: 4, verified: 4, pending: 3, rejected: 2, unverified: 1, deactivated: 0 };
+            va = kycOrder[a.kyc_status] ?? 1;
+            vb = kycOrder[b.kyc_status] ?? 1;
+            break;
+          }
           default:
             return 0;
         }
@@ -244,7 +250,9 @@ const AdminUsers = () => {
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">User</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Oveercode</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipe</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">KYC</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("kyc")}>
+                  <span className="flex items-center">KYC <SortIcon col="kyc" /></span>
+                </th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("profile")}>
                   <span className="flex items-center">Profil <SortIcon col="profile" /></span>
                 </th>
