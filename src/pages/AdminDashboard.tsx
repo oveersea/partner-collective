@@ -11,8 +11,15 @@ import AdminKYC from "@/components/admin/AdminKYC";
 import AdminHiring from "@/components/admin/AdminHiring";
 import AdminCredits from "@/components/admin/AdminCredits";
 import AdminContent from "@/components/admin/AdminContent";
-import { LogOut } from "lucide-react";
+import { LogOut, User, LayoutDashboard, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const AdminDashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -81,12 +88,35 @@ const AdminDashboard = () => {
               <SidebarTrigger />
               <h1 className="text-sm font-semibold text-foreground capitalize">{activeSection === "overview" ? "Dashboard Admin" : activeSection.replace("_", " ")}</h1>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground hidden sm:block">{user?.email}</span>
-              <Button variant="ghost" size="sm" onClick={async () => { await signOut(); navigate("/"); }}>
-                <LogOut className="w-4 h-4" />
-              </Button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 p-0">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-2 py-1.5">
+                  <p className="text-sm font-medium text-foreground">Admin</p>
+                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
+                  <LayoutDashboard className="w-4 h-4 mr-2" />
+                  Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/learning")} className="cursor-pointer">
+                  <GraduationCap className="w-4 h-4 mr-2" />
+                  Learning
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={async () => { await signOut(); navigate("/"); }} className="cursor-pointer text-destructive focus:text-destructive">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Keluar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </header>
           <main className="flex-1 p-6 overflow-auto">
             {renderContent()}
