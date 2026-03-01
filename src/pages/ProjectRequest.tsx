@@ -146,6 +146,7 @@ const ProjectRequest = () => {
         slug,
         status: "open",
         job_type: "project",
+        sla_type: "normal",
       });
 
       if (error) throw error;

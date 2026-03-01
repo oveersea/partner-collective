@@ -165,6 +165,9 @@ const ServiceOrder = () => {
         team_size: teamSize,
       };
 
+      // Map urgency to sla_type
+      const slaType = urgency === "urgent" ? "urgent" : urgency === "priority" ? "priority" : "normal";
+
       const { error } = await supabase.from("orders").insert({
         user_id: user.id,
         order_number: orderNum || "",
@@ -174,6 +177,7 @@ const ServiceOrder = () => {
         total_cents: 0,
         currency: "IDR",
         status: "pending",
+        sla_type: slaType,
         notes: notes.trim() || null,
         created_by: user.id,
       });

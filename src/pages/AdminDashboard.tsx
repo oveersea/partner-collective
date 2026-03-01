@@ -15,6 +15,7 @@ import AdminLearning from "@/components/admin/AdminLearning";
 import AdminAssessment from "@/components/admin/AdminAssessment";
 import AdminInsights from "@/components/admin/AdminInsights";
 import AdminInstitutions from "@/components/admin/AdminInstitutions";
+import AdminRequests from "@/components/admin/AdminRequests";
 import { LogOut, User, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -77,6 +78,7 @@ const AdminDashboard = () => {
       case "kyc": return <AdminKYC />;
       case "hiring": return <AdminHiring />;
       case "credits": return <AdminCredits />;
+      case "requests": return <AdminRequests />;
       case "content": return <AdminContent />;
       case "learning": return <AdminLearning />;
       case "institutions": return <AdminInstitutions />;
