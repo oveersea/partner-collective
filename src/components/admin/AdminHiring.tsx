@@ -59,8 +59,8 @@ const AdminHiring = () => {
 
   const updateStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("hiring_requests").update({ status }).eq("id", id);
-    if (error) toast.error("Gagal update status");
-    else { toast.success("Status diperbarui"); fetchData(); }
+    if (error) toast.error("Failed to update status");
+    else { toast.success("Status updated"); fetchData(); }
   };
 
   const slaColor = (type: string) => type === "fast" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground";
@@ -84,7 +84,7 @@ const AdminHiring = () => {
         <h2 className="text-xl font-semibold text-foreground">Hiring & Matchmaking</h2>
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Cari role atau perusahaan..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input className="pl-9" placeholder="Search role or company..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
 
@@ -104,13 +104,13 @@ const AdminHiring = () => {
               <thead>
                 <tr className="border-b border-border bg-muted/50">
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Role</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Perusahaan</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Company</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">SLA</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Qty</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Kredit</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Deadline</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Credits</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Deadline</th>
+                   <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -119,7 +119,7 @@ const AdminHiring = () => {
                     <tr key={i} className="border-b border-border"><td colSpan={8} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
                   ))
                 ) : filteredReqs.length === 0 ? (
-                  <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No data</td></tr>
                 ) : (
                   filteredReqs.map((r) => (
                     <tr key={r.id} className="border-b border-border hover:bg-muted/30 transition-colors">
@@ -134,7 +134,7 @@ const AdminHiring = () => {
                       </td>
                       <td className="px-4 py-3 text-foreground font-mono text-xs">{r.credit_cost}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">
-                        {r.sla_deadline ? new Date(r.sla_deadline).toLocaleDateString("id-ID") : "—"}
+                        {r.sla_deadline ? new Date(r.sla_deadline).toLocaleDateString("en-US") : "—"}
                       </td>
                       <td className="px-4 py-3 text-right">
                         {r.status === "open" && (
@@ -169,15 +169,15 @@ const AdminHiring = () => {
               <thead>
                 <tr className="border-b border-border bg-muted/50">
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Skills</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Kekurangan</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">SLA</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Shortage</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">SLA</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
                 </tr>
               </thead>
               <tbody>
                 {alerts.length === 0 ? (
-                  <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Tidak ada shortage alerts</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No shortage alerts</td></tr>
                 ) : (
                   alerts.map((a) => (
                     <tr key={a.id} className="border-b border-border hover:bg-muted/30 transition-colors">
@@ -195,7 +195,7 @@ const AdminHiring = () => {
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${a.status === "open" ? "bg-amber-500/10 text-amber-600" : "bg-primary/10 text-primary"}`}>{a.status}</span>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(a.created_at).toLocaleDateString("id-ID")}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(a.created_at).toLocaleDateString("en-US")}</td>
                     </tr>
                   ))
                 )}

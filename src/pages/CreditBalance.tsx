@@ -121,13 +121,13 @@ const CreditBalancePage = () => {
       amount_cents: pkg.price_cents,
       currency: pkg.currency,
       status: "pending",
-      description: `Pembelian paket ${pkg.name}`,
+      description: `Purchase package ${pkg.name}`,
     } as any);
 
     if (error) {
-      toast.error("Gagal membuat order: " + error.message);
+      toast.error("Failed to create order: " + error.message);
     } else {
-      toast.success("Order kredit berhasil dibuat! Menunggu konfirmasi pembayaran.");
+      toast.success("Credit order created! Awaiting payment confirmation.");
       fetchAll();
     }
     setSubmitting(false);
@@ -136,7 +136,7 @@ const CreditBalancePage = () => {
   const submitDeposit = async () => {
     const amount = parseInt(depositAmount);
     if (!amount || amount < 10000) {
-      toast.error("Minimum deposit Rp 10.000");
+      toast.error("Minimum deposit Rp 10,000");
       return;
     }
     setDepositSubmitting(true);
@@ -149,9 +149,9 @@ const CreditBalancePage = () => {
     } as any);
 
     if (error) {
-      toast.error("Gagal membuat deposit: " + error.message);
+      toast.error("Failed to create deposit: " + error.message);
     } else {
-      toast.success("Deposit berhasil dibuat! Menunggu konfirmasi admin.");
+      toast.success("Deposit created! Awaiting admin confirmation.");
       setDepositAmount("");
       fetchAll();
     }
@@ -186,9 +186,9 @@ const CreditBalancePage = () => {
       <div className="w-full px-6 py-8 max-w-7xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
-            <ChevronLeft className="w-4 h-4 mr-1" /> Kembali
+            <ChevronLeft className="w-4 h-4 mr-1" /> Back
           </Button>
-          <h1 className="text-xl font-semibold text-foreground">Kredit & Saldo</h1>
+          <h1 className="text-xl font-semibold text-foreground">Credits & Balance</h1>
         </div>
 
         {/* Tab Switcher */}
@@ -199,7 +199,7 @@ const CreditBalancePage = () => {
               tab === "credits" ? "bg-card text-card-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <CreditCard className="w-4 h-4" /> Kredit
+            <CreditCard className="w-4 h-4" /> Credits
           </button>
           <button
             onClick={() => setTab("wallet")}
@@ -207,14 +207,13 @@ const CreditBalancePage = () => {
               tab === "wallet" ? "bg-card text-card-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Wallet className="w-4 h-4" /> Saldo
+            <Wallet className="w-4 h-4" /> Wallet
           </button>
         </div>
 
         {/* ========== CREDITS TAB ========== */}
         {tab === "credits" && (
           <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-6">
-            {/* Left Column - 65% */}
             <div className="space-y-6">
               {/* Balance Card */}
               <div className="bg-card rounded-2xl border border-border p-6">
@@ -223,17 +222,17 @@ const CreditBalancePage = () => {
                     <Coins className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Saldo Kredit</p>
+                    <p className="text-sm text-muted-foreground">Credit Balance</p>
                     <p className="text-3xl font-semibold text-foreground">{creditBal?.balance ?? 0}</p>
                   </div>
                 </div>
                 <div className="flex gap-6 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Total dibeli: </span>
+                    <span className="text-muted-foreground">Total purchased: </span>
                     <span className="font-medium text-foreground">{creditBal?.total_purchased ?? 0}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Total dipakai: </span>
+                    <span className="text-muted-foreground">Total used: </span>
                     <span className="font-medium text-foreground">{creditBal?.total_used ?? 0}</span>
                   </div>
                 </div>
@@ -241,22 +240,22 @@ const CreditBalancePage = () => {
 
               {/* Order History */}
               <div>
-                <h3 className="text-base font-semibold text-foreground mb-3">Riwayat Order</h3>
+                <h3 className="text-base font-semibold text-foreground mb-3">Order History</h3>
                 <div className="bg-card rounded-2xl border border-border overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-border bg-muted/50">
                           <th className="text-left px-4 py-3 font-medium text-muted-foreground">Order #</th>
-                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Kredit</th>
-                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Jumlah</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Credits</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Amount</th>
                           <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
                         </tr>
                       </thead>
                       <tbody>
                         {pagedOrders.length === 0 ? (
-                          <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Belum ada order</td></tr>
+                          <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No orders yet</td></tr>
                         ) : (
                           pagedOrders.map((o) => (
                             <tr key={o.id} className="border-b border-border hover:bg-muted/30 transition-colors">
@@ -266,7 +265,7 @@ const CreditBalancePage = () => {
                               <td className="px-4 py-3">
                                 <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(o.status)}`}>{o.status}</span>
                               </td>
-                              <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(o.created_at).toLocaleDateString("id-ID")}</td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(o.created_at).toLocaleDateString("en-US")}</td>
                             </tr>
                           ))
                         )}
@@ -286,10 +285,10 @@ const CreditBalancePage = () => {
               </div>
             </div>
 
-            {/* Right Column - 35% */}
+            {/* Right Column */}
             <div>
               <div className="bg-card rounded-2xl border border-border p-6 lg:sticky lg:top-6">
-                <h3 className="text-base font-semibold text-foreground mb-3">Beli Kredit</h3>
+                <h3 className="text-base font-semibold text-foreground mb-3">Buy Credits</h3>
                 <div className="grid grid-cols-1 gap-3">
                   {packages.map((pkg) => (
                     <div key={pkg.id} className="rounded-xl border border-border p-4 flex flex-col gap-2 hover:border-primary/40 transition-colors">
@@ -299,11 +298,11 @@ const CreditBalancePage = () => {
                       </div>
                       <div className="flex items-baseline gap-1">
                         <span className="text-xl font-semibold text-foreground">{pkg.credits}</span>
-                        <span className="text-sm text-muted-foreground">kredit</span>
+                        <span className="text-sm text-muted-foreground">credits</span>
                         <span className="text-sm text-muted-foreground ml-auto">{formatCurrency(pkg.price_cents)}</span>
                       </div>
                       <Button size="sm" className="w-full mt-1" disabled={submitting} onClick={() => purchaseCredit(pkg)}>
-                        Beli Sekarang
+                        Buy Now
                       </Button>
                     </div>
                   ))}
@@ -316,7 +315,6 @@ const CreditBalancePage = () => {
         {/* ========== WALLET TAB ========== */}
         {tab === "wallet" && (
           <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-6">
-            {/* Left Column - 65% */}
             <div className="space-y-6">
               {/* Balance Card */}
               <div className="bg-card rounded-2xl border border-border p-6">
@@ -325,19 +323,19 @@ const CreditBalancePage = () => {
                     <Wallet className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Saldo Wallet</p>
+                    <p className="text-sm text-muted-foreground">Wallet Balance</p>
                     <p className="text-3xl font-semibold text-foreground">{formatCurrency(Number(walletBal?.balance ?? 0))}</p>
                   </div>
                 </div>
                 <div className="flex gap-6 text-sm">
                   <div className="flex items-center gap-1.5">
                     <ArrowDownRight className="w-3.5 h-3.5 text-primary" />
-                    <span className="text-muted-foreground">Masuk: </span>
+                    <span className="text-muted-foreground">In: </span>
                     <span className="font-medium text-foreground">{formatCurrency(Number(walletBal?.total_deposited ?? 0))}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <ArrowUpRight className="w-3.5 h-3.5 text-destructive" />
-                    <span className="text-muted-foreground">Keluar: </span>
+                    <span className="text-muted-foreground">Out: </span>
                     <span className="font-medium text-foreground">{formatCurrency(Number(walletBal?.total_withdrawn ?? 0))}</span>
                   </div>
                 </div>
@@ -346,17 +344,17 @@ const CreditBalancePage = () => {
               {/* Deposit History */}
               {deposits.length > 0 && (
                 <div>
-                  <h3 className="text-base font-semibold text-foreground mb-3">Riwayat Deposit</h3>
+                  <h3 className="text-base font-semibold text-foreground mb-3">Deposit History</h3>
                   <div className="bg-card rounded-2xl border border-border overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="border-b border-border bg-muted/50">
                             <th className="text-left px-4 py-3 font-medium text-muted-foreground">Deposit #</th>
-                            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Jumlah</th>
-                            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Metode</th>
+                            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Amount</th>
+                            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Method</th>
                             <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
+                            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -368,7 +366,7 @@ const CreditBalancePage = () => {
                               <td className="px-4 py-3">
                                 <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(d.status)}`}>{d.status}</span>
                               </td>
-                              <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(d.created_at).toLocaleDateString("id-ID")}</td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(d.created_at).toLocaleDateString("en-US")}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -380,22 +378,22 @@ const CreditBalancePage = () => {
 
               {/* Transaction History */}
               <div>
-                <h3 className="text-base font-semibold text-foreground mb-3">Riwayat Transaksi</h3>
+                <h3 className="text-base font-semibold text-foreground mb-3">Transaction History</h3>
                 <div className="bg-card rounded-2xl border border-border overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-border bg-muted/50">
-                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipe</th>
-                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Jumlah</th>
-                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Saldo Setelah</th>
-                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Deskripsi</th>
-                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Type</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Amount</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Balance After</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Description</th>
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
                         </tr>
                       </thead>
                       <tbody>
                         {pagedTx.length === 0 ? (
-                          <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Belum ada transaksi</td></tr>
+                          <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No transactions yet</td></tr>
                         ) : (
                           pagedTx.map((tx) => (
                             <tr key={tx.id} className="border-b border-border hover:bg-muted/30 transition-colors">
@@ -407,7 +405,7 @@ const CreditBalancePage = () => {
                               </td>
                               <td className="px-4 py-3 text-muted-foreground text-xs">{formatCurrency(Number(tx.balance_after))}</td>
                               <td className="px-4 py-3 text-muted-foreground text-xs max-w-[200px] truncate">{tx.description || "—"}</td>
-                              <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(tx.created_at).toLocaleDateString("id-ID")}</td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(tx.created_at).toLocaleDateString("en-US")}</td>
                             </tr>
                           ))
                         )}
@@ -427,15 +425,14 @@ const CreditBalancePage = () => {
               </div>
             </div>
 
-            {/* Right Column - 35% */}
+            {/* Right Column */}
             <div className="space-y-6">
-              {/* Deposit Form */}
               <div className="bg-card rounded-2xl border border-border p-6 lg:sticky lg:top-6">
-                <h3 className="text-base font-semibold text-foreground mb-3">Deposit Saldo</h3>
-                <p className="text-sm text-muted-foreground mb-4">Masukkan jumlah yang ingin di-deposit. Minimum Rp 10.000.</p>
+                <h3 className="text-base font-semibold text-foreground mb-3">Deposit Funds</h3>
+                <p className="text-sm text-muted-foreground mb-4">Enter the amount to deposit. Minimum Rp 10,000.</p>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-sm text-muted-foreground mb-1.5 block">Jumlah (IDR)</label>
+                    <label className="text-sm text-muted-foreground mb-1.5 block">Amount (IDR)</label>
                     <Input
                       type="number"
                       min={10000}
@@ -446,10 +443,9 @@ const CreditBalancePage = () => {
                     />
                   </div>
                   <Button className="w-full" disabled={depositSubmitting || !depositAmount} onClick={submitDeposit}>
-                    {depositSubmitting ? "Memproses..." : "Deposit"}
+                    {depositSubmitting ? "Processing..." : "Deposit"}
                   </Button>
                 </div>
-                {/* Quick amounts */}
                 <div className="flex flex-wrap gap-2 mt-3">
                   {[50000, 100000, 250000, 500000].map((amt) => (
                     <button

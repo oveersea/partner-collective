@@ -17,32 +17,32 @@ import DashboardNav from "@/components/dashboard/DashboardNav";
 import { z } from "zod";
 
 const vendorSchema = z.object({
-  name: z.string().trim().min(2, "Nama perusahaan minimal 2 karakter").max(200),
+  name: z.string().trim().min(2, "Company name must be at least 2 characters").max(200),
   description: z.string().trim().max(2000).optional(),
-  industry: z.string().min(1, "Industri wajib dipilih"),
-  company_size: z.string().min(1, "Ukuran perusahaan wajib dipilih"),
-  address: z.string().trim().min(5, "Alamat minimal 5 karakter").max(500),
-  city: z.string().trim().min(2, "Kota wajib diisi"),
-  phone: z.string().trim().min(8, "Nomor telepon minimal 8 digit").max(20),
-  email: z.string().email("Email tidak valid"),
-  website: z.string().url("URL tidak valid").optional().or(z.literal("")),
+  industry: z.string().min(1, "Industry is required"),
+  company_size: z.string().min(1, "Company size is required"),
+  address: z.string().trim().min(5, "Address must be at least 5 characters").max(500),
+  city: z.string().trim().min(2, "City is required"),
+  phone: z.string().trim().min(8, "Phone number must be at least 8 digits").max(20),
+  email: z.string().email("Invalid email address"),
+  website: z.string().url("Invalid URL").optional().or(z.literal("")),
   nib: z.string().trim().optional(),
   npwp: z.string().trim().optional(),
   akta_number: z.string().trim().optional(),
 });
 
 const industries = [
-  "Teknologi", "Konstruksi", "Manufaktur", "Perdagangan", "Jasa Profesional",
-  "Keuangan", "Pendidikan", "Kesehatan", "Logistik", "F&B",
-  "Media & Kreatif", "Pertanian", "Energi", "Pertambangan", "Lainnya",
+  "Technology", "Construction", "Manufacturing", "Trading", "Professional Services",
+  "Finance", "Education", "Healthcare", "Logistics", "F&B",
+  "Media & Creative", "Agriculture", "Energy", "Mining", "Other",
 ];
 
 const companySizes = [
-  { value: "1-10", label: "1-10 karyawan" },
-  { value: "11-50", label: "11-50 karyawan" },
-  { value: "51-200", label: "51-200 karyawan" },
-  { value: "201-500", label: "201-500 karyawan" },
-  { value: "500+", label: "500+ karyawan" },
+  { value: "1-10", label: "1-10 employees" },
+  { value: "11-50", label: "11-50 employees" },
+  { value: "51-200", label: "51-200 employees" },
+  { value: "201-500", label: "201-500 employees" },
+  { value: "500+", label: "500+ employees" },
 ];
 
 interface DocUpload {
@@ -54,12 +54,12 @@ interface DocUpload {
 }
 
 const initialDocs: DocUpload[] = [
-  { type: "siup", label: "SIUP / Izin Usaha", file: null, required: true, uploading: false },
-  { type: "nib", label: "NIB (Nomor Induk Berusaha)", file: null, required: true, uploading: false },
-  { type: "npwp", label: "NPWP Perusahaan", file: null, required: true, uploading: false },
-  { type: "akta", label: "Akta Pendirian", file: null, required: false, uploading: false },
-  { type: "tdp", label: "TDP / SKU", file: null, required: false, uploading: false },
-  { type: "other", label: "Dokumen Lainnya", file: null, required: false, uploading: false },
+  { type: "siup", label: "Business License (SIUP)", file: null, required: true, uploading: false },
+  { type: "nib", label: "Business Identification Number (NIB)", file: null, required: true, uploading: false },
+  { type: "npwp", label: "Tax ID (NPWP)", file: null, required: true, uploading: false },
+  { type: "akta", label: "Articles of Incorporation", file: null, required: false, uploading: false },
+  { type: "tdp", label: "Company Registration Certificate", file: null, required: false, uploading: false },
+  { type: "other", label: "Other Documents", file: null, required: false, uploading: false },
 ];
 
 const VendorRegistration = () => {
@@ -115,7 +115,7 @@ const VendorRegistration = () => {
   const validateStep2 = (): boolean => {
     const missingRequired = docs.filter((d) => d.required && !d.file);
     if (missingRequired.length > 0) {
-      toast.error(`Dokumen wajib belum lengkap: ${missingRequired.map((d) => d.label).join(", ")}`);
+      toast.error(`Required documents missing: ${missingRequired.map((d) => d.label).join(", ")}`);
       return false;
     }
     return true;
@@ -187,10 +187,10 @@ const VendorRegistration = () => {
         });
       }
 
-      toast.success("Registrasi vendor berhasil! Dokumen akan diverifikasi dalam 1-3 hari kerja.");
+      toast.success("Vendor registration successful! Documents will be verified within 1-3 business days.");
       navigate("/dashboard");
     } catch (error: any) {
-      toast.error(error.message || "Gagal mendaftarkan vendor");
+      toast.error(error.message || "Failed to register vendor");
     } finally {
       setSubmitting(false);
     }
@@ -205,15 +205,14 @@ const VendorRegistration = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
-      <DashboardBreadcrumb items={[{ label: "Registrasi Vendor" }]} />
+      <DashboardBreadcrumb items={[{ label: "Vendor Registration" }]} />
       <div className="w-full px-6 py-8">
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left: Form (70%) */}
           <div className="lg:w-[70%]">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-              <h1 className="text-2xl font-semibold text-foreground mb-2">Registrasi Vendor</h1>
-              <p className="text-muted-foreground text-sm">Daftarkan perusahaan Anda dan upload dokumen legalitas</p>
+              <h1 className="text-2xl font-semibold text-foreground mb-2">Vendor Registration</h1>
+              <p className="text-muted-foreground text-sm">Register your company and upload legal documents</p>
             </motion.div>
 
             {/* Step indicator */}
@@ -230,7 +229,7 @@ const VendorRegistration = () => {
                     {step > s ? <CheckCircle2 className="w-4 h-4" /> : s}
                   </div>
                   <span className={`text-sm font-medium ${step >= s ? "text-foreground" : "text-muted-foreground"}`}>
-                    {s === 1 ? "Info Perusahaan" : "Dokumen Legalitas"}
+                    {s === 1 ? "Company Info" : "Legal Documents"}
                   </span>
                   {s === 1 && <div className="w-8 h-0.5 bg-border mx-1" />}
                 </div>
@@ -245,25 +244,25 @@ const VendorRegistration = () => {
                 className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-5"
               >
                 <div>
-                  <Label className="text-card-foreground">Nama Perusahaan *</Label>
-                  <Input className="mt-1.5" placeholder="PT Contoh Indonesia" value={form.name} onChange={(e) => set("name", e.target.value)} />
+                  <Label className="text-card-foreground">Company Name *</Label>
+                  <Input className="mt-1.5" placeholder="PT Example Indonesia" value={form.name} onChange={(e) => set("name", e.target.value)} />
                   {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
                 </div>
 
                 <div>
-                  <Label className="text-card-foreground">Deskripsi Perusahaan</Label>
-                  <Textarea className="mt-1.5" rows={3} placeholder="Deskripsi singkat tentang perusahaan Anda..." value={form.description} onChange={(e) => set("description", e.target.value)} />
+                  <Label className="text-card-foreground">Company Description</Label>
+                  <Textarea className="mt-1.5" rows={3} placeholder="Brief description of your company..." value={form.description} onChange={(e) => set("description", e.target.value)} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-card-foreground">Industri *</Label>
+                    <Label className="text-card-foreground">Industry *</Label>
                     <select
                       className="mt-1.5 w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                       value={form.industry}
                       onChange={(e) => set("industry", e.target.value)}
                     >
-                      <option value="">Pilih industri</option>
+                      <option value="">Select industry</option>
                       {industries.map((i) => (
                         <option key={i} value={i}>{i}</option>
                       ))}
@@ -271,13 +270,13 @@ const VendorRegistration = () => {
                     {errors.industry && <p className="text-xs text-destructive mt-1">{errors.industry}</p>}
                   </div>
                   <div>
-                    <Label className="text-card-foreground">Ukuran Perusahaan *</Label>
+                    <Label className="text-card-foreground">Company Size *</Label>
                     <select
                       className="mt-1.5 w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                       value={form.company_size}
                       onChange={(e) => set("company_size", e.target.value)}
                     >
-                      <option value="">Pilih ukuran</option>
+                      <option value="">Select size</option>
                       {companySizes.map((s) => (
                         <option key={s.value} value={s.value}>{s.label}</option>
                       ))}
@@ -287,19 +286,19 @@ const VendorRegistration = () => {
                 </div>
 
                 <div>
-                  <Label className="text-card-foreground">Alamat *</Label>
+                  <Label className="text-card-foreground">Address *</Label>
                   <Textarea className="mt-1.5" rows={2} placeholder="Jl. Sudirman No. 1, Jakarta" value={form.address} onChange={(e) => set("address", e.target.value)} />
                   {errors.address && <p className="text-xs text-destructive mt-1">{errors.address}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-card-foreground">Kota *</Label>
+                    <Label className="text-card-foreground">City *</Label>
                     <Input className="mt-1.5" placeholder="Jakarta" value={form.city} onChange={(e) => set("city", e.target.value)} />
                     {errors.city && <p className="text-xs text-destructive mt-1">{errors.city}</p>}
                   </div>
                   <div>
-                    <Label className="text-card-foreground">Telepon *</Label>
+                    <Label className="text-card-foreground">Phone *</Label>
                     <Input className="mt-1.5" placeholder="021-12345678" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
                     {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
                   </div>
@@ -307,20 +306,20 @@ const VendorRegistration = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-card-foreground">Email Perusahaan *</Label>
-                    <Input className="mt-1.5" type="email" placeholder="info@perusahaan.com" value={form.email} onChange={(e) => set("email", e.target.value)} />
+                    <Label className="text-card-foreground">Company Email *</Label>
+                    <Input className="mt-1.5" type="email" placeholder="info@company.com" value={form.email} onChange={(e) => set("email", e.target.value)} />
                     {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
                   </div>
                   <div>
                     <Label className="text-card-foreground">Website</Label>
-                    <Input className="mt-1.5" placeholder="https://perusahaan.com" value={form.website} onChange={(e) => set("website", e.target.value)} />
+                    <Input className="mt-1.5" placeholder="https://company.com" value={form.website} onChange={(e) => set("website", e.target.value)} />
                     {errors.website && <p className="text-xs text-destructive mt-1">{errors.website}</p>}
                   </div>
                 </div>
 
                 {/* Legal numbers */}
                 <div className="border-t border-border pt-5">
-                  <p className="text-sm font-semibold text-card-foreground mb-3">Nomor Legalitas (opsional di tahap ini)</p>
+                  <p className="text-sm font-semibold text-card-foreground mb-3">Legal Numbers (optional at this stage)</p>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
                       <Label className="text-card-foreground text-xs">NIB</Label>
@@ -331,7 +330,7 @@ const VendorRegistration = () => {
                       <Input className="mt-1" placeholder="01.234.567.8-901.000" value={form.npwp} onChange={(e) => set("npwp", e.target.value)} />
                     </div>
                     <div>
-                      <Label className="text-card-foreground text-xs">No. Akta</Label>
+                      <Label className="text-card-foreground text-xs">Deed No.</Label>
                       <Input className="mt-1" placeholder="AHU-00000" value={form.akta_number} onChange={(e) => set("akta_number", e.target.value)} />
                     </div>
                   </div>
@@ -342,7 +341,7 @@ const VendorRegistration = () => {
                   size="lg"
                   onClick={() => { if (validateStep1()) setStep(2); }}
                 >
-                  Lanjut ke Upload Dokumen
+                  Continue to Document Upload
                 </Button>
               </motion.div>
             )}
@@ -355,9 +354,9 @@ const VendorRegistration = () => {
                 className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-5"
               >
                 <div>
-                  <h2 className="text-lg font-semibold text-card-foreground mb-1">Upload Dokumen Legalitas</h2>
+                  <h2 className="text-lg font-semibold text-card-foreground mb-1">Upload Legal Documents</h2>
                   <p className="text-sm text-muted-foreground">
-                    Upload dokumen perusahaan Anda. Format: JPG, PNG, PDF. Maks 10MB per file.
+                    Upload your company documents. Formats: JPG, PNG, PDF. Max 10MB per file.
                   </p>
                 </div>
 
@@ -404,7 +403,7 @@ const VendorRegistration = () => {
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file && file.size > 10 * 1024 * 1024) {
-                                toast.error("File terlalu besar. Maks 10MB.");
+                                toast.error("File too large. Max 10MB.");
                                 return;
                               }
                               setDocFile(idx, file || null);
@@ -419,29 +418,29 @@ const VendorRegistration = () => {
 
                 {/* Info */}
                 <div className="bg-muted rounded-xl p-4 text-sm text-muted-foreground space-y-1">
-                  <p className="font-medium text-card-foreground">Informasi:</p>
+                  <p className="font-medium text-card-foreground">Information:</p>
                   <ul className="list-disc list-inside space-y-0.5 text-xs">
-                    <li>Dokumen bertanda * wajib diunggah</li>
-                    <li>Dokumen akan diverifikasi dalam 1-3 hari kerja</li>
-                    <li>Pastikan dokumen masih berlaku dan terbaca jelas</li>
-                    <li>Data perusahaan dijaga kerahasiaannya</li>
+                    <li>Documents marked * are required</li>
+                    <li>Documents will be verified within 1-3 business days</li>
+                    <li>Ensure documents are valid and clearly readable</li>
+                    <li>Company data is kept confidential</li>
                   </ul>
                 </div>
 
                 <div className="flex gap-3">
                   <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
-                    Kembali
+                    Back
                   </Button>
                   <Button className="flex-1" size="lg" onClick={handleSubmit} disabled={submitting}>
                     {submitting ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        Mendaftarkan...
+                        Registering...
                       </>
                     ) : (
                       <>
                         <Upload className="w-4 h-4" />
-                        Daftarkan Vendor
+                        Register Vendor
                       </>
                     )}
                   </Button>
@@ -450,25 +449,25 @@ const VendorRegistration = () => {
             )}
           </div>
 
-          {/* Right: Summary sidebar (30%) */}
+          {/* Right: Summary sidebar */}
           <div className="lg:w-[30%]">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card rounded-2xl border border-border p-6 shadow-card sticky top-24">
-              <h3 className="text-sm font-semibold text-card-foreground mb-4">Ringkasan Vendor</h3>
+              <h3 className="text-sm font-semibold text-card-foreground mb-4">Vendor Summary</h3>
               <div className="space-y-4 text-sm">
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Nama Perusahaan</p>
+                  <p className="text-muted-foreground text-xs mb-1">Company Name</p>
                   <p className="text-card-foreground font-medium">{form.name || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Industri</p>
+                  <p className="text-muted-foreground text-xs mb-1">Industry</p>
                   <p className="text-card-foreground font-medium">{form.industry || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Ukuran</p>
+                  <p className="text-muted-foreground text-xs mb-1">Size</p>
                   <p className="text-card-foreground font-medium">{form.company_size || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Kota</p>
+                  <p className="text-muted-foreground text-xs mb-1">City</p>
                   <p className="text-card-foreground font-medium">{form.city || "—"}</p>
                 </div>
                 {form.email && (
@@ -478,15 +477,15 @@ const VendorRegistration = () => {
                   </div>
                 )}
                 <div>
-                  <p className="text-muted-foreground text-xs mb-1">Tahap</p>
+                  <p className="text-muted-foreground text-xs mb-1">Step</p>
                   <p className="text-card-foreground font-medium">
-                    {step === 1 ? "📝 Info Perusahaan" : "📄 Upload Dokumen"}
+                    {step === 1 ? "📝 Company Info" : "📄 Document Upload"}
                   </p>
                 </div>
                 <div className="border-t border-border pt-3">
-                  <p className="text-muted-foreground text-xs mb-1">Dokumen</p>
+                  <p className="text-muted-foreground text-xs mb-1">Documents</p>
                   <p className="text-card-foreground font-medium">
-                    {uploadedCount} terupload ({requiredUploaded}/{requiredCount} wajib)
+                    {uploadedCount} uploaded ({requiredUploaded}/{requiredCount} required)
                   </p>
                 </div>
               </div>
