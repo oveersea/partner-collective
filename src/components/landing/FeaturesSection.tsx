@@ -50,7 +50,7 @@ const categories = [
 const FeaturesSection = () => {
   return (
     <section className="py-24 bg-background relative">
-      <div className="container mx-auto px-6 max-w-6xl">
+      <div className="container mx-auto px-6 max-w-full">
         {/* Grid */}
         <div className="border border-border rounded-2xl overflow-hidden bg-card">
           {/* Row 1: 3 cols */}
