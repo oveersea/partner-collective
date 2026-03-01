@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown, Building2, Users, Briefcase, Globe, Monitor, Search, GraduationCap, BookOpen, Award, FileText, BarChart3, Shield, Zap, Target, Layers, HeadphonesIcon, ArrowUpRight, Wallet, ClipboardCheck, Landmark, CreditCard } from "lucide-react";
+import { Menu, X, ChevronDown, Building2, Users, Briefcase, Globe, Monitor, Search, GraduationCap, Award, FileText, Shield, Target, Layers, ArrowUpRight, Wallet, ClipboardCheck, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -177,89 +177,7 @@ const Navbar = () => {
             onMouseLeave={() => setActiveMenu(null)}
           >
             {megaMenus.filter(m => m.label === activeMenu).map((menu) => (
-              <div key={menu.label}>
-                <div className="container mx-auto px-6 py-8">
-                  <div className="grid grid-cols-12 gap-8">
-                    {/* Left column */}
-                    <div className="col-span-3">
-                      <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "hsl(0 79% 47%)" }}>
-                        {menu.label}
-                      </p>
-                      <ul className="space-y-1 mb-6">
-                        {menu.leftLinks.map((link) => (
-                          <li key={link.label}>
-                            <Link
-                              to={link.href}
-                              className="block py-1.5 text-sm font-medium transition-colors hover:text-primary"
-                              style={{ color: "hsl(0 0% 20%)" }}
-                              onClick={() => setActiveMenu(null)}
-                            >
-                              {link.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                      <p className="text-sm leading-relaxed mb-4" style={{ color: "hsl(0 0% 50%)" }}>
-                        {menu.leftDescription}
-                      </p>
-                      <Link
-                        to={menu.cta.href}
-                        className="inline-flex items-center gap-1 text-sm font-semibold transition-colors hover:opacity-80"
-                        style={{ color: "hsl(0 79% 47%)" }}
-                        onClick={() => setActiveMenu(null)}
-                      >
-                        {menu.cta.label} <ArrowUpRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </div>
-
-                    {/* Right grid */}
-                    <div className="col-span-9">
-                      <div className="grid grid-cols-2 gap-4">
-                        {menu.items.map((item) => (
-                          <Link
-                            key={item.title}
-                            to={item.href}
-                            className="flex items-start gap-4 rounded-xl p-4 transition-colors hover:bg-muted/60 group"
-                            onClick={() => setActiveMenu(null)}
-                          >
-                            <div
-                              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                              style={{ background: "hsl(0 79% 47% / 0.08)" }}
-                            >
-                              <item.icon className="w-5 h-5" style={{ color: "hsl(0 79% 47%)" }} />
-                            </div>
-                            <div>
-                              <p className="text-sm font-semibold" style={{ color: "hsl(0 0% 10%)" }}>
-                                {item.title}
-                              </p>
-                              <p className="text-sm mt-0.5" style={{ color: "hsl(0 0% 50%)" }}>
-                                {item.description}
-                              </p>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom bar */}
-                <div className="border-t" style={{ borderColor: "hsl(0 0% 92%)" }}>
-                  <div className="container mx-auto px-6 py-3 flex items-center justify-between">
-                    <p className="text-sm" style={{ color: "hsl(0 0% 50%)" }}>
-                      {menu.tagline}
-                    </p>
-                    <Link
-                      to={menu.cta.href}
-                      className="inline-flex items-center gap-1 text-sm font-semibold transition-colors hover:opacity-80"
-                      style={{ color: "hsl(0 79% 47%)" }}
-                      onClick={() => setActiveMenu(null)}
-                    >
-                      {menu.cta.label} <ArrowUpRight className="w-3.5 h-3.5" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
+              <MegaMenuContent key={menu.label} menu={menu} onClose={() => setActiveMenu(null)} />
             ))}
           </motion.div>
         )}
@@ -292,6 +210,106 @@ const Navbar = () => {
         )}
       </AnimatePresence>
     </nav>
+  );
+};
+
+const MegaMenuContent = ({ menu, onClose }: { menu: MegaMenuData; onClose: () => void }) => {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  return (
+    <div>
+      <div className="container mx-auto px-6 py-8">
+        <div className="grid grid-cols-12 gap-8">
+          {/* Left column */}
+          <div className="col-span-3">
+            <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "hsl(0 79% 47%)" }}>
+              {menu.label}
+            </p>
+            <ul className="space-y-1 mb-6">
+              {menu.leftLinks.map((link, index) => (
+                <li key={link.label}>
+                  <Link
+                    to={link.href}
+                    className="block py-1.5 text-sm font-medium transition-colors"
+                    style={{ color: hoveredIndex === index ? "hsl(0 79% 47%)" : "hsl(0 0% 20%)" }}
+                    onMouseEnter={() => setHoveredIndex(index)}
+                    onMouseLeave={() => setHoveredIndex(null)}
+                    onClick={onClose}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="text-sm leading-relaxed mb-4" style={{ color: "hsl(0 0% 50%)" }}>
+              {menu.leftDescription}
+            </p>
+            <Link
+              to={menu.cta.href}
+              className="inline-flex items-center gap-1 text-sm font-semibold transition-colors hover:opacity-80"
+              style={{ color: "hsl(0 79% 47%)" }}
+              onClick={onClose}
+            >
+              {menu.cta.label} <ArrowUpRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Right grid */}
+          <div className="col-span-9">
+            <div className="grid grid-cols-2 gap-4">
+              {menu.items.map((item, index) => {
+                const isHighlighted = hoveredIndex === null || hoveredIndex === index;
+                return (
+                  <Link
+                    key={item.title}
+                    to={item.href}
+                    className="flex items-start gap-4 rounded-xl p-4 transition-all duration-200 group"
+                    style={{
+                      opacity: isHighlighted ? 1 : 0.35,
+                      background: hoveredIndex === index ? "hsl(0 79% 47% / 0.06)" : "transparent",
+                      transform: hoveredIndex === index ? "scale(1.02)" : "scale(1)",
+                    }}
+                    onClick={onClose}
+                  >
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors duration-200"
+                      style={{ background: hoveredIndex === index ? "hsl(0 79% 47% / 0.15)" : "hsl(0 79% 47% / 0.08)" }}
+                    >
+                      <item.icon className="w-5 h-5" style={{ color: "hsl(0 79% 47%)" }} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: "hsl(0 0% 10%)" }}>
+                        {item.title}
+                      </p>
+                      <p className="text-sm mt-0.5" style={{ color: "hsl(0 0% 50%)" }}>
+                        {item.description}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div className="border-t" style={{ borderColor: "hsl(0 0% 92%)" }}>
+        <div className="container mx-auto px-6 py-3 flex items-center justify-between">
+          <p className="text-sm" style={{ color: "hsl(0 0% 50%)" }}>
+            {menu.tagline}
+          </p>
+          <Link
+            to={menu.cta.href}
+            className="inline-flex items-center gap-1 text-sm font-semibold transition-colors hover:opacity-80"
+            style={{ color: "hsl(0 79% 47%)" }}
+            onClick={onClose}
+          >
+            {menu.cta.label} <ArrowUpRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 };
 
