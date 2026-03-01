@@ -25,10 +25,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Record last_online on sign in
+        if (event === 'SIGNED_IN' && session?.user) {
+          setTimeout(() => {
+            supabase
+              .from('profiles')
+              .update({ last_online: new Date().toISOString() } as any)
+              .eq('user_id', session.user.id)
+              .then();
+          }, 0);
+        }
       }
     );
 
@@ -36,6 +47,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Also record on app load if already signed in
+      if (session?.user) {
+        supabase
+          .from('profiles')
+          .update({ last_online: new Date().toISOString() } as any)
+          .eq('user_id', session.user.id)
+          .then();
+      }
     });
 
     return () => subscription.unsubscribe();

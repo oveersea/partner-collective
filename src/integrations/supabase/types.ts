@@ -7585,6 +7585,7 @@ export type Database = {
           id: string
           kyc_status: string
           languages: string | null
+          last_online: string | null
           last_seen_at: string | null
           latitude: number | null
           linkedin_url: string | null
@@ -7640,6 +7641,7 @@ export type Database = {
           id?: string
           kyc_status?: string
           languages?: string | null
+          last_online?: string | null
           last_seen_at?: string | null
           latitude?: number | null
           linkedin_url?: string | null
@@ -7695,6 +7697,7 @@ export type Database = {
           id?: string
           kyc_status?: string
           languages?: string | null
+          last_online?: string | null
           last_seen_at?: string | null
           latitude?: number | null
           linkedin_url?: string | null
