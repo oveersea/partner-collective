@@ -1,0 +1,319 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Search, Building2, MapPin, Globe, ChevronLeft, ChevronRight, ExternalLink, MoreVertical, Shield, ShieldCheck, ShieldX,
+} from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+interface Company {
+  id: string;
+  name: string;
+  slug: string;
+  oveercode: string | null;
+  kyc_status: string;
+  industry: string | null;
+  city: string | null;
+  country: string | null;
+  company_size: string | null;
+  email: string | null;
+  phone: string | null;
+  website: string | null;
+  created_at: string;
+  _opp_count?: number;
+  _exp_count?: number;
+}
+
+const PAGE_SIZE = 20;
+
+const AdminCompanies = () => {
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [oppCounts, setOppCounts] = useState<Record<string, number>>({});
+  const [expCounts, setExpCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    const [compRes, oppRes, expRes] = await Promise.all([
+      supabase
+        .from("business_profiles")
+        .select("id, name, slug, oveercode, kyc_status, industry, city, country, company_size, email, phone, website, created_at")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("opportunities")
+        .select("business_id"),
+      supabase
+        .from("user_experiences")
+        .select("business_id"),
+    ]);
+
+    if (compRes.data) setCompanies(compRes.data as Company[]);
+    if (compRes.error) toast.error("Gagal memuat data perusahaan");
+
+    // Count opportunities per company
+    if (oppRes.data) {
+      const counts: Record<string, number> = {};
+      oppRes.data.forEach((o: any) => {
+        if (o.business_id) counts[o.business_id] = (counts[o.business_id] || 0) + 1;
+      });
+      setOppCounts(counts);
+    }
+
+    // Count experiences per company
+    if (expRes.data) {
+      const counts: Record<string, number> = {};
+      expRes.data.forEach((e: any) => {
+        if (e.business_id) counts[e.business_id] = (counts[e.business_id] || 0) + 1;
+      });
+      setExpCounts(counts);
+    }
+
+    setLoading(false);
+  };
+
+  const updateKycStatus = async (id: string, status: string) => {
+    const { error } = await supabase
+      .from("business_profiles")
+      .update({ kyc_status: status })
+      .eq("id", id);
+    if (error) toast.error("Gagal update status: " + error.message);
+    else {
+      toast.success(`Status KYC diubah ke "${status}"`);
+      setCompanies((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, kyc_status: status } : c))
+      );
+    }
+  };
+
+  const filtered = companies.filter(
+    (c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      (c.oveercode || "").toLowerCase().includes(search.toLowerCase()) ||
+      (c.industry || "").toLowerCase().includes(search.toLowerCase()) ||
+      (c.city || "").toLowerCase().includes(search.toLowerCase())
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const kycBadge = (status: string) => {
+    const map: Record<string, string> = {
+      verified: "bg-primary/10 text-primary",
+      approved: "bg-primary/10 text-primary",
+      pending: "bg-amber-500/10 text-amber-600",
+      rejected: "bg-destructive/10 text-destructive",
+      unverified: "bg-muted text-muted-foreground",
+    };
+    return map[status] || map.unverified;
+  };
+
+  const stats = {
+    total: companies.length,
+    verified: companies.filter((c) => c.kyc_status === "verified" || c.kyc_status === "approved").length,
+    pending: companies.filter((c) => c.kyc_status === "pending").length,
+    unverified: companies.filter((c) => c.kyc_status === "unverified").length,
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-foreground">Manajemen Perusahaan</h2>
+        <div className="relative w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            className="pl-9"
+            placeholder="Cari nama, kode, industri, kota..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {[
+          { label: "Total Perusahaan", value: stats.total, icon: Building2, color: "text-foreground" },
+          { label: "Terverifikasi", value: stats.verified, icon: ShieldCheck, color: "text-primary" },
+          { label: "Pending", value: stats.pending, icon: Shield, color: "text-amber-600" },
+          { label: "Belum Verifikasi", value: stats.unverified, icon: ShieldX, color: "text-muted-foreground" },
+        ].map((s) => (
+          <div key={s.label} className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+              <s.icon className={`w-5 h-5 ${s.color}`} />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground">{s.value}</p>
+              <p className="text-xs text-muted-foreground">{s.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Table */}
+      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/50">
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Perusahaan</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Oveercode</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Industri</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Lokasi</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Jobs</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Exp</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">KYC</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Bergabung</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="border-b border-border">
+                    <td colSpan={9} className="px-4 py-4">
+                      <div className="h-4 bg-muted rounded animate-pulse" />
+                    </td>
+                  </tr>
+                ))
+              ) : paged.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
+                    Tidak ada data perusahaan
+                  </td>
+                </tr>
+              ) : (
+                paged.map((c) => (
+                  <tr key={c.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                          <Building2 className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-medium text-foreground truncate max-w-[180px]">{c.name}</p>
+                          {c.website && (
+                            <a
+                              href={c.website.startsWith("http") ? c.website : `https://${c.website}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Globe className="w-2.5 h-2.5" /> {c.website}
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.oveercode || "—"}</td>
+                    <td className="px-4 py-3">
+                      {c.industry ? (
+                        <Badge variant="secondary" className="text-xs truncate max-w-[120px]">
+                          {c.industry}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
+                      {c.city || c.country ? (
+                        <span className="flex items-center gap-1 truncate max-w-[150px]">
+                          <MapPin className="w-3 h-3 shrink-0" />
+                          {[c.city, c.country].filter(Boolean).join(", ")}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-xs font-medium text-foreground">{oppCounts[c.id] || 0}</span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-xs font-medium text-foreground">{expCounts[c.id] || 0}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${kycBadge(c.kyc_status)}`}>
+                        {c.kyc_status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
+                      {new Date(c.created_at).toLocaleDateString("id-ID")}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {c.website && (
+                            <DropdownMenuItem
+                              onClick={() =>
+                                window.open(
+                                  c.website!.startsWith("http") ? c.website! : `https://${c.website}`,
+                                  "_blank"
+                                )
+                              }
+                            >
+                              <ExternalLink className="w-4 h-4 mr-2" /> Buka Website
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem onClick={() => updateKycStatus(c.id, "verified")}>
+                            <ShieldCheck className="w-4 h-4 mr-2" /> Set Verified
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateKycStatus(c.id, "pending")}>
+                            <Shield className="w-4 h-4 mr-2" /> Set Pending
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateKycStatus(c.id, "rejected")}>
+                            <ShieldX className="w-4 h-4 mr-2" /> Set Rejected
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        {!loading && filtered.length > PAGE_SIZE && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+            <span className="text-xs text-muted-foreground">
+              Menampilkan {Math.min((page - 1) * PAGE_SIZE + 1, filtered.length)}–
+              {Math.min(page * PAGE_SIZE, filtered.length)} dari {filtered.length}
+            </span>
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <span className="text-xs text-muted-foreground px-2">
+                {page} / {totalPages}
+              </span>
+              <Button size="sm" variant="ghost" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AdminCompanies;

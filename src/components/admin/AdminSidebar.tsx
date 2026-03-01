@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Users, Shield, Briefcase, CreditCard, FileText, ChevronLeft,
+  LayoutDashboard, Users, Shield, Briefcase, CreditCard, FileText, Building2, ChevronLeft,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 const sections = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "users", label: "Manajemen User", icon: Users },
+  { id: "companies", label: "Manajemen Perusahaan", icon: Building2 },
   { id: "kyc", label: "Verifikasi KYC", icon: Shield },
   { id: "hiring", label: "Hiring & Matching", icon: Briefcase },
   { id: "credits", label: "Kredit & Wallet", icon: CreditCard },
