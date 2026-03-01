@@ -44,12 +44,10 @@ const DashboardNav = () => {
         </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="w-4 h-4 text-primary" />
+            <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 p-0">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="w-5 h-5 text-primary" />
               </div>
-              <span className="text-sm text-muted-foreground hidden sm:block max-w-[180px] truncate">{user?.email}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
