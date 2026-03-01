@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/Dashboard";
 import KYCVerification from "./pages/KYCVerification";
+import HiringRequest from "./pages/HiringRequest";
+import ProjectRequest from "./pages/ProjectRequest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/kyc" element={<KYCVerification />} />
+            <Route path="/hiring-request" element={<HiringRequest />} />
+            <Route path="/project-request" element={<ProjectRequest />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
