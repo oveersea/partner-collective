@@ -13,7 +13,7 @@ import ProjectRequest from "./pages/ProjectRequest";
 import VendorRegistration from "./pages/VendorRegistration";
 import Matchmaking from "./pages/Matchmaking";
 import JobDetail from "./pages/JobDetail";
-import Features from "./pages/Features";
+import Services from "./pages/Services";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUserDetail from "./pages/AdminUserDetail";
 import Learning from "./pages/Learning";
@@ -42,7 +42,7 @@ const App = () => (
             <Route path="/vendor-registration" element={<VendorRegistration />} />
             <Route path="/matchmaking" element={<Matchmaking />} />
             <Route path="/job/:slug" element={<JobDetail />} />
-            <Route path="/features" element={<Features />} />
+            <Route path="/services" element={<Services />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/user/:userId" element={<AdminUserDetail />} />
             <Route path="/admin/program/:programId" element={<AdminProgramEdit />} />
