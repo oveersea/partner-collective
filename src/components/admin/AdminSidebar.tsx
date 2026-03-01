@@ -44,7 +44,7 @@ const AdminSidebar = ({ activeSection, onSectionChange }: AdminSidebarProps) => 
         <SidebarGroup>
           {!collapsed && (
             <div className="px-3 py-4">
-              <img src={logoLight} alt="Oveersea" className="h-6" />
+              <img src={logoLight} alt="Oveersea" className="h-8" />
             </div>
           )}
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
