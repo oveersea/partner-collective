@@ -27,7 +27,7 @@ interface ServiceWithCount {
 
 const ServiceShowcaseSection = () => {
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
   const [services, setServices] = useState<ServiceWithCount[]>([]);
   const [loadingServices, setLoadingServices] = useState(false);
 
@@ -40,22 +40,26 @@ const ServiceShowcaseSection = () => {
         .order("sort_order");
       if (data) {
         setCategories(data);
-        if (data.length > 0) setActiveCategory(data[0].id);
       }
     };
+    fetchCategories();
     fetchCategories();
   }, []);
 
   useEffect(() => {
-    if (!activeCategory) return;
     const fetchServices = async () => {
       setLoadingServices(true);
-      const { data: servicesData } = await supabase
+      let query = supabase
         .from("services")
         .select("id, name, slug, description, required_skills")
-        .eq("category_id", activeCategory)
         .eq("is_active", true)
         .order("sort_order");
+
+      if (activeCategory !== "all") {
+        query = query.eq("category_id", activeCategory);
+      }
+
+      const { data: servicesData } = await query;
 
       if (servicesData) {
         // Get provider counts
@@ -102,6 +106,17 @@ const ServiceShowcaseSection = () => {
 
         {/* Category pills */}
         <div className="flex flex-wrap justify-center gap-3 mb-12 p-1.5 bg-muted/50 border border-border w-fit mx-auto" style={{ borderRadius: '5px' }}>
+          <button
+            onClick={() => setActiveCategory("all")}
+            className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all relative ${
+              activeCategory === "all"
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "text-muted-foreground hover:text-foreground hover:bg-card/80"
+            }`}
+            style={{ borderRadius: '5px' }}
+          >
+            Semua
+          </button>
           {categories.map((cat) => {
             const Icon = iconMap[cat.icon || ""] || Briefcase;
             const isActive = activeCategory === cat.id;
