@@ -5,11 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft, Search, MapPin, Clock, Briefcase, Zap, Filter,
+  Search, MapPin, Clock, Briefcase, Zap, Filter,
   ChevronDown, Star, Send, X, DollarSign, Users, Globe,
   Building2, TrendingUp, CheckCircle2, Eye, ShoppingBag, Package,
   HandCoins, UserCircle, Loader2,
 } from "lucide-react";
+import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -341,10 +342,8 @@ const Matchmaking = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
+      <DashboardBreadcrumb items={[{ label: "Matchmaking" }]} />
       <div className="w-full px-6 py-8">
-        <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
-        </button>
 
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">

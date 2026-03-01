@@ -5,10 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, MapPin, Clock, Briefcase, DollarSign, Users, Globe,
+  MapPin, Clock, Briefcase, DollarSign, Users,
   Building2, TrendingUp, Star, Send, CheckCircle2, Calendar, XCircle, AlertCircle,
   Lightbulb, GraduationCap, ChevronRight,
 } from "lucide-react";
+import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -302,13 +303,8 @@ const JobDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
+      <DashboardBreadcrumb items={[{ label: "Matchmaking", href: "/matchmaking" }, { label: opp?.title || "Job Detail" }]} />
       <div className="w-full px-6 py-8">
-        <button
-          onClick={() => navigate("/matchmaking")}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Kembali ke Matchmaking
-        </button>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left: Job Detail (70%) */}
