@@ -6899,6 +6899,83 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_team_members: {
+        Row: {
+          id: string
+          joined_at: string
+          role: string
+          status: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          role?: string
+          status?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          role?: string
+          status?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "partner_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_teams: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          logo_url: string | null
+          max_members: number | null
+          name: string
+          skills: string[] | null
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          max_members?: number | null
+          name: string
+          skills?: string[] | null
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          max_members?: number | null
+          name?: string
+          skills?: string[] | null
+          slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       platform_stats: {
         Row: {
           stat_key: string
