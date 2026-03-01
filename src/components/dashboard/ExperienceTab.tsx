@@ -35,9 +35,9 @@ const emptyForm = {
 };
 
 const statusConfig: Record<string, { label: string; icon: any; color: string; bg: string }> = {
-  approved: { label: "Disetujui", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-500/10" },
-  pending: { label: "Menunggu Persetujuan", icon: Clock, color: "text-amber-600", bg: "bg-amber-500/10" },
-  rejected: { label: "Ditolak", icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
+  approved: { label: "Approved", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-500/10" },
+  pending: { label: "Pending Approval", icon: Clock, color: "text-amber-600", bg: "bg-amber-500/10" },
+  rejected: { label: "Rejected", icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
 };
 
 const ExperienceTab = () => {
@@ -90,7 +90,7 @@ const ExperienceTab = () => {
   const handleSave = async () => {
     if (!user) return;
     if (!form.company.trim() || !form.position.trim()) {
-      toast.error("Perusahaan dan posisi wajib diisi");
+      toast.error("Company and position are required");
       return;
     }
 
@@ -122,11 +122,11 @@ const ExperienceTab = () => {
     }
 
     if (error) {
-      toast.error("Gagal menyimpan data pengalaman kerja");
+      toast.error("Failed to save work experience");
     } else {
       toast.success(editingId
-        ? "Perubahan dikirim untuk persetujuan admin"
-        : "Data pengalaman kerja dikirim untuk persetujuan admin");
+        ? "Changes submitted for admin approval"
+        : "Work experience submitted for admin approval");
       setShowForm(false);
       setEditingId(null);
       setForm(emptyForm);
@@ -144,9 +144,9 @@ const ExperienceTab = () => {
       .eq("id", id)
       .eq("user_id", user.id);
     if (error) {
-      toast.error("Gagal menghapus data");
+      toast.error("Failed to delete data");
     } else {
-      toast.success("Data pengalaman kerja dihapus");
+      toast.success("Work experience deleted");
       setExperiences(prev => prev.filter(e => e.id !== id));
     }
     setDeleting(null);
@@ -175,7 +175,7 @@ const ExperienceTab = () => {
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
         >
           {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {showForm ? "Batal" : "Tambah Pengalaman"}
+          {showForm ? "Cancel" : "Add Experience"}
         </button>
       </div>
 
@@ -184,9 +184,9 @@ const ExperienceTab = () => {
         <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
           <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="font-medium text-amber-700">Perubahan memerlukan persetujuan admin</p>
+            <p className="font-medium text-amber-700">Changes require admin approval</p>
             <p className="text-amber-600/80 mt-0.5">
-              Data pengalaman kerja yang Anda {editingId ? "ubah" : "tambahkan"} akan di-review oleh admin terlebih dahulu.
+              Work experience you {editingId ? "edit" : "add"} will be reviewed by an admin first.
             </p>
           </div>
         </div>
@@ -203,48 +203,48 @@ const ExperienceTab = () => {
           >
             <div className="bg-card rounded-2xl border border-border p-6 shadow-card space-y-4">
               <h3 className="font-semibold text-card-foreground">
-                {editingId ? "Edit Pengalaman Kerja" : "Tambah Pengalaman Kerja Baru"}
+                {editingId ? "Edit Work Experience" : "Add New Work Experience"}
               </h3>
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <Label>Perusahaan *</Label>
-                  <Input className="mt-1.5" placeholder="PT Contoh Indonesia" value={form.company} onChange={e => set("company", e.target.value)} />
+                  <Label>Company *</Label>
+                  <Input className="mt-1.5" placeholder="Acme Corporation" value={form.company} onChange={e => set("company", e.target.value)} />
                 </div>
                 <div>
-                  <Label>Posisi / Jabatan *</Label>
+                  <Label>Position / Title *</Label>
                   <Input className="mt-1.5" placeholder="Software Engineer" value={form.position} onChange={e => set("position", e.target.value)} />
                 </div>
                 <div>
-                  <Label>Lokasi</Label>
+                  <Label>Location</Label>
                   <Input className="mt-1.5" placeholder="Jakarta, Indonesia" value={form.location} onChange={e => set("location", e.target.value)} />
                 </div>
                 <div className="flex items-center gap-3 pt-6">
                   <Switch checked={form.is_current} onCheckedChange={v => set("is_current", v)} />
-                  <Label className="cursor-pointer" onClick={() => set("is_current", !form.is_current)}>Masih bekerja di sini</Label>
+                  <Label className="cursor-pointer" onClick={() => set("is_current", !form.is_current)}>Currently working here</Label>
                 </div>
                 <div>
-                  <Label>Tanggal Mulai</Label>
+                  <Label>Start Date</Label>
                   <Input className="mt-1.5" type="date" value={form.start_date} onChange={e => set("start_date", e.target.value)} />
                 </div>
                 {!form.is_current && (
                   <div>
-                    <Label>Tanggal Selesai</Label>
+                    <Label>End Date</Label>
                     <Input className="mt-1.5" type="date" value={form.end_date} onChange={e => set("end_date", e.target.value)} />
                   </div>
                 )}
               </div>
               <div>
-                <Label>Deskripsi Pekerjaan</Label>
-                <Textarea className="mt-1.5" rows={3} placeholder="Tanggung jawab, pencapaian, proyek, dll." value={form.description} onChange={e => set("description", e.target.value)} />
+                <Label>Job Description</Label>
+                <Textarea className="mt-1.5" rows={3} placeholder="Responsibilities, achievements, projects, etc." value={form.description} onChange={e => set("description", e.target.value)} />
               </div>
 
               <div className="flex gap-3 pt-2">
                 <Button onClick={handleSave} disabled={saving || !form.company.trim() || !form.position.trim()}>
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {editingId ? "Kirim Perubahan" : "Kirim untuk Persetujuan"}
+                  {editingId ? "Submit Changes" : "Submit for Approval"}
                 </Button>
-                <Button variant="ghost" onClick={cancelForm}>Batal</Button>
+                <Button variant="ghost" onClick={cancelForm}>Cancel</Button>
               </div>
             </div>
           </motion.div>
@@ -255,8 +255,8 @@ const ExperienceTab = () => {
       {experiences.length === 0 && !showForm ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card rounded-2xl border border-border p-12 text-center shadow-card">
           <Briefcase className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="font-semibold text-card-foreground mb-1">Belum ada pengalaman kerja</h3>
-          <p className="text-sm text-muted-foreground">Tambahkan pengalaman kerja Anda.</p>
+          <h3 className="font-semibold text-card-foreground mb-1">No work experience yet</h3>
+          <p className="text-sm text-muted-foreground">Add your work experience.</p>
         </motion.div>
       ) : (
         experiences.map((exp, i) => {
@@ -295,7 +295,7 @@ const ExperienceTab = () => {
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold text-card-foreground">{exp.position}</h3>
                     {exp.is_current && (
-                      <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">Saat ini</span>
+                      <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">Current</span>
                     )}
                     <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${sc.bg} ${sc.color}`}>
                       <StatusIcon className="w-3 h-3" />
@@ -307,7 +307,7 @@ const ExperienceTab = () => {
                     {exp.start_date && (
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        {formatDate(exp.start_date)} — {exp.is_current ? "Sekarang" : formatDate(exp.end_date)}
+                        {formatDate(exp.start_date)} — {exp.is_current ? "Present" : formatDate(exp.end_date)}
                       </span>
                     )}
                     {exp.location && (

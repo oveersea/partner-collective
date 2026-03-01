@@ -32,9 +32,9 @@ const emptyForm = {
 };
 
 const statusConfig: Record<string, { label: string; icon: any; color: string; bg: string }> = {
-  approved: { label: "Disetujui", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-500/10" },
-  pending: { label: "Menunggu Persetujuan", icon: Clock, color: "text-amber-600", bg: "bg-amber-500/10" },
-  rejected: { label: "Ditolak", icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
+  approved: { label: "Approved", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-500/10" },
+  pending: { label: "Pending Approval", icon: Clock, color: "text-amber-600", bg: "bg-amber-500/10" },
+  rejected: { label: "Rejected", icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
 };
 
 const EducationTab = () => {
@@ -86,7 +86,7 @@ const EducationTab = () => {
   const handleSave = async () => {
     if (!user) return;
     if (!form.institution.trim()) {
-      toast.error("Nama institusi wajib diisi");
+      toast.error("Institution name is required");
       return;
     }
 
@@ -117,11 +117,11 @@ const EducationTab = () => {
     }
 
     if (error) {
-      toast.error("Gagal menyimpan data pendidikan");
+      toast.error("Failed to save education data");
     } else {
       toast.success(editingId
-        ? "Perubahan dikirim untuk persetujuan admin"
-        : "Data pendidikan dikirim untuk persetujuan admin");
+        ? "Changes submitted for admin approval"
+        : "Education data submitted for admin approval");
       setShowForm(false);
       setEditingId(null);
       setForm(emptyForm);
@@ -139,9 +139,9 @@ const EducationTab = () => {
       .eq("id", id)
       .eq("user_id", user.id);
     if (error) {
-      toast.error("Gagal menghapus data");
+      toast.error("Failed to delete data");
     } else {
-      toast.success("Data pendidikan dihapus");
+      toast.success("Education data deleted");
       setEducations(prev => prev.filter(e => e.id !== id));
     }
     setDeleting(null);
@@ -170,7 +170,7 @@ const EducationTab = () => {
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
         >
           {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {showForm ? "Batal" : "Tambah Pendidikan"}
+          {showForm ? "Cancel" : "Add Education"}
         </button>
       </div>
 
@@ -179,9 +179,9 @@ const EducationTab = () => {
         <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
           <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="font-medium text-amber-700">Perubahan memerlukan persetujuan admin</p>
+            <p className="font-medium text-amber-700">Changes require admin approval</p>
             <p className="text-amber-600/80 mt-0.5">
-              Data pendidikan yang Anda {editingId ? "ubah" : "tambahkan"} akan di-review oleh admin terlebih dahulu.
+              Education data you {editingId ? "edit" : "add"} will be reviewed by an admin first.
             </p>
           </div>
         </div>
@@ -198,22 +198,22 @@ const EducationTab = () => {
           >
             <div className="bg-card rounded-2xl border border-border p-6 shadow-card space-y-4">
               <h3 className="font-semibold text-card-foreground">
-                {editingId ? "Edit Pendidikan" : "Tambah Pendidikan Baru"}
+                {editingId ? "Edit Education" : "Add New Education"}
               </h3>
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <Label>Nama Institusi *</Label>
-                  <Input className="mt-1.5" placeholder="Universitas Indonesia" value={form.institution} onChange={e => set("institution", e.target.value)} />
+                  <Label>Institution Name *</Label>
+                  <Input className="mt-1.5" placeholder="Harvard University" value={form.institution} onChange={e => set("institution", e.target.value)} />
                 </div>
                 <div>
-                  <Label>Jenjang</Label>
+                  <Label>Degree</Label>
                   <select
                     className="mt-1.5 w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                     value={form.degree}
                     onChange={e => set("degree", e.target.value)}
                   >
-                    <option value="">Pilih Jenjang</option>
+                    <option value="">Select Degree</option>
                     <option value="SD">SD</option>
                     <option value="SMP">SMP</option>
                     <option value="SMA/SMK">SMA/SMK</option>
@@ -221,39 +221,39 @@ const EducationTab = () => {
                     <option value="D2">D2</option>
                     <option value="D3">D3</option>
                     <option value="D4">D4</option>
-                    <option value="S1">S1 (Sarjana)</option>
-                    <option value="S2">S2 (Magister)</option>
-                    <option value="S3">S3 (Doktor)</option>
+                    <option value="S1">Bachelor's</option>
+                    <option value="S2">Master's</option>
+                    <option value="S3">Doctorate</option>
                     <option value="Profesi">Profesi</option>
-                    <option value="Sertifikasi">Sertifikasi</option>
-                    <option value="Kursus">Kursus / Bootcamp</option>
+                    <option value="Sertifikasi">Certification</option>
+                    <option value="Kursus">Course / Bootcamp</option>
                   </select>
                 </div>
                 <div>
-                  <Label>Bidang Studi</Label>
-                  <Input className="mt-1.5" placeholder="Teknik Informatika" value={form.field_of_study} onChange={e => set("field_of_study", e.target.value)} />
+                  <Label>Field of Study</Label>
+                  <Input className="mt-1.5" placeholder="Computer Science" value={form.field_of_study} onChange={e => set("field_of_study", e.target.value)} />
                 </div>
                 <div>
-                  <Label>Tanggal Mulai</Label>
+                  <Label>Start Date</Label>
                   <Input className="mt-1.5" type="date" value={form.start_date} onChange={e => set("start_date", e.target.value)} />
                 </div>
                 <div>
-                  <Label>Tanggal Selesai</Label>
+                  <Label>End Date</Label>
                   <Input className="mt-1.5" type="date" value={form.end_date} onChange={e => set("end_date", e.target.value)} />
-                  <p className="text-xs text-muted-foreground mt-1">Kosongkan jika masih berlangsung</p>
+                  <p className="text-xs text-muted-foreground mt-1">Leave empty if still ongoing</p>
                 </div>
               </div>
               <div>
-                <Label>Deskripsi / Catatan</Label>
-                <Textarea className="mt-1.5" rows={3} placeholder="IPK, prestasi, aktivitas, dll." value={form.description} onChange={e => set("description", e.target.value)} />
+                <Label>Description / Notes</Label>
+                <Textarea className="mt-1.5" rows={3} placeholder="GPA, achievements, activities, etc." value={form.description} onChange={e => set("description", e.target.value)} />
               </div>
 
               <div className="flex gap-3 pt-2">
                 <Button onClick={handleSave} disabled={saving || !form.institution.trim()}>
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {editingId ? "Kirim Perubahan" : "Kirim untuk Persetujuan"}
+                  {editingId ? "Submit Changes" : "Submit for Approval"}
                 </Button>
-                <Button variant="ghost" onClick={cancelForm}>Batal</Button>
+                <Button variant="ghost" onClick={cancelForm}>Cancel</Button>
               </div>
             </div>
           </motion.div>
@@ -264,8 +264,8 @@ const EducationTab = () => {
       {educations.length === 0 && !showForm ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card rounded-2xl border border-border p-12 text-center shadow-card">
           <GraduationCap className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="font-semibold text-card-foreground mb-1">Belum ada data pendidikan</h3>
-          <p className="text-sm text-muted-foreground">Tambahkan riwayat pendidikan Anda.</p>
+          <h3 className="font-semibold text-card-foreground mb-1">No education data yet</h3>
+          <p className="text-sm text-muted-foreground">Add your education history.</p>
         </motion.div>
       ) : (
         educations.map((edu, i) => {
@@ -316,7 +316,7 @@ const EducationTab = () => {
                   {edu.start_date && (
                     <span className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
                       <Calendar className="w-3 h-3" />
-                      {formatDate(edu.start_date)} — {edu.end_date ? formatDate(edu.end_date) : "Sekarang"}
+                      {formatDate(edu.start_date)} — {edu.end_date ? formatDate(edu.end_date) : "Present"}
                     </span>
                   )}
                   {edu.description && (

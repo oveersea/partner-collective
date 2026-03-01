@@ -49,20 +49,20 @@ const availabilityLabel: Record<string, string> = {
 };
 
 const genderLabel: Record<string, string> = {
-  male: "Laki-laki",
-  female: "Perempuan",
+  male: "Male",
+  female: "Female",
 };
 
 const maritalLabel: Record<string, string> = {
-  single: "Belum Menikah",
-  married: "Menikah",
-  divorced: "Cerai",
-  widowed: "Janda/Duda",
+  single: "Single",
+  married: "Married",
+  divorced: "Divorced",
+  widowed: "Widowed",
 };
 
 const ProfileOverview = ({ profile }: ProfileOverviewProps) => {
   const formatDate = (d: string) => {
-    try { return new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }); }
+    try { return new Date(d).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }); }
     catch { return d; }
   };
 
@@ -74,42 +74,42 @@ const ProfileOverview = ({ profile }: ProfileOverviewProps) => {
     <div className="grid md:grid-cols-2 gap-6">
       {/* About */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-2xl border border-border p-8 shadow-card">
-        <h2 className="text-lg font-semibold text-card-foreground mb-4">Tentang</h2>
+        <h2 className="text-lg font-semibold text-card-foreground mb-4">About</h2>
         <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-          {profile.professional_summary || profile.bio || "Belum ada deskripsi."}
+          {profile.professional_summary || profile.bio || "No description added yet."}
         </p>
 
         <div className="space-y-4">
-          {profile.phone_number && <InfoRow icon={Phone} label="Telepon" value={profile.phone_number} />}
-          {profile.date_of_birth && <InfoRow icon={Calendar} label="Tanggal Lahir" value={formatDate(profile.date_of_birth)} />}
-          {profile.gender && <InfoRow icon={User} label="Jenis Kelamin" value={genderLabel[profile.gender] || profile.gender} />}
-          {profile.nationality && <InfoRow icon={Globe} label="Kewarganegaraan" value={profile.nationality} />}
-          {profile.marital_status && <InfoRow icon={Heart} label="Status Pernikahan" value={maritalLabel[profile.marital_status] || profile.marital_status} />}
-          {profile.languages && <InfoRow icon={Languages} label="Bahasa" value={profile.languages} />}
-          {fullAddress && <InfoRow icon={MapPin} label="Alamat" value={fullAddress} />}
+          {profile.phone_number && <InfoRow icon={Phone} label="Phone" value={profile.phone_number} />}
+          {profile.date_of_birth && <InfoRow icon={Calendar} label="Date of Birth" value={formatDate(profile.date_of_birth)} />}
+          {profile.gender && <InfoRow icon={User} label="Gender" value={genderLabel[profile.gender] || profile.gender} />}
+          {profile.nationality && <InfoRow icon={Globe} label="Nationality" value={profile.nationality} />}
+          {profile.marital_status && <InfoRow icon={Heart} label="Marital Status" value={maritalLabel[profile.marital_status] || profile.marital_status} />}
+          {profile.languages && <InfoRow icon={Languages} label="Languages" value={profile.languages} />}
+          {fullAddress && <InfoRow icon={MapPin} label="Address" value={fullAddress} />}
         </div>
       </motion.div>
 
       {/* Professional */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-card rounded-2xl border border-border p-8 shadow-card">
-        <h2 className="text-lg font-semibold text-card-foreground mb-4">Profesional</h2>
+        <h2 className="text-lg font-semibold text-card-foreground mb-4">Professional</h2>
 
         <div className="space-y-4">
           {profile.years_of_experience != null && profile.years_of_experience > 0 && (
-            <InfoRow icon={Briefcase} label="Pengalaman" value={`${profile.years_of_experience} tahun`} />
+            <InfoRow icon={Briefcase} label="Experience" value={`${profile.years_of_experience} years`} />
           )}
-          {profile.highest_education && <InfoRow icon={GraduationCap} label="Pendidikan Terakhir" value={profile.highest_education} />}
+          {profile.highest_education && <InfoRow icon={GraduationCap} label="Highest Education" value={profile.highest_education} />}
           {profile.opportunity_availability && (
-            <InfoRow icon={Calendar} label="Ketersediaan" value={availabilityLabel[profile.opportunity_availability] || profile.opportunity_availability} />
+            <InfoRow icon={Calendar} label="Availability" value={availabilityLabel[profile.opportunity_availability] || profile.opportunity_availability} />
           )}
           {profile.daily_rate != null && profile.daily_rate > 0 && (
-            <InfoRow icon={DollarSign} label="Daily Rate" value={`Rp ${profile.daily_rate.toLocaleString("id-ID")}/hari`} />
+            <InfoRow icon={DollarSign} label="Daily Rate" value={`Rp ${profile.daily_rate.toLocaleString("en-US")}/day`} />
           )}
           {profile.monthly_salary_rate != null && profile.monthly_salary_rate > 0 && (
             <InfoRow
               icon={DollarSign}
-              label="Gaji Bulanan"
-              value={`${profile.expected_salary_currency || "IDR"} ${profile.monthly_salary_rate.toLocaleString("id-ID")}`}
+              label="Monthly Salary"
+              value={`${profile.expected_salary_currency || "IDR"} ${profile.monthly_salary_rate.toLocaleString("en-US")}`}
             />
           )}
           {profile.linkedin_url && (
@@ -142,7 +142,7 @@ const ProfileOverview = ({ profile }: ProfileOverviewProps) => {
               <span key={skill} className="text-sm px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">{skill}</span>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground">Belum ada skills ditambahkan.</p>
+            <p className="text-sm text-muted-foreground">No skills added yet.</p>
           )}
         </div>
       </motion.div>

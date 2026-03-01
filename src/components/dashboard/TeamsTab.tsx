@@ -124,7 +124,7 @@ const TeamsTab = () => {
       .single();
 
     if (error) {
-      toast.error("Gagal membuat tim");
+      toast.error("Failed to create team");
       setCreating(false);
       return;
     }
@@ -136,7 +136,7 @@ const TeamsTab = () => {
       role: "leader",
     });
 
-    toast.success("Tim berhasil dibuat!");
+    toast.success("Team created successfully!");
     setShowCreate(false);
     setNewTeam({ name: "", description: "", skills: "" });
     setCreating(false);
@@ -150,31 +150,31 @@ const TeamsTab = () => {
       {/* Create Team Button */}
       <div className="flex justify-end">
         <Button onClick={() => setShowCreate(!showCreate)} variant={showCreate ? "ghost" : "default"} size="sm">
-          {showCreate ? <><X className="w-4 h-4" /> Batal</> : <><Plus className="w-4 h-4" /> Buat Tim Baru</>}
+          {showCreate ? <><X className="w-4 h-4" /> Cancel</> : <><Plus className="w-4 h-4" /> Create New Team</>}
         </Button>
       </div>
 
       {/* Create Form */}
       {showCreate && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border p-6 shadow-card space-y-4">
-          <h3 className="font-semibold text-card-foreground">Buat Tim Baru</h3>
+          <h3 className="font-semibold text-card-foreground">Create New Team</h3>
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <Label className="text-card-foreground">Nama Tim</Label>
-              <Input className="mt-1.5" placeholder="Contoh: Dev Squad" value={newTeam.name} onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })} />
+              <Label className="text-card-foreground">Team Name</Label>
+              <Input className="mt-1.5" placeholder="e.g., Dev Squad" value={newTeam.name} onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })} />
             </div>
             <div>
-              <Label className="text-card-foreground">Skills (koma)</Label>
+              <Label className="text-card-foreground">Skills (comma-separated)</Label>
               <Input className="mt-1.5" placeholder="React, Node.js, UI/UX" value={newTeam.skills} onChange={(e) => setNewTeam({ ...newTeam, skills: e.target.value })} />
             </div>
           </div>
           <div>
-            <Label className="text-card-foreground">Deskripsi</Label>
-            <Textarea className="mt-1.5" rows={2} placeholder="Deskripsi singkat tentang tim..." value={newTeam.description} onChange={(e) => setNewTeam({ ...newTeam, description: e.target.value })} />
+            <Label className="text-card-foreground">Description</Label>
+            <Textarea className="mt-1.5" rows={2} placeholder="Brief description of your team..." value={newTeam.description} onChange={(e) => setNewTeam({ ...newTeam, description: e.target.value })} />
           </div>
           <div className="flex justify-end">
             <Button onClick={handleCreate} disabled={creating}>
-              {creating ? "Membuat..." : "Buat Tim"}
+              {creating ? "Creating..." : "Create Team"}
             </Button>
           </div>
         </motion.div>
@@ -184,9 +184,9 @@ const TeamsTab = () => {
       {teams.length === 0 && !showCreate ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card rounded-2xl border border-border p-12 text-center shadow-card">
           <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="font-semibold text-card-foreground mb-1">Belum ada tim</h3>
-          <p className="text-sm text-muted-foreground mb-4">Buat tim untuk berkolaborasi dengan partner lain.</p>
-          <Button size="sm" onClick={() => setShowCreate(true)}><Plus className="w-4 h-4" /> Buat Tim Pertama</Button>
+          <h3 className="font-semibold text-card-foreground mb-1">No teams yet</h3>
+          <p className="text-sm text-muted-foreground mb-4">Create a team to collaborate with other partners.</p>
+          <Button size="sm" onClick={() => setShowCreate(true)}><Plus className="w-4 h-4" /> Create First Team</Button>
         </motion.div>
       ) : (
         <div className="grid sm:grid-cols-2 gap-5">
@@ -214,7 +214,7 @@ const TeamsTab = () => {
               </div>
 
               <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-                <span className="flex items-center gap-1"><Users className="w-3 h-3" />{team.member_count || 0} anggota</span>
+                <span className="flex items-center gap-1"><Users className="w-3 h-3" />{team.member_count || 0} members</span>
               </div>
 
               {team.skills && team.skills.length > 0 && (
@@ -235,7 +235,7 @@ const TeamsTab = () => {
       {/* Members Panel */}
       {selectedTeam && members.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border p-6 shadow-card">
-          <h3 className="font-semibold text-card-foreground mb-4">Anggota Tim</h3>
+          <h3 className="font-semibold text-card-foreground mb-4">Team Members</h3>
           <div className="space-y-3">
             {members.map((member) => (
               <div key={member.id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
