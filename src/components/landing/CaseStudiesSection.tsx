@@ -6,9 +6,18 @@ import case1 from "@/assets/case-1.jpg";
 import case2 from "@/assets/case-2.jpg";
 import case3 from "@/assets/case-3.jpg";
 import case4 from "@/assets/case-4.jpg";
+import case5 from "@/assets/case-5.jpg";
+import case6 from "@/assets/case-6.jpg";
 
 // Fallback images for case studies without image_url
-const fallbackImages = [case1, case2, case3, case4];
+const fallbackImages = [case1, case2, case3, case4, case5, case6];
+
+const placeholderCases: CaseStudy[] = [
+  { id: "1", title: "Transformasi Digital untuk Perusahaan Logistik", description: "Membangun platform end-to-end yang meningkatkan efisiensi operasional hingga 40%.", company_name: "LogiTech Indonesia", industry: "Logistik", image_url: null, cta_label: "Lihat Detail", cta_url: "/case-studies", is_featured: true },
+  { id: "2", title: "Rebranding & Digital Marketing untuk F&B Chain", description: "Strategi brand baru yang meningkatkan awareness 3x lipat dalam 6 bulan.", company_name: "Warung Nusantara", industry: "F&B", image_url: null, cta_label: "Lihat Detail", cta_url: "/case-studies", is_featured: true },
+  { id: "3", title: "Sistem HR Terpadu untuk Startup Fintech", description: "Otomasi proses recruitment dan onboarding yang menghemat 60% waktu HR.", company_name: "PayEase", industry: "Fintech", image_url: null, cta_label: "Lihat Detail", cta_url: "/case-studies", is_featured: false },
+  { id: "4", title: "E-Commerce Platform untuk Brand Fashion Lokal", description: "Platform custom yang meningkatkan konversi penjualan online hingga 250%.", company_name: "Batik Moderna", industry: "Fashion", image_url: null, cta_label: "Lihat Detail", cta_url: "/case-studies", is_featured: false },
+];
 
 interface CaseStudy {
   id: string;
@@ -35,13 +44,17 @@ const CaseStudiesSection = () => {
         .order("sort_order", { ascending: true })
         .limit(4);
 
-      if (data) setCases(data as unknown as CaseStudy[]);
+      if (data && data.length > 0) {
+        setCases(data as unknown as CaseStudy[]);
+      } else {
+        setCases(placeholderCases);
+      }
       setLoading(false);
     };
     fetchCases();
   }, []);
 
-  if (loading || cases.length === 0) return null;
+  if (loading) return null;
 
   return (
     <section className="py-24 bg-background">
