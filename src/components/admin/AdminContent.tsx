@@ -42,19 +42,32 @@ const AdminContent = () => {
   }, []);
 
   const fetchData = async () => {
-    const [oppRes, progRes] = await Promise.all([
-      supabase
+    // Fetch all opportunities with pagination
+    let allOpps: Opportunity[] = [];
+    let oppFrom = 0;
+    const batchSize = 1000;
+    let oppHasMore = true;
+    while (oppHasMore) {
+      const { data } = await supabase
         .from("opportunities")
         .select("id, title, status, category, job_type, location, created_at, business_profiles!opportunities_business_id_fkey(name)")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("programs")
-        .select("id, title, status, category, oveercode, created_at")
-        .order("created_at", { ascending: false }),
-    ]);
+        .order("created_at", { ascending: false })
+        .range(oppFrom, oppFrom + batchSize - 1);
+      if (data) {
+        allOpps = [...allOpps, ...(data as unknown as Opportunity[])];
+        oppHasMore = data.length === batchSize;
+        oppFrom += batchSize;
+      } else { oppHasMore = false; }
+    }
+    setOpportunities(allOpps);
 
-    if (oppRes.data) setOpportunities(oppRes.data as unknown as Opportunity[]);
-    if (progRes.data) setPrograms(progRes.data as unknown as Program[]);
+    // Programs (likely under 1000, but safe)
+    const { data: progData } = await supabase
+      .from("programs")
+      .select("id, title, status, category, oveercode, created_at")
+      .order("created_at", { ascending: false });
+    if (progData) setPrograms(progData as unknown as Program[]);
+
     setLoading(false);
   };
 

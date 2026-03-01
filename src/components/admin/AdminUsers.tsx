@@ -94,14 +94,32 @@ const AdminUsers = () => {
   }, []);
 
   const fetchUsers = async () => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("user_id, full_name, oveercode, account_type, kyc_status, city, country, created_at, last_online, skills, years_of_experience, highest_education, phone_number, bio, professional_summary, avatar_url, linkedin_url")
-      .order("created_at", { ascending: false })
-      .limit(1000);
+    let allData: UserProfile[] = [];
+    let from = 0;
+    const batchSize = 1000;
+    let hasMore = true;
 
-    if (data) setUsers(data);
-    if (error) toast.error("Gagal memuat data user");
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, oveercode, account_type, kyc_status, city, country, created_at, last_online, skills, years_of_experience, highest_education, phone_number, bio, professional_summary, avatar_url, linkedin_url")
+        .order("created_at", { ascending: false })
+        .range(from, from + batchSize - 1);
+
+      if (error) {
+        toast.error("Gagal memuat data user");
+        break;
+      }
+      if (data) {
+        allData = [...allData, ...data];
+        hasMore = data.length === batchSize;
+        from += batchSize;
+      } else {
+        hasMore = false;
+      }
+    }
+
+    setUsers(allData);
     setLoading(false);
   };
 
