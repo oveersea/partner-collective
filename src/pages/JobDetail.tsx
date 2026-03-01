@@ -594,10 +594,10 @@ const JobDetail = () => {
                               </div>
                             ) : (
                               <Link
-                                to="/learning"
+                                to={`/learning?skills=${encodeURIComponent(missingSkills.join(","))}`}
                                 className="flex items-center justify-center gap-1.5 p-2 rounded-lg bg-card border border-border hover:border-primary/30 text-xs text-primary font-medium transition-colors"
                               >
-                                Jelajahi Program Learning <ChevronRight className="w-3.5 h-3.5" />
+                                Lihat Program untuk Skill Ini <ChevronRight className="w-3.5 h-3.5" />
                               </Link>
                             )}
                           </div>
