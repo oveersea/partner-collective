@@ -1,57 +1,54 @@
 
 
-## Add Learning, Assessment & Insights Management to Admin Panel
+# Plan: Merge Features ke Services
 
-### Overview
-Add 3 new admin sections to the superadmin sidebar and dashboard, leveraging existing database tables: `learning_programs`, `competency_tests` (assessments), and `insight_services`/`surveys`.
+## Ringkasan
+Menghapus halaman Features (`/features`) yang berisi data hardcoded, dan menggantinya dengan halaman Services (`/services`) yang mengambil data langsung dari database Supabase (`services` dan `service_categories` tables). Semua link yang mengarah ke `/features` akan diarahkan ke halaman Services baru.
 
-### Changes
+## Langkah-langkah
 
-#### 1. Update AdminSidebar (`src/components/admin/AdminSidebar.tsx`)
-Add 3 new menu items to the `sections` array:
-- **Learning Program** (icon: `GraduationCap`, id: `learning`)
-- **Assessment** (icon: `ClipboardCheck`, id: `assessment`)
-- **Insights & Survey** (icon: `BarChart3`, id: `insights`)
+### 1. Buat halaman Services List (`/services`)
+- Buat file `src/pages/Services.tsx` (halaman katalog semua services)
+- Mengambil data dari tabel `service_categories` dan `services` di Supabase
+- Mendukung filter berdasarkan kategori via query param (`/services?category=xxx`)
+- Tampilan mirip Features page tapi data-driven dari database
+- Termasuk breadcrumb, filter pills, dan grid 3 kolom
 
-#### 2. Create `AdminLearning.tsx` (`src/components/admin/AdminLearning.tsx`)
-Management panel for `learning_programs` table (20 records exist). Features:
-- Table listing: title, category, skill_name, difficulty_level, program_type, duration_hours, price, is_active, oveercode, created_at
-- Toggle active/inactive (`is_active`)
-- Enrollment stats from `learning_enrollments` (count per program)
-- Search + pagination (reuse PAGE_SIZE=20 pattern from AdminContent)
+### 2. Update FeaturesSection di landing page
+- Ubah `src/components/landing/FeaturesSection.tsx` menjadi menampilkan service categories dari database (bukan hardcoded)
+- Semua link card mengarah ke `/services?category=xxx` bukan `/features?category=xxx`
 
-#### 3. Create `AdminAssessment.tsx` (`src/components/admin/AdminAssessment.tsx`)
-Management panel for `competency_tests` table (1 record exists) + `assessment_orders`. Features:
-- Table listing: title, skill_name, assessment_type, test_tier, total_questions, passing_score, time_limit, price, is_active
-- Toggle active/inactive
-- Sub-tab for Assessment Orders from `assessment_orders`: order_number, user, status, amount, payment confirmation (approve/reject)
-- Search + pagination
+### 3. Update routing di App.tsx
+- Hapus route `/features` dan import `Features`
+- Tambah route `/services` pointing ke halaman Services baru
+- Route `/services/:slug` sudah ada (ServiceDetail)
 
-#### 4. Create `AdminInsights.tsx` (`src/components/admin/AdminInsights.tsx`)
-Management panel for `insight_services` + `surveys` (3 surveys exist). Features:
-- Two tabs: "Insight Services" and "Surveys"
-- Insight Services table: title, tagline, icon_name, sort_order, is_active, toggle active
-- Surveys table: title, category, status, total_responses, starts_at, ends_at, toggle status
-- Search + pagination
+### 4. Update Navbar links
+- Semua href `/features` di megaMenus diganti ke `/services`
+- CTA "Lihat semua layanan" mengarah ke `/services`
 
-#### 5. Update AdminDashboard (`src/pages/AdminDashboard.tsx`)
-- Import the 3 new components
-- Add cases to `renderContent()` switch: `learning`, `assessment`, `insights`
+### 5. Hapus file Features.tsx
+- Hapus `src/pages/Features.tsx` (data hardcoded, tidak diperlukan lagi)
 
-### Technical Details
+### 6. Update Index.tsx
+- Ganti import `FeaturesSection` dengan versi baru yang data-driven
 
-All 3 new components follow the exact same pattern as `AdminContent.tsx`:
-- Fetch data from Supabase on mount
-- Filter with search input
-- Paginate with PAGE_SIZE=20
-- Status badge helper
-- Toggle status with update query + toast feedback
-- Consistent table styling with `bg-card rounded-2xl border border-border`
+## Detail Teknis
 
-Database tables used (read-only exploration confirmed):
-| Section | Primary Table | Related Tables |
-|---|---|---|
-| Learning | `learning_programs` | `learning_enrollments`, `learning_modules` |
-| Assessment | `competency_tests` | `assessment_orders`, `assessment_attempts` |
-| Insights | `insight_services`, `surveys` | `insight_subscriptions`, `survey_responses` |
+### Services.tsx (halaman baru)
+- Fetch `service_categories` untuk filter pills
+- Fetch `services` dengan filter optional `category_id`
+- Fetch `user_services` count per service untuk menampilkan jumlah provider
+- Grid layout `lg:grid-cols-3` konsisten dengan ServiceShowcaseSection
+- Setiap card link ke `/services/:slug`
+
+### FeaturesSection.tsx (refactor)
+- Fetch `service_categories` dari Supabase
+- Tampilkan kategori sebagai grid cards
+- Klik card navigasi ke `/services?category={category_id}`
+- Tetap retain layout bento grid yang ada, tapi data dari DB
+
+### Tidak ada perubahan database
+- Tidak ada tabel "features" di database yang perlu dihapus
+- Semua data sudah tersedia di tabel `services` dan `service_categories`
 
