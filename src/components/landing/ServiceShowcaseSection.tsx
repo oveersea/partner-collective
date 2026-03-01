@@ -210,16 +210,16 @@ const ServiceShowcaseSection = () => {
                     transition={{ delay: i * 0.04 }}
                     className="group rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all h-full flex flex-col overflow-hidden"
                   >
-                    {/* Thumbnail image */}
-                    <div className="h-40 bg-muted overflow-hidden">
+                    {/* Thumbnail grid */}
+                    <div className="grid grid-cols-3 gap-0.5 h-40 bg-muted overflow-hidden">
                       {thumbnailImg ? (
-                        <img
-                          src={thumbnailImg}
-                          alt={service.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
+                        <>
+                          <img src={thumbnailImg} alt={service.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" style={{ objectPosition: 'left center' }} />
+                          <img src={thumbnailImg} alt={service.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" style={{ objectPosition: 'center center' }} />
+                          <img src={thumbnailImg} alt={service.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" style={{ objectPosition: 'right center' }} />
+                        </>
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-primary/10 via-muted to-accent/10 flex items-center justify-center">
+                        <div className="col-span-3 w-full h-full bg-gradient-to-br from-primary/10 via-muted to-accent/10 flex items-center justify-center">
                           <Icon className="w-10 h-10 text-muted-foreground/40" />
                         </div>
                       )}
