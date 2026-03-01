@@ -8,23 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Search,
-  Clock,
-  Star,
-  Users,
-  MapPin,
-  GraduationCap,
-  BookOpen,
-  ChevronLeft,
-  ChevronRight,
-  X,
+  Search, Clock, Star, Users, MapPin, GraduationCap, BookOpen, ChevronLeft, ChevronRight, X,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -81,7 +68,6 @@ const Learning = () => {
 
   const filtered = useMemo(() => {
     let list = programs;
-    // If skills filter from URL, only show programs matching those skills
     if (skillsList.length > 0) {
       list = list.filter((p) =>
         skillsList.some((kw) =>
@@ -120,7 +106,6 @@ const Learning = () => {
       <DashboardNav />
 
       <main className="container mx-auto px-4 sm:px-6 py-8">
-        {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 rounded-lg bg-primary/10">
@@ -129,34 +114,33 @@ const Learning = () => {
             <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">Learning Programs</h1>
           </div>
           <p className="text-muted-foreground max-w-2xl">
-            Tingkatkan kompetensi Anda dengan program sertifikasi dan bootcamp berkualitas dari instruktur berpengalaman.
+            Boost your competencies with quality certification programs and bootcamps from experienced instructors.
           </p>
         </motion.div>
 
-        {/* Search & Filters */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Cari program..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+            <Input placeholder="Search programs..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
           </div>
           <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-full sm:w-44"><SelectValue placeholder="Kategori" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-44"><SelectValue placeholder="Category" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Semua Kategori</SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
               {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={level} onValueChange={setLevel}>
             <SelectTrigger className="w-full sm:w-44"><SelectValue placeholder="Level" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Semua Level</SelectItem>
+              <SelectItem value="all">All Levels</SelectItem>
               {levels.map((l) => <SelectItem key={l!} value={l!}>{l}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={deliveryMode} onValueChange={setDeliveryMode}>
             <SelectTrigger className="w-full sm:w-44"><SelectValue placeholder="Mode" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Semua Mode</SelectItem>
+              <SelectItem value="all">All Modes</SelectItem>
               {modes.map((m) => <SelectItem key={m!} value={m!}>{m}</SelectItem>)}
             </SelectContent>
           </Select>
@@ -166,21 +150,20 @@ const Learning = () => {
           <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
               <GraduationCap className="w-4 h-4 text-amber-600" />
-              <span className="text-card-foreground font-medium">Menampilkan program untuk skill:</span>
+              <span className="text-card-foreground font-medium">Showing programs for skills:</span>
               <span className="text-muted-foreground">{skillsFilter}</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs gap-1"><X className="w-3 h-3" /> Hapus filter</Button>
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs gap-1"><X className="w-3 h-3" /> Clear filter</Button>
           </div>
         )}
 
         {activeFilters > 0 && (
           <div className="mb-4 flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{filtered.length} program ditemukan</span>
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs gap-1"><X className="w-3 h-3" /> Reset filter</Button>
+            <span className="text-sm text-muted-foreground">{filtered.length} programs found</span>
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs gap-1"><X className="w-3 h-3" /> Reset filters</Button>
           </div>
         )}
 
-        {/* Grid */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -190,8 +173,8 @@ const Learning = () => {
         ) : paginated.length === 0 ? (
           <div className="text-center py-20 text-muted-foreground">
             <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-40" />
-            <p className="font-medium">Tidak ada program ditemukan</p>
-            <p className="text-sm mt-1">Coba ubah filter atau kata pencarian Anda.</p>
+            <p className="font-medium">No programs found</p>
+            <p className="text-sm mt-1">Try changing your filters or search terms.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -230,11 +213,10 @@ const Learning = () => {
           </div>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 mt-8">
             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}><ChevronLeft className="w-4 h-4" /></Button>
-            <span className="text-sm text-muted-foreground">Halaman {page} dari {totalPages}</span>
+            <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
             <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}><ChevronRight className="w-4 h-4" /></Button>
           </div>
         )}

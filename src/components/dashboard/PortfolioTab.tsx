@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
-const MAX_STORAGE = 50 * 1024 * 1024; // 50MB total per user
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_STORAGE = 50 * 1024 * 1024;
 
 interface Portfolio {
   id: string;
@@ -73,7 +73,6 @@ const PortfolioTab = () => {
 
   const updateStorageUsage = async (bytesChange: number) => {
     if (!user) return;
-    // Upsert storage usage
     const { data: existing } = await supabase
       .from("user_storage_usage")
       .select("total_bytes")
@@ -99,13 +98,13 @@ const PortfolioTab = () => {
 
     const totalNewBytes = Array.from(files).reduce((sum, f) => sum + f.size, 0);
     if (storageUsed + totalNewBytes > MAX_STORAGE) {
-      toast.error(`Storage penuh. Sisa: ${formatBytes(MAX_STORAGE - storageUsed)}`);
+      toast.error(`Storage full. Remaining: ${formatBytes(MAX_STORAGE - storageUsed)}`);
       return;
     }
 
     for (const file of Array.from(files)) {
       if (file.size > MAX_FILE_SIZE) {
-        toast.error(`${file.name} melebihi 10MB, dilewati.`);
+        toast.error(`${file.name} exceeds 10MB, skipped.`);
         continue;
       }
     }
@@ -120,7 +119,7 @@ const PortfolioTab = () => {
       const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
       const { error } = await supabase.storage.from("portfolios").upload(path, file);
       if (error) {
-        toast.error(`Gagal upload: ${file.name}`);
+        toast.error(`Failed to upload: ${file.name}`);
         continue;
       }
       const { data: urlData } = supabase.storage.from("portfolios").getPublicUrl(path);
@@ -132,11 +131,11 @@ const PortfolioTab = () => {
       setForm(prev => ({
         ...prev,
         media_urls: [...prev.media_urls, ...newUrls],
-        image_url: prev.image_url || newUrls[0], // first image as thumbnail
+        image_url: prev.image_url || newUrls[0],
       }));
       setPreviewFiles(prev => [...prev, ...newUrls]);
       await updateStorageUsage(totalUploaded);
-      toast.success(`${newUrls.length} gambar berhasil diunggah`);
+      toast.success(`${newUrls.length} image(s) uploaded successfully`);
     }
     setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
@@ -147,11 +146,11 @@ const PortfolioTab = () => {
     if (!file || !user) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.error("Ukuran video maksimal 10MB");
+      toast.error("Maximum video size is 10MB");
       return;
     }
     if (storageUsed + file.size > MAX_STORAGE) {
-      toast.error(`Storage penuh. Sisa: ${formatBytes(MAX_STORAGE - storageUsed)}`);
+      toast.error(`Storage full. Remaining: ${formatBytes(MAX_STORAGE - storageUsed)}`);
       return;
     }
 
@@ -160,7 +159,7 @@ const PortfolioTab = () => {
     const path = `${user.id}/vid-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("portfolios").upload(path, file);
     if (error) {
-      toast.error("Gagal mengunggah video");
+      toast.error("Failed to upload video");
       setUploadingVideo(false);
       return;
     }
@@ -185,7 +184,7 @@ const PortfolioTab = () => {
   const handleSave = async () => {
     if (!user) return;
     if (!form.title.trim()) {
-      toast.error("Judul portfolio wajib diisi");
+      toast.error("Portfolio title is required");
       return;
     }
 
@@ -202,9 +201,9 @@ const PortfolioTab = () => {
     });
 
     if (error) {
-      toast.error("Gagal menyimpan portfolio");
+      toast.error("Failed to save portfolio");
     } else {
-      toast.success("Portfolio berhasil ditambahkan!");
+      toast.success("Portfolio added successfully!");
       resetForm();
       fetchPortfolios();
     }
@@ -227,9 +226,9 @@ const PortfolioTab = () => {
       .eq("user_id", user.id);
 
     if (error) {
-      toast.error("Gagal menghapus portfolio");
+      toast.error("Failed to delete portfolio");
     } else {
-      toast.success("Portfolio dihapus");
+      toast.success("Portfolio deleted");
       setPortfolios(prev => prev.filter(p => p.id !== id));
     }
     setDeleting(null);
@@ -247,7 +246,6 @@ const PortfolioTab = () => {
     if (type === "upload") {
       return <video src={url} controls className="w-full rounded-lg" style={{ maxHeight: "300px" }} />;
     }
-    // YouTube / Vimeo embed
     const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
     if (ytMatch) {
       return <iframe src={`https://www.youtube.com/embed/${ytMatch[1]}`} className="w-full aspect-video rounded-lg" allowFullScreen />;
@@ -256,14 +254,13 @@ const PortfolioTab = () => {
     if (vimeoMatch) {
       return <iframe src={`https://player.vimeo.com/video/${vimeoMatch[1]}`} className="w-full aspect-video rounded-lg" allowFullScreen />;
     }
-    return <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline flex items-center gap-1"><Video className="w-4 h-4" /> Lihat Video</a>;
+    return <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline flex items-center gap-1"><Video className="w-4 h-4" /> Watch Video</a>;
   };
 
   if (loading) return <div className="flex justify-center py-12"><div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" /></div>;
 
   return (
     <div className="space-y-6">
-      {/* Storage indicator + Add button */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3 min-w-0">
           <HardDrive className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -280,11 +277,10 @@ const PortfolioTab = () => {
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
         >
           {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {showForm ? "Batal" : "Tambah Portfolio"}
+          {showForm ? "Cancel" : "Add Portfolio"}
         </button>
       </div>
 
-      {/* Form */}
       <AnimatePresence>
         {showForm && (
           <motion.div
@@ -294,26 +290,25 @@ const PortfolioTab = () => {
             className="overflow-hidden"
           >
             <div className="bg-card rounded-2xl border border-border p-6 shadow-card space-y-5">
-              <h3 className="font-semibold text-card-foreground">Tambah Portfolio Baru</h3>
+              <h3 className="font-semibold text-card-foreground">Add New Portfolio</h3>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Judul *</label>
-                <Input placeholder="Nama proyek / karya" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+                <label className="text-sm text-muted-foreground mb-1 block">Title *</label>
+                <Input placeholder="Project / work name" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
               </div>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Deskripsi</label>
-                <Textarea placeholder="Deskripsi singkat tentang proyek ini" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} />
+                <label className="text-sm text-muted-foreground mb-1 block">Description</label>
+                <Textarea placeholder="Brief description about this project" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} />
               </div>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-1 block">URL Project</label>
+                <label className="text-sm text-muted-foreground mb-1 block">Project URL</label>
                 <Input placeholder="https://..." value={form.project_url} onChange={e => setForm(f => ({ ...f, project_url: e.target.value }))} />
               </div>
 
-              {/* ───── Multi-Image Upload ───── */}
               <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Gambar (bisa upload banyak, maks 10MB/file)</label>
+                <label className="text-sm text-muted-foreground mb-1 block">Images (multiple upload, max 10MB/file)</label>
                 <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleMultiImageUpload} />
 
                 {previewFiles.length > 0 && (
@@ -338,13 +333,12 @@ const PortfolioTab = () => {
                   className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-border text-muted-foreground text-sm hover:border-primary/40 hover:text-foreground transition-colors w-full justify-center"
                 >
                   {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                  {uploading ? "Mengunggah..." : "Pilih gambar untuk diunggah"}
+                  {uploading ? "Uploading..." : "Select images to upload"}
                 </button>
               </div>
 
-              {/* ───── Video Embed ───── */}
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Video (opsional)</label>
+                <label className="text-sm text-muted-foreground mb-2 block">Video (optional)</label>
                 <div className="flex gap-2 mb-3">
                   <button
                     onClick={() => setForm(f => ({ ...f, video_type: "url", video_url: "" }))}
@@ -361,7 +355,7 @@ const PortfolioTab = () => {
                 </div>
 
                 {form.video_type === "url" ? (
-                  <Input placeholder="https://youtube.com/watch?v=... atau https://vimeo.com/..." value={form.video_url} onChange={e => setForm(f => ({ ...f, video_url: e.target.value }))} />
+                  <Input placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..." value={form.video_url} onChange={e => setForm(f => ({ ...f, video_url: e.target.value }))} />
                 ) : (
                   <>
                     <input ref={videoFileRef} type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
@@ -382,7 +376,7 @@ const PortfolioTab = () => {
                         className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-border text-muted-foreground text-sm hover:border-primary/40 hover:text-foreground transition-colors w-full justify-center"
                       >
                         {uploadingVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
-                        {uploadingVideo ? "Mengunggah video..." : "Upload video (maks. 10MB)"}
+                        {uploadingVideo ? "Uploading video..." : "Upload video (max 10MB)"}
                       </button>
                     )}
                   </>
@@ -396,13 +390,13 @@ const PortfolioTab = () => {
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Simpan
+                  Save
                 </button>
                 <button
                   onClick={resetForm}
                   className="px-5 py-2.5 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Batal
+                  Cancel
                 </button>
               </div>
             </div>
@@ -410,12 +404,11 @@ const PortfolioTab = () => {
         )}
       </AnimatePresence>
 
-      {/* Portfolio grid */}
       {portfolios.length === 0 && !showForm ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card rounded-2xl border border-border p-12 text-center shadow-card">
           <FolderKanban className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="font-semibold text-card-foreground mb-1">Belum ada portofolio</h3>
-          <p className="text-sm text-muted-foreground">Proyek dan karya Anda akan tampil di sini.</p>
+          <h3 className="font-semibold text-card-foreground mb-1">No portfolios yet</h3>
+          <p className="text-sm text-muted-foreground">Your projects and works will appear here.</p>
         </motion.div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -429,7 +422,6 @@ const PortfolioTab = () => {
                 transition={{ delay: i * 0.05 }}
                 className="group bg-card rounded-2xl border border-border overflow-hidden shadow-card hover:shadow-card-hover transition-all relative"
               >
-                {/* Delete button */}
                 <button
                   onClick={() => handleDelete(item.id)}
                   disabled={deleting === item.id}
@@ -438,7 +430,6 @@ const PortfolioTab = () => {
                   {deleting === item.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                 </button>
 
-                {/* Media gallery */}
                 {allMedia.length > 0 ? (
                   allMedia.length === 1 ? (
                     <div className="aspect-video bg-muted relative overflow-hidden">
@@ -464,7 +455,6 @@ const PortfolioTab = () => {
                   </div>
                 )}
 
-                {/* Video badge */}
                 {item.video_url && (
                   <div className="absolute top-3 left-3 z-10 px-2 py-1 rounded-md bg-background/80 border border-border text-xs font-medium flex items-center gap-1 text-muted-foreground">
                     <Video className="w-3 h-3" /> Video
@@ -477,7 +467,6 @@ const PortfolioTab = () => {
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{item.description}</p>
                   )}
 
-                  {/* Video embed */}
                   {item.video_url && (
                     <div className="mb-3">
                       {getVideoEmbed(item.video_url, item.video_type)}
@@ -492,7 +481,7 @@ const PortfolioTab = () => {
                       className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline font-medium"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      Lihat Project
+                      View Project
                     </a>
                   )}
                 </div>

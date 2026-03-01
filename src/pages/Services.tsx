@@ -52,7 +52,6 @@ const Services = () => {
     const fetchServices = async () => {
       setLoading(true);
 
-      // Find category_id from slug
       let categoryId: string | null = null;
       if (categoryParam !== "all" && categories.length > 0) {
         const found = categories.find(c => c.slug === categoryParam || c.id === categoryParam);
@@ -99,8 +98,8 @@ const Services = () => {
   }, [categoryParam, categories]);
 
   const activeCategoryName = categoryParam === "all"
-    ? "Semua Layanan"
-    : categories.find(c => c.slug === categoryParam || c.id === categoryParam)?.name || "Layanan";
+    ? "All Services"
+    : categories.find(c => c.slug === categoryParam || c.id === categoryParam)?.name || "Services";
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,22 +107,21 @@ const Services = () => {
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
           <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-8 transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Kembali ke Beranda
+            <ArrowLeft className="w-4 h-4" /> Back to Home
           </Link>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
             <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">
-              Katalog <span className="text-gradient-accent">Layanan</span>
+              Service <span className="text-gradient-accent">Catalog</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl">
-              Temukan layanan profesional dari talent terverifikasi untuk membantu bisnis Anda berkembang.
+              Discover professional services from verified talents to help your business grow.
             </p>
           </motion.div>
 
-          {/* Category filter */}
           <div className="flex flex-wrap gap-2 mb-10">
             <Link to="/services?category=all">
-              <Button variant={categoryParam === "all" ? "default" : "outline"} size="sm" className="rounded-full">Semua</Button>
+              <Button variant={categoryParam === "all" ? "default" : "outline"} size="sm" className="rounded-full">All</Button>
             </Link>
             {categories.map(cat => {
               const isActive = categoryParam === cat.slug || categoryParam === cat.id;
@@ -135,7 +133,6 @@ const Services = () => {
             })}
           </div>
 
-          {/* Services grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
@@ -150,7 +147,7 @@ const Services = () => {
               ))
             ) : services.length === 0 ? (
               <div className="col-span-full text-center py-12 text-muted-foreground">
-                Belum ada layanan di kategori ini.
+                No services in this category yet.
               </div>
             ) : (
               services.map((service, i) => (
@@ -189,7 +186,7 @@ const Services = () => {
                       )}
                     </div>
                     <div className="mt-4 flex items-center gap-1 text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                      Lihat detail <ArrowRight className="w-4 h-4" />
+                      View details <ArrowRight className="w-4 h-4" />
                     </div>
                   </motion.div>
                 </Link>
