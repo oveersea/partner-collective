@@ -326,23 +326,25 @@ const AdminEmailNotifications = () => {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {templates.map(t => (
-                <Card key={t.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-base">{t.name}</CardTitle>
-                        <CardDescription className="text-xs mt-1">{t.template_key}</CardDescription>
+                <Card key={t.id} className="hover:shadow-md transition-shadow flex flex-col">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="text-base leading-tight truncate">{t.name}</CardTitle>
+                        <CardDescription className="text-xs mt-1 font-mono truncate">{t.template_key}</CardDescription>
                       </div>
-                      <Badge variant={t.is_active ? "default" : "secondary"}>
+                      <Badge variant={t.is_active ? "default" : "secondary"} className="shrink-0">
                         {t.is_active ? "Active" : "Inactive"}
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-1">Subject: {t.subject}</p>
-                    {t.description && <p className="text-xs text-muted-foreground mb-3">{t.description}</p>}
-                    {t.category && <Badge variant="outline" className="text-xs mb-3">{t.category}</Badge>}
-                    <div className="flex gap-2 mt-3">
+                  <CardContent className="flex-1 flex flex-col justify-between gap-3">
+                    <div className="space-y-1.5">
+                      <p className="text-sm text-muted-foreground line-clamp-2"><span className="font-medium text-foreground">Subject:</span> {t.subject}</p>
+                      {t.description && <p className="text-xs text-muted-foreground line-clamp-2">{t.description}</p>}
+                      {t.category && <Badge variant="outline" className="text-xs">{t.category}</Badge>}
+                    </div>
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
                       <Button size="sm" variant="outline" onClick={() => { setPreviewHtml(t.html_body); setPreviewDialog(true); }}>
                         <Eye className="w-3 h-3 mr-1" />Preview
                       </Button>
@@ -352,7 +354,7 @@ const AdminEmailNotifications = () => {
                       <Button size="sm" variant="outline" onClick={() => openSendDialog(t.id)}>
                         <Send className="w-3 h-3 mr-1" />Kirim
                       </Button>
-                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deleteTemplate(t.id)}>
+                      <Button size="sm" variant="ghost" className="text-destructive ml-auto" onClick={() => deleteTemplate(t.id)}>
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
