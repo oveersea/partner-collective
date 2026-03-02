@@ -8,6 +8,10 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Upload, FileText, RefreshCw, CheckCircle2, XCircle, Loader2, Trash2 } from "lucide-react";
@@ -40,6 +44,7 @@ const AdminBulkCV = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<string, string>>({});
+  const [deleteTarget, setDeleteTarget] = useState<CvUpload | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchUploads = useCallback(async () => {
@@ -183,6 +188,27 @@ const AdminBulkCV = () => {
     fetchUploads();
   };
 
+  const handleDelete = async (upload: CvUpload) => {
+    try {
+      // Delete file from storage (ignore error if file already gone)
+      await supabase.storage.from("cv-uploads").remove([upload.file_url]);
+
+      // Delete cv_uploads record (candidates_archive data is preserved independently)
+      const { error } = await supabase
+        .from("cv_uploads")
+        .delete()
+        .eq("id", upload.id);
+
+      if (error) throw error;
+
+      setUploads(prev => prev.filter(u => u.id !== upload.id));
+      setDeleteTarget(null);
+      toast.success(`"${upload.file_name}" berhasil dihapus`);
+    } catch (err: any) {
+      toast.error("Gagal menghapus: " + err.message);
+    }
+  };
+
   const statusBadge = (status: string) => {
     switch (status) {
       case "completed":
@@ -316,11 +342,16 @@ const AdminBulkCV = () => {
                       {new Date(u.created_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
                     </TableCell>
                     <TableCell className="text-right">
-                      {u.parsing_status === "failed" && (
-                        <Button size="sm" variant="outline" onClick={() => handleReparse(u)}>
-                          <RefreshCw className="w-3 h-3 mr-1" />Re-parse
+                      <div className="flex items-center justify-end gap-1">
+                        {u.parsing_status === "failed" && (
+                          <Button size="sm" variant="outline" onClick={() => handleReparse(u)}>
+                            <RefreshCw className="w-3 h-3 mr-1" />Re-parse
+                          </Button>
+                        )}
+                        <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setDeleteTarget(u)}>
+                          <Trash2 className="w-3 h-3" />
                         </Button>
-                      )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -409,6 +440,30 @@ const AdminBulkCV = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus CV Upload?</AlertDialogTitle>
+            <AlertDialogDescription>
+              File "{deleteTarget?.file_name}" akan dihapus dari storage dan daftar upload.
+              {deleteTarget?.candidate_id
+                ? " Data kandidat yang sudah diparse tetap tersimpan di database dan tidak akan terpengaruh."
+                : " Belum ada data kandidat yang tersimpan dari file ini."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteTarget && handleDelete(deleteTarget)}
+            >
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
