@@ -7235,6 +7235,8 @@ export type Database = {
       }
       partner_teams: {
         Row: {
+          admin_notes: string | null
+          approval_status: string
           created_at: string
           created_by: string
           description: string | null
@@ -7242,12 +7244,18 @@ export type Database = {
           logo_url: string | null
           max_members: number | null
           name: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           skills: string[] | null
           slug: string
           status: string
+          suggested_team_id: string | null
           updated_at: string
         }
         Insert: {
+          admin_notes?: string | null
+          approval_status?: string
           created_at?: string
           created_by: string
           description?: string | null
@@ -7255,12 +7263,18 @@ export type Database = {
           logo_url?: string | null
           max_members?: number | null
           name: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           skills?: string[] | null
           slug: string
           status?: string
+          suggested_team_id?: string | null
           updated_at?: string
         }
         Update: {
+          admin_notes?: string | null
+          approval_status?: string
           created_at?: string
           created_by?: string
           description?: string | null
@@ -7268,12 +7282,24 @@ export type Database = {
           logo_url?: string | null
           max_members?: number | null
           name?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           skills?: string[] | null
           slug?: string
           status?: string
+          suggested_team_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "partner_teams_suggested_team_id_fkey"
+            columns: ["suggested_team_id"]
+            isOneToOne: false
+            referencedRelation: "partner_teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platform_stats: {
         Row: {
