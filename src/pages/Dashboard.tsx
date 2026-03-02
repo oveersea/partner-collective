@@ -183,12 +183,6 @@ const Dashboard = () => {
               Project
             </button>
           </Link>
-          <Link to="/vendor-registration" className="shrink-0">
-            <button className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-primary/10 text-primary text-xs md:text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20 whitespace-nowrap">
-              <Building2 className="w-4 h-4" />
-              Vendor
-            </button>
-          </Link>
           <Link to="/matchmaking" className="shrink-0">
             <button className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-primary/10 text-primary text-xs md:text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20 whitespace-nowrap">
               <Zap className="w-4 h-4" />
@@ -247,6 +241,26 @@ const Dashboard = () => {
         {activeTab === "portfolio" && <PortfolioTab />}
         {activeTab === "teams" && <TeamsTab />}
         {activeTab === "services" && <ServicesTab />}
+
+        {/* Vendor CTA */}
+        <div className="mt-8 md:mt-12">
+          <Link to="/vendor-registration">
+            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 md:p-8 flex flex-col md:flex-row items-center gap-4 md:gap-6 hover:bg-primary/10 transition-colors">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Building2 className="w-7 h-7 text-primary" />
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-lg font-semibold text-foreground">Daftarkan Bisnis Anda sebagai Vendor</h3>
+                <p className="text-sm text-muted-foreground mt-1">Bergabung sebagai vendor untuk menerima proyek, mengelola tim, dan mengembangkan bisnis Anda di platform kami.</p>
+              </div>
+              <div className="shrink-0">
+                <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium">
+                  Daftar Vendor
+                </span>
+              </div>
+            </div>
+          </Link>
+        </div>
       </div>
     </div>
   );
