@@ -54,6 +54,7 @@ const tabs = [
   { id: "education", label: "Education", icon: GraduationCap },
   { id: "portfolio", label: "Portfolio", icon: FolderKanban },
   { id: "teams", label: "Teams", icon: Users },
+  { id: "company", label: "Company", icon: Building2 },
   { id: "services", label: "Services", icon: Layers },
 ];
 
@@ -215,7 +216,7 @@ const Dashboard = () => {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => { setActiveTab(tab.id); if (editing && tab.id !== "profile") setEditing(false); }}
+                onClick={() => { if (tab.id === "company") { navigate("/companies"); return; } setActiveTab(tab.id); if (editing && tab.id !== "profile") setEditing(false); }}
                 className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "bg-card text-card-foreground shadow-sm"
