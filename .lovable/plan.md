@@ -1,55 +1,38 @@
 
+# Company Dashboard
 
-# Vendor Dashboard & Team Dashboard - Full Suite
+## Ringkasan
+Membuat halaman Company Dashboard yang dapat diakses oleh member perusahaan (business_members). Desain dan fungsionalitas mirip dengan Vendor Dashboard yang sudah ada, namun khusus untuk `business_type = 'company'`.
 
-## Overview
-- `/vendor/:slug` — Dashboard vendor (full suite + Business KYC)
-- `/team/:slug` — Dashboard team (full suite, tanpa KYC, tapi perlu approval admin)
+## Apa yang akan dibangun
 
-## Database Changes
+### 1. Halaman CompanyDashboard (`src/pages/CompanyDashboard.tsx`)
+- Route: `/company/:slug`
+- Mengambil data dari tabel `business_profiles` dengan filter `business_type = 'company'`
+- Validasi akses: hanya user yang terdaftar di `business_members` untuk company tersebut yang bisa mengakses
+- Role admin (owner/admin/created_by) mendapat akses kelola member
 
-### 1. partner_teams — tambah kolom approval
-- `approval_status` (enum: pending, approved, rejected, merged) default 'pending'
-- `admin_notes` text nullable  
-- `suggested_team_id` uuid nullable (FK ke partner_teams, untuk suggest merge)
-- `rejection_reason` text nullable
+**Tab yang tersedia:**
+- **Overview** - Informasi bisnis (industry, lokasi, website, email, phone, NPWP, NIB, deskripsi) + quick stats (members, documents, credits)
+- **Members** - Daftar member dengan invite/remove (khusus admin)
+- **Documents** - Dokumen perusahaan dari `business_documents`
+- **KYC** - Status verifikasi KYC bisnis
+- **Projects** - Placeholder untuk proyek perusahaan
+- **Credits** - Saldo kredit dari `company_credits`
 
-### 2. team_approval_requests (tabel baru)
-- `id`, `team_id` (FK partner_teams), `requested_by`, `status`, `admin_notes`, `suggested_team_id`, `reviewed_by`, `reviewed_at`, `created_at`
+### 2. Route baru di App.tsx
+```
+/company/:slug -> CompanyDashboard
+```
 
-## Pages & Components
+### 3. Akses kontrol
+- Query `business_members` untuk cek apakah user login adalah member aktif
+- Role owner/admin mendapat fitur invite & remove member
+- RLS sudah ada di tabel `business_profiles` dan `business_members`
 
-### Vendor Dashboard (`/vendor/:slug`)
-Tabs: Overview, Members, Documents, KYC, Projects/Orders, Credits
-- Overview: info bisnis, stats
-- Members: invite, role management (owner/admin/member)  
-- Documents: upload & manage business docs
-- KYC: business KYC submission & status
-- Projects: order claims yang diterima vendor
-- Credits: company_credits balance & transactions
+## Detail Teknis
 
-### Team Dashboard (`/team/:slug`)
-Tabs: Overview, Members, Projects
-- Overview: team info, skills, status approval
-- Members: invite, role management (leader/member)
-- Projects: order claims yang diterima team
-- Approval banner: status pending/approved/rejected + suggested team info
-
-## Routing
-- Tambah routes di App.tsx
-- Link dari TeamsTab ke `/team/:slug`
-- Link dari dashboard vendor list ke `/vendor/:slug`
-
-## Admin Side (existing AdminTeams, AdminVendors)
-- Admin bisa approve/reject team creation
-- Admin bisa suggest existing team saat reject
-- Admin bisa manage business KYC (sudah ada di AdminKYC)
-
-## Implementation Order
-1. Database migration (approval columns + team_approval table)
-2. Vendor Dashboard page (reuse business_profiles data)
-3. Team Dashboard page
-4. Update TeamsTab to link ke team dashboard
-5. Update routing
-6. Update admin panel for team approval flow
-
+- File baru: `src/pages/CompanyDashboard.tsx` (mengikuti pola `VendorDashboard.tsx`)
+- Edit: `src/App.tsx` - tambah route `/company/:slug`
+- Tidak perlu migrasi database karena tabel dan RLS sudah tersedia
+- Menggunakan tabel: `business_profiles`, `business_members`, `business_documents`, `company_credits`, `profiles`
