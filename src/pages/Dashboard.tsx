@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -64,11 +64,17 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Profile>>({});
-  const [activeTab, setActiveTab] = useState("profile");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "profile");
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && tabs.some((t) => t.id === tab)) setActiveTab(tab);
+  }, [searchParams]);
 
   useEffect(() => {
     if (user) fetchProfile();
@@ -205,7 +211,7 @@ const Dashboard = () => {
 
         {/* Tabs */}
         <div className="mt-4 md:mt-6 mb-4 md:mb-6">
-          <div className="flex gap-1 p-1 bg-muted rounded-xl overflow-x-auto scrollbar-hide -mx-4 md:mx-0">
+          <div className="hidden md:flex gap-1 p-1 bg-muted rounded-xl overflow-x-auto scrollbar-hide -mx-4 md:mx-0">
             {tabs.map((tab) => (
               <button
                 key={tab.id}

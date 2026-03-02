@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Layers, Briefcase, GraduationCap, User, LayoutGrid, UserSearch, FolderKanban, Building2, Zap, CreditCard, Shield, X } from "lucide-react";
+import { Home, Layers, Briefcase, GraduationCap, User, LayoutGrid, UserSearch, FolderKanban, Building2, Zap, CreditCard, Shield, X, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -13,12 +13,17 @@ const defaultNav = [
 ];
 
 const dashboardMenuItems = [
+  { label: "Experience", icon: Briefcase, href: "/dashboard?tab=experience" },
+  { label: "Education", icon: GraduationCap, href: "/dashboard?tab=education" },
+  { label: "Portfolio", icon: FolderKanban, href: "/dashboard?tab=portfolio" },
+  { label: "Teams", icon: Users, href: "/dashboard?tab=teams" },
+  { label: "Services", icon: Layers, href: "/dashboard?tab=services" },
   { label: "Hiring Request", icon: UserSearch, href: "/hiring-request" },
   { label: "Project Request", icon: FolderKanban, href: "/project-request" },
-  { label: "Vendor Registration", icon: Building2, href: "/vendor-registration" },
+  { label: "Vendor", icon: Building2, href: "/vendor-registration" },
   { label: "Matchmaking", icon: Zap, href: "/matchmaking" },
-  { label: "Credits & Balance", icon: CreditCard, href: "/credit-balance" },
-  { label: "KYC Verification", icon: Shield, href: "/kyc" },
+  { label: "Credits", icon: CreditCard, href: "/credit-balance" },
+  { label: "KYC", icon: Shield, href: "/kyc" },
 ];
 
 const dashboardRoutes = ["/dashboard", "/hiring-request", "/project-request", "/vendor-registration", "/credit-balance", "/kyc"];
