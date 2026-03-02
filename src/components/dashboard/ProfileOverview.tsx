@@ -73,7 +73,7 @@ const ProfileOverview = ({ profile }: ProfileOverviewProps) => {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       {/* About */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-2xl border border-border p-8 shadow-card">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-2xl border border-border p-4 md:p-8 shadow-card">
         <h2 className="text-lg font-semibold text-card-foreground mb-4">About</h2>
         <p className="text-muted-foreground text-sm leading-relaxed mb-6">
           {profile.professional_summary || profile.bio || "No description added yet."}
@@ -91,7 +91,7 @@ const ProfileOverview = ({ profile }: ProfileOverviewProps) => {
       </motion.div>
 
       {/* Professional */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-card rounded-2xl border border-border p-8 shadow-card">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-card rounded-2xl border border-border p-4 md:p-8 shadow-card">
         <h2 className="text-lg font-semibold text-card-foreground mb-4">Professional</h2>
 
         <div className="space-y-4">
@@ -134,7 +134,7 @@ const ProfileOverview = ({ profile }: ProfileOverviewProps) => {
       </motion.div>
 
       {/* Skills */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card rounded-2xl border border-border p-8 shadow-card md:col-span-2">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card rounded-2xl border border-border p-4 md:p-8 shadow-card md:col-span-2">
         <h2 className="text-lg font-semibold text-card-foreground mb-4">Skills</h2>
         <div className="flex flex-wrap gap-2">
           {profile.skills && profile.skills.length > 0 ? (

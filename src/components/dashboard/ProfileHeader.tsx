@@ -41,26 +41,29 @@ const ProfileHeader = ({ profile, editing, onToggleEdit }: ProfileHeaderProps) =
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-2xl border border-border p-8 shadow-card"
+      className="bg-card rounded-2xl border border-border p-4 md:p-8 shadow-card"
     >
-      <div className="flex flex-col sm:flex-row items-start gap-6">
-        <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+      <div className="flex items-start gap-4 md:gap-6">
+        <div className="w-14 h-14 md:w-20 md:h-20 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
           {profile.avatar_url ? (
-            <img src={profile.avatar_url} alt="" className="w-20 h-20 rounded-2xl object-cover" />
+            <img src={profile.avatar_url} alt="" className="w-14 h-14 md:w-20 md:h-20 rounded-2xl object-cover" />
           ) : (
-            <User className="w-10 h-10 text-primary" />
+            <User className="w-7 h-7 md:w-10 md:h-10 text-primary" />
           )}
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-semibold text-card-foreground">
+          <div className="flex items-start justify-between gap-2 md:gap-4">
+            <div className="min-w-0">
+              <h1 className="text-lg md:text-2xl font-semibold text-card-foreground truncate">
                 {profile.full_name || "Name not set"}
               </h1>
-              <p className="text-muted-foreground">{profile.headline || "Headline not set"}</p>
+              <p className="text-sm md:text-base text-muted-foreground truncate">{profile.headline || "Headline not set"}</p>
             </div>
-            <Button variant={editing ? "ghost" : "outline"} size="sm" onClick={onToggleEdit}>
+            <Button variant={editing ? "ghost" : "outline"} size="icon" className="shrink-0 md:hidden" onClick={onToggleEdit}>
+              {editing ? <X className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
+            </Button>
+            <Button variant={editing ? "ghost" : "outline"} size="sm" className="shrink-0 hidden md:flex" onClick={onToggleEdit}>
               {editing ? <X className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
               {editing ? "Cancel" : "Edit Profile"}
             </Button>

@@ -133,8 +133,8 @@ const ServicesTab = () => {
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-xl bg-card border border-border p-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+        <div className="rounded-xl bg-card border border-border p-3 md:p-4">
           <p className="text-2xl font-bold text-foreground">{activeCount}</p>
           <p className="text-xs text-muted-foreground mt-1">Active Services</p>
         </div>

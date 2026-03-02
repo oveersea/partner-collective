@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Briefcase, FolderKanban, GraduationCap, Users, UserSearch, Plus, Building2, Zap, CreditCard, Layers } from "lucide-react";
+import { User, Briefcase, FolderKanban, GraduationCap, Users, UserSearch, Building2, Zap, CreditCard, Layers } from "lucide-react";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import KYCBanner from "@/components/dashboard/KYCBanner";
 import ProfileHeader from "@/components/dashboard/ProfileHeader";
@@ -149,7 +149,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <DashboardNav />
 
-      <div className="w-full px-6 py-8">
+      <div className="w-full px-4 py-4 md:px-6 md:py-8 pb-28 md:pb-8 max-w-4xl mx-auto">
         {/* KYC Banner */}
         <KYCBanner kycStatus={profile.kyc_status} />
 
@@ -164,60 +164,60 @@ const Dashboard = () => {
         />
 
         {/* Quick Actions */}
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link to="/hiring-request">
-            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
+        <div className="mt-4 md:mt-6 flex overflow-x-auto scrollbar-hide gap-2 md:flex-wrap md:gap-3 -mx-4 px-4 md:mx-0 md:px-0">
+          <Link to="/hiring-request" className="shrink-0">
+            <button className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-primary/10 text-primary text-xs md:text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20 whitespace-nowrap">
               <UserSearch className="w-4 h-4" />
-              Hiring Request
+              Hiring
             </button>
           </Link>
-          <Link to="/project-request">
-            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
+          <Link to="/project-request" className="shrink-0">
+            <button className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-primary/10 text-primary text-xs md:text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20 whitespace-nowrap">
               <FolderKanban className="w-4 h-4" />
-              Project Request
+              Project
             </button>
           </Link>
-          <Link to="/vendor-registration">
-            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
+          <Link to="/vendor-registration" className="shrink-0">
+            <button className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-primary/10 text-primary text-xs md:text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20 whitespace-nowrap">
               <Building2 className="w-4 h-4" />
-              Vendor Registration
+              Vendor
             </button>
           </Link>
-          <Link to="/matchmaking">
-            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
+          <Link to="/matchmaking" className="shrink-0">
+            <button className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-primary/10 text-primary text-xs md:text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20 whitespace-nowrap">
               <Zap className="w-4 h-4" />
               Matchmaking
             </button>
           </Link>
-          <Link to="/learning">
-            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
+          <Link to="/learning" className="shrink-0">
+            <button className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-primary/10 text-primary text-xs md:text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20 whitespace-nowrap">
               <GraduationCap className="w-4 h-4" />
               Learning
             </button>
           </Link>
-          <Link to="/credit-balance">
-            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20">
+          <Link to="/credit-balance" className="shrink-0">
+            <button className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-primary/10 text-primary text-xs md:text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20 whitespace-nowrap">
               <CreditCard className="w-4 h-4" />
-              Credits & Balance
+              Credits
             </button>
           </Link>
         </div>
 
         {/* Tabs */}
-        <div className="mt-6 mb-6">
-          <div className="flex gap-1 p-1 bg-muted rounded-xl overflow-x-auto">
+        <div className="mt-4 md:mt-6 mb-4 md:mb-6">
+          <div className="flex gap-1 p-1 bg-muted rounded-xl overflow-x-auto scrollbar-hide -mx-4 md:mx-0">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id); if (editing && tab.id !== "profile") setEditing(false); }}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "bg-card text-card-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
               </button>
             ))}
           </div>

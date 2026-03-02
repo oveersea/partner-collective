@@ -201,7 +201,7 @@ const ExperienceTab = () => {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="bg-card rounded-2xl border border-border p-6 shadow-card space-y-4">
+            <div className="bg-card rounded-2xl border border-border p-4 md:p-6 shadow-card space-y-4">
               <h3 className="font-semibold text-card-foreground">
                 {editingId ? "Edit Work Experience" : "Add New Work Experience"}
               </h3>
@@ -268,10 +268,10 @@ const ExperienceTab = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="group bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-card-hover transition-shadow relative"
+              className="group bg-card rounded-2xl border border-border p-4 md:p-6 shadow-card hover:shadow-card-hover transition-shadow relative"
             >
               {/* Action buttons */}
-              <div className="absolute top-4 right-4 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-4 right-4 flex items-center gap-1.5 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => openEditForm(exp)}
                   className="p-1.5 rounded-lg bg-background border border-border text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors"

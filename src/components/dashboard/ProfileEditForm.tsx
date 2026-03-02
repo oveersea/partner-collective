@@ -23,7 +23,7 @@ const ProfileEditForm = ({ editData, onChange, onSave, onCancel }: ProfileEditFo
   const set = (key: string, value: any) => onChange({ ...editData, [key]: value });
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border p-8 shadow-card space-y-5">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border p-4 md:p-8 shadow-card space-y-5">
       <h2 className="text-lg font-semibold text-card-foreground">Edit Profile Information</h2>
 
       {/* Approval notice */}
@@ -207,9 +207,9 @@ const ProfileEditForm = ({ editData, onChange, onSave, onCancel }: ProfileEditFo
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 pt-4 border-t border-border">
+      <div className="flex justify-end gap-3 pt-4 border-t border-border sticky bottom-4 md:static bg-card py-3 md:py-0 -mx-4 px-4 md:mx-0 md:px-0 rounded-b-2xl">
         <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-        <Button onClick={onSave}><Save className="w-4 h-4" />Submit for Approval</Button>
+        <Button onClick={onSave} className="flex-1 md:flex-none"><Save className="w-4 h-4" />Submit for Approval</Button>
       </div>
     </motion.div>
   );
