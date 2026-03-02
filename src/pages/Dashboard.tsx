@@ -149,7 +149,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <DashboardNav />
 
-      <div className="w-full px-4 py-4 md:px-6 md:py-8 pb-28 md:pb-8 max-w-4xl mx-auto">
+      <div className="w-full px-4 py-4 md:px-6 md:py-8 pb-28 md:pb-8">
         {/* KYC Banner */}
         <KYCBanner kycStatus={profile.kyc_status} />
 
