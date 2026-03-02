@@ -246,32 +246,30 @@ const CompanyDashboard = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <div className="border-b border-border">
-            <nav className="flex gap-1 overflow-x-auto scrollbar-hide -mb-px px-1">
-              {[
-                { value: "overview", icon: Building2, label: "Overview" },
-                { value: "members", icon: Users, label: "Members", count: members.length },
-                { value: "documents", icon: FileText, label: "Documents", count: documents.length },
-                { value: "kyc", icon: Shield, label: "KYC" },
-                { value: "projects", icon: FolderKanban, label: "Projects" },
-                { value: "credits", icon: CreditCard, label: "Credits" },
-              ].map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="relative flex items-center gap-2 px-4 py-3 text-sm font-medium text-muted-foreground rounded-none border-b-2 border-transparent transition-all hover:text-foreground hover:bg-muted/50 data-[state=active]:text-primary data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none whitespace-nowrap"
-                >
-                  <tab.icon className="w-4 h-4" />
-                  <span className="hidden md:inline">{tab.label}</span>
-                  {tab.count !== undefined && tab.count > 0 && (
-                    <span className="ml-1 text-[10px] font-semibold min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary/10 text-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-1">
-                      {tab.count}
-                    </span>
-                  )}
-                </TabsTrigger>
-              ))}
-            </nav>
-          </div>
+          <TabsList className="bg-transparent border-b border-border rounded-none h-auto p-0 w-full justify-start gap-1 overflow-x-auto">
+            {[
+              { value: "overview", icon: Building2, label: "Overview" },
+              { value: "members", icon: Users, label: "Members", count: members.length },
+              { value: "documents", icon: FileText, label: "Documents", count: documents.length },
+              { value: "kyc", icon: Shield, label: "KYC" },
+              { value: "projects", icon: FolderKanban, label: "Projects" },
+              { value: "credits", icon: CreditCard, label: "Credits" },
+            ].map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="relative flex items-center gap-2 px-4 py-3 text-sm font-medium text-muted-foreground rounded-none border-b-2 border-transparent transition-all hover:text-foreground hover:bg-muted/50 data-[state=active]:text-primary data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none whitespace-nowrap"
+              >
+                <tab.icon className="w-4 h-4" />
+                <span className="hidden md:inline">{tab.label}</span>
+                {tab.count !== undefined && tab.count > 0 && (
+                  <span className="ml-1 text-[10px] font-semibold min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary/10 text-primary px-1">
+                    {tab.count}
+                  </span>
+                )}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview">
