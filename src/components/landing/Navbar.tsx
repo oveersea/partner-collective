@@ -320,7 +320,7 @@ const Navbar = () => {
               <Link to="/auth">
                 <span className="text-sm font-medium cursor-pointer transition-colors" style={{ color: "hsl(0 0% 60%)" }}>Login</span>
               </Link>
-              <Link to="/auth">
+              <Link to="/request-quote">
                 <button className="px-5 py-2 text-sm font-semibold rounded-lg border transition-colors" style={{ borderColor: "hsl(0 0% 30%)", color: "white" }}>
                   Request Quote
                 </button>

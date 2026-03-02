@@ -37,6 +37,7 @@ import TeamDashboard from "./pages/TeamDashboard";
 import CompanyDashboard from "./pages/CompanyDashboard";
 import Companies from "./pages/Companies";
 import Checkout from "./pages/Checkout";
+import RequestQuote from "./pages/RequestQuote";
 
 const queryClient = new QueryClient();
 
@@ -79,6 +80,7 @@ const App = () => (
             <Route path="/companies" element={<Companies />} />
             <Route path="/company/:slug" element={<CompanyDashboard />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/request-quote" element={<RequestQuote />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
