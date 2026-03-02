@@ -117,10 +117,20 @@ const HiringRequest = () => {
         clientId = newClient.id;
       }
 
+      // Get user's business_id for credit deduction
+      const { data: membership } = await supabase
+        .from("business_members")
+        .select("business_id")
+        .eq("user_id", user!.id)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle();
+
       const creditCost = parsed.data.hiring_type === "fast" ? 10 * parsed.data.positions_count : parsed.data.positions_count;
 
       const { error } = await supabase.from("hiring_requests").insert({
         client_id: clientId,
+        business_id: membership?.business_id || null,
         title: parsed.data.title,
         description: parsed.data.description,
         required_skills: parsed.data.required_skills,
