@@ -38,10 +38,17 @@ Deno.serve(async (req) => {
     const userEmail = claims.claims.email as string;
 
     const body = await req.json();
-    const { checkout_type, record_id, amount, description, success_redirect_url, failure_redirect_url } = body;
+    const {
+      checkout_type, amount, description,
+      success_redirect_url, failure_redirect_url,
+      // Credit order specific
+      package_id, credits, currency,
+      // Program order specific
+      program_id, program_title,
+    } = body;
 
-    if (!checkout_type || !record_id || !amount) {
-      return new Response(JSON.stringify({ error: "Missing required fields: checkout_type, record_id, amount" }), {
+    if (!checkout_type || !amount) {
+      return new Response(JSON.stringify({ error: "Missing required fields: checkout_type, amount" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -60,7 +67,24 @@ Deno.serve(async (req) => {
       .single();
 
     const xenditKey = Deno.env.get("XENDIT_SECRET_KEY")!;
-    const externalId = `${checkout_type}_${record_id}`;
+    const externalId = `${checkout_type}_${userId}_${Date.now()}`;
+
+    // Build metadata - all order details stored here, NO DB record created yet
+    const metadata: Record<string, any> = {
+      checkout_type,
+      user_id: userId,
+      amount: Number(amount),
+      currency: currency || "IDR",
+      description: description || `Payment for ${checkout_type}`,
+    };
+
+    if (checkout_type === "credit_order") {
+      metadata.package_id = package_id;
+      metadata.credits = credits;
+    } else if (checkout_type === "program_order") {
+      metadata.program_id = program_id;
+      metadata.program_title = program_title;
+    }
 
     // Create Xendit invoice
     const xenditRes = await fetch("https://api.xendit.co/v2/invoices", {
@@ -72,7 +96,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         external_id: externalId,
         amount: Number(amount),
-        currency: "IDR",
+        currency: currency || "IDR",
         description: description || `Payment for ${checkout_type}`,
         customer: {
           given_names: profile?.full_name || "User",
@@ -82,11 +106,7 @@ Deno.serve(async (req) => {
         success_redirect_url: success_redirect_url || undefined,
         failure_redirect_url: failure_redirect_url || undefined,
         invoice_duration: 86400, // 24 hours
-        metadata: {
-          checkout_type,
-          record_id,
-          user_id: userId,
-        },
+        metadata,
       }),
     });
 
@@ -101,38 +121,7 @@ Deno.serve(async (req) => {
 
     const invoice = await xenditRes.json();
 
-    // Update the respective record with Xendit invoice info
-    if (checkout_type === "credit_order") {
-      await adminClient
-        .from("credit_orders")
-        .update({
-          xendit_invoice_id: invoice.id,
-          xendit_checkout_url: invoice.invoice_url,
-          status: "pending_payment",
-        })
-        .eq("id", record_id)
-        .eq("user_id", userId);
-    } else if (checkout_type === "wallet_deposit") {
-      await adminClient
-        .from("wallet_deposits")
-        .update({
-          xendit_invoice_id: invoice.id,
-          xendit_checkout_url: invoice.invoice_url,
-          method: "xendit",
-          status: "pending",
-        })
-        .eq("id", record_id)
-        .eq("user_id", userId);
-    } else if (checkout_type === "program_order") {
-      await adminClient
-        .from("program_orders")
-        .update({
-          xendit_invoice_id: invoice.id,
-          xendit_invoice_url: invoice.invoice_url,
-          status: "pending_payment",
-        })
-        .eq("id", record_id);
-    }
+    // No DB record created here - record will be created by webhook on successful payment
 
     return new Response(
       JSON.stringify({
