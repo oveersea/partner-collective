@@ -59,7 +59,9 @@ serve(async (req) => {
       });
     }
 
-    const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+    const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
 
     const { cv_upload_id } = await req.json();
     if (!cv_upload_id) {
@@ -70,14 +72,17 @@ serve(async (req) => {
     }
 
     // Get CV upload record
+    console.log("Fetching CV upload:", cv_upload_id);
     const { data: cvUpload, error: cvError } = await adminClient
       .from("cv_uploads")
       .select("*")
       .eq("id", cv_upload_id)
       .single();
 
+    console.log("CV upload result:", JSON.stringify({ cvUpload: cvUpload?.id, cvError }));
+
     if (cvError || !cvUpload) {
-      return new Response(JSON.stringify({ error: "CV upload not found" }), {
+      return new Response(JSON.stringify({ error: "CV upload not found", details: cvError?.message }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
