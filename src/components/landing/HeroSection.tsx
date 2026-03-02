@@ -274,7 +274,7 @@ const HeroSection = () => {
       <div className="relative container mx-auto px-6 pt-28 pb-16">
         <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[calc(100vh-7rem)]">
           {/* Left: Content */}
-          <div className="max-w-xl pl-4 lg:pl-8">
+          <div className="max-w-xl">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 mb-8">
               <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: "hsl(0 79% 47%)" }}>
                 <span className="text-xs font-semibold text-white">G</span>
