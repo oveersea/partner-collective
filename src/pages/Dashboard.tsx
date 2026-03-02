@@ -164,7 +164,7 @@ const Dashboard = () => {
         />
 
         {/* Quick Actions */}
-        <div className="mt-4 md:mt-6 flex overflow-x-auto scrollbar-hide gap-2 md:flex-wrap md:gap-3 -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="mt-4 md:mt-6 hidden md:flex overflow-x-auto scrollbar-hide gap-2 md:flex-wrap md:gap-3 -mx-4 px-4 md:mx-0 md:px-0">
           <Link to="/hiring-request" className="shrink-0">
             <button className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-primary/10 text-primary text-xs md:text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20 whitespace-nowrap">
               <UserSearch className="w-4 h-4" />
