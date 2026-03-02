@@ -1,120 +1,75 @@
 
 
-# Bulk CV Upload & Parsing (Superadmin)
+# Rombak Dashboard - Multi Device Friendly
 
-## Overview
-Menambahkan fitur di panel Superadmin untuk upload dan parsing CV secara bulk (maksimal 20 file per batch). File CV (PDF/DOCX) akan di-upload ke storage bucket `cv-uploads`, lalu diproses oleh AI (Lovable AI Gateway + Gemini) untuk mengekstrak data kandidat secara otomatis ke tabel `candidates_archive`.
+## Masalah Saat Ini
+- Padding terlalu besar di mobile (p-8, px-6)
+- Quick Actions buttons terlalu kecil dan padat di layar kecil
+- Tab bar horizontal scroll tanpa indikator, sulit digunakan
+- DashboardNav redundan dengan MobileBottomNav di mobile
+- Konten tertutup oleh bottom navigation (tidak ada padding bawah)
+- Profile header layout pecah di layar kecil
+- Edit form dan overview cards tidak responsive
 
-## Arsitektur
+## Perubahan yang Akan Dilakukan
 
-```text
-Admin UI (Bulk Upload Dialog)
-       |
-       v  upload files ke storage bucket "cv-uploads"
-       |
-       v  insert records ke tabel "cv_uploads" (status: pending)
-       |
-       v  panggil edge function "parse-cv" per file
-       |
-Edge Function: parse-cv
-  - Download file dari storage
-  - Kirim konten ke Lovable AI Gateway (Gemini) via tool calling
-  - Extract: nama, email, phone, skills, pengalaman, pendidikan, dll
-  - Insert/update ke tabel "candidates_archive"
-  - Update cv_uploads status -> "completed"
-       |
-       v
-Data kandidat tersimpan di candidates_archive
-```
+### 1. Dashboard.tsx - Layout Utama
+- Ubah padding dari `px-6 py-8` menjadi responsive: `px-4 py-4 md:px-6 md:py-8`
+- Tambah `pb-24 md:pb-8` agar konten tidak tertutup bottom nav
+- Quick Actions: ubah dari `flex-wrap` menjadi horizontal scroll di mobile (`flex overflow-x-auto gap-2 md:flex-wrap md:gap-3`), dengan tombol lebih compact
+- Tabs: di mobile tampilkan hanya icon + label kecil dengan scroll horizontal yang lebih smooth, tambah `scrollbar-hide`
+- Tambah `max-w-4xl mx-auto` untuk desktop agar konten tidak terlalu lebar
 
-## Komponen yang Dibuat/Dimodifikasi
+### 2. DashboardNav.tsx - Top Navigation
+- Sembunyikan di mobile (`hidden md:block`) karena sudah ada MobileBottomNav
+- Atau simplifikasi: hanya tampilkan logo + avatar di mobile (tanpa link Dashboard/Jobs)
 
-### 1. Edge Function `parse-cv`
-- Menerima `{ cv_upload_id }` sebagai input
-- Download file dari storage bucket `cv-uploads` menggunakan service role
-- Konversi file ke base64 (untuk PDF) atau text
-- Kirim ke Lovable AI Gateway dengan tool calling untuk structured output
-- Ekstrak: full_name, email, phone, city, country, current_title, current_company, skills[], years_of_experience, education (JSON), work_experience (JSON), certifications (JSON), summary
-- Insert hasil ke `candidates_archive`, link via `candidate_id` di `cv_uploads`
-- Update `cv_uploads.parsing_status` menjadi "completed" atau "failed"
-- Menggunakan `LOVABLE_API_KEY` (sudah tersedia) dan `SB_SERVICE_ROLE_KEY`
+### 3. ProfileHeader.tsx - Header Profil
+- Padding responsive: `p-4 md:p-8`
+- Avatar lebih kecil di mobile: `w-16 h-16 md:w-20 md:h-20`
+- Edit button menjadi icon-only di mobile
+- Badges wrap dengan gap lebih kecil di mobile
 
-### 2. Admin UI: `AdminBulkCV.tsx`
-- Section baru di sidebar admin: "Bulk CV"
-- Halaman utama menampilkan daftar CV uploads dengan status parsing
-- Tombol "Upload CVs" membuka dialog upload
-- Dialog mendukung multi-file selection (max 20 files, PDF/DOCX only)
-- Progress bar per file (upload -> parsing -> done)
-- Tabel hasil: nama file, status parsing, nama kandidat (jika berhasil), actions
-- Bisa re-parse jika gagal
+### 4. ProfileOverview.tsx - Overview Cards
+- Padding responsive: `p-4 md:p-8`
+- Grid satu kolom di mobile: `grid-cols-1 md:grid-cols-2`
+- Skills section full-width tetap
 
-### 3. Modifikasi Sidebar & Dashboard
-- Tambah menu "Bulk CV" di `AdminSidebar.tsx`
-- Tambah routing di `AdminDashboard.tsx`
+### 5. ProfileEditForm.tsx - Form Edit
+- Padding responsive: `p-4 md:p-8`
+- Form fields tetap responsive (sudah `sm:grid-cols-2`)
+- Sticky save button di bottom untuk mobile
 
-### 4. Database
-- Tabel `cv_uploads` dan `candidates_archive` sudah ada, tidak perlu migrasi baru
-- Storage bucket `cv-uploads` sudah ada
+### 6. KYCBanner.tsx
+- Padding responsive: `p-3 md:p-5`
 
-## Detail Teknis
+### 7. ExperienceTab.tsx & Tab Lainnya
+- Card padding responsive
+- Action buttons selalu terlihat di mobile (tidak hanya hover)
 
-### Edge Function: parse-cv
+### 8. index.css
+- Tambah `.scrollbar-hide` utility untuk tab scrolling
 
-Menggunakan Lovable AI Gateway dengan tool calling untuk mendapatkan structured output:
+## Technical Details
 
-```typescript
-// Tool definition untuk extract CV data
-tools: [{
-  type: "function",
-  function: {
-    name: "extract_cv_data",
-    parameters: {
-      type: "object",
-      properties: {
-        full_name: { type: "string" },
-        email: { type: "string" },
-        phone: { type: "string" },
-        skills: { type: "array", items: { type: "string" } },
-        current_title: { type: "string" },
-        current_company: { type: "string" },
-        years_of_experience: { type: "number" },
-        education: { type: "array", items: { ... } },
-        work_experience: { type: "array", items: { ... } },
-        // dll
-      }
-    }
-  }
-}]
-```
+### File yang Dimodifikasi
 
-Model: `google/gemini-3-flash-preview` (default, cepat dan akurat)
+| File | Perubahan |
+|------|-----------|
+| `src/pages/Dashboard.tsx` | Responsive padding, scroll quick actions, compact tabs, bottom padding |
+| `src/components/dashboard/DashboardNav.tsx` | Hide di mobile, simplify |
+| `src/components/dashboard/ProfileHeader.tsx` | Responsive padding & sizing |
+| `src/components/dashboard/ProfileOverview.tsx` | Responsive grid & padding |
+| `src/components/dashboard/ProfileEditForm.tsx` | Responsive padding, sticky save |
+| `src/components/dashboard/KYCBanner.tsx` | Responsive padding |
+| `src/components/dashboard/ExperienceTab.tsx` | Mobile-visible action buttons |
+| `src/components/dashboard/ServicesTab.tsx` | Responsive stats grid & padding |
+| `src/index.css` | scrollbar-hide utility |
 
-### Upload Flow
-1. Admin pilih hingga 20 file PDF/DOCX
-2. Client upload semua file ke `cv-uploads` bucket via Supabase Storage
-3. Client insert record ke `cv_uploads` tabel per file (status: pending)
-4. Client panggil edge function `parse-cv` per file secara paralel (max 5 concurrent)
-5. Edge function proses dan update status
-6. UI polling atau realtime untuk update status
-
-### Keamanan
-- Edge function memverifikasi JWT caller dan cek role superadmin
-- Storage bucket `cv-uploads` sudah private
-- File hanya bisa diakses via service role di edge function
-
-### Config
-```toml
-[functions.parse-cv]
-verify_jwt = false
-```
-
-## File yang Akan Dibuat/Dimodifikasi
-
-| File | Aksi |
-|------|------|
-| `supabase/functions/parse-cv/index.ts` | Baru |
-| `src/components/admin/AdminBulkCV.tsx` | Baru |
-| `src/components/admin/AdminSidebar.tsx` | Modifikasi (tambah menu) |
-| `src/pages/AdminDashboard.tsx` | Modifikasi (tambah section) |
-| `supabase/config.toml` | Modifikasi (tambah function config) |
+### Prinsip Desain
+- Mobile-first: semua styling dimulai dari mobile, lalu scale up dengan `md:` / `lg:`
+- Bottom nav safe area: konten utama selalu punya padding bawah cukup
+- Touch-friendly: minimum tap target 44px
+- Scrollable sections: quick actions dan tabs bisa di-scroll horizontal di mobile
+- Consistent spacing: `p-4` mobile, `p-6` tablet, `p-8` desktop
 
