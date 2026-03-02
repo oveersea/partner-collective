@@ -14,7 +14,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Upload, FileText, RefreshCw, CheckCircle2, XCircle, Loader2, Trash2 } from "lucide-react";
+import { Upload, FileText, RefreshCw, CheckCircle2, XCircle, Loader2, Trash2, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 type CvUpload = {
@@ -46,6 +46,7 @@ const AdminBulkCV = () => {
   const [uploadProgress, setUploadProgress] = useState<Record<string, string>>({});
   const [deleteTarget, setDeleteTarget] = useState<CvUpload | null>(null);
   const [parsingAll, setParsingAll] = useState(false);
+  const [invitingAll, setInvitingAll] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchUploads = useCallback(async () => {
@@ -237,6 +238,89 @@ const AdminBulkCV = () => {
     toast.success("Batch parsing selesai");
   };
 
+  const handleInviteAllCandidates = async () => {
+    setInvitingAll(true);
+    toast.info("Mengambil data kandidat yang belum diinvite...");
+
+    try {
+      // Get completed uploads with candidate_id
+      const completedUploads = uploads.filter(u => u.parsing_status === "completed" && u.candidate_id);
+      const candidateIds = completedUploads.map(u => u.candidate_id!);
+
+      if (candidateIds.length === 0) {
+        toast.warning("Tidak ada kandidat yang perlu diinvite");
+        setInvitingAll(false);
+        return;
+      }
+
+      // Fetch candidates with emails
+      const { data: candidates, error: fetchError } = await supabase
+        .from("candidates_archive")
+        .select("id, full_name, email, phone")
+        .in("id", candidateIds)
+        .not("email", "is", null);
+
+      if (fetchError || !candidates || candidates.length === 0) {
+        toast.warning("Tidak ada kandidat dengan email yang bisa diinvite");
+        setInvitingAll(false);
+        return;
+      }
+
+      // Filter out already invited
+      const { data: existingInvites } = await supabase
+        .from("user_invitations")
+        .select("email");
+
+      const invitedEmails = new Set(
+        (existingInvites || []).map((i: { email: string }) => i.email?.toLowerCase().trim())
+      );
+
+      const toInvite = candidates.filter(
+        c => c.email && !invitedEmails.has(c.email.toLowerCase().trim())
+      );
+
+      if (toInvite.length === 0) {
+        toast.info("Semua kandidat sudah diinvite sebelumnya");
+        setInvitingAll(false);
+        return;
+      }
+
+      toast.info(`Mengirim undangan ke ${toInvite.length} kandidat...`);
+
+      // Batch in groups of 20
+      let successCount = 0;
+      let failCount = 0;
+
+      for (let i = 0; i < toInvite.length; i += 20) {
+        const batch = toInvite.slice(i, i + 20).map(c => ({
+          full_name: c.full_name || "",
+          email: c.email!,
+          phone_number: c.phone || "",
+        }));
+
+        const { data, error } = await supabase.functions.invoke("invite-users", {
+          body: { invites: batch },
+        });
+
+        if (error) {
+          console.error("Invite batch error:", error);
+          failCount += batch.length;
+        } else if (data?.summary) {
+          successCount += data.summary.success || 0;
+          failCount += data.summary.failed || 0;
+        }
+      }
+
+      if (successCount > 0) toast.success(`${successCount} kandidat berhasil diundang`);
+      if (failCount > 0) toast.warning(`${failCount} kandidat gagal diundang`);
+    } catch (err: any) {
+      console.error("Invite all error:", err);
+      toast.error("Gagal mengirim undangan: " + err.message);
+    }
+
+    setInvitingAll(false);
+  };
+
   const statusBadge = (status: string) => {
     switch (status) {
       case "completed":
@@ -279,6 +363,12 @@ const AdminBulkCV = () => {
             <Button variant="outline" onClick={handleParseAllPending} disabled={parsingAll}>
               {parsingAll ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
               Parse All Pending ({uploads.filter(u => u.parsing_status === "pending").length})
+            </Button>
+          )}
+          {uploads.filter(u => u.parsing_status === "completed" && u.candidate_id).length > 0 && (
+            <Button variant="outline" onClick={handleInviteAllCandidates} disabled={invitingAll}>
+              {invitingAll ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
+              Invite Candidates
             </Button>
           )}
           <Button onClick={() => setDialogOpen(true)}>
