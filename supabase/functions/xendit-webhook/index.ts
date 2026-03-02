@@ -29,57 +29,106 @@ Deno.serve(async (req) => {
       Deno.env.get("SB_SERVICE_ROLE_KEY")!
     );
 
-    // Parse external_id: "{type}_{record_id}"
-    const parts = external_id.split("_");
-    const checkoutType = parts[0] + (parts.length > 2 ? "_" + parts[1] : "");
-    const recordId = parts.slice(checkoutType.split("_").length).join("_");
-
     const isPaid = status === "PAID" || status === "SETTLED";
 
-    if (checkoutType === "credit_order" && isPaid) {
-      await adminClient
-        .from("credit_orders")
-        .update({
-          status: "paid",
-          xendit_paid_at: paid_at || new Date().toISOString(),
-        })
-        .eq("xendit_invoice_id", id);
-    } else if (checkoutType === "wallet_deposit" && isPaid) {
-      await adminClient
-        .from("wallet_deposits")
-        .update({
-          status: "paid",
-          xendit_paid_at: paid_at || new Date().toISOString(),
-        })
-        .eq("xendit_invoice_id", id);
-    } else if (checkoutType === "program_order" && isPaid) {
-      await adminClient
-        .from("program_orders")
-        .update({
-          status: "paid",
-        })
-        .eq("xendit_invoice_id", id);
-    } else if (status === "EXPIRED") {
-      // Handle expired invoices
-      if (checkoutType === "credit_order") {
-        await adminClient
-          .from("credit_orders")
-          .update({ status: "expired" })
-          .eq("xendit_invoice_id", id);
-      } else if (checkoutType === "wallet_deposit") {
-        await adminClient
-          .from("wallet_deposits")
-          .update({ status: "expired" })
-          .eq("xendit_invoice_id", id);
-      } else if (checkoutType === "program_order") {
-        await adminClient
-          .from("program_orders")
-          .update({ status: "expired" })
-          .eq("xendit_invoice_id", id);
-      }
+    if (!isPaid) {
+      // For non-paid statuses (EXPIRED, etc.), nothing to do since no record exists yet
+      console.log(`Invoice ${id} status: ${status} - no action needed (no record exists)`);
+      return new Response(JSON.stringify({ success: true, action: "skipped" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    // Payment successful - NOW create the order record
+    const checkoutType = metadata?.checkout_type;
+    const userId = metadata?.user_id;
+    const amount = metadata?.amount;
+    const currency = metadata?.currency || "IDR";
+    const description = metadata?.description;
+
+    if (!checkoutType || !userId) {
+      console.error("Missing metadata in webhook:", metadata);
+      return new Response(JSON.stringify({ error: "Missing metadata" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const paidAt = paid_at || new Date().toISOString();
+
+    if (checkoutType === "credit_order") {
+      const { error } = await adminClient
+        .from("credit_orders")
+        .insert({
+          user_id: userId,
+          package_id: metadata.package_id || null,
+          credits: metadata.credits || 0,
+          amount_cents: amount,
+          currency,
+          status: "paid",
+          description: description || "Credit purchase",
+          xendit_invoice_id: id,
+          xendit_checkout_url: null,
+          xendit_paid_at: paidAt,
+        });
+
+      if (error) {
+        console.error("Failed to create credit_order:", error);
+        return new Response(JSON.stringify({ error: "Failed to create credit order: " + error.message }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      console.log("Credit order created for user:", userId);
+
+    } else if (checkoutType === "wallet_deposit") {
+      const { error } = await adminClient
+        .from("wallet_deposits")
+        .insert({
+          user_id: userId,
+          amount,
+          currency,
+          method: "xendit",
+          status: "paid",
+          xendit_invoice_id: id,
+          xendit_checkout_url: null,
+          xendit_paid_at: paidAt,
+        });
+
+      if (error) {
+        console.error("Failed to create wallet_deposit:", error);
+        return new Response(JSON.stringify({ error: "Failed to create wallet deposit: " + error.message }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      console.log("Wallet deposit created for user:", userId);
+
+    } else if (checkoutType === "program_order") {
+      const { error } = await adminClient
+        .from("program_orders")
+        .insert({
+          user_id: userId,
+          program_id: metadata.program_id || null,
+          program_title: metadata.program_title || "Program",
+          amount,
+          currency,
+          status: "paid",
+          xendit_invoice_id: id,
+          xendit_invoice_url: null,
+        });
+
+      if (error) {
+        console.error("Failed to create program_order:", error);
+        return new Response(JSON.stringify({ error: "Failed to create program order: " + error.message }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      console.log("Program order created for user:", userId);
+    }
+
+    return new Response(JSON.stringify({ success: true, action: "record_created" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {

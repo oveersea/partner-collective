@@ -114,21 +114,27 @@ const CreditBalancePage = () => {
 
   const purchaseCredit = async (pkg: CreditPackage) => {
     setSubmitting(true);
-    const { data, error } = await supabase.from("credit_orders").insert({
-      user_id: user!.id,
-      package_id: pkg.id,
-      credits: pkg.credits,
-      amount_cents: pkg.price_cents,
-      currency: pkg.currency,
-      status: "pending",
-      description: `Purchase package ${pkg.name}`,
-    } as any).select("id").single();
-
-    if (error) {
-      toast.error("Failed to create order: " + error.message);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-xendit-invoice", {
+        body: {
+          checkout_type: "credit_order",
+          amount: pkg.price_cents,
+          currency: pkg.currency,
+          description: `Purchase package ${pkg.name}`,
+          package_id: pkg.id,
+          credits: pkg.credits,
+          success_redirect_url: `${window.location.origin}/checkout?payment=success&type=credit`,
+          failure_redirect_url: `${window.location.origin}/checkout?payment=failed`,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      // Redirect to Xendit payment page
+      window.location.href = data.invoice_url;
+    } catch (err: any) {
+      toast.error("Failed to create payment: " + (err.message || "Unknown error"));
+    } finally {
       setSubmitting(false);
-    } else if (data) {
-      navigate(`/checkout?type=credit_order&id=${data.id}`);
     }
   };
 
@@ -139,19 +145,24 @@ const CreditBalancePage = () => {
       return;
     }
     setDepositSubmitting(true);
-    const { data, error } = await supabase.from("wallet_deposits").insert({
-      user_id: user!.id,
-      amount,
-      currency: "IDR",
-      method: "xendit",
-      status: "pending",
-    } as any).select("id").single();
-
-    if (error) {
-      toast.error("Failed to create deposit: " + error.message);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-xendit-invoice", {
+        body: {
+          checkout_type: "wallet_deposit",
+          amount,
+          currency: "IDR",
+          description: `Wallet deposit`,
+          success_redirect_url: `${window.location.origin}/checkout?payment=success&type=wallet`,
+          failure_redirect_url: `${window.location.origin}/checkout?payment=failed`,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      window.location.href = data.invoice_url;
+    } catch (err: any) {
+      toast.error("Failed to create payment: " + (err.message || "Unknown error"));
+    } finally {
       setDepositSubmitting(false);
-    } else if (data) {
-      navigate(`/checkout?type=wallet_deposit&id=${data.id}`);
     }
   };
 
