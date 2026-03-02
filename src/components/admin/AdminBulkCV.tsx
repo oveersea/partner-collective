@@ -14,7 +14,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Upload, FileText, RefreshCw, CheckCircle2, XCircle, Loader2, Trash2, Mail } from "lucide-react";
+import { Upload, FileText, RefreshCw, CheckCircle2, XCircle, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type CvUpload = {
@@ -45,9 +45,8 @@ const AdminBulkCV = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<string, string>>({});
   const [deleteTarget, setDeleteTarget] = useState<CvUpload | null>(null);
-  const [parsingAll, setParsingAll] = useState(false);
-  const [invitingAll, setInvitingAll] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const invitedIdsRef = useRef<Set<string>>(new Set());
 
   const fetchUploads = useCallback(async () => {
     const { data, error } = await supabase
@@ -64,14 +63,68 @@ const AdminBulkCV = () => {
     fetchUploads();
   }, [fetchUploads]);
 
-  // Poll for status updates when there are processing items
+  // Auto-invite newly completed candidates
+  const autoInviteCandidate = useCallback(async (candidateId: string) => {
+    if (invitedIdsRef.current.has(candidateId)) return;
+    invitedIdsRef.current.add(candidateId);
+
+    try {
+      const { data: candidate } = await supabase
+        .from("candidates_archive")
+        .select("id, full_name, email, phone")
+        .eq("id", candidateId)
+        .single();
+
+      if (!candidate?.email) return;
+
+      // Check if already invited
+      const { data: existing } = await supabase
+        .from("user_invitations")
+        .select("id")
+        .eq("email", candidate.email.toLowerCase().trim())
+        .limit(1);
+
+      if (existing && existing.length > 0) return;
+
+      await supabase.functions.invoke("invite-users", {
+        body: {
+          invites: [{
+            full_name: candidate.full_name || "",
+            email: candidate.email,
+            phone_number: candidate.phone || "",
+          }],
+        },
+      });
+    } catch (err) {
+      console.error("Auto-invite error for candidate:", candidateId, err);
+    }
+  }, []);
+
+  // Poll for status updates & auto-invite completed ones
   useEffect(() => {
     const hasProcessing = uploads.some(u => u.parsing_status === "processing" || u.parsing_status === "pending");
     if (!hasProcessing) return;
 
-    const interval = setInterval(fetchUploads, 3000);
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from("cv_uploads")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (data) {
+        const newUploads = data as CvUpload[];
+        // Auto-invite newly completed candidates
+        for (const u of newUploads) {
+          if (u.parsing_status === "completed" && u.candidate_id) {
+            autoInviteCandidate(u.candidate_id);
+          }
+        }
+        setUploads(newUploads);
+      }
+    }, 3000);
     return () => clearInterval(interval);
-  }, [uploads, fetchUploads]);
+  }, [uploads, autoInviteCandidate]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -99,7 +152,6 @@ const AdminBulkCV = () => {
       const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
       const storagePath = `${userId}/${crypto.randomUUID()}.${ext}`;
 
-      // Upload to storage
       const { error: storageError } = await supabase.storage
         .from("cv-uploads")
         .upload(storagePath, file);
@@ -108,7 +160,6 @@ const AdminBulkCV = () => {
 
       setUploadProgress(prev => ({ ...prev, [fileId]: "saving" }));
 
-      // Insert cv_uploads record
       const { data: record, error: insertError } = await supabase
         .from("cv_uploads")
         .insert({
@@ -126,7 +177,7 @@ const AdminBulkCV = () => {
 
       setUploadProgress(prev => ({ ...prev, [fileId]: "parsing" }));
 
-      // Call parse-cv edge function
+      // Auto-parse immediately
       const { error: fnError } = await supabase.functions.invoke("parse-cv", {
         body: { cv_upload_id: record.id },
       });
@@ -156,7 +207,6 @@ const AdminBulkCV = () => {
       return;
     }
 
-    // Process in batches of MAX_CONCURRENT
     const files = [...selectedFiles];
     for (let i = 0; i < files.length; i += MAX_CONCURRENT) {
       const batch = files.slice(i, i + MAX_CONCURRENT);
@@ -168,7 +218,7 @@ const AdminBulkCV = () => {
     setDialogOpen(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
     fetchUploads();
-    toast.success("Batch upload selesai");
+    toast.success("Upload selesai — parsing & invite otomatis berjalan");
   };
 
   const handleReparse = async (upload: CvUpload) => {
@@ -192,10 +242,8 @@ const AdminBulkCV = () => {
 
   const handleDelete = async (upload: CvUpload) => {
     try {
-      // Delete file from storage (ignore error if file already gone)
       await supabase.storage.from("cv-uploads").remove([upload.file_url]);
 
-      // Delete cv_uploads record (candidates_archive data is preserved independently)
       const { error } = await supabase
         .from("cv_uploads")
         .delete()
@@ -209,116 +257,6 @@ const AdminBulkCV = () => {
     } catch (err: any) {
       toast.error("Gagal menghapus: " + err.message);
     }
-  };
-
-  const handleParseAllPending = async () => {
-    const pendingUploads = uploads.filter(u => u.parsing_status === "pending");
-    if (pendingUploads.length === 0) return;
-    setParsingAll(true);
-    toast.info(`Memulai parsing ${pendingUploads.length} CV...`);
-
-    for (let i = 0; i < pendingUploads.length; i += MAX_CONCURRENT) {
-      const batch = pendingUploads.slice(i, i + MAX_CONCURRENT);
-      await Promise.allSettled(
-        batch.map(async (u) => {
-          await supabase
-            .from("cv_uploads")
-            .update({ parsing_status: "processing", updated_at: new Date().toISOString() })
-            .eq("id", u.id);
-          const { error } = await supabase.functions.invoke("parse-cv", {
-            body: { cv_upload_id: u.id },
-          });
-          if (error) console.error(`Parse error for ${u.file_name}:`, error);
-        })
-      );
-    }
-
-    setParsingAll(false);
-    fetchUploads();
-    toast.success("Batch parsing selesai");
-  };
-
-  const handleInviteAllCandidates = async () => {
-    setInvitingAll(true);
-    toast.info("Mengambil data kandidat yang belum diinvite...");
-
-    try {
-      // Get completed uploads with candidate_id
-      const completedUploads = uploads.filter(u => u.parsing_status === "completed" && u.candidate_id);
-      const candidateIds = completedUploads.map(u => u.candidate_id!);
-
-      if (candidateIds.length === 0) {
-        toast.warning("Tidak ada kandidat yang perlu diinvite");
-        setInvitingAll(false);
-        return;
-      }
-
-      // Fetch candidates with emails
-      const { data: candidates, error: fetchError } = await supabase
-        .from("candidates_archive")
-        .select("id, full_name, email, phone")
-        .in("id", candidateIds)
-        .not("email", "is", null);
-
-      if (fetchError || !candidates || candidates.length === 0) {
-        toast.warning("Tidak ada kandidat dengan email yang bisa diinvite");
-        setInvitingAll(false);
-        return;
-      }
-
-      // Filter out already invited
-      const { data: existingInvites } = await supabase
-        .from("user_invitations")
-        .select("email");
-
-      const invitedEmails = new Set(
-        (existingInvites || []).map((i: { email: string }) => i.email?.toLowerCase().trim())
-      );
-
-      const toInvite = candidates.filter(
-        c => c.email && !invitedEmails.has(c.email.toLowerCase().trim())
-      );
-
-      if (toInvite.length === 0) {
-        toast.info("Semua kandidat sudah diinvite sebelumnya");
-        setInvitingAll(false);
-        return;
-      }
-
-      toast.info(`Mengirim undangan ke ${toInvite.length} kandidat...`);
-
-      // Batch in groups of 20
-      let successCount = 0;
-      let failCount = 0;
-
-      for (let i = 0; i < toInvite.length; i += 20) {
-        const batch = toInvite.slice(i, i + 20).map(c => ({
-          full_name: c.full_name || "",
-          email: c.email!,
-          phone_number: c.phone || "",
-        }));
-
-        const { data, error } = await supabase.functions.invoke("invite-users", {
-          body: { invites: batch },
-        });
-
-        if (error) {
-          console.error("Invite batch error:", error);
-          failCount += batch.length;
-        } else if (data?.summary) {
-          successCount += data.summary.success || 0;
-          failCount += data.summary.failed || 0;
-        }
-      }
-
-      if (successCount > 0) toast.success(`${successCount} kandidat berhasil diundang`);
-      if (failCount > 0) toast.warning(`${failCount} kandidat gagal diundang`);
-    } catch (err: any) {
-      console.error("Invite all error:", err);
-      toast.error("Gagal mengirim undangan: " + err.message);
-    }
-
-    setInvitingAll(false);
   };
 
   const statusBadge = (status: string) => {
@@ -351,7 +289,7 @@ const AdminBulkCV = () => {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Bulk CV Upload</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Upload dan parsing CV kandidat secara massal (maks {MAX_FILES} per batch)
+            Upload CV — parsing & invite kandidat berjalan otomatis (maks {MAX_FILES} per batch)
           </p>
         </div>
         <div className="flex gap-2">
@@ -359,18 +297,6 @@ const AdminBulkCV = () => {
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
-          {uploads.filter(u => u.parsing_status === "pending").length > 0 && (
-            <Button variant="outline" onClick={handleParseAllPending} disabled={parsingAll}>
-              {parsingAll ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-              Parse All Pending ({uploads.filter(u => u.parsing_status === "pending").length})
-            </Button>
-          )}
-          {uploads.filter(u => u.parsing_status === "completed" && u.candidate_id).length > 0 && (
-            <Button variant="outline" onClick={handleInviteAllCandidates} disabled={invitingAll}>
-              {invitingAll ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
-              Invite Candidates
-            </Button>
-          )}
           <Button onClick={() => setDialogOpen(true)}>
             <Upload className="w-4 h-4 mr-2" />
             Upload CVs
@@ -491,7 +417,7 @@ const AdminBulkCV = () => {
           <DialogHeader>
             <DialogTitle>Upload Bulk CV</DialogTitle>
             <DialogDescription>
-              Pilih hingga {MAX_FILES} file CV (PDF/DOCX) untuk diupload dan diparse secara otomatis oleh AI.
+              Pilih hingga {MAX_FILES} file CV (PDF/DOCX). Parsing dan invite kandidat akan berjalan otomatis setelah upload.
             </DialogDescription>
           </DialogHeader>
 
@@ -541,7 +467,7 @@ const AdminBulkCV = () => {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Mengupload dan parsing {selectedFiles.length} file...</span>
+                  <span>Mengupload, parsing & invite {selectedFiles.length} file...</span>
                 </div>
                 <Progress value={
                   (Object.values(uploadProgress).filter(s => s === "done" || s === "error").length / selectedFiles.length) * 100
