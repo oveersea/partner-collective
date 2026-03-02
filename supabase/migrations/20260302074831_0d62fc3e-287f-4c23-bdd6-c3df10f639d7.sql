@@ -1,0 +1,17 @@
+UPDATE public.services SET description = 'End-to-end digital marketing strategy' WHERE id = 'eb342700-d2a6-469d-804d-412df758966e';
+UPDATE public.services SET description = 'Website & web application development' WHERE id = 'e80c5486-12f5-48ef-9572-d173ae16c08b';
+UPDATE public.services SET description = 'Interface design & user experience' WHERE id = '1fb5c5bd-26ea-4172-969d-60e70ee5eb05';
+UPDATE public.services SET description = 'Strategy & operational business consulting' WHERE id = '1266330c-1e73-4cda-9dd4-0e030c585cd8';
+UPDATE public.services SET description = 'Article, blog, & copywriting services' WHERE id = '9681b8d8-ac26-467a-9878-6dd9fb8be893';
+UPDATE public.services SET description = 'Accounting & tax services' WHERE id = '8cc09bcf-bc33-4651-b1bc-ec8e2d060249';
+UPDATE public.services SET description = 'Mobile application development' WHERE id = 'd67b1114-7b58-42b3-b0b6-45dea642fabf';
+UPDATE public.services SET description = 'Financial planning & investment' WHERE id = 'b417f197-6473-49fa-b29e-4db4c1e0ea31';
+UPDATE public.services SET description = 'Graphic design & visual branding' WHERE id = 'e5fcfb8a-4699-46c9-a582-7ad3c399af8c';
+UPDATE public.services SET description = 'Video production & videography' WHERE id = '20ac50d6-1eff-48a0-9bde-a48acccf3fae';
+UPDATE public.services SET description = 'Social media account & campaign management' WHERE id = 'c461ea21-109e-46c7-90ab-22024d1cf1f5';
+UPDATE public.services SET description = 'Human resources & recruitment management' WHERE id = 'cfba6ec6-75be-4e69-9272-22e3082772c6';
+UPDATE public.services SET description = 'Data analysis & business intelligence' WHERE id = '3a325949-6a13-4e3b-b3e3-03724f9616a6';
+UPDATE public.services SET description = 'Search engine optimization & paid advertising' WHERE id = '809dbdef-e98e-4554-9f0f-4597764c20f8';
+UPDATE public.services SET description = 'Animation & motion graphics' WHERE id = '1611f376-ed50-4671-b294-91f47a6896f5';
+UPDATE public.services SET description = 'Cloud infrastructure & CI/CD' WHERE id = 'ca36887b-b78a-48b8-981c-6651118039a5';
+UPDATE public.services SET description = 'Email campaigns & marketing automation' WHERE id = 'e4408e89-73d4-4e6f-806e-dd740d26dca8';
