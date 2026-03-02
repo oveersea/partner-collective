@@ -344,11 +344,62 @@ If information is not found, use null. Always call the extract_cv_data tool with
       })
       .eq("id", cv_upload_id);
 
+    // Auto-invite candidate as user if email is available
+    let inviteResult: { invited: boolean; error?: string; user_id?: string } = { invited: false };
+
+    const candidateEmail = parsedData.email?.trim().toLowerCase();
+    if (candidateEmail) {
+      try {
+        console.log("Auto-inviting candidate:", candidateEmail);
+
+        const { data: inviteData, error: inviteError } =
+          await adminClient.auth.admin.inviteUserByEmail(candidateEmail, {
+            data: {
+              full_name: parsedData.full_name || "",
+              phone_number: parsedData.phone || "",
+            },
+          });
+
+        if (inviteError) {
+          console.error("Auto-invite error:", inviteError.message);
+          inviteResult = { invited: false, error: inviteError.message };
+        } else {
+          const invitedUserId = inviteData?.user?.id;
+          console.log("Auto-invite success:", candidateEmail, "userId:", invitedUserId);
+          inviteResult = { invited: true, user_id: invitedUserId };
+
+          // Update profile with phone if available
+          if (invitedUserId && parsedData.phone) {
+            await adminClient
+              .from("profiles")
+              .update({ phone_number: parsedData.phone })
+              .eq("user_id", invitedUserId);
+          }
+
+          // Log invitation in user_invitations table
+          await adminClient.from("user_invitations").insert({
+            email: candidateEmail,
+            full_name: parsedData.full_name || "",
+            phone_number: parsedData.phone || null,
+            invited_by: userId,
+            status: "pending",
+          });
+        }
+      } catch (inviteErr) {
+        console.error("Auto-invite exception:", inviteErr);
+        inviteResult = { invited: false, error: String(inviteErr) };
+      }
+    } else {
+      console.log("No email found in CV, skipping auto-invite");
+      inviteResult = { invited: false, error: "No email in CV" };
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         candidate_id: candidateId,
         parsed_data: parsedData,
+        invitation: inviteResult,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
