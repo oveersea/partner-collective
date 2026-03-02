@@ -1,54 +1,61 @@
 
+# Fitur Invite User (Batch)
 
-# Plan: Merge Features ke Services
+## Overview
+Menambahkan fitur di Admin Dashboard untuk mengundang user baru ke platform. Admin dapat memasukkan hingga 20 user sekaligus dengan data: nama lengkap, email, dan nomor ponsel. Sistem akan mengirim email undangan via Supabase Auth.
 
-## Ringkasan
-Menghapus halaman Features (`/features`) yang berisi data hardcoded, dan menggantinya dengan halaman Services (`/services`) yang mengambil data langsung dari database Supabase (`services` dan `service_categories` tables). Semua link yang mengarah ke `/features` akan diarahkan ke halaman Services baru.
+## Arsitektur
 
-## Langkah-langkah
+```text
+Admin UI (Dialog Form)
+       |
+       v
+Edge Function: invite-users
+  - Validates input (max 20)
+  - Checks admin role via user_roles table
+  - Loops: supabase.auth.admin.inviteUserByEmail()
+  - Stores phone & name in profiles after invite
+       |
+       v
+Supabase Auth sends invite email to each user
+```
 
-### 1. Buat halaman Services List (`/services`)
-- Buat file `src/pages/Services.tsx` (halaman katalog semua services)
-- Mengambil data dari tabel `service_categories` dan `services` di Supabase
-- Mendukung filter berdasarkan kategori via query param (`/services?category=xxx`)
-- Tampilan mirip Features page tapi data-driven dari database
-- Termasuk breadcrumb, filter pills, dan grid 3 kolom
+## Langkah Implementasi
 
-### 2. Update FeaturesSection di landing page
-- Ubah `src/components/landing/FeaturesSection.tsx` menjadi menampilkan service categories dari database (bukan hardcoded)
-- Semua link card mengarah ke `/services?category=xxx` bukan `/features?category=xxx`
+### 1. Edge Function `invite-users`
+- Menerima array of `{ full_name, email, phone_number }` (max 20)
+- Memverifikasi pemanggil adalah admin/superadmin via `user_roles`
+- Menggunakan `supabase.auth.admin.inviteUserByEmail()` untuk setiap user
+- Setelah invite berhasil, update `profiles` table dengan `phone_number` dan `full_name`
+- Mengembalikan hasil per-user (sukses/gagal + alasan)
+- Membutuhkan `SUPABASE_SERVICE_ROLE_KEY` sebagai secret
 
-### 3. Update routing di App.tsx
-- Hapus route `/features` dan import `Features`
-- Tambah route `/services` pointing ke halaman Services baru
-- Route `/services/:slug` sudah ada (ServiceDetail)
+### 2. Database: Tabel `user_invitations` (opsional tracking)
+- Mencatat siapa yang diundang, oleh siapa, dan statusnya
+- Kolom: `id`, `email`, `full_name`, `phone_number`, `invited_by`, `status`, `created_at`
+- RLS: hanya admin yang bisa read/write
 
-### 4. Update Navbar links
-- Semua href `/features` di megaMenus diganti ke `/services`
-- CTA "Lihat semua layanan" mengarah ke `/services`
-
-### 5. Hapus file Features.tsx
-- Hapus `src/pages/Features.tsx` (data hardcoded, tidak diperlukan lagi)
-
-### 6. Update Index.tsx
-- Ganti import `FeaturesSection` dengan versi baru yang data-driven
+### 3. UI: Dialog Invite di `AdminUsers.tsx`
+- Tombol "Invite Users" di header halaman User Management
+- Dialog berisi form dinamis: baris input (nama, email, telepon) yang bisa ditambah/hapus
+- Tombol "Add Row" untuk menambah baris (max 20)
+- Validasi client-side: email format, nama wajib diisi, max 20 entries
+- Loading state per-batch dan hasil summary (berapa sukses, berapa gagal)
 
 ## Detail Teknis
 
-### Services.tsx (halaman baru)
-- Fetch `service_categories` untuk filter pills
-- Fetch `services` dengan filter optional `category_id`
-- Fetch `user_services` count per service untuk menampilkan jumlah provider
-- Grid layout `lg:grid-cols-3` konsisten dengan ServiceShowcaseSection
-- Setiap card link ke `/services/:slug`
+### Edge Function Secret
+- Membutuhkan `SUPABASE_SERVICE_ROLE_KEY` - akan diminta ke user untuk ditambahkan
 
-### FeaturesSection.tsx (refactor)
-- Fetch `service_categories` dari Supabase
-- Tampilkan kategori sebagai grid cards
-- Klik card navigasi ke `/services?category={category_id}`
-- Tetap retain layout bento grid yang ada, tapi data dari DB
+### Keamanan
+- Edge function memverifikasi JWT caller dan cek role admin di database
+- Service role key hanya digunakan server-side (edge function), tidak di client
+- Input divalidasi dengan zod schema (email, max length, max 20 items)
 
-### Tidak ada perubahan database
-- Tidak ada tabel "features" di database yang perlu dihapus
-- Semua data sudah tersedia di tabel `services` dan `service_categories`
-
+### UX Flow
+1. Admin klik "Invite Users" di halaman User Management
+2. Dialog muncul dengan 1 baris form kosong
+3. Admin isi data dan bisa tambah baris (max 20)
+4. Klik "Send Invitations" -> loading state
+5. Hasil ditampilkan: list email yang berhasil/gagal
+6. Refresh tabel user setelah dialog ditutup
