@@ -37,7 +37,7 @@ const DashboardNav = () => {
   };
 
   return (
-    <nav className="border-b border-border bg-card sticky top-0 z-40">
+    <nav className="hidden md:block border-b border-border bg-card sticky top-0 z-40">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center">

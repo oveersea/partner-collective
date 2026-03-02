@@ -41,7 +41,7 @@ const KYCBanner = ({ kycStatus }: KYCBannerProps) => {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl border ${c.borderColor} ${c.color.split(" ")[0]} p-5 mb-6`}
+      className={`rounded-2xl border ${c.borderColor} ${c.color.split(" ")[0]} p-3 md:p-5 mb-4 md:mb-6`}
     >
       <div className="flex items-center gap-4">
         <div className={`w-10 h-10 rounded-xl ${c.color} flex items-center justify-center shrink-0`}>

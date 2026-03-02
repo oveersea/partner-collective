@@ -137,6 +137,14 @@
     box-shadow: var(--shadow-card-hover);
   }
 
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   .glass {
     backdrop-filter: blur(16px);
     background: hsl(var(--surface-glass));
