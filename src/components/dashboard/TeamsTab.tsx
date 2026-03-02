@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
@@ -7,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Users, Plus, Crown, User, X } from "lucide-react";
+import { Users, Plus, Crown, X } from "lucide-react";
 
 interface Team {
   id: string;
@@ -21,23 +22,13 @@ interface Team {
   member_count?: number;
 }
 
-interface TeamMember {
-  id: string;
-  user_id: string;
-  role: string;
-  status: string;
-  joined_at: string;
-  profile?: { full_name: string | null; headline: string | null; avatar_url: string | null };
-}
-
 const TeamsTab = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
-  const [members, setMembers] = useState<TeamMember[]>([]);
   const [newTeam, setNewTeam] = useState({ name: "", description: "", skills: "" });
 
   useEffect(() => {
@@ -84,26 +75,7 @@ const TeamsTab = () => {
     setLoading(false);
   };
 
-  const fetchMembers = async (teamId: string) => {
-    setSelectedTeam(teamId);
-    const { data } = await supabase
-      .from("partner_team_members")
-      .select("id, user_id, role, status, joined_at")
-      .eq("team_id", teamId);
 
-    // Fetch profile info for each member
-    const membersWithProfiles = await Promise.all(
-      (data || []).map(async (member) => {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("full_name, headline, avatar_url")
-          .eq("user_id", member.user_id)
-          .single();
-        return { ...member, profile: profile || undefined } as TeamMember;
-      })
-    );
-    setMembers(membersWithProfiles);
-  };
 
   const handleCreate = async () => {
     if (!newTeam.name.trim()) { toast.error("Nama tim wajib diisi"); return; }
@@ -196,10 +168,8 @@ const TeamsTab = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className={`bg-card rounded-2xl border p-6 shadow-card hover:shadow-card-hover transition-all cursor-pointer ${
-                selectedTeam === team.id ? "border-primary" : "border-border"
-              }`}
-              onClick={() => fetchMembers(team.id)}
+              className="bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-card-hover transition-all cursor-pointer"
+              onClick={() => navigate(`/team/${team.slug}`)}
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -230,35 +200,6 @@ const TeamsTab = () => {
             </motion.div>
           ))}
         </div>
-      )}
-
-      {/* Members Panel */}
-      {selectedTeam && members.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border p-6 shadow-card">
-          <h3 className="font-semibold text-card-foreground mb-4">Team Members</h3>
-          <div className="space-y-3">
-            {members.map((member) => (
-              <div key={member.id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  {member.profile?.avatar_url ? (
-                    <img src={member.profile.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
-                  ) : (
-                    <User className="w-4 h-4 text-primary" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-card-foreground truncate">{member.profile?.full_name || "Partner"}</p>
-                  <p className="text-xs text-muted-foreground truncate">{member.profile?.headline || member.role}</p>
-                </div>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                  member.role === "leader" ? "bg-amber-500/10 text-amber-600" : "bg-muted text-muted-foreground"
-                }`}>
-                  {member.role === "leader" ? "Leader" : "Member"}
-                </span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
       )}
     </div>
   );
