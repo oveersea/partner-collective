@@ -220,7 +220,7 @@ const AdminCompanyDetail = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="w-full px-4 md:px-8 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
               <ArrowLeft className="w-4 h-4" />
@@ -241,229 +241,244 @@ const AdminCompanyDetail = () => {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-        {/* Quick Stats */}
-        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {members.length} Member</span>
-          <span className="flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" /> {oppCount} Opportunities</span>
-          <span>Dibuat: {new Date(data.created_at).toLocaleDateString("id-ID")}</span>
-        </div>
-
-        {/* KYC Actions */}
-        <Card>
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Shield className="w-4 h-4" /> Status KYC</CardTitle></CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            <Button size="sm" variant={data.kyc_status === "verified" ? "default" : "outline"} onClick={() => updateKycStatus("verified")}>
-              <ShieldCheck className="w-4 h-4 mr-1" /> Verified
-            </Button>
-            <Button size="sm" variant={data.kyc_status === "pending" ? "default" : "outline"} onClick={() => updateKycStatus("pending")}>
-              <Shield className="w-4 h-4 mr-1" /> Pending
-            </Button>
-            <Button size="sm" variant={data.kyc_status === "rejected" ? "destructive" : "outline"} onClick={() => updateKycStatus("rejected")}>
-              <ShieldX className="w-4 h-4 mr-1" /> Rejected
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Company Info */}
-        <Card>
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Building2 className="w-4 h-4" /> Informasi Perusahaan</CardTitle></CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <Label>Nama</Label>
-              <Input value={data.name} onChange={(e) => update("name", e.target.value)} />
-            </div>
-            <div>
-              <Label>Industri</Label>
-              <Input value={data.industry || ""} onChange={(e) => update("industry", e.target.value)} />
-            </div>
-            <div>
-              <Label>Ukuran Perusahaan</Label>
-              <Input value={data.company_size || ""} onChange={(e) => update("company_size", e.target.value)} placeholder="e.g. 50-100" />
-            </div>
-            <div>
-              <Label>Tahun Berdiri</Label>
-              <Input type="number" value={data.founded_year ?? ""} onChange={(e) => update("founded_year", e.target.value ? Number(e.target.value) : null)} />
-            </div>
-            <div>
-              <Label>Tipe Bisnis</Label>
-              <Input value={data.business_type} onChange={(e) => update("business_type", e.target.value)} />
-            </div>
-            <div className="md:col-span-2">
-              <Label>Deskripsi</Label>
-              <Textarea value={data.description || ""} onChange={(e) => update("description", e.target.value)} rows={3} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Contact & Location */}
-        <Card>
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><MapPin className="w-4 h-4" /> Kontak & Lokasi</CardTitle></CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Email</Label>
-              <Input value={data.email || ""} onChange={(e) => update("email", e.target.value)} />
-            </div>
-            <div>
-              <Label>Telepon</Label>
-              <Input value={data.phone || ""} onChange={(e) => update("phone", e.target.value)} />
-            </div>
-            <div>
-              <Label>Website</Label>
-              <Input value={data.website || ""} onChange={(e) => update("website", e.target.value)} />
-            </div>
-            <div>
-              <Label>Kota</Label>
-              <Input value={data.city || ""} onChange={(e) => update("city", e.target.value)} />
-            </div>
-            <div>
-              <Label>Negara</Label>
-              <Input value={data.country || ""} onChange={(e) => update("country", e.target.value)} />
-            </div>
-            <div className="md:col-span-2">
-              <Label>Alamat</Label>
-              <Input value={data.address || ""} onChange={(e) => update("address", e.target.value)} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Legal */}
-        <Card>
-          <CardHeader><CardTitle className="text-base">Dokumen Legal</CardTitle></CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label>NPWP</Label>
-              <Input value={data.npwp || ""} onChange={(e) => update("npwp", e.target.value)} />
-            </div>
-            <div>
-              <Label>NIB</Label>
-              <Input value={data.nib || ""} onChange={(e) => update("nib", e.target.value)} />
-            </div>
-            <div>
-              <Label>No. Akta</Label>
-              <Input value={data.akta_number || ""} onChange={(e) => update("akta_number", e.target.value)} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Social Media */}
-        <Card>
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Globe className="w-4 h-4" /> Media Sosial</CardTitle></CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>LinkedIn</Label>
-              <Input value={data.linkedin_url || ""} onChange={(e) => update("linkedin_url", e.target.value)} />
-            </div>
-            <div>
-              <Label>Instagram</Label>
-              <Input value={data.instagram_url || ""} onChange={(e) => update("instagram_url", e.target.value)} />
-            </div>
-            <div>
-              <Label>Facebook</Label>
-              <Input value={data.facebook_url || ""} onChange={(e) => update("facebook_url", e.target.value)} />
-            </div>
-            <div>
-              <Label>Twitter / X</Label>
-              <Input value={data.twitter_url || ""} onChange={(e) => update("twitter_url", e.target.value)} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Members */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2"><Users className="w-4 h-4" /> Member ({members.length})</CardTitle>
-              <Button size="sm" onClick={() => setShowAddMember(!showAddMember)} className="gap-1.5">
-                <UserPlus className="w-3.5 h-3.5" /> Tambah Member
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {/* Add member form */}
-            {showAddMember && (
-              <div className="border border-border rounded-lg p-4 space-y-3 bg-muted/30">
-                <div className="space-y-2">
-                  <Label>Cari User</Label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input className="pl-9" placeholder="Ketik nama minimal 2 huruf..." value={userSearch} onChange={(e) => searchUsers(e.target.value)} />
-                    {searchingUsers && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />}
-                  </div>
-                  {userResults.length > 0 && (
-                    <div className="border border-border rounded-lg max-h-40 overflow-y-auto">
-                      {userResults.map((u) => (
-                        <button key={u.user_id} type="button" onClick={() => { setSelectedUserId(u.user_id); setUserSearch(u.full_name); setUserResults([]); }}
-                          className={`w-full text-left px-3 py-2 text-sm hover:bg-muted/50 transition-colors ${selectedUserId === u.user_id ? "bg-primary/10" : ""}`}>
-                          <span className="text-foreground">{u.full_name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {selectedUserId && (
-                    <div className="flex items-center gap-2 text-xs text-primary bg-primary/5 rounded-md px-3 py-2">
-                      <Users className="w-3.5 h-3.5" /> <span>User: <strong>{userSearch}</strong></span>
-                      <button onClick={() => { setSelectedUserId(""); setUserSearch(""); }} className="ml-auto text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
-                    </div>
-                  )}
+      <div className="w-full px-4 md:px-8 py-6">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left Column - 70% */}
+          <div className="w-full lg:w-[70%] space-y-6">
+            {/* Company Info */}
+            <Card>
+              <CardHeader><CardTitle className="text-base flex items-center gap-2"><Building2 className="w-4 h-4" /> Informasi Perusahaan</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <Label>Nama</Label>
+                  <Input value={data.name} onChange={(e) => update("name", e.target.value)} />
                 </div>
-                <div className="flex items-end gap-2">
-                  <div className="flex-1">
-                    <Label>Role</Label>
-                    <Select value={newMemberRole} onValueChange={setNewMemberRole}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="owner">Owner</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="member">Member</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button onClick={addMember} disabled={!selectedUserId || addingMember} size="sm">
-                    {addingMember ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <UserPlus className="w-4 h-4 mr-1" />}
-                    Tambahkan
+                <div>
+                  <Label>Industri</Label>
+                  <Input value={data.industry || ""} onChange={(e) => update("industry", e.target.value)} />
+                </div>
+                <div>
+                  <Label>Ukuran Perusahaan</Label>
+                  <Input value={data.company_size || ""} onChange={(e) => update("company_size", e.target.value)} placeholder="e.g. 50-100" />
+                </div>
+                <div>
+                  <Label>Tahun Berdiri</Label>
+                  <Input type="number" value={data.founded_year ?? ""} onChange={(e) => update("founded_year", e.target.value ? Number(e.target.value) : null)} />
+                </div>
+                <div>
+                  <Label>Tipe Bisnis</Label>
+                  <Input value={data.business_type} onChange={(e) => update("business_type", e.target.value)} />
+                </div>
+                <div className="md:col-span-2">
+                  <Label>Deskripsi</Label>
+                  <Textarea value={data.description || ""} onChange={(e) => update("description", e.target.value)} rows={3} />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Contact & Location */}
+            <Card>
+              <CardHeader><CardTitle className="text-base flex items-center gap-2"><MapPin className="w-4 h-4" /> Kontak & Lokasi</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Email</Label>
+                  <Input value={data.email || ""} onChange={(e) => update("email", e.target.value)} />
+                </div>
+                <div>
+                  <Label>Telepon</Label>
+                  <Input value={data.phone || ""} onChange={(e) => update("phone", e.target.value)} />
+                </div>
+                <div>
+                  <Label>Website</Label>
+                  <Input value={data.website || ""} onChange={(e) => update("website", e.target.value)} />
+                </div>
+                <div>
+                  <Label>Kota</Label>
+                  <Input value={data.city || ""} onChange={(e) => update("city", e.target.value)} />
+                </div>
+                <div>
+                  <Label>Negara</Label>
+                  <Input value={data.country || ""} onChange={(e) => update("country", e.target.value)} />
+                </div>
+                <div className="md:col-span-2">
+                  <Label>Alamat</Label>
+                  <Input value={data.address || ""} onChange={(e) => update("address", e.target.value)} />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Legal */}
+            <Card>
+              <CardHeader><CardTitle className="text-base">Dokumen Legal</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label>NPWP</Label>
+                  <Input value={data.npwp || ""} onChange={(e) => update("npwp", e.target.value)} />
+                </div>
+                <div>
+                  <Label>NIB</Label>
+                  <Input value={data.nib || ""} onChange={(e) => update("nib", e.target.value)} />
+                </div>
+                <div>
+                  <Label>No. Akta</Label>
+                  <Input value={data.akta_number || ""} onChange={(e) => update("akta_number", e.target.value)} />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Social Media */}
+            <Card>
+              <CardHeader><CardTitle className="text-base flex items-center gap-2"><Globe className="w-4 h-4" /> Media Sosial</CardTitle></CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>LinkedIn</Label>
+                  <Input value={data.linkedin_url || ""} onChange={(e) => update("linkedin_url", e.target.value)} />
+                </div>
+                <div>
+                  <Label>Instagram</Label>
+                  <Input value={data.instagram_url || ""} onChange={(e) => update("instagram_url", e.target.value)} />
+                </div>
+                <div>
+                  <Label>Facebook</Label>
+                  <Input value={data.facebook_url || ""} onChange={(e) => update("facebook_url", e.target.value)} />
+                </div>
+                <div>
+                  <Label>Twitter / X</Label>
+                  <Input value={data.twitter_url || ""} onChange={(e) => update("twitter_url", e.target.value)} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - 30% */}
+          <div className="w-full lg:w-[30%] space-y-6">
+            {/* Quick Stats */}
+            <Card>
+              <CardContent className="pt-6 space-y-3">
+                <div className="flex items-center gap-3 text-sm">
+                  <Users className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-foreground font-medium">{members.length}</span>
+                  <span className="text-muted-foreground">Member</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <Briefcase className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-foreground font-medium">{oppCount}</span>
+                  <span className="text-muted-foreground">Opportunities</span>
+                </div>
+                <div className="text-xs text-muted-foreground pt-1 border-t border-border">
+                  Dibuat: {new Date(data.created_at).toLocaleDateString("id-ID")}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* KYC Actions */}
+            <Card>
+              <CardHeader><CardTitle className="text-base flex items-center gap-2"><Shield className="w-4 h-4" /> Status KYC</CardTitle></CardHeader>
+              <CardContent className="flex flex-col gap-2">
+                <Button size="sm" variant={data.kyc_status === "verified" ? "default" : "outline"} onClick={() => updateKycStatus("verified")} className="w-full justify-start">
+                  <ShieldCheck className="w-4 h-4 mr-1" /> Verified
+                </Button>
+                <Button size="sm" variant={data.kyc_status === "pending" ? "default" : "outline"} onClick={() => updateKycStatus("pending")} className="w-full justify-start">
+                  <Shield className="w-4 h-4 mr-1" /> Pending
+                </Button>
+                <Button size="sm" variant={data.kyc_status === "rejected" ? "destructive" : "outline"} onClick={() => updateKycStatus("rejected")} className="w-full justify-start">
+                  <ShieldX className="w-4 h-4 mr-1" /> Rejected
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Members */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2"><Users className="w-4 h-4" /> Member ({members.length})</CardTitle>
+                  <Button size="sm" variant="ghost" onClick={() => setShowAddMember(!showAddMember)} className="gap-1 h-7 px-2">
+                    <UserPlus className="w-3.5 h-3.5" />
                   </Button>
                 </div>
-              </div>
-            )}
-
-            {membersLoading ? (
-              <div className="space-y-2">{[1, 2, 3].map((i) => <div key={i} className="h-14 bg-muted animate-pulse rounded-lg" />)}</div>
-            ) : members.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground text-sm border border-dashed border-border rounded-lg">Belum ada member.</div>
-            ) : (
-              <div className="space-y-2">
-                {members.map((m) => (
-                  <div key={m.id} className="flex items-center justify-between p-3 bg-muted/30 border border-border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                        {m.role === "owner" || m.role === "admin" ? <Crown className="w-4 h-4 text-primary" /> : <Users className="w-4 h-4 text-muted-foreground" />}
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {/* Add member form */}
+                {showAddMember && (
+                  <div className="border border-border rounded-lg p-3 space-y-3 bg-muted/30">
+                    <div className="space-y-2">
+                      <Label className="text-xs">Cari User</Label>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                        <Input className="pl-9 h-8 text-sm" placeholder="Ketik nama..." value={userSearch} onChange={(e) => searchUsers(e.target.value)} />
+                        {searchingUsers && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 animate-spin text-muted-foreground" />}
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{m.user_name}</p>
-                        <p className="text-[11px] text-muted-foreground">Bergabung {new Date(m.created_at).toLocaleDateString("id-ID")}</p>
-                      </div>
+                      {userResults.length > 0 && (
+                        <div className="border border-border rounded-lg max-h-32 overflow-y-auto">
+                          {userResults.map((u) => (
+                            <button key={u.user_id} type="button" onClick={() => { setSelectedUserId(u.user_id); setUserSearch(u.full_name); setUserResults([]); }}
+                              className={`w-full text-left px-3 py-1.5 text-xs hover:bg-muted/50 transition-colors ${selectedUserId === u.user_id ? "bg-primary/10" : ""}`}>
+                              <span className="text-foreground">{u.full_name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {selectedUserId && (
+                        <div className="flex items-center gap-2 text-xs text-primary bg-primary/5 rounded-md px-2 py-1.5">
+                          <Users className="w-3 h-3" /> <span className="truncate"><strong>{userSearch}</strong></span>
+                          <button onClick={() => { setSelectedUserId(""); setUserSearch(""); }} className="ml-auto text-muted-foreground hover:text-foreground"><X className="w-3 h-3" /></button>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Select value={m.role} onValueChange={(v) => updateMemberRole(m.id, v)}>
-                        <SelectTrigger className="w-[120px] h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <div className="space-y-2">
+                      <Label className="text-xs">Role</Label>
+                      <Select value={newMemberRole} onValueChange={setNewMemberRole}>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="owner">Owner</SelectItem>
                           <SelectItem value="admin">Admin</SelectItem>
                           <SelectItem value="member">Member</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Badge variant="outline" className={`text-[10px] border ${roleBadge(m.role)}`}>{m.role}</Badge>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removeMember(m.id, m.user_name || "member")}>
-                        <Trash2 className="w-3.5 h-3.5" />
+                      <Button onClick={addMember} disabled={!selectedUserId || addingMember} size="sm" className="w-full">
+                        {addingMember ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <UserPlus className="w-4 h-4 mr-1" />}
+                        Tambahkan
                       </Button>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                )}
+
+                {membersLoading ? (
+                  <div className="space-y-2">{[1, 2, 3].map((i) => <div key={i} className="h-12 bg-muted animate-pulse rounded-lg" />)}</div>
+                ) : members.length === 0 ? (
+                  <div className="text-center py-6 text-muted-foreground text-xs border border-dashed border-border rounded-lg">Belum ada member.</div>
+                ) : (
+                  <div className="space-y-2">
+                    {members.map((m) => (
+                      <div key={m.id} className="flex items-center gap-2 p-2 bg-muted/30 border border-border rounded-lg">
+                        <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          {m.role === "owner" || m.role === "admin" ? <Crown className="w-3 h-3 text-primary" /> : <Users className="w-3 h-3 text-muted-foreground" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-foreground truncate">{m.user_name}</p>
+                          <p className="text-[10px] text-muted-foreground">{new Date(m.created_at).toLocaleDateString("id-ID")}</p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Select value={m.role} onValueChange={(v) => updateMemberRole(m.id, v)}>
+                            <SelectTrigger className="w-[80px] h-6 text-[10px]"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="owner">Owner</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="member">Member</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removeMember(m.id, m.user_name || "member")}>
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
