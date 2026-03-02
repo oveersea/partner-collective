@@ -63,7 +63,7 @@ const TeamDashboard = () => {
   // Invite member
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteSearch, setInviteSearch] = useState("");
-  const [inviteResults, setInviteResults] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [inviteResults, setInviteResults] = useState<{ user_id: string; full_name: string; oveercode?: string | null }[]>([]);
   const [inviteUserId, setInviteUserId] = useState("");
   const [inviteRole, setInviteRole] = useState("member");
   const [inviting, setInviting] = useState(false);
@@ -134,8 +134,8 @@ const TeamDashboard = () => {
     if (q.length < 2) { setInviteResults([]); return; }
     const { data } = await supabase
       .from("profiles")
-      .select("user_id, full_name")
-      .ilike("full_name", `%${q}%`)
+      .select("user_id, full_name, oveercode")
+      .or(`full_name.ilike.%${q}%,oveercode.ilike.%${q}%`)
       .limit(10);
     setInviteResults(data || []);
   };
@@ -421,7 +421,8 @@ const TeamDashboard = () => {
                   {inviteResults.map((u) => (
                     <button key={u.user_id} onClick={() => { setInviteUserId(u.user_id); setInviteSearch(u.full_name); setInviteResults([]); }}
                       className={`w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors ${inviteUserId === u.user_id ? "bg-primary/10" : ""}`}>
-                      {u.full_name}
+                      <span>{u.full_name}</span>
+                      {u.oveercode && <span className="ml-2 text-xs text-muted-foreground font-mono">{u.oveercode}</span>}
                     </button>
                   ))}
                 </div>

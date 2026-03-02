@@ -69,7 +69,7 @@ const AdminCompanyDetail = () => {
 
   // Add member
   const [userSearch, setUserSearch] = useState("");
-  const [userResults, setUserResults] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [userResults, setUserResults] = useState<{ user_id: string; full_name: string; oveercode?: string | null }[]>([]);
   const [searchingUsers, setSearchingUsers] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [newMemberRole, setNewMemberRole] = useState("member");
@@ -168,7 +168,7 @@ const AdminCompanyDetail = () => {
     setUserSearch(q);
     if (q.length < 2) { setUserResults([]); return; }
     setSearchingUsers(true);
-    const { data: res } = await supabase.from("profiles").select("user_id, full_name").ilike("full_name", `%${q}%`).limit(10);
+    const { data: res } = await supabase.from("profiles").select("user_id, full_name, oveercode").or(`full_name.ilike.%${q}%,oveercode.ilike.%${q}%`).limit(10);
     setUserResults(res || []);
     setSearchingUsers(false);
   };
@@ -414,6 +414,7 @@ const AdminCompanyDetail = () => {
                             <button key={u.user_id} type="button" onClick={() => { setSelectedUserId(u.user_id); setUserSearch(u.full_name); setUserResults([]); }}
                               className={`w-full text-left px-3 py-1.5 text-xs hover:bg-muted/50 transition-colors ${selectedUserId === u.user_id ? "bg-primary/10" : ""}`}>
                               <span className="text-foreground">{u.full_name}</span>
+                              {u.oveercode && <span className="ml-1 text-muted-foreground font-mono">{u.oveercode}</span>}
                             </button>
                           ))}
                         </div>
