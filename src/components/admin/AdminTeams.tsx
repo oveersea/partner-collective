@@ -30,6 +30,10 @@ interface Team {
   max_members: number | null;
   created_by: string;
   created_at: string;
+  approval_status: string;
+  admin_notes: string | null;
+  rejection_reason: string | null;
+  suggested_team_id: string | null;
 }
 
 interface TeamMember {
@@ -65,6 +69,17 @@ const AdminTeams = () => {
   const [newMemberRole, setNewMemberRole] = useState("member");
   const [addingMember, setAddingMember] = useState(false);
 
+  // Approval dialog
+  const [approvalOpen, setApprovalOpen] = useState(false);
+  const [approvalTeam, setApprovalTeam] = useState<Team | null>(null);
+  const [approvalAction, setApprovalAction] = useState<"approve" | "reject">("approve");
+  const [approvalNotes, setApprovalNotes] = useState("");
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [suggestTeamSearch, setSuggestTeamSearch] = useState("");
+  const [suggestTeamResults, setSuggestTeamResults] = useState<Team[]>([]);
+  const [suggestTeamId, setSuggestTeamId] = useState<string | null>(null);
+  const [submittingApproval, setSubmittingApproval] = useState(false);
+
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
@@ -72,7 +87,7 @@ const AdminTeams = () => {
     const [teamRes, memRes] = await Promise.all([
       supabase
         .from("partner_teams")
-        .select("id, name, slug, description, skills, status, max_members, created_by, created_at")
+        .select("id, name, slug, description, skills, status, max_members, created_by, created_at, approval_status, admin_notes, rejection_reason, suggested_team_id")
         .order("created_at", { ascending: false }),
       supabase.from("partner_team_members").select("team_id"),
     ]);
@@ -221,6 +236,64 @@ const AdminTeams = () => {
     setAddingMember(false);
   };
 
+  // ── Approval Flow ──
+  const openApproval = (team: Team, action: "approve" | "reject") => {
+    setApprovalTeam(team);
+    setApprovalAction(action);
+    setApprovalNotes("");
+    setRejectionReason("");
+    setSuggestTeamId(null);
+    setSuggestTeamSearch("");
+    setSuggestTeamResults([]);
+    setApprovalOpen(true);
+  };
+
+  const searchSuggestTeams = async (q: string) => {
+    setSuggestTeamSearch(q);
+    if (q.length < 2) { setSuggestTeamResults([]); return; }
+    const { data } = await supabase
+      .from("partner_teams")
+      .select("id, name, slug, description, skills, status, max_members, created_by, created_at, approval_status, admin_notes, rejection_reason, suggested_team_id")
+      .ilike("name", `%${q}%`)
+      .eq("approval_status", "approved")
+      .neq("id", approvalTeam?.id || "")
+      .limit(5);
+    setSuggestTeamResults((data as Team[]) || []);
+  };
+
+  const handleApproval = async () => {
+    if (!approvalTeam) return;
+    setSubmittingApproval(true);
+
+    const updateData: Record<string, any> = {
+      admin_notes: approvalNotes || null,
+      reviewed_at: new Date().toISOString(),
+    };
+
+    if (approvalAction === "approve") {
+      updateData.approval_status = "approved";
+      updateData.status = "active";
+    } else {
+      updateData.approval_status = suggestTeamId ? "merged" : "rejected";
+      updateData.rejection_reason = rejectionReason || null;
+      updateData.suggested_team_id = suggestTeamId;
+    }
+
+    const { error } = await supabase
+      .from("partner_teams")
+      .update(updateData)
+      .eq("id", approvalTeam.id);
+
+    if (error) {
+      toast.error("Failed: " + error.message);
+    } else {
+      toast.success(approvalAction === "approve" ? "Team approved!" : "Team rejected");
+      setApprovalOpen(false);
+      fetchData();
+    }
+    setSubmittingApproval(false);
+  };
+
   // ── Filters ──
   const filtered = teams.filter(
     (t) =>
@@ -243,6 +316,16 @@ const AdminTeams = () => {
     return map[status] || map.inactive;
   };
 
+  const approvalBadge = (status: string) => {
+    const map: Record<string, string> = {
+      approved: "bg-primary/10 text-primary",
+      pending: "bg-amber-500/10 text-amber-600",
+      rejected: "bg-destructive/10 text-destructive",
+      merged: "bg-muted text-muted-foreground",
+    };
+    return map[status] || map.pending;
+  };
+
   const roleBadge = (role: string) => {
     if (role === "leader") return "bg-amber-500/10 text-amber-600 border-amber-500/20";
     if (role === "admin") return "bg-primary/10 text-primary border-primary/20";
@@ -252,7 +335,7 @@ const AdminTeams = () => {
   const stats = {
     total: teams.length,
     active: teams.filter((t) => t.status === "active").length,
-    inactive: teams.filter((t) => t.status === "inactive" || !t.status).length,
+    pending: teams.filter((t) => t.approval_status === "pending").length,
     totalMembers: Object.values(memberCounts).reduce((a, b) => a + b, 0),
   };
 
@@ -276,7 +359,7 @@ const AdminTeams = () => {
         {[
           { label: "Total Teams", value: stats.total, icon: UsersRound, color: "text-foreground" },
           { label: "Active", value: stats.active, icon: CheckCircle, color: "text-primary" },
-          { label: "Inactive", value: stats.inactive, icon: XCircle, color: "text-muted-foreground" },
+          { label: "Pending Approval", value: stats.pending, icon: Clock, color: "text-amber-600" },
           { label: "Total Members", value: stats.totalMembers, icon: Users, color: "text-amber-600" },
         ].map((s) => (
           <div key={s.label} className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
@@ -300,8 +383,8 @@ const AdminTeams = () => {
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Team</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Skills</th>
                 <th className="text-center px-4 py-3 font-medium text-muted-foreground">Members</th>
-                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Max</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Approval</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Created</th>
                 <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
               </tr>
@@ -360,12 +443,14 @@ const AdminTeams = () => {
                         <Users className="w-3 h-3" /> {memberCounts[t.id] || 0}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-center text-xs text-muted-foreground">
-                      {t.max_members || "∞"}
-                    </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(t.status)}`}>
                         {t.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${approvalBadge(t.approval_status)}`}>
+                        {t.approval_status}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
@@ -382,6 +467,16 @@ const AdminTeams = () => {
                           <DropdownMenuItem onClick={() => openTeamDetail(t)}>
                             <Users className="w-4 h-4 mr-2" /> Manage Members
                           </DropdownMenuItem>
+                          {t.approval_status === "pending" && (
+                            <>
+                              <DropdownMenuItem onClick={() => openApproval(t, "approve")}>
+                                <CheckCircle className="w-4 h-4 mr-2" /> Approve Team
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openApproval(t, "reject")}>
+                                <XCircle className="w-4 h-4 mr-2" /> Reject Team
+                              </DropdownMenuItem>
+                            </>
+                          )}
                           <DropdownMenuItem onClick={() => updateTeamStatus(t.id, "active")}>
                             <CheckCircle className="w-4 h-4 mr-2" /> Set Active
                           </DropdownMenuItem>
@@ -620,6 +715,51 @@ const AdminTeams = () => {
             <Button onClick={addMember} disabled={!selectedUserId || addingMember}>
               {addingMember ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
               Add
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Approval Dialog ── */}
+      <Dialog open={approvalOpen} onOpenChange={setApprovalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{approvalAction === "approve" ? "Approve" : "Reject"} Team: {approvalTeam?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {approvalAction === "reject" && (
+              <div className="space-y-2">
+                <Label>Rejection Reason</Label>
+                <Input placeholder="Why is this team being rejected?" value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} />
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label>Admin Notes (optional)</Label>
+              <Input placeholder="Internal notes..." value={approvalNotes} onChange={(e) => setApprovalNotes(e.target.value)} />
+            </div>
+            {approvalAction === "reject" && (
+              <div className="space-y-2">
+                <Label>Suggest Existing Team (optional)</Label>
+                <Input placeholder="Search team name..." value={suggestTeamSearch} onChange={(e) => searchSuggestTeams(e.target.value)} />
+                {suggestTeamResults.length > 0 && (
+                  <div className="border border-border rounded-lg overflow-hidden">
+                    {suggestTeamResults.map((st) => (
+                      <button key={st.id} onClick={() => { setSuggestTeamId(st.id); setSuggestTeamSearch(st.name); setSuggestTeamResults([]); }}
+                        className={`w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors ${suggestTeamId === st.id ? "bg-primary/10" : ""}`}>
+                        {st.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {suggestTeamId && <p className="text-xs text-primary">Will suggest user to join this team instead.</p>}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setApprovalOpen(false)}>Cancel</Button>
+            <Button onClick={handleApproval} disabled={submittingApproval} variant={approvalAction === "approve" ? "default" : "destructive"}>
+              {submittingApproval ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              {approvalAction === "approve" ? "Approve" : "Reject"}
             </Button>
           </DialogFooter>
         </DialogContent>
