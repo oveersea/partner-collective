@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, Shield, Briefcase, CreditCard, FileText, Building2,
   GraduationCap, ClipboardCheck, BarChart3, Landmark, FolderKanban, UserCheck, UsersRound, Store,
-  Image as ImageIcon, Zap,
+  Image as ImageIcon, Zap, FileUp,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -30,6 +30,7 @@ export const adminSections = [
   { id: "assessment", label: "Assessment", icon: ClipboardCheck },
   { id: "insights", label: "Insights & Survey", icon: BarChart3 },
   { id: "approvals", label: "Profile Approvals", icon: UserCheck },
+  { id: "bulk_cv", label: "Bulk CV", icon: FileUp },
 ];
 
 // Regular menu items (excluding overview & requests which are placed separately)
