@@ -576,16 +576,33 @@ const AdminEmailNotifications = () => {
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Body HTML</label>
-              <Textarea value={tplBody} onChange={e => setTplBody(e.target.value)} rows={12} placeholder="<html>...</html>" className="font-mono text-xs" />
+              <Tabs defaultValue="preview" className="w-full">
+                <TabsList className="w-full grid grid-cols-2">
+                  <TabsTrigger value="preview">Preview</TabsTrigger>
+                  <TabsTrigger value="code">Kode HTML</TabsTrigger>
+                </TabsList>
+                <TabsContent value="preview" className="mt-2">
+                  {tplBody ? (
+                    <div className="border rounded-lg overflow-hidden bg-white">
+                      <iframe
+                        srcDoc={tplBody}
+                        className="w-full border-0"
+                        style={{ minHeight: 400 }}
+                        title="Email Preview"
+                        sandbox="allow-same-origin"
+                      />
+                    </div>
+                  ) : (
+                    <div className="border rounded-lg p-8 text-center text-muted-foreground text-sm">
+                      Belum ada konten HTML
+                    </div>
+                  )}
+                </TabsContent>
+                <TabsContent value="code" className="mt-2">
+                  <Textarea value={tplBody} onChange={e => setTplBody(e.target.value)} rows={14} placeholder="<html>...</html>" className="font-mono text-xs" />
+                </TabsContent>
+              </Tabs>
             </div>
-            {tplBody && (
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Preview</label>
-                <div className="border rounded-lg p-4 bg-background max-h-[200px] overflow-auto">
-                  <div dangerouslySetInnerHTML={{ __html: tplBody }} />
-                </div>
-              </div>
-            )}
           </div>
           <DialogFooter className="pt-2">
             <Button variant="outline" onClick={() => setTemplateDialog(false)}>Batal</Button>
