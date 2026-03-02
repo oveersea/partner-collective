@@ -50,7 +50,7 @@ const AdminCompanies = () => {
       supabase.from("business_members").select("business_id"),
     ]);
     if (compRes.data) setCompanies(compRes.data as Company[]);
-    if (compRes.error) toast.error("Gagal memuat data perusahaan");
+    if (compRes.error) toast.error("Failed to load company data");
     if (oppRes.data) {
       const counts: Record<string, number> = {};
       oppRes.data.forEach((o: any) => { if (o.business_id) counts[o.business_id] = (counts[o.business_id] || 0) + 1; });
@@ -66,9 +66,9 @@ const AdminCompanies = () => {
 
   const updateKycStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("business_profiles").update({ kyc_status: status }).eq("id", id);
-    if (error) toast.error("Gagal update status: " + error.message);
+    if (error) toast.error("Failed to update status: " + error.message);
     else {
-      toast.success(`Status KYC diubah ke "${status}"`);
+      toast.success(`KYC status changed to "${status}"`);
       setCompanies((prev) => prev.map((c) => (c.id === id ? { ...c, kyc_status: status } : c)));
     }
   };
@@ -108,22 +108,22 @@ const AdminCompanies = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-foreground">Manajemen Perusahaan</h2>
-          <p className="text-sm text-muted-foreground">Perusahaan adalah pemberi job / klien</p>
+          <h2 className="text-xl font-semibold text-foreground">Company Management</h2>
+          <p className="text-sm text-muted-foreground">Companies are job providers / clients</p>
         </div>
         <div className="relative w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Cari nama, kode, industri, kota..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input className="pl-9" placeholder="Search name, code, industry, city..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Total Perusahaan", value: stats.total, icon: Building2, color: "text-foreground" },
-          { label: "Terverifikasi", value: stats.verified, icon: ShieldCheck, color: "text-primary" },
+          { label: "Total Companies", value: stats.total, icon: Building2, color: "text-foreground" },
+          { label: "Verified", value: stats.verified, icon: ShieldCheck, color: "text-primary" },
           { label: "Pending", value: stats.pending, icon: Shield, color: "text-amber-600" },
-          { label: "Belum Verifikasi", value: stats.unverified, icon: ShieldX, color: "text-muted-foreground" },
+          { label: "Unverified", value: stats.unverified, icon: ShieldX, color: "text-muted-foreground" },
         ].map((s) => (
           <div key={s.label} className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
@@ -143,15 +143,15 @@ const AdminCompanies = () => {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50">
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Perusahaan</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Company</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Oveercode</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Industri</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Lokasi</th>
-                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Member</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Industry</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Location</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Members</th>
                 <th className="text-center px-4 py-3 font-medium text-muted-foreground">Jobs</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">KYC</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Bergabung</th>
-                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Joined</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -160,7 +160,7 @@ const AdminCompanies = () => {
                   <tr key={i} className="border-b border-border"><td colSpan={9} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
                 ))
               ) : paged.length === 0 ? (
-                <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data perusahaan</td></tr>
+                <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">No company data found</td></tr>
               ) : (
                 paged.map((c) => (
                   <tr key={c.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/company/${c.id}`)}>
@@ -197,7 +197,7 @@ const AdminCompanies = () => {
                     <td className="px-4 py-3">
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${kycBadge(c.kyc_status)}`}>{c.kyc_status}</span>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(c.created_at).toLocaleDateString("id-ID")}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(c.created_at).toLocaleDateString("en-US")}</td>
                     <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -205,11 +205,11 @@ const AdminCompanies = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => navigate(`/admin/company/${c.id}`)}>
-                            <Users className="w-4 h-4 mr-2" /> Lihat Detail
+                            <Users className="w-4 h-4 mr-2" /> View Details
                           </DropdownMenuItem>
                           {c.website && (
                             <DropdownMenuItem onClick={() => window.open(c.website!.startsWith("http") ? c.website! : `https://${c.website}`, "_blank")}>
-                              <ExternalLink className="w-4 h-4 mr-2" /> Buka Website
+                              <ExternalLink className="w-4 h-4 mr-2" /> Open Website
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem onClick={() => updateKycStatus(c.id, "verified")}>
@@ -233,7 +233,7 @@ const AdminCompanies = () => {
         {!loading && filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-border">
             <span className="text-xs text-muted-foreground">
-              Menampilkan {Math.min((page - 1) * PAGE_SIZE + 1, filtered.length)}–{Math.min(page * PAGE_SIZE, filtered.length)} dari {filtered.length}
+              Showing {Math.min((page - 1) * PAGE_SIZE + 1, filtered.length)}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
             </span>
             <div className="flex items-center gap-1">
               <Button size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}><ChevronLeft className="w-4 h-4" /></Button>

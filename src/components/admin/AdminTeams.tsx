@@ -78,7 +78,7 @@ const AdminTeams = () => {
     ]);
 
     if (teamRes.data) setTeams(teamRes.data as Team[]);
-    if (teamRes.error) toast.error("Gagal memuat data tim");
+    if (teamRes.error) toast.error("Failed to load team data");
 
     if (memRes.data) {
       const counts: Record<string, number> = {};
@@ -95,9 +95,9 @@ const AdminTeams = () => {
       .from("partner_teams")
       .update({ status })
       .eq("id", id);
-    if (error) toast.error("Gagal update status: " + error.message);
+    if (error) toast.error("Failed to update status: " + error.message);
     else {
-      toast.success(`Status tim diubah ke "${status}"`);
+      toast.success(`Team status changed to "${status}"`);
       setTeams((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
     }
   };
@@ -143,20 +143,20 @@ const AdminTeams = () => {
       .update({ role })
       .eq("id", memberId);
     if (error) {
-      toast.error("Gagal update role: " + error.message);
+      toast.error("Failed to update role: " + error.message);
     } else {
-      toast.success(`Role diubah ke "${role}"`);
+      toast.success(`Role changed to "${role}"`);
       setMembers((prev) => prev.map((m) => (m.id === memberId ? { ...m, role } : m)));
     }
   };
 
   const removeMember = async (memberId: string, userName: string) => {
-    if (!confirm(`Hapus "${userName}" dari tim ini?`)) return;
+    if (!confirm(`Remove "${userName}" from this team?`)) return;
     const { error } = await supabase.from("partner_team_members").delete().eq("id", memberId);
     if (error) {
-      toast.error("Gagal menghapus: " + error.message);
+      toast.error("Failed to remove: " + error.message);
     } else {
-      toast.success("Member dihapus");
+      toast.success("Member removed");
       setMembers((prev) => prev.filter((m) => m.id !== memberId));
       setMemberCounts((prev) => ({
         ...prev,
@@ -191,7 +191,7 @@ const AdminTeams = () => {
       .maybeSingle();
 
     if (existing) {
-      toast.error("User sudah menjadi member tim ini");
+      toast.error("User is already a member of this team");
       setAddingMember(false);
       return;
     }
@@ -204,9 +204,9 @@ const AdminTeams = () => {
     });
 
     if (error) {
-      toast.error("Gagal menambahkan: " + error.message);
+      toast.error("Failed to add member: " + error.message);
     } else {
-      toast.success("Member berhasil ditambahkan");
+      toast.success("Member added successfully");
       setAddMemberOpen(false);
       setUserSearch("");
       setSelectedUserId("");
@@ -259,12 +259,12 @@ const AdminTeams = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-foreground">Manajemen Tim</h2>
+        <h2 className="text-xl font-semibold text-foreground">Team Management</h2>
         <div className="relative w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             className="pl-9"
-            placeholder="Cari nama, deskripsi, skill..."
+            placeholder="Search name, description, skill..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -274,10 +274,10 @@ const AdminTeams = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Total Tim", value: stats.total, icon: UsersRound, color: "text-foreground" },
-          { label: "Aktif", value: stats.active, icon: CheckCircle, color: "text-primary" },
-          { label: "Non-aktif", value: stats.inactive, icon: XCircle, color: "text-muted-foreground" },
-          { label: "Total Member", value: stats.totalMembers, icon: Users, color: "text-amber-600" },
+          { label: "Total Teams", value: stats.total, icon: UsersRound, color: "text-foreground" },
+          { label: "Active", value: stats.active, icon: CheckCircle, color: "text-primary" },
+          { label: "Inactive", value: stats.inactive, icon: XCircle, color: "text-muted-foreground" },
+          { label: "Total Members", value: stats.totalMembers, icon: Users, color: "text-amber-600" },
         ].map((s) => (
           <div key={s.label} className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
@@ -297,13 +297,13 @@ const AdminTeams = () => {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50">
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tim</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Team</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Skills</th>
-                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Member</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Members</th>
                 <th className="text-center px-4 py-3 font-medium text-muted-foreground">Max</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Dibuat</th>
-                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Created</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -318,7 +318,7 @@ const AdminTeams = () => {
               ) : paged.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                    Tidak ada data tim
+                    No team data found
                   </td>
                 </tr>
               ) : (
@@ -369,7 +369,7 @@ const AdminTeams = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
-                      {new Date(t.created_at).toLocaleDateString("id-ID")}
+                      {new Date(t.created_at).toLocaleDateString("en-US")}
                     </td>
                     <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
@@ -380,13 +380,13 @@ const AdminTeams = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openTeamDetail(t)}>
-                            <Users className="w-4 h-4 mr-2" /> Kelola Member
+                            <Users className="w-4 h-4 mr-2" /> Manage Members
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => updateTeamStatus(t.id, "active")}>
-                            <CheckCircle className="w-4 h-4 mr-2" /> Set Aktif
+                            <CheckCircle className="w-4 h-4 mr-2" /> Set Active
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => updateTeamStatus(t.id, "inactive")}>
-                            <XCircle className="w-4 h-4 mr-2" /> Set Non-aktif
+                            <XCircle className="w-4 h-4 mr-2" /> Set Inactive
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => updateTeamStatus(t.id, "suspended")}>
                             <Clock className="w-4 h-4 mr-2" /> Suspend
@@ -403,8 +403,8 @@ const AdminTeams = () => {
         {!loading && filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-border">
             <span className="text-xs text-muted-foreground">
-              Menampilkan {Math.min((page - 1) * PAGE_SIZE + 1, filtered.length)}–
-              {Math.min(page * PAGE_SIZE, filtered.length)} dari {filtered.length}
+              Showing {Math.min((page - 1) * PAGE_SIZE + 1, filtered.length)}–
+              {Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
             </span>
             <div className="flex items-center gap-1">
               <Button size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
@@ -447,7 +447,7 @@ const AdminTeams = () => {
                 </div>
                 {selectedTeam.description && (
                   <div className="col-span-2">
-                    <Label className="text-xs text-muted-foreground">Deskripsi</Label>
+                    <Label className="text-xs text-muted-foreground">Description</Label>
                     <p className="text-foreground">{selectedTeam.description}</p>
                   </div>
                 )}
@@ -467,10 +467,10 @@ const AdminTeams = () => {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <Users className="w-4 h-4" /> Member Tim ({members.length})
+                    <Users className="w-4 h-4" /> Team Members ({members.length})
                   </h3>
                   <Button size="sm" onClick={() => setAddMemberOpen(true)} className="gap-1.5">
-                    <UserPlus className="w-3.5 h-3.5" /> Tambah Member
+                    <UserPlus className="w-3.5 h-3.5" /> Add Member
                   </Button>
                 </div>
 
@@ -482,7 +482,7 @@ const AdminTeams = () => {
                   </div>
                 ) : members.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground text-sm border border-dashed border-border rounded-lg">
-                    Belum ada member. Tambahkan member pertama.
+                    No members yet. Add the first member.
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -499,7 +499,7 @@ const AdminTeams = () => {
                           <div>
                             <p className="text-sm font-medium text-foreground">{m.user_name}</p>
                             <p className="text-[11px] text-muted-foreground">
-                              Bergabung {new Date(m.joined_at).toLocaleDateString("id-ID")}
+                              Joined {new Date(m.joined_at).toLocaleDateString("en-US")}
                             </p>
                           </div>
                         </div>
@@ -543,17 +543,17 @@ const AdminTeams = () => {
       <Dialog open={addMemberOpen} onOpenChange={setAddMemberOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Tambah Member ke {selectedTeam?.name}</DialogTitle>
+            <DialogTitle>Add Member to {selectedTeam?.name}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Cari User</Label>
+              <Label>Search User</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   className="pl-9"
-                  placeholder="Ketik nama user minimal 2 huruf..."
+                  placeholder="Type at least 2 characters..."
                   value={userSearch}
                   onChange={(e) => searchUsers(e.target.value)}
                 />
@@ -579,7 +579,7 @@ const AdminTeams = () => {
                     >
                       <span className="text-foreground">{u.full_name}</span>
                       {selectedUserId === u.user_id && (
-                        <Badge variant="outline" className="text-[10px]">Dipilih</Badge>
+                        <Badge variant="outline" className="text-[10px]">Selected</Badge>
                       )}
                     </button>
                   ))}
@@ -589,7 +589,7 @@ const AdminTeams = () => {
               {selectedUserId && (
                 <div className="flex items-center gap-2 text-xs text-primary bg-primary/5 rounded-md px-3 py-2">
                   <Users className="w-3.5 h-3.5" />
-                  <span>User dipilih: <strong>{userSearch}</strong></span>
+                  <span>Selected user: <strong>{userSearch}</strong></span>
                   <button
                     onClick={() => { setSelectedUserId(""); setUserSearch(""); }}
                     className="ml-auto text-muted-foreground hover:text-foreground"
@@ -607,19 +607,19 @@ const AdminTeams = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="leader">Leader — ketua tim</SelectItem>
-                  <SelectItem value="admin">Admin — bisa mengelola tim</SelectItem>
-                  <SelectItem value="member">Member — anggota biasa</SelectItem>
+                  <SelectItem value="leader">Leader — team lead</SelectItem>
+                  <SelectItem value="admin">Admin — can manage team</SelectItem>
+                  <SelectItem value="member">Member — regular member</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAddMemberOpen(false)}>Batal</Button>
+            <Button variant="outline" onClick={() => setAddMemberOpen(false)}>Cancel</Button>
             <Button onClick={addMember} disabled={!selectedUserId || addingMember}>
               {addingMember ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
-              Tambahkan
+              Add
             </Button>
           </DialogFooter>
         </DialogContent>

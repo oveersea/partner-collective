@@ -39,11 +39,12 @@ interface LoginActivity {
   user_id: string;
   total_logins: number;
   daily_breakdown: Record<string, number>;
-  timestamps: string[]; // raw sign-in timestamps
+  timestamps: string[];
 }
 
 const PAGE_SIZE = 25;
-const DAY_NAMES = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const calcProfileScore = (u: UserProfile): number => {
   let score = 0;
@@ -65,13 +66,13 @@ const formatLastOnline = (d: string | null): string => {
   if (!d) return "—";
   const diff = Date.now() - new Date(d).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Baru saja";
-  if (mins < 60) return `${mins}m lalu`;
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}j lalu`;
+  if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}h lalu`;
-  return new Date(d).toLocaleDateString("id-ID");
+  if (days < 7) return `${days}d ago`;
+  return new Date(d).toLocaleDateString("en-US");
 };
 
 type SortKey = "profile" | "activity" | "last_online" | "created_at" | "kyc" | null;
@@ -107,7 +108,7 @@ const AdminUsers = () => {
         .range(from, from + batchSize - 1);
 
       if (error) {
-        toast.error("Gagal memuat data user");
+        toast.error("Failed to load user data");
         break;
       }
       if (data) {
@@ -124,7 +125,6 @@ const AdminUsers = () => {
   };
 
   const fetchLoginActivity = async () => {
-    // Get login logs from last 7 days
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
 
@@ -154,8 +154,8 @@ const AdminUsers = () => {
       { user_id: userId, role },
       { onConflict: "user_id,role" }
     );
-    if (error) toast.error("Gagal assign role: " + error.message);
-    else toast.success(`Role '${role}' berhasil ditambahkan`);
+    if (error) toast.error("Failed to assign role: " + error.message);
+    else toast.success(`Role '${role}' assigned successfully`);
   };
 
   const deactivateUser = async (userId: string) => {
@@ -163,9 +163,9 @@ const AdminUsers = () => {
       .from("profiles")
       .update({ kyc_status: "deactivated" } as any)
       .eq("user_id", userId);
-    if (error) toast.error("Gagal menonaktifkan user: " + error.message);
+    if (error) toast.error("Failed to deactivate user: " + error.message);
     else {
-      toast.success("User berhasil dinonaktifkan");
+      toast.success("User deactivated successfully");
       fetchUsers();
     }
     setConfirmDialog({ open: false, type: "deactivate", userId: "", name: "" });
@@ -176,9 +176,9 @@ const AdminUsers = () => {
       .from("profiles")
       .delete()
       .eq("user_id", userId);
-    if (error) toast.error("Gagal menghapus profil: " + error.message);
+    if (error) toast.error("Failed to delete profile: " + error.message);
     else {
-      toast.success("Profil user berhasil dihapus");
+      toast.success("User profile deleted successfully");
       setUsers((prev) => prev.filter((u) => u.user_id !== userId));
     }
     setConfirmDialog({ open: false, type: "delete", userId: "", name: "" });
@@ -260,10 +260,10 @@ const AdminUsers = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-foreground">Manajemen User</h2>
+        <h2 className="text-xl font-semibold text-foreground">User Management</h2>
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Cari nama atau oveercode..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input className="pl-9" placeholder="Search name or oveercode..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
 
@@ -274,24 +274,24 @@ const AdminUsers = () => {
               <tr className="border-b border-border bg-muted/50">
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">User</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Oveercode</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipe</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Type</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("kyc")}>
                   <span className="flex items-center">KYC <SortIcon col="kyc" /></span>
                 </th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("profile")}>
-                  <span className="flex items-center">Profil <SortIcon col="profile" /></span>
+                  <span className="flex items-center">Profile <SortIcon col="profile" /></span>
                 </th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("activity")}>
-                  <span className="flex items-center">Aktivitas <SortIcon col="activity" /></span>
+                  <span className="flex items-center">Activity <SortIcon col="activity" /></span>
                 </th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("last_online")}>
                   <span className="flex items-center">Last Online <SortIcon col="last_online" /></span>
                 </th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Lokasi</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Location</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort("created_at")}>
-                  <span className="flex items-center">Bergabung <SortIcon col="created_at" /></span>
+                  <span className="flex items-center">Joined <SortIcon col="created_at" /></span>
                 </th>
-                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -302,7 +302,7 @@ const AdminUsers = () => {
                   </tr>
                 ))
               ) : sortedFiltered.length === 0 ? (
-                <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+                <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">No data found</td></tr>
               ) : (
                 pagedUsers.map((u) => {
                   const pScore = calcProfileScore(u);
@@ -338,7 +338,7 @@ const AdminUsers = () => {
                         <PopoverTrigger asChild>
                           <button className="flex flex-col gap-1 text-left hover:bg-muted/50 rounded-lg px-1.5 py-1 -mx-1.5 -my-1 transition-colors">
                             <span className={`text-xs font-semibold ${totalLogins > 5 ? "text-primary" : totalLogins > 0 ? "text-amber-600" : "text-muted-foreground"}`}>
-                              {totalLogins}x /minggu
+                              {totalLogins}x /week
                             </span>
                             {activity && totalLogins > 0 && (
                               <div className="flex gap-0.5">
@@ -366,7 +366,7 @@ const AdminUsers = () => {
                           <div className="p-3 border-b border-border">
                             <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                               <CalendarDays className="w-4 h-4 text-primary" />
-                              Riwayat Sign In (7 hari)
+                              Sign-In History (7 days)
                             </div>
                             <p className="text-xs text-muted-foreground mt-0.5">{u.full_name || u.oveercode}</p>
                           </div>
@@ -397,10 +397,10 @@ const AdminUsers = () => {
                                   return (
                                     <div key={idx} className="flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-muted/50 text-xs">
                                       <span className="text-muted-foreground">
-                                        {d.toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short" })}
+                                        {d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" })}
                                       </span>
                                       <span className="font-mono text-foreground">
-                                        {d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                                        {d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                                       </span>
                                     </div>
                                   );
@@ -409,7 +409,7 @@ const AdminUsers = () => {
                             </>
                           ) : (
                             <div className="p-4 text-center text-xs text-muted-foreground">
-                              Belum ada data sign in minggu ini
+                              No sign-in data this week
                             </div>
                           )}
                         </PopoverContent>
@@ -425,7 +425,7 @@ const AdminUsers = () => {
                       {[u.city, u.country].filter(Boolean).join(", ") || "—"}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
-                      {new Date(u.created_at).toLocaleDateString("id-ID")}
+                      {new Date(u.created_at).toLocaleDateString("en-US")}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <DropdownMenu>
@@ -434,17 +434,17 @@ const AdminUsers = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); assignRole(u.user_id, "admin"); }}>
-                            <Shield className="w-4 h-4 mr-2" /> Jadikan Admin
+                            <Shield className="w-4 h-4 mr-2" /> Make Admin
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); assignRole(u.user_id, "instructor"); }}>
-                            Jadikan Instructor
+                            Make Instructor
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setConfirmDialog({ open: true, type: "deactivate", userId: u.user_id, name: u.full_name || "User" }); }}>
-                            <UserX className="w-4 h-4 mr-2" /> Nonaktifkan
+                            <UserX className="w-4 h-4 mr-2" /> Deactivate
                           </DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={(e) => { e.stopPropagation(); setConfirmDialog({ open: true, type: "delete", userId: u.user_id, name: u.full_name || "User" }); }}>
-                            <Trash2 className="w-4 h-4 mr-2" /> Hapus Profil
+                            <Trash2 className="w-4 h-4 mr-2" /> Delete Profile
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -459,7 +459,7 @@ const AdminUsers = () => {
         {!loading && sortedFiltered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-border">
             <span className="text-xs text-muted-foreground">
-              Menampilkan {Math.min((page - 1) * PAGE_SIZE + 1, sortedFiltered.length)}–{Math.min(page * PAGE_SIZE, sortedFiltered.length)} dari {sortedFiltered.length}
+              Showing {Math.min((page - 1) * PAGE_SIZE + 1, sortedFiltered.length)}–{Math.min(page * PAGE_SIZE, sortedFiltered.length)} of {sortedFiltered.length}
             </span>
             <div className="flex items-center gap-1">
               <Button size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
@@ -478,16 +478,16 @@ const AdminUsers = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirmDialog.type === "delete" ? "Hapus Profil User?" : "Nonaktifkan User?"}
+              {confirmDialog.type === "delete" ? "Delete User Profile?" : "Deactivate User?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirmDialog.type === "delete"
-                ? `Profil "${confirmDialog.name}" akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`
-                : `User "${confirmDialog.name}" akan dinonaktifkan dan tidak dapat mengakses platform.`}
+                ? `The profile "${confirmDialog.name}" will be permanently deleted. This action cannot be undone.`
+                : `User "${confirmDialog.name}" will be deactivated and unable to access the platform.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className={confirmDialog.type === "delete" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
               onClick={() =>
@@ -496,7 +496,7 @@ const AdminUsers = () => {
                   : deactivateUser(confirmDialog.userId)
               }
             >
-              {confirmDialog.type === "delete" ? "Hapus" : "Nonaktifkan"}
+              {confirmDialog.type === "delete" ? "Delete" : "Deactivate"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

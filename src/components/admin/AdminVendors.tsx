@@ -87,7 +87,7 @@ const AdminVendors = () => {
     ]);
 
     if (vendorRes.data) setVendors(vendorRes.data as Vendor[]);
-    if (vendorRes.error) toast.error("Gagal memuat data vendor");
+    if (vendorRes.error) toast.error("Failed to load vendor data");
 
     if (memRes.data) {
       const counts: Record<string, number> = {};
@@ -113,9 +113,9 @@ const AdminVendors = () => {
       .from("business_profiles")
       .update({ kyc_status: status })
       .eq("id", id);
-    if (error) toast.error("Gagal update status: " + error.message);
+    if (error) toast.error("Failed to update status: " + error.message);
     else {
-      toast.success(`Status KYC diubah ke "${status}"`);
+      toast.success(`KYC status changed to "${status}"`);
       setVendors((prev) =>
         prev.map((v) => (v.id === id ? { ...v, kyc_status: status } : v))
       );
@@ -162,19 +162,19 @@ const AdminVendors = () => {
       .from("business_members")
       .update({ role, updated_at: new Date().toISOString() })
       .eq("id", memberId);
-    if (error) toast.error("Gagal update role: " + error.message);
+    if (error) toast.error("Failed to update role: " + error.message);
     else {
-      toast.success(`Role diubah ke "${role}"`);
+      toast.success(`Role changed to "${role}"`);
       setMembers((prev) => prev.map((m) => (m.id === memberId ? { ...m, role } : m)));
     }
   };
 
   const removeMember = async (memberId: string, userName: string) => {
-    if (!confirm(`Hapus "${userName}" dari vendor ini?`)) return;
+    if (!confirm(`Remove "${userName}" from this vendor?`)) return;
     const { error } = await supabase.from("business_members").delete().eq("id", memberId);
-    if (error) toast.error("Gagal menghapus: " + error.message);
+    if (error) toast.error("Failed to remove: " + error.message);
     else {
-      toast.success("Member dihapus");
+      toast.success("Member removed");
       setMembers((prev) => prev.filter((m) => m.id !== memberId));
       setMemberCounts((prev) => ({
         ...prev,
@@ -208,7 +208,7 @@ const AdminVendors = () => {
       .maybeSingle();
 
     if (existing) {
-      toast.error("User sudah menjadi member vendor ini");
+      toast.error("User is already a member of this vendor");
       setAddingMember(false);
       return;
     }
@@ -220,9 +220,9 @@ const AdminVendors = () => {
       status: "active",
     });
 
-    if (error) toast.error("Gagal menambahkan: " + error.message);
+    if (error) toast.error("Failed to add member: " + error.message);
     else {
-      toast.success("Member berhasil ditambahkan");
+      toast.success("Member added successfully");
       setAddMemberOpen(false);
       setUserSearch("");
       setSelectedUserId("");
@@ -279,14 +279,14 @@ const AdminVendors = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-foreground">Manajemen Vendor</h2>
-          <p className="text-sm text-muted-foreground">Vendor adalah penerima job / penyedia layanan</p>
+          <h2 className="text-xl font-semibold text-foreground">Vendor Management</h2>
+          <p className="text-sm text-muted-foreground">Vendors are job receivers / service providers</p>
         </div>
         <div className="relative w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             className="pl-9"
-            placeholder="Cari nama, kode, industri, kota..."
+            placeholder="Search name, code, industry, city..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -296,10 +296,10 @@ const AdminVendors = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Total Vendor", value: stats.total, icon: Briefcase, color: "text-foreground" },
-          { label: "Terverifikasi", value: stats.verified, icon: ShieldCheck, color: "text-primary" },
+          { label: "Total Vendors", value: stats.total, icon: Briefcase, color: "text-foreground" },
+          { label: "Verified", value: stats.verified, icon: ShieldCheck, color: "text-primary" },
           { label: "Pending", value: stats.pending, icon: Shield, color: "text-amber-600" },
-          { label: "Belum Verifikasi", value: stats.unverified, icon: ShieldX, color: "text-muted-foreground" },
+          { label: "Unverified", value: stats.unverified, icon: ShieldX, color: "text-muted-foreground" },
         ].map((s) => (
           <div key={s.label} className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
@@ -321,13 +321,13 @@ const AdminVendors = () => {
               <tr className="border-b border-border bg-muted/50">
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Vendor</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Oveercode</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Industri</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Lokasi</th>
-                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Member</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Industry</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Location</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Members</th>
                 <th className="text-center px-4 py-3 font-medium text-muted-foreground">Orders</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">KYC</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Bergabung</th>
-                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Joined</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -342,7 +342,7 @@ const AdminVendors = () => {
               ) : paged.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
-                    Tidak ada data vendor
+                    No vendor data found
                   </td>
                 </tr>
               ) : (
@@ -403,7 +403,7 @@ const AdminVendors = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
-                      {new Date(v.created_at).toLocaleDateString("id-ID")}
+                      {new Date(v.created_at).toLocaleDateString("en-US")}
                     </td>
                     <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
@@ -412,11 +412,11 @@ const AdminVendors = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openVendorDetail(v)}>
-                            <Users className="w-4 h-4 mr-2" /> Kelola Member
+                            <Users className="w-4 h-4 mr-2" /> Manage Members
                           </DropdownMenuItem>
                           {v.website && (
                             <DropdownMenuItem onClick={() => window.open(v.website!.startsWith("http") ? v.website! : `https://${v.website}`, "_blank")}>
-                              <ExternalLink className="w-4 h-4 mr-2" /> Buka Website
+                              <ExternalLink className="w-4 h-4 mr-2" /> Open Website
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem onClick={() => updateKycStatus(v.id, "verified")}>
@@ -440,8 +440,8 @@ const AdminVendors = () => {
         {!loading && filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-border">
             <span className="text-xs text-muted-foreground">
-              Menampilkan {Math.min((page - 1) * PAGE_SIZE + 1, filtered.length)}–
-              {Math.min(page * PAGE_SIZE, filtered.length)} dari {filtered.length}
+              Showing {Math.min((page - 1) * PAGE_SIZE + 1, filtered.length)}–
+              {Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
             </span>
             <div className="flex items-center gap-1">
               <Button size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
@@ -483,13 +483,13 @@ const AdminVendors = () => {
                 </div>
                 {selectedVendor.industry && (
                   <div>
-                    <Label className="text-xs text-muted-foreground">Industri</Label>
+                    <Label className="text-xs text-muted-foreground">Industry</Label>
                     <p className="text-foreground">{selectedVendor.industry}</p>
                   </div>
                 )}
                 {(selectedVendor.city || selectedVendor.country) && (
                   <div>
-                    <Label className="text-xs text-muted-foreground">Lokasi</Label>
+                    <Label className="text-xs text-muted-foreground">Location</Label>
                     <p className="text-foreground">{[selectedVendor.city, selectedVendor.country].filter(Boolean).join(", ")}</p>
                   </div>
                 )}
@@ -499,10 +499,10 @@ const AdminVendors = () => {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <Users className="w-4 h-4" /> Member Vendor ({members.length})
+                    <Users className="w-4 h-4" /> Vendor Members ({members.length})
                   </h3>
                   <Button size="sm" onClick={() => setAddMemberOpen(true)} className="gap-1.5">
-                    <UserPlus className="w-3.5 h-3.5" /> Tambah Member
+                    <UserPlus className="w-3.5 h-3.5" /> Add Member
                   </Button>
                 </div>
 
@@ -514,7 +514,7 @@ const AdminVendors = () => {
                   </div>
                 ) : members.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground text-sm border border-dashed border-border rounded-lg">
-                    Belum ada member. Tambahkan member pertama.
+                    No members yet. Add the first member.
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -531,7 +531,7 @@ const AdminVendors = () => {
                           <div>
                             <p className="text-sm font-medium text-foreground">{m.user_name}</p>
                             <p className="text-[11px] text-muted-foreground">
-                              Bergabung {new Date(m.created_at).toLocaleDateString("id-ID")}
+                              Joined {new Date(m.created_at).toLocaleDateString("en-US")}
                             </p>
                           </div>
                         </div>
@@ -568,16 +568,16 @@ const AdminVendors = () => {
       <Dialog open={addMemberOpen} onOpenChange={setAddMemberOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Tambah Member ke {selectedVendor?.name}</DialogTitle>
+            <DialogTitle>Add Member to {selectedVendor?.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Cari User</Label>
+              <Label>Search User</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   className="pl-9"
-                  placeholder="Ketik nama user minimal 2 huruf..."
+                  placeholder="Type at least 2 characters..."
                   value={userSearch}
                   onChange={(e) => searchUsers(e.target.value)}
                 />
@@ -602,7 +602,7 @@ const AdminVendors = () => {
                     >
                       <span className="text-foreground">{u.full_name}</span>
                       {selectedUserId === u.user_id && (
-                        <Badge variant="outline" className="text-[10px]">Dipilih</Badge>
+                        <Badge variant="outline" className="text-[10px]">Selected</Badge>
                       )}
                     </button>
                   ))}
@@ -611,7 +611,7 @@ const AdminVendors = () => {
               {selectedUserId && (
                 <div className="flex items-center gap-2 text-xs text-primary bg-primary/5 rounded-md px-3 py-2">
                   <Users className="w-3.5 h-3.5" />
-                  <span>User dipilih: <strong>{userSearch}</strong></span>
+                  <span>Selected user: <strong>{userSearch}</strong></span>
                   <button
                     onClick={() => { setSelectedUserId(""); setUserSearch(""); }}
                     className="ml-auto text-muted-foreground hover:text-foreground"
@@ -626,18 +626,18 @@ const AdminVendors = () => {
               <Select value={newMemberRole} onValueChange={setNewMemberRole}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">Admin — bisa mengelola vendor</SelectItem>
-                  <SelectItem value="member">Member — anggota biasa</SelectItem>
-                  <SelectItem value="owner">Owner — pemilik vendor</SelectItem>
+                  <SelectItem value="admin">Admin — can manage vendor</SelectItem>
+                  <SelectItem value="member">Member — regular member</SelectItem>
+                  <SelectItem value="owner">Owner — vendor owner</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAddMemberOpen(false)}>Batal</Button>
+            <Button variant="outline" onClick={() => setAddMemberOpen(false)}>Cancel</Button>
             <Button onClick={addMember} disabled={!selectedUserId || addingMember}>
               {addingMember ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
-              Tambahkan
+              Add
             </Button>
           </DialogFooter>
         </DialogContent>
