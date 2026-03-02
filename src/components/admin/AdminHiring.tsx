@@ -8,10 +8,10 @@ import { Search, AlertTriangle, Briefcase, Clock, CheckCircle2 } from "lucide-re
 
 interface HiringRequest {
   id: string;
-  role_title: string;
-  sla_type: string;
+  title: string;
+  hiring_type: string;
   status: string;
-  quantity: number;
+  positions_count: number;
   credit_cost: number;
   sla_deadline: string | null;
   created_at: string;
@@ -42,7 +42,7 @@ const AdminHiring = () => {
     const [reqRes, alertRes] = await Promise.all([
       supabase
         .from("hiring_requests")
-        .select("id, role_title, sla_type, status, quantity, credit_cost, sla_deadline, created_at, business_profiles(name)")
+        .select("id, title, hiring_type, status, positions_count, credit_cost, sla_deadline, created_at, business_profiles(name)")
         .order("created_at", { ascending: false })
         .limit(50),
       supabase
@@ -63,7 +63,7 @@ const AdminHiring = () => {
     else { toast.success("Status updated"); fetchData(); }
   };
 
-  const slaColor = (type: string) => type === "fast" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground";
+  const hiringTypeColor = (type: string) => type === "fast" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground";
 
   const statusColor = (s: string) => {
     if (s === "open") return "bg-blue-500/10 text-blue-600";
@@ -74,7 +74,7 @@ const AdminHiring = () => {
   };
 
   const filteredReqs = requests.filter(
-    (r) => r.role_title.toLowerCase().includes(search.toLowerCase()) ||
+    (r) => r.title.toLowerCase().includes(search.toLowerCase()) ||
       (r.business_profiles?.name || "").toLowerCase().includes(search.toLowerCase())
   );
 
@@ -123,12 +123,12 @@ const AdminHiring = () => {
                 ) : (
                   filteredReqs.map((r) => (
                     <tr key={r.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-3 font-medium text-foreground">{r.role_title}</td>
+                      <td className="px-4 py-3 font-medium text-foreground">{r.title}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{r.business_profiles?.name || "—"}</td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${slaColor(r.sla_type)}`}>{r.sla_type}</span>
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${hiringTypeColor(r.hiring_type)}`}>{r.hiring_type}</span>
                       </td>
-                      <td className="px-4 py-3 text-foreground">{r.quantity}</td>
+                      <td className="px-4 py-3 text-foreground">{r.positions_count}</td>
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusColor(r.status)}`}>{r.status}</span>
                       </td>
@@ -190,7 +190,7 @@ const AdminHiring = () => {
                       </td>
                       <td className="px-4 py-3 text-destructive font-semibold">{a.shortage_count}</td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${slaColor(a.sla_type)}`}>{a.sla_type}</span>
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${hiringTypeColor(a.sla_type)}`}>{a.sla_type}</span>
                       </td>
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${a.status === "open" ? "bg-amber-500/10 text-amber-600" : "bg-primary/10 text-primary"}`}>{a.status}</span>
