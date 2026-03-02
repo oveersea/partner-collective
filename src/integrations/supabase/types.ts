@@ -3389,9 +3389,67 @@ export type Database = {
           },
         ]
       }
+      email_sends: {
+        Row: {
+          body_html: string
+          created_at: string
+          error_message: string | null
+          id: string
+          recipient_email: string
+          recipient_name: string | null
+          recipient_user_id: string | null
+          send_type: string
+          sent_at: string | null
+          sent_by: string | null
+          status: string
+          subject: string
+          template_id: string | null
+        }
+        Insert: {
+          body_html: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          recipient_email: string
+          recipient_name?: string | null
+          recipient_user_id?: string | null
+          send_type?: string
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          subject: string
+          template_id?: string | null
+        }
+        Update: {
+          body_html?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          recipient_email?: string
+          recipient_name?: string | null
+          recipient_user_id?: string | null
+          send_type?: string
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          subject?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_sends_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_templates: {
         Row: {
+          category: string | null
           created_at: string | null
+          created_by: string | null
           description: string | null
           html_body: string
           id: string
@@ -3400,9 +3458,12 @@ export type Database = {
           subject: string
           template_key: string
           updated_at: string | null
+          variables: string[] | null
         }
         Insert: {
+          category?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           html_body: string
           id?: string
@@ -3411,9 +3472,12 @@ export type Database = {
           subject: string
           template_key: string
           updated_at?: string | null
+          variables?: string[] | null
         }
         Update: {
+          category?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           html_body?: string
           id?: string
@@ -3422,6 +3486,7 @@ export type Database = {
           subject?: string
           template_key?: string
           updated_at?: string | null
+          variables?: string[] | null
         }
         Relationships: []
       }
