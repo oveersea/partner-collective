@@ -31,30 +31,35 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
-    if (userError || !user) {
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      console.error("getClaims error:", claimsError);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const userId = user.id;
+    const userId = claimsData.claims.sub as string;
+    console.log("Authenticated user:", userId);
 
-    // Check superadmin/admin role
-    const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-    const { data: roles } = await adminClient
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .in("role", ["admin", "superadmin"]);
+    // Check superadmin/admin role using has_role function (security definer, bypasses RLS)
+    const { data: isAdmin, error: adminCheckError } = await userClient.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
 
-    if (!roles || roles.length === 0) {
+    console.log("Role check - userId:", userId, "isAdmin:", isAdmin, "error:", adminCheckError);
+
+    if (adminCheckError || !isAdmin) {
       return new Response(JSON.stringify({ error: "Forbidden: admin role required" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
     const { cv_upload_id } = await req.json();
     if (!cv_upload_id) {
