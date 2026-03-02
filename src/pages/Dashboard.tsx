@@ -201,6 +201,12 @@ const Dashboard = () => {
               Credits & Balance
             </button>
           </Link>
+          <a href="https://oveersuite.com" target="_blank" rel="noopener noreferrer" className="shrink-0">
+            <button className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-primary/10 text-primary text-xs md:text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/20 whitespace-nowrap">
+              <Layers className="w-4 h-4" />
+              Oveersuite
+            </button>
+          </a>
         </div>
 
         {/* Tabs */}
