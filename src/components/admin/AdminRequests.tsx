@@ -7,7 +7,7 @@ import { id as localeId } from "date-fns/locale";
 import {
   FolderKanban, ShoppingCart, Clock, AlertTriangle, CheckCircle2,
   User, Building2, ChevronDown, ChevronUp, Send, Loader2, Search,
-  Filter, ArrowUpDown, Zap, TrendingUp, XCircle, BarChart3,
+  Filter, ArrowUpDown, Zap, TrendingUp, XCircle, BarChart3, Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,10 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
@@ -93,9 +97,26 @@ const AdminRequests = () => {
   const [submitting, setSubmitting] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  const [isSuperadmin, setIsSuperadmin] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<UnifiedRequest | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     fetchRequests();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .then(({ data }) => {
+          setIsSuperadmin(data?.some((r: any) => r.role === "superadmin") ?? false);
+        });
+    }
+  }, [user]);
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -292,6 +313,29 @@ const AdminRequests = () => {
     } catch (err: any) {
       toast.error(err.message || "Failed to change status");
     }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget || !isSuperadmin) return;
+    setDeleting(true);
+    try {
+      const table = deleteTarget.type === "project" ? "opportunities" : "orders";
+      const { error } = await supabase.from(table).delete().eq("id", deleteTarget.id);
+      if (error) throw error;
+      toast.success("Request deleted successfully");
+      setDeleteDialog(false);
+      setDeleteTarget(null);
+      fetchRequests();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete request");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const openDeleteDialog = (req: UnifiedRequest) => {
+    setDeleteTarget(req);
+    setDeleteDialog(true);
   };
 
   // SLA remaining helper
@@ -581,11 +625,18 @@ const AdminRequests = () => {
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" /> Complete
                       </Button>
-                      <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/20 hover:bg-destructive/5"
+                       <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/20 hover:bg-destructive/5"
                         onClick={() => handleQuickStatusChange(req, "cancelled")}
                       >
                         <XCircle className="w-3.5 h-3.5" /> Cancel
                       </Button>
+                      {isSuperadmin && (
+                        <Button size="sm" variant="destructive" className="gap-1.5"
+                          onClick={() => openDeleteDialog(req)}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -654,6 +705,29 @@ const AdminRequests = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialog} onOpenChange={setDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Request</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to permanently delete <strong>"{deleteTarget?.title}"</strong>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
