@@ -26,6 +26,7 @@ import AdminCompanyDetail from "./pages/AdminCompanyDetail";
 import AdminCreditDetail from "./pages/AdminCreditDetail";
 import AdminHiringDetail from "./pages/AdminHiringDetail";
 import NotFound from "./pages/NotFound";
+import MobileBottomNav from "./components/MobileBottomNav";
 import ServiceDetail from "./pages/ServiceDetail";
 import ServiceOrder from "./pages/ServiceOrder";
 import Portfolios from "./pages/Portfolios";
@@ -71,6 +72,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <MobileBottomNav />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
