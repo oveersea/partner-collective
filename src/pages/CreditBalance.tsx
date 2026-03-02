@@ -114,7 +114,7 @@ const CreditBalancePage = () => {
 
   const purchaseCredit = async (pkg: CreditPackage) => {
     setSubmitting(true);
-    const { error } = await supabase.from("credit_orders").insert({
+    const { data, error } = await supabase.from("credit_orders").insert({
       user_id: user!.id,
       package_id: pkg.id,
       credits: pkg.credits,
@@ -122,15 +122,14 @@ const CreditBalancePage = () => {
       currency: pkg.currency,
       status: "pending",
       description: `Purchase package ${pkg.name}`,
-    } as any);
+    } as any).select("id").single();
 
     if (error) {
       toast.error("Failed to create order: " + error.message);
-    } else {
-      toast.success("Credit order created! Awaiting payment confirmation.");
-      fetchAll();
+      setSubmitting(false);
+    } else if (data) {
+      navigate(`/checkout?type=credit_order&id=${data.id}`);
     }
-    setSubmitting(false);
   };
 
   const submitDeposit = async () => {
@@ -140,22 +139,20 @@ const CreditBalancePage = () => {
       return;
     }
     setDepositSubmitting(true);
-    const { error } = await supabase.from("wallet_deposits").insert({
+    const { data, error } = await supabase.from("wallet_deposits").insert({
       user_id: user!.id,
       amount,
       currency: "IDR",
-      method: "manual_transfer",
+      method: "xendit",
       status: "pending",
-    } as any);
+    } as any).select("id").single();
 
     if (error) {
       toast.error("Failed to create deposit: " + error.message);
-    } else {
-      toast.success("Deposit created! Awaiting admin confirmation.");
-      setDepositAmount("");
-      fetchAll();
+      setDepositSubmitting(false);
+    } else if (data) {
+      navigate(`/checkout?type=wallet_deposit&id=${data.id}`);
     }
-    setDepositSubmitting(false);
   };
 
   const statusBadge = (s: string) => {
