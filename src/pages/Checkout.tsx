@@ -221,7 +221,7 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
-      <main className="max-w-2xl mx-auto px-6 pt-24 pb-20">
+      <main className="container mx-auto px-6 pt-24 pb-20">
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <Button variant="ghost" size="sm" onClick={() => navigate("/credit-balance")}>
@@ -333,117 +333,123 @@ const Checkout = () => {
               key="review"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-6"
+              className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-6"
             >
-              {/* Order Summary Card */}
-              <div className="bg-card border border-border rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-border bg-muted/30">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <TypeIcon className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-semibold text-foreground">{item.title}</h2>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
+              {/* Left Column - Order Details */}
+              <div className="space-y-6">
+                {/* Order Summary Card */}
+                <div className="bg-card border border-border rounded-2xl overflow-hidden">
+                  <div className="p-6 border-b border-border bg-muted/30">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <TypeIcon className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold text-foreground">{item.title}</h2>
+                        <p className="text-sm text-muted-foreground">{item.description}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="p-6 space-y-4">
-                  {/* Item Details */}
-                  <div className="space-y-3">
-                    {item.meta?.credits && (
+                  <div className="p-6 space-y-4">
+                    {/* Item Details */}
+                    <div className="space-y-3">
+                      {item.meta?.credits && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground flex items-center gap-2">
+                            <Sparkles className="w-4 h-4" /> Credits
+                          </span>
+                          <span className="font-semibold text-foreground">{item.meta.credits} credits</span>
+                        </div>
+                      )}
+                      {item.meta?.order_number && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground flex items-center gap-2">
+                            <Receipt className="w-4 h-4" /> Order Number
+                          </span>
+                          <span className="font-mono text-xs text-foreground">{item.meta.order_number}</span>
+                        </div>
+                      )}
+                      {item.meta?.deposit_number && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground flex items-center gap-2">
+                            <Receipt className="w-4 h-4" /> Deposit Number
+                          </span>
+                          <span className="font-mono text-xs text-foreground">{item.meta.deposit_number}</span>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground flex items-center gap-2">
-                          <Sparkles className="w-4 h-4" /> Credits
+                          <Clock className="w-4 h-4" /> Status
                         </span>
-                        <span className="font-semibold text-foreground">{item.meta.credits} credits</span>
+                        <span className="text-amber-600 font-medium capitalize">{item.status}</span>
                       </div>
-                    )}
-                    {item.meta?.order_number && (
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground flex items-center gap-2">
-                          <Receipt className="w-4 h-4" /> Order Number
-                        </span>
-                        <span className="font-mono text-xs text-foreground">{item.meta.order_number}</span>
-                      </div>
-                    )}
-                    {item.meta?.deposit_number && (
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground flex items-center gap-2">
-                          <Receipt className="w-4 h-4" /> Deposit Number
-                        </span>
-                        <span className="font-mono text-xs text-foreground">{item.meta.deposit_number}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground flex items-center gap-2">
-                        <Clock className="w-4 h-4" /> Status
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-border" />
+
+                    {/* Total */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-base font-semibold text-foreground">Total</span>
+                      <span className="text-2xl font-bold text-foreground">
+                        {formatCurrency(item.amount, item.currency)}
                       </span>
-                      <span className="text-amber-600 font-medium capitalize">{item.status}</span>
                     </div>
                   </div>
+                </div>
 
-                  {/* Divider */}
-                  <div className="border-t border-border" />
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex-1" onClick={() => navigate("/credit-balance")}>
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1 gap-2"
+                    onClick={handlePay}
+                    disabled={processing}
+                  >
+                    {processing ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : hasInvoice ? (
+                      <ExternalLink className="w-4 h-4" />
+                    ) : (
+                      <CreditCard className="w-4 h-4" />
+                    )}
+                    {hasInvoice ? "Continue to Payment" : "Pay Now"}
+                  </Button>
+                </div>
+              </div>
 
-                  {/* Total */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-base font-semibold text-foreground">Total</span>
-                    <span className="text-2xl font-bold text-foreground">
-                      {formatCurrency(item.amount, item.currency)}
-                    </span>
+              {/* Right Column - Payment Info */}
+              <div className="space-y-6">
+                {/* Payment Methods Info */}
+                <div className="bg-card border border-border rounded-2xl p-6">
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-primary" /> Payment Methods
+                  </h3>
+                  <div className="space-y-2 text-xs text-muted-foreground">
+                    {["Virtual Account", "E-Wallet (OVO, DANA, GoPay)", "Credit/Debit Card", "QRIS"].map(
+                      (method) => (
+                        <div key={method} className="flex items-center gap-2 py-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                          <span>{method}</span>
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
-              </div>
 
-              {/* Payment Methods Info */}
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-primary" /> Payment Methods
-                </h3>
-                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                  {["Virtual Account", "E-Wallet (OVO, DANA, GoPay)", "Credit/Debit Card", "QRIS"].map(
-                    (method) => (
-                      <div key={method} className="flex items-center gap-2 py-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                        <span>{method}</span>
-                      </div>
-                    )
-                  )}
+                {/* Security Badge */}
+                <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/10 rounded-xl text-sm">
+                  <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground">Secure Payment by Xendit</p>
+                    <p className="text-muted-foreground text-xs">
+                      Your payment is processed securely through Xendit payment gateway. We don't store your payment details.
+                    </p>
+                  </div>
                 </div>
-              </div>
-
-              {/* Security Badge */}
-              <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/10 rounded-xl text-sm">
-                <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
-                <div>
-                  <p className="font-medium text-foreground">Secure Payment by Xendit</p>
-                  <p className="text-muted-foreground text-xs">
-                    Your payment is processed securely through Xendit payment gateway. We don't store your payment details.
-                  </p>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => navigate("/credit-balance")}>
-                  Cancel
-                </Button>
-                <Button
-                  className="flex-1 gap-2"
-                  onClick={handlePay}
-                  disabled={processing}
-                >
-                  {processing ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : hasInvoice ? (
-                    <ExternalLink className="w-4 h-4" />
-                  ) : (
-                    <CreditCard className="w-4 h-4" />
-                  )}
-                  {hasInvoice ? "Continue to Payment" : "Pay Now"}
-                </Button>
               </div>
             </motion.div>
           )}
