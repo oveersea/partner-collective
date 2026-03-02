@@ -63,7 +63,7 @@ const AdminTeams = () => {
   // Add member dialog
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [userSearch, setUserSearch] = useState("");
-  const [userResults, setUserResults] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [userResults, setUserResults] = useState<{ user_id: string; full_name: string; oveercode?: string | null }[]>([]);
   const [searchingUsers, setSearchingUsers] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [newMemberRole, setNewMemberRole] = useState("member");
@@ -187,8 +187,8 @@ const AdminTeams = () => {
     setSearchingUsers(true);
     const { data } = await supabase
       .from("profiles")
-      .select("user_id, full_name")
-      .ilike("full_name", `%${q}%`)
+      .select("user_id, full_name, oveercode")
+      .or(`full_name.ilike.%${q}%,oveercode.ilike.%${q}%`)
       .limit(10);
     setUserResults(data || []);
     setSearchingUsers(false);
@@ -673,6 +673,7 @@ const AdminTeams = () => {
                       }`}
                     >
                       <span className="text-foreground">{u.full_name}</span>
+                      {u.oveercode && <span className="ml-2 text-xs text-muted-foreground font-mono">{u.oveercode}</span>}
                       {selectedUserId === u.user_id && (
                         <Badge variant="outline" className="text-[10px]">Selected</Badge>
                       )}
