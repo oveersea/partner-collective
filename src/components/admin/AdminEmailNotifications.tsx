@@ -1,13 +1,13 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -16,9 +16,13 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Mail, Send, Plus, FileText, Clock, CheckCircle2, XCircle, Loader2, Trash2, Eye, Edit,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Mail, Send, Plus, FileText, Clock, CheckCircle2, XCircle, Loader2, Trash2, Eye, Edit, Search, MoreHorizontal, MailPlus,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type EmailTemplate = {
   id: string;
@@ -55,6 +59,9 @@ const AdminEmailNotifications = () => {
   const [sends, setSends] = useState<EmailSend[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTpl, setSearchTpl] = useState("");
+  const [searchHistory, setSearchHistory] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
 
   // Template dialog
   const [templateDialog, setTemplateDialog] = useState(false);
@@ -75,6 +82,7 @@ const AdminEmailNotifications = () => {
   const [sendBody, setSendBody] = useState("");
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [sending, setSending] = useState(false);
+  const [searchUser, setSearchUser] = useState("");
 
   // Preview
   const [previewDialog, setPreviewDialog] = useState(false);
@@ -90,7 +98,6 @@ const AdminEmailNotifications = () => {
     if (tplRes.data) setTemplates(tplRes.data as EmailTemplate[]);
     if (sendsRes.data) setSends(sendsRes.data as EmailSend[]);
     if (profilesRes.data) {
-      // Get emails from auth
       const { data: authData } = await supabase.rpc("admin_get_users_auth_info");
       const emailMap = new Map<string, string>();
       if (authData) {
@@ -104,6 +111,38 @@ const AdminEmailNotifications = () => {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Filtered data
+  const filteredTemplates = useMemo(() => {
+    let result = templates;
+    if (searchTpl) {
+      const q = searchTpl.toLowerCase();
+      result = result.filter(t =>
+        t.name.toLowerCase().includes(q) ||
+        t.template_key.toLowerCase().includes(q) ||
+        t.subject.toLowerCase().includes(q)
+      );
+    }
+    if (filterCategory !== "all") {
+      result = result.filter(t => t.category === filterCategory);
+    }
+    return result;
+  }, [templates, searchTpl, filterCategory]);
+
+  const filteredSends = useMemo(() => {
+    if (!searchHistory) return sends;
+    const q = searchHistory.toLowerCase();
+    return sends.filter(s =>
+      s.recipient_email.toLowerCase().includes(q) ||
+      (s.recipient_name || "").toLowerCase().includes(q) ||
+      s.subject.toLowerCase().includes(q)
+    );
+  }, [sends, searchHistory]);
+
+  const categories = useMemo(() => {
+    const cats = new Set(templates.map(t => t.category).filter(Boolean));
+    return Array.from(cats) as string[];
+  }, [templates]);
 
   // Template CRUD
   const openNewTemplate = () => {
@@ -169,6 +208,7 @@ const AdminEmailNotifications = () => {
     }
     setSendTarget("selected");
     setSelectedUserIds([]);
+    setSearchUser("");
     setSendDialog(true);
   };
 
@@ -238,13 +278,14 @@ const AdminEmailNotifications = () => {
     );
   };
 
-  const statusBadge = (status: string) => {
-    switch (status) {
-      case "sent": return <Badge className="bg-primary/10 text-primary border-primary/20"><CheckCircle2 className="w-3 h-3 mr-1" />Sent</Badge>;
-      case "failed": return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Failed</Badge>;
-      default: return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
-    }
-  };
+  const filteredProfiles = useMemo(() => {
+    if (!searchUser) return profiles.filter(p => p.email);
+    const q = searchUser.toLowerCase();
+    return profiles.filter(p => p.email && (
+      p.full_name.toLowerCase().includes(q) ||
+      (p.email || "").toLowerCase().includes(q)
+    ));
+  }, [profiles, searchUser]);
 
   const stats = {
     total: sends.length,
@@ -263,170 +304,259 @@ const AdminEmailNotifications = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Email Notifications</h2>
-          <p className="text-muted-foreground text-sm">Kelola template dan kirim email notifikasi</p>
+          <p className="text-muted-foreground text-sm mt-0.5">Kelola template email dan kirim notifikasi ke pengguna</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={openNewTemplate}>
-            <Plus className="w-4 h-4 mr-2" />Template Baru
+            <Plus className="w-4 h-4 mr-1.5" />Template
           </Button>
           <Button onClick={() => openSendDialog()}>
-            <Send className="w-4 h-4 mr-2" />Kirim Email
+            <MailPlus className="w-4 h-4 mr-1.5" />Compose
           </Button>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10"><FileText className="w-5 h-5 text-primary" /></div>
-              <div><p className="text-2xl font-bold">{stats.templates}</p><p className="text-xs text-muted-foreground">Template</p></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent"><Mail className="w-5 h-5 text-accent-foreground" /></div>
-              <div><p className="text-2xl font-bold">{stats.total}</p><p className="text-xs text-muted-foreground">Total Terkirim</p></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10"><CheckCircle2 className="w-5 h-5 text-primary" /></div>
-              <div><p className="text-2xl font-bold">{stats.sent}</p><p className="text-xs text-muted-foreground">Berhasil</p></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-destructive/10"><XCircle className="w-5 h-5 text-destructive" /></div>
-              <div><p className="text-2xl font-bold">{stats.failed}</p><p className="text-xs text-muted-foreground">Gagal</p></div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: "Template", value: stats.templates, icon: FileText, color: "text-primary bg-primary/10" },
+          { label: "Total Sent", value: stats.total, icon: Mail, color: "text-accent-foreground bg-accent" },
+          { label: "Delivered", value: stats.sent, icon: CheckCircle2, color: "text-primary bg-primary/10" },
+          { label: "Failed", value: stats.failed, icon: XCircle, color: "text-destructive bg-destructive/10" },
+        ].map(s => (
+          <Card key={s.label} className="border-border/50">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${s.color}`}>
+                <s.icon className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xl font-bold leading-none">{s.value}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      <Tabs defaultValue="templates">
+      {/* Tabs */}
+      <Tabs defaultValue="templates" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="templates"><FileText className="w-4 h-4 mr-1" />Template</TabsTrigger>
-          <TabsTrigger value="history"><Clock className="w-4 h-4 mr-1" />Riwayat Kirim</TabsTrigger>
+          <TabsTrigger value="templates" className="gap-1.5">
+            <FileText className="w-3.5 h-3.5" />Template ({templates.length})
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-1.5">
+            <Clock className="w-3.5 h-3.5" />Riwayat ({sends.length})
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="templates" className="mt-4">
-          {templates.length === 0 ? (
-            <Card><CardContent className="py-10 text-center text-muted-foreground">Belum ada template. Buat template pertama Anda.</CardContent></Card>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {templates.map(t => (
-                <Card key={t.id} className="hover:shadow-md transition-shadow flex flex-col">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <CardTitle className="text-base leading-tight truncate">{t.name}</CardTitle>
-                        <CardDescription className="text-xs mt-1 font-mono truncate">{t.template_key}</CardDescription>
-                      </div>
-                      <Badge variant={t.is_active ? "default" : "secondary"} className="shrink-0">
-                        {t.is_active ? "Active" : "Inactive"}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col justify-between gap-3">
-                    <div className="space-y-1.5">
-                      <p className="text-sm text-muted-foreground line-clamp-2"><span className="font-medium text-foreground">Subject:</span> {t.subject}</p>
-                      {t.description && <p className="text-xs text-muted-foreground line-clamp-2">{t.description}</p>}
-                      {t.category && <Badge variant="outline" className="text-xs">{t.category}</Badge>}
-                    </div>
-                    <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
-                      <Button size="sm" variant="outline" onClick={() => { setPreviewHtml(t.html_body); setPreviewDialog(true); }}>
-                        <Eye className="w-3 h-3 mr-1" />Preview
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => openEditTemplate(t)}>
-                        <Edit className="w-3 h-3 mr-1" />Edit
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => openSendDialog(t.id)}>
-                        <Send className="w-3 h-3 mr-1" />Kirim
-                      </Button>
-                      <Button size="sm" variant="ghost" className="text-destructive ml-auto" onClick={() => deleteTemplate(t.id)}>
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="history" className="mt-4">
+        {/* === TEMPLATES TAB === */}
+        <TabsContent value="templates">
           <Card>
-            <CardContent className="p-0">
+            {/* Toolbar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-4 border-b border-border">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={searchTpl}
+                  onChange={e => setSearchTpl(e.target.value)}
+                  placeholder="Cari template..."
+                  className="pl-9"
+                />
+              </div>
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="w-full sm:w-[160px]">
+                  <SelectValue placeholder="Kategori" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Kategori</SelectItem>
+                  {categories.map(c => (
+                    <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Penerima</TableHead>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-[250px]">Template</TableHead>
                     <TableHead>Subject</TableHead>
-                    <TableHead>Tipe</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Waktu</TableHead>
+                    <TableHead className="w-[100px]">Kategori</TableHead>
+                    <TableHead className="w-[80px]">Status</TableHead>
+                    <TableHead className="w-[60px] text-right">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sends.length === 0 ? (
-                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Belum ada email yang dikirim</TableCell></TableRow>
-                  ) : sends.map(s => (
-                    <TableRow key={s.id}>
-                      <TableCell>
-                        <div>
-                          <p className="text-sm font-medium">{s.recipient_name || "-"}</p>
-                          <p className="text-xs text-muted-foreground">{s.recipient_email}</p>
+                  {filteredTemplates.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                          <FileText className="w-8 h-8 opacity-40" />
+                          <p className="text-sm">
+                            {searchTpl || filterCategory !== "all"
+                              ? "Tidak ada template yang cocok dengan filter"
+                              : "Belum ada template. Klik 'Template' untuk membuat."}
+                          </p>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm max-w-[200px] truncate">{s.subject}</TableCell>
-                      <TableCell><Badge variant="outline" className="text-xs">{s.send_type}</Badge></TableCell>
-                      <TableCell>{statusBadge(s.status)}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {s.sent_at ? new Date(s.sent_at).toLocaleString("id-ID") : "-"}
+                    </TableRow>
+                  ) : filteredTemplates.map(t => (
+                    <TableRow key={t.id} className="group cursor-pointer" onClick={() => openEditTemplate(t)}>
+                      <TableCell>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{t.name}</p>
+                          <p className="text-xs text-muted-foreground font-mono">{t.template_key}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-sm text-muted-foreground truncate max-w-[300px]">{t.subject}</p>
+                        {t.description && (
+                          <p className="text-xs text-muted-foreground/70 truncate max-w-[300px] mt-0.5">{t.description}</p>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs capitalize">{t.category || "general"}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={t.is_active ? "default" : "secondary"} className="text-xs">
+                          {t.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right" onClick={e => e.stopPropagation()}>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => { setPreviewHtml(t.html_body); setPreviewDialog(true); }}>
+                              <Eye className="w-4 h-4 mr-2" />Preview
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openEditTemplate(t)}>
+                              <Edit className="w-4 h-4 mr-2" />Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openSendDialog(t.id)}>
+                              <Send className="w-4 h-4 mr-2" />Kirim
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => deleteTemplate(t.id)} className="text-destructive focus:text-destructive">
+                              <Trash2 className="w-4 h-4 mr-2" />Hapus
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </CardContent>
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* === HISTORY TAB === */}
+        <TabsContent value="history">
+          <Card>
+            <div className="p-4 border-b border-border">
+              <div className="relative max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={searchHistory}
+                  onChange={e => setSearchHistory(e.target.value)}
+                  placeholder="Cari email, nama, atau subject..."
+                  className="pl-9"
+                />
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Penerima</TableHead>
+                    <TableHead>Subject</TableHead>
+                    <TableHead className="w-[100px]">Tipe</TableHead>
+                    <TableHead className="w-[100px]">Status</TableHead>
+                    <TableHead className="w-[160px]">Waktu</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredSends.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                          <Mail className="w-8 h-8 opacity-40" />
+                          <p className="text-sm">Belum ada email yang dikirim</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredSends.map(s => (
+                    <TableRow key={s.id}>
+                      <TableCell>
+                        <p className="text-sm font-medium">{s.recipient_name || "-"}</p>
+                        <p className="text-xs text-muted-foreground">{s.recipient_email}</p>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground max-w-[250px] truncate">{s.subject}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs capitalize">{s.send_type}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        {s.status === "sent" ? (
+                          <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">
+                            <CheckCircle2 className="w-3 h-3 mr-1" />Sent
+                          </Badge>
+                        ) : s.status === "failed" ? (
+                          <Badge variant="destructive" className="text-xs">
+                            <XCircle className="w-3 h-3 mr-1" />Failed
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">
+                            <Clock className="w-3 h-3 mr-1" />Pending
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {s.sent_at ? new Date(s.sent_at).toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "-"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* ========== DIALOGS ========== */}
 
       {/* Template Dialog */}
       <Dialog open={templateDialog} onOpenChange={setTemplateDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingTemplate ? "Edit Template" : "Buat Template Baru"}</DialogTitle>
+            <DialogDescription>Isi detail template email di bawah ini.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 pt-2">
             <div className="grid grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-1.5">
                 <label className="text-sm font-medium">Nama Template</label>
                 <Input value={tplName} onChange={e => setTplName(e.target.value)} placeholder="Welcome Email" />
               </div>
-              <div>
+              <div className="space-y-1.5">
                 <label className="text-sm font-medium">Template Key</label>
-                <Input value={tplKey} onChange={e => setTplKey(e.target.value)} placeholder="welcome_email" />
+                <Input value={tplKey} onChange={e => setTplKey(e.target.value)} placeholder="welcome_email" className="font-mono" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-1.5">
                 <label className="text-sm font-medium">Subject</label>
                 <Input value={tplSubject} onChange={e => setTplSubject(e.target.value)} placeholder="Selamat Datang di Oveersea" />
               </div>
-              <div>
+              <div className="space-y-1.5">
                 <label className="text-sm font-medium">Kategori</label>
                 <Select value={tplCategory} onValueChange={setTplCategory}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -440,27 +570,27 @@ const AdminEmailNotifications = () => {
                 </Select>
               </div>
             </div>
-            <div>
-              <label className="text-sm font-medium">Deskripsi (opsional)</label>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Deskripsi <span className="text-muted-foreground font-normal">(opsional)</span></label>
               <Input value={tplDesc} onChange={e => setTplDesc(e.target.value)} placeholder="Deskripsi singkat template ini" />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <label className="text-sm font-medium">Body HTML</label>
               <Textarea value={tplBody} onChange={e => setTplBody(e.target.value)} rows={12} placeholder="<html>...</html>" className="font-mono text-xs" />
             </div>
             {tplBody && (
-              <div>
-                <label className="text-sm font-medium mb-2 block">Preview</label>
-                <div className="border rounded-lg p-4 bg-white max-h-[200px] overflow-auto">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Preview</label>
+                <div className="border rounded-lg p-4 bg-background max-h-[200px] overflow-auto">
                   <div dangerouslySetInnerHTML={{ __html: tplBody }} />
                 </div>
               </div>
             )}
           </div>
-          <DialogFooter>
+          <DialogFooter className="pt-2">
             <Button variant="outline" onClick={() => setTemplateDialog(false)}>Batal</Button>
             <Button onClick={saveTemplate} disabled={savingTpl}>
-              {savingTpl ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              {savingTpl && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Simpan
             </Button>
           </DialogFooter>
@@ -471,62 +601,85 @@ const AdminEmailNotifications = () => {
       <Dialog open={sendDialog} onOpenChange={setSendDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Kirim Email Notifikasi</DialogTitle>
+            <DialogTitle>Compose Email</DialogTitle>
+            <DialogDescription>Kirim email notifikasi ke pengguna terpilih.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Template (opsional)</label>
-              <Select value={selectedTemplateId} onValueChange={handleTemplateSelect}>
-                <SelectTrigger><SelectValue placeholder="Pilih template atau tulis manual" /></SelectTrigger>
-                <SelectContent>
-                  {templates.filter(t => t.is_active).map(t => (
-                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="space-y-4 pt-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Template <span className="text-muted-foreground font-normal">(opsional)</span></label>
+                <Select value={selectedTemplateId} onValueChange={handleTemplateSelect}>
+                  <SelectTrigger><SelectValue placeholder="Pilih template" /></SelectTrigger>
+                  <SelectContent>
+                    {templates.filter(t => t.is_active).map(t => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Penerima</label>
+                <Select value={sendTarget} onValueChange={(v) => setSendTarget(v as "all" | "selected")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua User ({profiles.filter(p => p.email).length})</SelectItem>
+                    <SelectItem value="selected">Pilih User</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium">Penerima</label>
-              <Select value={sendTarget} onValueChange={(v) => setSendTarget(v as "all" | "selected")}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua User ({profiles.filter(p => p.email).length})</SelectItem>
-                  <SelectItem value="selected">Pilih User</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
             {sendTarget === "selected" && (
-              <div className="border rounded-lg max-h-[200px] overflow-y-auto">
-                {profiles.filter(p => p.email).map(p => (
-                  <label key={p.user_id} className="flex items-center gap-3 px-3 py-2 hover:bg-muted cursor-pointer border-b last:border-b-0">
-                    <input
-                      type="checkbox"
-                      checked={selectedUserIds.includes(p.user_id)}
-                      onChange={() => toggleUserSelection(p.user_id)}
-                      className="rounded"
-                    />
-                    <div>
-                      <p className="text-sm font-medium">{p.full_name}</p>
-                      <p className="text-xs text-muted-foreground">{p.email}</p>
-                    </div>
-                  </label>
-                ))}
+              <div className="space-y-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    value={searchUser}
+                    onChange={e => setSearchUser(e.target.value)}
+                    placeholder="Cari user..."
+                    className="pl-9"
+                  />
+                </div>
+                {selectedUserIds.length > 0 && (
+                  <p className="text-xs text-muted-foreground">{selectedUserIds.length} user dipilih</p>
+                )}
+                <div className="border rounded-lg max-h-[180px] overflow-y-auto divide-y divide-border">
+                  {filteredProfiles.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">Tidak ada user ditemukan</div>
+                  ) : filteredProfiles.map(p => (
+                    <label key={p.user_id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors">
+                      <Checkbox
+                        checked={selectedUserIds.includes(p.user_id)}
+                        onCheckedChange={() => toggleUserSelection(p.user_id)}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium truncate">{p.full_name || "—"}</p>
+                        <p className="text-xs text-muted-foreground truncate">{p.email}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
               </div>
             )}
-            <div>
+
+            <div className="space-y-1.5">
               <label className="text-sm font-medium">Subject</label>
               <Input value={sendSubject} onChange={e => setSendSubject(e.target.value)} placeholder="Subject email" />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <label className="text-sm font-medium">Body HTML</label>
               <Textarea value={sendBody} onChange={e => setSendBody(e.target.value)} rows={10} placeholder="<html>...</html>" className="font-mono text-xs" />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="pt-2">
             <Button variant="outline" onClick={() => setSendDialog(false)}>Batal</Button>
             <Button onClick={handleSend} disabled={sending}>
               {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-              Kirim {sendTarget === "all" ? `ke ${profiles.filter(p => p.email).length} user` : selectedUserIds.length > 0 ? `ke ${selectedUserIds.length} user` : ""}
+              Kirim {sendTarget === "all"
+                ? `ke ${profiles.filter(p => p.email).length} user`
+                : selectedUserIds.length > 0
+                  ? `ke ${selectedUserIds.length} user`
+                  : ""}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -535,8 +688,10 @@ const AdminEmailNotifications = () => {
       {/* Preview Dialog */}
       <Dialog open={previewDialog} onOpenChange={setPreviewDialog}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Preview Email</DialogTitle></DialogHeader>
-          <div className="border rounded-lg p-4 bg-white">
+          <DialogHeader>
+            <DialogTitle>Preview Email</DialogTitle>
+          </DialogHeader>
+          <div className="border rounded-lg p-6 bg-background">
             <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
           </div>
         </DialogContent>
