@@ -5,8 +5,10 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Shield, User, MoreVertical, Trash2, UserX, ArrowUpDown, ArrowUp, ArrowDown, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Shield, User, MoreVertical, Trash2, UserX, ArrowUpDown, ArrowUp, ArrowDown, CalendarDays, ChevronLeft, ChevronRight, FileUp } from "lucide-react";
 import InviteUsersDialog from "./InviteUsersDialog";
+import AdminBulkCV from "./AdminBulkCV";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -259,6 +261,13 @@ const AdminUsers = () => {
   };
 
   return (
+    <Tabs defaultValue="users" className="space-y-4">
+      <TabsList>
+        <TabsTrigger value="users"><User className="w-4 h-4 mr-1.5" />User Management</TabsTrigger>
+        <TabsTrigger value="bulk_cv"><FileUp className="w-4 h-4 mr-1.5" />Bulk CV</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="users">
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-foreground">User Management</h2>
@@ -506,6 +515,12 @@ const AdminUsers = () => {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+      </TabsContent>
+
+      <TabsContent value="bulk_cv">
+        <AdminBulkCV />
+      </TabsContent>
+    </Tabs>
   );
 };
 
