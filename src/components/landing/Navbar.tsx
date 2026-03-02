@@ -329,10 +329,7 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile menu button */}
-        <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* Mobile menu button - hidden, using bottom nav instead */}
       </div>
 
       {/* Mega Menu Dropdown */}
