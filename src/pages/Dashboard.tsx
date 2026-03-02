@@ -14,6 +14,7 @@ import EducationTab from "@/components/dashboard/EducationTab";
 import PortfolioTab from "@/components/dashboard/PortfolioTab";
 import TeamsTab from "@/components/dashboard/TeamsTab";
 import ServicesTab from "@/components/dashboard/ServicesTab";
+import CompanyTab from "@/components/dashboard/CompanyTab";
 
 interface Profile {
   full_name: string | null;
@@ -216,7 +217,7 @@ const Dashboard = () => {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => { if (tab.id === "company") { navigate("/companies"); return; } setActiveTab(tab.id); if (editing && tab.id !== "profile") setEditing(false); }}
+                onClick={() => { setActiveTab(tab.id); if (editing && tab.id !== "profile") setEditing(false); }}
                 className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "bg-card text-card-foreground shadow-sm"
@@ -248,6 +249,7 @@ const Dashboard = () => {
         {activeTab === "portfolio" && <PortfolioTab />}
         {activeTab === "teams" && <TeamsTab />}
         {activeTab === "services" && <ServicesTab />}
+        {activeTab === "company" && <CompanyTab />}
 
         {/* Vendor CTA */}
         <div className="mt-8 md:mt-12">
