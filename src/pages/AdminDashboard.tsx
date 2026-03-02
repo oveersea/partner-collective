@@ -20,7 +20,6 @@ import AdminVendors from "@/components/admin/AdminVendors";
 import AdminRequests from "@/components/admin/AdminRequests";
 import AdminApprovals from "@/components/admin/AdminApprovals";
 import AdminTeams from "@/components/admin/AdminTeams";
-import AdminBulkCV from "@/components/admin/AdminBulkCV";
 import { LogOut, User, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -93,7 +92,6 @@ const AdminDashboard = () => {
       case "assessment": return <AdminAssessment />;
       case "insights": return <AdminInsights />;
       case "approvals": return <AdminApprovals />;
-      case "bulk_cv": return <AdminBulkCV />;
       default: return <AdminOverview />;
     }
   };
