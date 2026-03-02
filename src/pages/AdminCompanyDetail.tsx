@@ -430,7 +430,6 @@ const AdminCompanyDetail = () => {
                       <Select value={newMemberRole} onValueChange={setNewMemberRole}>
                         <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="owner">Owner</SelectItem>
                           <SelectItem value="admin">Admin</SelectItem>
                           <SelectItem value="member">Member</SelectItem>
                         </SelectContent>
@@ -459,14 +458,17 @@ const AdminCompanyDetail = () => {
                           <p className="text-[10px] text-muted-foreground">{new Date(m.created_at).toLocaleDateString("id-ID")}</p>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
-                          <Select value={m.role} onValueChange={(v) => updateMemberRole(m.id, v)}>
-                            <SelectTrigger className="w-[80px] h-6 text-[10px]"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="owner">Owner</SelectItem>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="member">Member</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          {m.role === "owner" ? (
+                            <Badge variant="outline" className={`text-[10px] px-2 py-0.5 ${roleBadge("owner")}`}>Owner</Badge>
+                          ) : (
+                            <Select value={m.role} onValueChange={(v) => updateMemberRole(m.id, v)}>
+                              <SelectTrigger className="w-[80px] h-6 text-[10px]"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="member">Member</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
                           <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removeMember(m.id, m.user_name || "member")}>
                             <Trash2 className="w-3 h-3" />
                           </Button>
