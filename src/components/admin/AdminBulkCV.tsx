@@ -45,6 +45,7 @@ const AdminBulkCV = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<string, string>>({});
   const [deleteTarget, setDeleteTarget] = useState<CvUpload | null>(null);
+  const [parsingAll, setParsingAll] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchUploads = useCallback(async () => {
@@ -209,6 +210,33 @@ const AdminBulkCV = () => {
     }
   };
 
+  const handleParseAllPending = async () => {
+    const pendingUploads = uploads.filter(u => u.parsing_status === "pending");
+    if (pendingUploads.length === 0) return;
+    setParsingAll(true);
+    toast.info(`Memulai parsing ${pendingUploads.length} CV...`);
+
+    for (let i = 0; i < pendingUploads.length; i += MAX_CONCURRENT) {
+      const batch = pendingUploads.slice(i, i + MAX_CONCURRENT);
+      await Promise.allSettled(
+        batch.map(async (u) => {
+          await supabase
+            .from("cv_uploads")
+            .update({ parsing_status: "processing", updated_at: new Date().toISOString() })
+            .eq("id", u.id);
+          const { error } = await supabase.functions.invoke("parse-cv", {
+            body: { cv_upload_id: u.id },
+          });
+          if (error) console.error(`Parse error for ${u.file_name}:`, error);
+        })
+      );
+    }
+
+    setParsingAll(false);
+    fetchUploads();
+    toast.success("Batch parsing selesai");
+  };
+
   const statusBadge = (status: string) => {
     switch (status) {
       case "completed":
@@ -247,6 +275,12 @@ const AdminBulkCV = () => {
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
+          {uploads.filter(u => u.parsing_status === "pending").length > 0 && (
+            <Button variant="outline" onClick={handleParseAllPending} disabled={parsingAll}>
+              {parsingAll ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+              Parse All Pending ({uploads.filter(u => u.parsing_status === "pending").length})
+            </Button>
+          )}
           <Button onClick={() => setDialogOpen(true)}>
             <Upload className="w-4 h-4 mr-2" />
             Upload CVs
@@ -343,7 +377,7 @@ const AdminBulkCV = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {u.parsing_status === "failed" && (
+                        {(u.parsing_status === "failed" || u.parsing_status === "pending") && (
                           <Button size="sm" variant="outline" onClick={() => handleReparse(u)}>
                             <RefreshCw className="w-3 h-3 mr-1" />Re-parse
                           </Button>
