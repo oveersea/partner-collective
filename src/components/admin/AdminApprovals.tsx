@@ -36,15 +36,15 @@ interface ChangeRequest {
 }
 
 const FIELD_LABELS: Record<string, string> = {
-  full_name: "Nama Lengkap",
+  full_name: "Full Name",
   headline: "Headline",
-  city: "Kota",
-  country: "Negara",
-  phone_number: "No. Telepon",
+  city: "City",
+  country: "Country",
+  phone_number: "Phone Number",
   daily_rate: "Daily Rate",
-  highest_education: "Pendidikan Terakhir",
-  opportunity_availability: "Ketersediaan",
-  professional_summary: "Ringkasan Profesional",
+  highest_education: "Highest Education",
+  opportunity_availability: "Availability",
+  professional_summary: "Professional Summary",
   linkedin_url: "LinkedIn URL",
   website_url: "Website URL",
   bio: "Bio",
@@ -87,7 +87,7 @@ const AdminApprovals = () => {
       .order("created_at", { ascending: false });
 
     if (error) {
-      toast.error("Gagal memuat data");
+      toast.error("Failed to load data");
       setLoading(false);
       return;
     }
@@ -152,12 +152,12 @@ const AdminApprovals = () => {
         }
       }
 
-      toast.success(action === "approved" ? "Perubahan disetujui!" : "Perubahan ditolak");
+      toast.success(action === "approved" ? "Change approved!" : "Change rejected");
       setReviewDialog(false);
       setReviewNotes("");
       fetchRequests();
     } catch (err: any) {
-      toast.error(err.message || "Gagal memproses");
+      toast.error(err.message || "Failed to process");
     } finally {
       setSubmitting(false);
     }
@@ -172,10 +172,10 @@ const AdminApprovals = () => {
         await handleReview("approved", id, "Bulk approved");
       }
       setSelectedIds(new Set());
-      toast.success(`${selectedIds.size} perubahan disetujui`);
+      toast.success(`${selectedIds.size} changes approved`);
       fetchRequests();
     } catch {
-      toast.error("Gagal memproses bulk approval");
+      toast.error("Failed to process bulk approval");
     } finally {
       setBulkSubmitting(false);
     }
@@ -260,7 +260,7 @@ const AdminApprovals = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             className="pl-9"
-            placeholder="Cari nama user atau field..."
+            placeholder="Search user name or field..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -271,7 +271,7 @@ const AdminApprovals = () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Semua</SelectItem>
+            <SelectItem value="all">All</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="approved">Approved</SelectItem>
             <SelectItem value="rejected">Rejected</SelectItem>
@@ -286,7 +286,7 @@ const AdminApprovals = () => {
             className="gap-1.5"
           >
             {bulkSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-            Approve {selectedIds.size} Terpilih
+            Approve {selectedIds.size} Selected
           </Button>
         )}
       </div>
@@ -295,7 +295,7 @@ const AdminApprovals = () => {
       <div className="space-y-2">
         {filtered.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
-            Tidak ada request perubahan profil.
+            No profile change requests found.
           </div>
         )}
 
@@ -377,15 +377,15 @@ const AdminApprovals = () => {
                 <div className="px-4 pb-4 border-t border-border pt-4 space-y-3">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <Label className="text-xs text-muted-foreground">Nilai Lama</Label>
+                     <Label className="text-xs text-muted-foreground">Old Value</Label>
                       <div className="mt-1 p-3 bg-destructive/5 border border-destructive/10 rounded-lg text-sm text-foreground min-h-[40px]">
-                        {req.old_value || <span className="text-muted-foreground italic">Kosong</span>}
+                        {req.old_value || <span className="text-muted-foreground italic">Empty</span>}
                       </div>
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">Nilai Baru</Label>
+                      <Label className="text-xs text-muted-foreground">New Value</Label>
                       <div className="mt-1 p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-lg text-sm text-foreground min-h-[40px]">
-                        {req.new_value || <span className="text-muted-foreground italic">Kosong</span>}
+                        {req.new_value || <span className="text-muted-foreground italic">Empty</span>}
                       </div>
                     </div>
                   </div>
@@ -399,7 +399,7 @@ const AdminApprovals = () => {
 
                   {req.reviewed_at && (
                     <p className="text-xs text-muted-foreground">
-                      Direview pada {format(new Date(req.reviewed_at), "dd MMM yyyy HH:mm", { locale: localeId })}
+                      Reviewed on {format(new Date(req.reviewed_at), "dd MMM yyyy HH:mm")}
                     </p>
                   )}
                 </div>
@@ -414,25 +414,26 @@ const AdminApprovals = () => {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {reviewAction === "approved" ? "Setujui Perubahan" : "Tolak Perubahan"}
+              {reviewAction === "approved" ? "Approve Change" : "Reject Change"}
             </DialogTitle>
           </DialogHeader>
 
           {selectedRequest && (
             <div className="space-y-4">
               <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1">
-                <p><strong>{selectedRequest.user_name}</strong> mengubah <strong>{FIELD_LABELS[selectedRequest.field_name] || selectedRequest.field_name}</strong></p>
+                <p><strong>{selectedRequest.user_name}</strong> changed <strong>{FIELD_LABELS[selectedRequest.field_name] || selectedRequest.field_name}</strong></p>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                  <span className="line-through">{selectedRequest.old_value || "(kosong)"}</span>
+                  <span className="line-through">{selectedRequest.old_value || "(empty)"}</span>
                   <ArrowRight className="w-3 h-3" />
+                  <span className="text-foreground font-medium">{selectedRequest.new_value || "(empty)"}</span>
                   <span className="text-foreground font-medium">{selectedRequest.new_value || "(kosong)"}</span>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Catatan Admin (opsional)</Label>
+                <Label>Admin Notes (optional)</Label>
                 <Textarea
-                  placeholder="Alasan approve/reject..."
+                  placeholder="Reason for approve/reject..."
                   rows={3}
                   value={reviewNotes}
                   onChange={(e) => setReviewNotes(e.target.value)}
@@ -442,7 +443,7 @@ const AdminApprovals = () => {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReviewDialog(false)}>Batal</Button>
+            <Button variant="outline" onClick={() => setReviewDialog(false)}>Cancel</Button>
             <Button
               onClick={() => handleReview(reviewAction)}
               disabled={submitting}
@@ -451,7 +452,7 @@ const AdminApprovals = () => {
               {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : (
                 reviewAction === "approved" ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <XCircle className="w-4 h-4 mr-2" />
               )}
-              {reviewAction === "approved" ? "Setujui" : "Tolak"}
+              {reviewAction === "approved" ? "Approve" : "Reject"}
             </Button>
           </DialogFooter>
         </DialogContent>

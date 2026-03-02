@@ -58,18 +58,9 @@ const AdminInsights = () => {
 
   const fetchData = async () => {
     const [svcRes, survRes, caseRes] = await Promise.all([
-      supabase
-        .from("insight_services")
-        .select("id, title, tagline, icon_name, sort_order, is_active, created_at")
-        .order("sort_order", { ascending: true }),
-      supabase
-        .from("surveys")
-        .select("id, title, category, status, total_responses, starts_at, ends_at, created_at")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("case_studies")
-        .select("id, title, company_name, industry, description, cta_label, sort_order, is_active, is_featured, created_at")
-        .order("sort_order", { ascending: true }),
+      supabase.from("insight_services").select("id, title, tagline, icon_name, sort_order, is_active, created_at").order("sort_order", { ascending: true }),
+      supabase.from("surveys").select("id, title, category, status, total_responses, starts_at, ends_at, created_at").order("created_at", { ascending: false }),
+      supabase.from("case_studies").select("id, title, company_name, industry, description, cta_label, sort_order, is_active, is_featured, created_at").order("sort_order", { ascending: true }),
     ]);
 
     if (svcRes.data) setServices(svcRes.data as unknown as InsightService[]);
@@ -80,27 +71,27 @@ const AdminInsights = () => {
 
   const toggleServiceActive = async (id: string, current: boolean | null) => {
     const { error } = await supabase.from("insight_services").update({ is_active: !current } as any).eq("id", id);
-    if (error) toast.error("Gagal update status");
-    else { toast.success("Status diperbarui"); fetchData(); }
+    if (error) toast.error("Failed to update status");
+    else { toast.success("Status updated"); fetchData(); }
   };
 
   const toggleSurveyStatus = async (id: string, current: string) => {
     const next = current === "active" ? "closed" : "active";
     const { error } = await supabase.from("surveys").update({ status: next } as any).eq("id", id);
-    if (error) toast.error("Gagal update status");
-    else { toast.success("Status diperbarui"); fetchData(); }
+    if (error) toast.error("Failed to update status");
+    else { toast.success("Status updated"); fetchData(); }
   };
 
   const toggleCaseActive = async (id: string, current: boolean | null) => {
     const { error } = await supabase.from("case_studies").update({ is_active: !current } as any).eq("id", id);
-    if (error) toast.error("Gagal update status");
-    else { toast.success("Status diperbarui"); fetchData(); }
+    if (error) toast.error("Failed to update status");
+    else { toast.success("Status updated"); fetchData(); }
   };
 
   const toggleCaseFeatured = async (id: string, current: boolean | null) => {
     const { error } = await supabase.from("case_studies").update({ is_featured: !current } as any).eq("id", id);
-    if (error) toast.error("Gagal update featured");
-    else { toast.success("Featured diperbarui"); fetchData(); }
+    if (error) toast.error("Failed to update featured");
+    else { toast.success("Featured updated"); fetchData(); }
   };
 
   const filteredSvc = services.filter((s) => s.title.toLowerCase().includes(search.toLowerCase()));
@@ -126,7 +117,7 @@ const AdminInsights = () => {
   const PaginationBar = ({ page, totalPages, total, onPrev, onNext }: { page: number; totalPages: number; total: number; onPrev: () => void; onNext: () => void }) => (
     <div className="flex items-center justify-between px-4 py-3 border-t border-border">
       <span className="text-xs text-muted-foreground">
-        Menampilkan {Math.min((page - 1) * PAGE_SIZE + 1, total)}–{Math.min(page * PAGE_SIZE, total)} dari {total}
+        Showing {Math.min((page - 1) * PAGE_SIZE + 1, total)}–{Math.min(page * PAGE_SIZE, total)} of {total}
       </span>
       <div className="flex items-center gap-1">
         <Button size="sm" variant="ghost" disabled={page <= 1} onClick={onPrev}>
@@ -143,10 +134,10 @@ const AdminInsights = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-foreground">Insights & Survey</h2>
+        <h2 className="text-xl font-semibold text-foreground">Insights & Surveys</h2>
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Cari..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input className="pl-9" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
 
@@ -169,12 +160,12 @@ const AdminInsights = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Judul</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Title</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tagline</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Icon</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Urutan</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Order</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -183,7 +174,7 @@ const AdminInsights = () => {
                     <tr key={i} className="border-b border-border"><td colSpan={6} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
                   ))
                 ) : pagedSvc.length === 0 ? (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No data found</td></tr>
                 ) : (
                   pagedSvc.map((s) => (
                     <tr key={s.id} className="border-b border-border hover:bg-muted/30 transition-colors">
@@ -193,7 +184,7 @@ const AdminInsights = () => {
                       <td className="px-4 py-3 text-muted-foreground text-xs">{s.sort_order ?? "—"}</td>
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${s.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                          {s.is_active ? "Aktif" : "Nonaktif"}
+                          {s.is_active ? "Active" : "Inactive"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
@@ -220,13 +211,13 @@ const AdminInsights = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Judul</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Kategori</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Title</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Category</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Respons</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Mulai</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Berakhir</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Responses</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Start</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">End</th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -235,7 +226,7 @@ const AdminInsights = () => {
                     <tr key={i} className="border-b border-border"><td colSpan={7} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
                   ))
                 ) : pagedSurveys.length === 0 ? (
-                  <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">No data found</td></tr>
                 ) : (
                   pagedSurveys.map((s) => (
                     <tr key={s.id} className="border-b border-border hover:bg-muted/30 transition-colors">
@@ -245,8 +236,8 @@ const AdminInsights = () => {
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusBadge(s.status)}`}>{s.status}</span>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{s.total_responses ?? 0}</td>
-                      <td className="px-4 py-3 text-muted-foreground text-xs">{s.starts_at ? new Date(s.starts_at).toLocaleDateString("id-ID") : "—"}</td>
-                      <td className="px-4 py-3 text-muted-foreground text-xs">{s.ends_at ? new Date(s.ends_at).toLocaleDateString("id-ID") : "—"}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{s.starts_at ? new Date(s.starts_at).toLocaleDateString("en-US") : "—"}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{s.ends_at ? new Date(s.ends_at).toLocaleDateString("en-US") : "—"}</td>
                       <td className="px-4 py-3 text-right">
                         <Button size="sm" variant="ghost" onClick={() => toggleSurveyStatus(s.id, s.status)}>
                           {s.status === "active" ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -271,14 +262,14 @@ const AdminInsights = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Judul</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Perusahaan</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Industri</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Urutan</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Title</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Company</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Industry</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Order</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Featured</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -287,7 +278,7 @@ const AdminInsights = () => {
                     <tr key={i} className="border-b border-border"><td colSpan={8} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td></tr>
                   ))
                 ) : pagedCases.length === 0 ? (
-                  <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No data found</td></tr>
                 ) : (
                   pagedCases.map((c) => (
                     <tr key={c.id} className="border-b border-border hover:bg-muted/30 transition-colors">
@@ -302,10 +293,10 @@ const AdminInsights = () => {
                       </td>
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-1 rounded-full ${c.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                          {c.is_active ? "Aktif" : "Nonaktif"}
+                          {c.is_active ? "Active" : "Inactive"}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(c.created_at).toLocaleDateString("id-ID")}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(c.created_at).toLocaleDateString("en-US")}</td>
                       <td className="px-4 py-3 text-right">
                         <Button size="sm" variant="ghost" onClick={() => toggleCaseActive(c.id, c.is_active)}>
                           {c.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

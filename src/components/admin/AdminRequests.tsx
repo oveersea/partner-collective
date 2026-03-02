@@ -272,11 +272,11 @@ const AdminRequests = () => {
         const { error } = await supabase.from("orders").update(updates).eq("id", selectedRequest.id);
         if (error) throw error;
       }
-      toast.success("Request berhasil diupdate!");
+      toast.success("Request updated successfully!");
       setAssignDialog(false);
       fetchRequests();
     } catch (err: any) {
-      toast.error(err.message || "Gagal mengupdate request");
+      toast.error(err.message || "Failed to update request");
     } finally {
       setSubmitting(false);
     }
@@ -287,10 +287,10 @@ const AdminRequests = () => {
       const table = req.type === "project" ? "opportunities" : "orders";
       const { error } = await supabase.from(table).update({ status: newStatus }).eq("id", req.id);
       if (error) throw error;
-      toast.success(`Status diubah ke ${newStatus}`);
+      toast.success(`Status changed to ${newStatus}`);
       fetchRequests();
     } catch (err: any) {
-      toast.error(err.message || "Gagal mengubah status");
+      toast.error(err.message || "Failed to change status");
     }
   };
 
@@ -317,12 +317,12 @@ const AdminRequests = () => {
   }
 
   const tabs: { key: TabKey; label: string; count: number; icon: typeof Clock; color?: string }[] = [
-    { key: "all", label: "Semua", count: stats.total, icon: FolderKanban },
+    { key: "all", label: "All", count: stats.total, icon: FolderKanban },
     { key: "urgent", label: "Urgent", count: stats.urgent, icon: Zap, color: "text-destructive" },
     { key: "pending", label: "Pending", count: stats.pending, icon: Clock, color: "text-amber-500" },
     { key: "assigned", label: "In Progress", count: stats.assigned, icon: TrendingUp, color: "text-blue-500" },
     { key: "overdue", label: "Overdue", count: stats.overdue, icon: AlertTriangle, color: "text-destructive" },
-    { key: "completed", label: "Selesai", count: stats.completed, icon: CheckCircle2, color: "text-emerald-500" },
+    { key: "completed", label: "Completed", count: stats.completed, icon: CheckCircle2, color: "text-emerald-500" },
   ];
 
   return (
@@ -334,7 +334,7 @@ const AdminRequests = () => {
           className="bg-card border border-border rounded-xl p-5 col-span-2 lg:col-span-1"
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Aktif</span>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Active</span>
             <FolderKanban className="w-4 h-4 text-primary" />
           </div>
           <p className="text-3xl font-bold text-foreground">{stats.activeCount}</p>
@@ -368,7 +368,7 @@ const AdminRequests = () => {
             <AlertTriangle className={`w-4 h-4 ${stats.overdue > 0 ? "text-destructive" : "text-muted-foreground"}`} />
           </div>
           <p className={`text-3xl font-bold ${stats.overdue > 0 ? "text-destructive" : "text-foreground"}`}>{stats.overdue}</p>
-          <p className="text-xs text-muted-foreground mt-1">request melewati deadline</p>
+          <p className="text-xs text-muted-foreground mt-1">requests past deadline</p>
         </motion.div>
 
         {/* Urgent */}
@@ -381,7 +381,7 @@ const AdminRequests = () => {
             <Zap className={`w-4 h-4 ${stats.urgent > 0 ? "text-amber-500" : "text-muted-foreground"}`} />
           </div>
           <p className={`text-3xl font-bold ${stats.urgent > 0 ? "text-amber-600" : "text-foreground"}`}>{stats.urgent}</p>
-          <p className="text-xs text-muted-foreground mt-1">deadline 3 hari</p>
+          <p className="text-xs text-muted-foreground mt-1">3-day deadline</p>
         </motion.div>
       </div>
 
@@ -410,7 +410,7 @@ const AdminRequests = () => {
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Cari judul, nama user, atau nomor order..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <Input className="pl-9" placeholder="Search title, user name, or order number..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
         </div>
         <Select value={filterType} onValueChange={(v) => setFilterType(v as any)}>
           <SelectTrigger className="w-[160px]">
@@ -418,14 +418,14 @@ const AdminRequests = () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Semua Tipe</SelectItem>
+            <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="project">Project Request</SelectItem>
             <SelectItem value="service">Service Order</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="outline" size="sm" onClick={() => setSortField(f => f === "sla_deadline" ? "created_at" : "sla_deadline")} className="gap-1.5">
           <ArrowUpDown className="w-3.5 h-3.5" />
-          {sortField === "sla_deadline" ? "SLA" : "Tanggal"}
+          {sortField === "sla_deadline" ? "SLA" : "Date"}
         </Button>
         <Button variant="ghost" size="sm" onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")}>
           {sortDir === "asc" ? "↑" : "↓"}
@@ -437,7 +437,7 @@ const AdminRequests = () => {
         {tabFiltered.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
             <FolderKanban className="w-12 h-12 mx-auto mb-3 text-muted-foreground/20" />
-            <p className="font-medium">Tidak ada request di tab ini.</p>
+            <p className="font-medium">No requests in this tab.</p>
           </div>
         )}
         {tabFiltered.map((req) => {
@@ -516,14 +516,14 @@ const AdminRequests = () => {
                 <div className="px-4 pb-4 border-t border-border pt-4 space-y-3">
                   {req.description && (
                     <div>
-                      <Label className="text-xs text-muted-foreground">Deskripsi</Label>
+                      <Label className="text-xs text-muted-foreground">Description</Label>
                       <p className="text-sm text-foreground mt-0.5">{req.description}</p>
                     </div>
                   )}
 
                   <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                     {req.type === "project" && req.category && (
-                      <div><Label className="text-xs text-muted-foreground">Kategori</Label><p className="text-foreground">{req.category}</p></div>
+                      <div><Label className="text-xs text-muted-foreground">Category</Label><p className="text-foreground">{req.category}</p></div>
                     )}
                     {req.type === "project" && (req.budget_min || req.budget_max) && (
                       <div><Label className="text-xs text-muted-foreground">Budget</Label><p className="text-foreground">{req.budget_min?.toLocaleString("id-ID")} - {req.budget_max?.toLocaleString("id-ID")}</p></div>
@@ -532,7 +532,7 @@ const AdminRequests = () => {
                       <>
                         <div><Label className="text-xs text-muted-foreground">Service</Label><p className="text-foreground">{req.service_slug}</p></div>
                         {(req.items as any)?.urgency && (
-                          <div><Label className="text-xs text-muted-foreground">Urgensi</Label><p className="text-foreground">{(req.items as any).urgency}</p></div>
+                          <div><Label className="text-xs text-muted-foreground">Urgency</Label><p className="text-foreground">{(req.items as any).urgency}</p></div>
                         )}
                         {(req.items as any)?.budget_range && (
                           <div><Label className="text-xs text-muted-foreground">Budget Range</Label><p className="text-foreground">{(req.items as any).budget_range}</p></div>
@@ -579,12 +579,12 @@ const AdminRequests = () => {
                       <Button size="sm" variant="outline" className="gap-1.5 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
                         onClick={() => handleQuickStatusChange(req, "completed")}
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Selesai
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Complete
                       </Button>
                       <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/20 hover:bg-destructive/5"
                         onClick={() => handleQuickStatusChange(req, "cancelled")}
                       >
-                        <XCircle className="w-3.5 h-3.5" /> Batalkan
+                        <XCircle className="w-3.5 h-3.5" /> Cancel
                       </Button>
                     </div>
                   )}
@@ -606,7 +606,7 @@ const AdminRequests = () => {
               <div className="bg-muted/50 rounded-lg p-3">
                 <p className="text-sm font-medium text-foreground">{selectedRequest.title}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {selectedRequest.type === "project" ? "Project Request" : "Service Order"} • oleh {selectedRequest.user_name}
+                  {selectedRequest.type === "project" ? "Project Request" : "Service Order"} • by {selectedRequest.user_name}
                 </p>
               </div>
               <div className="space-y-2">
@@ -614,14 +614,14 @@ const AdminRequests = () => {
                 <Select value={newSlaType} onValueChange={setNewSlaType}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="normal">Normal — 14 hari</SelectItem>
-                    <SelectItem value="priority">Priority — 7 hari</SelectItem>
-                    <SelectItem value="urgent">Urgent — 3 hari</SelectItem>
+                    <SelectItem value="normal">Normal — 14 days</SelectItem>
+                    <SelectItem value="priority">Priority — 7 days</SelectItem>
+                    <SelectItem value="urgent">Urgent — 3 days</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Assign Ke</Label>
+                <Label>Assign To</Label>
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   <button type="button" onClick={() => setAssignType("user")}
                     className={`p-2.5 rounded-lg border text-sm font-medium transition-all text-center flex items-center justify-center gap-2 ${assignType === "user" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30"}`}
@@ -631,7 +631,7 @@ const AdminRequests = () => {
                   ><Building2 className="w-4 h-4" /> Vendor</button>
                 </div>
                 <Select value={assignTo} onValueChange={setAssignTo}>
-                  <SelectTrigger><SelectValue placeholder={`Pilih ${assignType === "user" ? "user/talent" : "vendor"}...`} /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={`Select ${assignType === "user" ? "user/talent" : "vendor"}...`} /></SelectTrigger>
                   <SelectContent>
                     {assignOptions.filter(o => o.type === assignType).map(o => (
                       <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>
@@ -641,15 +641,15 @@ const AdminRequests = () => {
               </div>
               <div className="space-y-2">
                 <Label>Admin Notes</Label>
-                <Textarea placeholder="Catatan internal..." rows={3} value={adminNotes} onChange={(e) => setAdminNotes(e.target.value)} />
+                <Textarea placeholder="Internal notes..." rows={3} value={adminNotes} onChange={(e) => setAdminNotes(e.target.value)} />
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAssignDialog(false)}>Batal</Button>
+            <Button variant="outline" onClick={() => setAssignDialog(false)}>Cancel</Button>
             <Button onClick={handleAssign} disabled={submitting}>
               {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
-              Simpan
+              Save
             </Button>
           </DialogFooter>
         </DialogContent>

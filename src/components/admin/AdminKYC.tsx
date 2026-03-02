@@ -51,7 +51,7 @@ const AdminKYC = () => {
 
     const { data, error } = await query;
     if (error) {
-      toast.error("Gagal memuat data KYC");
+      toast.error("Failed to load KYC data");
       setLoading(false);
       return;
     }
@@ -91,9 +91,9 @@ const AdminKYC = () => {
       .update({ kyc_status: "approved" })
       .eq("user_id", sub.user_id);
 
-    if (e1 || e2) toast.error("Gagal approve KYC");
+    if (e1 || e2) toast.error("Failed to approve KYC");
     else {
-      toast.success("KYC berhasil diapprove");
+      toast.success("KYC approved successfully");
       setSelected(null);
       fetchSubmissions();
     }
@@ -102,7 +102,7 @@ const AdminKYC = () => {
 
   const handleReject = async (sub: KycSubmission) => {
     if (!rejectionReason.trim()) {
-      toast.error("Alasan penolakan wajib diisi");
+      toast.error("Rejection reason is required");
       return;
     }
     setProcessing(true);
@@ -116,9 +116,9 @@ const AdminKYC = () => {
       .update({ kyc_status: "rejected" })
       .eq("user_id", sub.user_id);
 
-    if (e1 || e2) toast.error("Gagal reject KYC");
+    if (e1 || e2) toast.error("Failed to reject KYC");
     else {
-      toast.success("KYC ditolak");
+      toast.success("KYC rejected");
       setSelected(null);
       fetchSubmissions();
     }
@@ -135,12 +135,12 @@ const AdminKYC = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-6">Verifikasi KYC</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-6">KYC Verification</h2>
 
       <div className="flex gap-2 mb-4">
         {filters.map((f) => (
           <Button key={f} size="sm" variant={filter === f ? "default" : "outline"} onClick={() => setFilter(f)} className="capitalize">
-            {f === "all" ? "Semua" : f}
+            {f === "all" ? "All" : f}
           </Button>
         ))}
       </div>
@@ -151,10 +151,10 @@ const AdminKYC = () => {
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">User</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Dokumen</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Document</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
-                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -165,7 +165,7 @@ const AdminKYC = () => {
                   </tr>
                 ))
               ) : submissions.length === 0 ? (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
+                <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No data found</td></tr>
               ) : (
                 submissions.map((sub) => (
                   <tr key={sub.id} className="border-b border-border hover:bg-muted/30 transition-colors">
@@ -183,7 +183,7 @@ const AdminKYC = () => {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
-                      {new Date(sub.created_at).toLocaleDateString("id-ID")}
+                      {new Date(sub.created_at).toLocaleDateString("en-US")}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Button size="sm" variant="outline" onClick={() => { setSelected(sub); setNotes(sub.admin_notes || ""); setRejectionReason(""); }}>
@@ -207,7 +207,7 @@ const AdminKYC = () => {
           {selected && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">Dokumen Utama ({selected.primary_doc_type.toUpperCase()})</p>
+                <p className="text-xs text-muted-foreground">Primary Document ({selected.primary_doc_type.toUpperCase()})</p>
                 <a href={selected.primary_doc_file_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
                   <FileText className="w-4 h-4" /> {selected.primary_doc_file_name} <ExternalLink className="w-3 h-3" />
                 </a>
@@ -230,22 +230,22 @@ const AdminKYC = () => {
               )}
 
               <div>
-                <label className="text-xs font-medium text-foreground">Catatan Admin</label>
-                <Textarea className="mt-1" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Catatan internal..." />
+                <label className="text-xs font-medium text-foreground">Admin Notes</label>
+                <Textarea className="mt-1" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Internal notes..." />
               </div>
 
               {selected.status === "pending" && (
                 <>
                   <div>
-                    <label className="text-xs font-medium text-foreground">Alasan Penolakan (jika ditolak)</label>
-                    <Textarea className="mt-1" rows={2} value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} placeholder="Isi jika menolak..." />
+                    <label className="text-xs font-medium text-foreground">Rejection Reason (if rejecting)</label>
+                    <Textarea className="mt-1" rows={2} value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} placeholder="Fill if rejecting..." />
                   </div>
                   <div className="flex gap-3">
                     <Button className="flex-1" onClick={() => handleApprove(selected)} disabled={processing}>
                       <CheckCircle2 className="w-4 h-4 mr-1" /> Approve
                     </Button>
                     <Button variant="destructive" className="flex-1" onClick={() => handleReject(selected)} disabled={processing}>
-                      <XCircle className="w-4 h-4 mr-1" /> Tolak
+                      <XCircle className="w-4 h-4 mr-1" /> Reject
                     </Button>
                   </div>
                 </>
