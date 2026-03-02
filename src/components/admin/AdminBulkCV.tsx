@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
@@ -282,6 +283,77 @@ const AdminBulkCV = () => {
   const completedCount = uploads.filter(u => u.parsing_status === "completed").length;
   const failedCount = uploads.filter(u => u.parsing_status === "failed").length;
   const processingCount = uploads.filter(u => u.parsing_status === "processing" || u.parsing_status === "pending").length;
+  const activeUploads = uploads.filter(u => u.parsing_status !== "completed");
+  const archivedUploads = uploads.filter(u => u.parsing_status === "completed");
+
+  const renderTable = (items: CvUpload[], emptyMsg: string) => {
+    if (items.length === 0) {
+      return (
+        <div className="text-center py-12 text-muted-foreground">
+          <FileText className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm">{emptyMsg}</p>
+        </div>
+      );
+    }
+    return (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>File</TableHead>
+            <TableHead>Ukuran</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Kandidat</TableHead>
+            <TableHead>Tanggal</TableHead>
+            <TableHead className="text-right">Aksi</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.map(u => (
+            <TableRow key={u.id}>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="font-medium truncate max-w-[200px]">{u.file_name}</span>
+                  <Badge variant="outline" className="text-[10px] uppercase">{u.file_type}</Badge>
+                </div>
+              </TableCell>
+              <TableCell className="text-muted-foreground text-sm">{formatSize(u.file_size_bytes)}</TableCell>
+              <TableCell>
+                {statusBadge(u.parsing_status)}
+                {u.parsing_error && (
+                  <p className="text-xs text-destructive mt-1 max-w-[200px] truncate" title={u.parsing_error}>
+                    {u.parsing_error}
+                  </p>
+                )}
+              </TableCell>
+              <TableCell className="text-sm">
+                {u.candidate_id ? (
+                  <Badge variant="outline" className="text-green-600 border-green-500/30">Tersimpan</Badge>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </TableCell>
+              <TableCell className="text-sm text-muted-foreground">
+                {new Date(u.created_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex items-center justify-end gap-1">
+                  {(u.parsing_status === "failed" || u.parsing_status === "pending") && (
+                    <Button size="sm" variant="outline" onClick={() => handleReparse(u)}>
+                      <RefreshCw className="w-3 h-3 mr-1" />Re-parse
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setDeleteTarget(u)}>
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -332,84 +404,59 @@ const AdminBulkCV = () => {
         </Card>
       </div>
 
-      {/* Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Daftar CV Uploads</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : uploads.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>Belum ada CV yang diupload</p>
-              <Button variant="outline" className="mt-4" onClick={() => setDialogOpen(true)}>
-                <Upload className="w-4 h-4 mr-2" />Upload CV Pertama
-              </Button>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>File</TableHead>
-                  <TableHead>Ukuran</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Kandidat</TableHead>
-                  <TableHead>Tanggal</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {uploads.map(u => (
-                  <TableRow key={u.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
-                        <span className="font-medium truncate max-w-[200px]">{u.file_name}</span>
-                        <Badge variant="outline" className="text-[10px] uppercase">{u.file_type}</Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{formatSize(u.file_size_bytes)}</TableCell>
-                    <TableCell>
-                      {statusBadge(u.parsing_status)}
-                      {u.parsing_error && (
-                        <p className="text-xs text-destructive mt-1 max-w-[200px] truncate" title={u.parsing_error}>
-                          {u.parsing_error}
-                        </p>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {u.candidate_id ? (
-                        <span className="text-green-600 font-medium">Tersimpan</span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(u.created_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        {(u.parsing_status === "failed" || u.parsing_status === "pending") && (
-                          <Button size="sm" variant="outline" onClick={() => handleReparse(u)}>
-                            <RefreshCw className="w-3 h-3 mr-1" />Re-parse
-                          </Button>
-                        )}
-                        <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setDeleteTarget(u)}>
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      {/* Tabs: Active & Archive */}
+      <Tabs defaultValue="active" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="active">
+            Aktif {activeUploads.length > 0 && <Badge variant="secondary" className="ml-2 text-xs">{activeUploads.length}</Badge>}
+          </TabsTrigger>
+          <TabsTrigger value="archive">
+            Arsip {archivedUploads.length > 0 && <Badge variant="secondary" className="ml-2 text-xs">{archivedUploads.length}</Badge>}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="active">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Sedang Diproses / Berkendala</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : activeUploads.length === 0 && uploads.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p>Belum ada CV yang diupload</p>
+                  <Button variant="outline" className="mt-4" onClick={() => setDialogOpen(true)}>
+                    <Upload className="w-4 h-4 mr-2" />Upload CV Pertama
+                  </Button>
+                </div>
+              ) : (
+                renderTable(activeUploads, "Semua CV berhasil diproses — cek tab Arsip")
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="archive">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Arsip — Berhasil Diparse</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                renderTable(archivedUploads, "Belum ada CV yang selesai diparse")
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Upload Dialog */}
       <Dialog open={dialogOpen} onOpenChange={(open) => { if (!uploading) setDialogOpen(open); }}>
