@@ -1,75 +1,55 @@
 
 
-# Rombak Dashboard - Multi Device Friendly
+# Vendor Dashboard & Team Dashboard - Full Suite
 
-## Masalah Saat Ini
-- Padding terlalu besar di mobile (p-8, px-6)
-- Quick Actions buttons terlalu kecil dan padat di layar kecil
-- Tab bar horizontal scroll tanpa indikator, sulit digunakan
-- DashboardNav redundan dengan MobileBottomNav di mobile
-- Konten tertutup oleh bottom navigation (tidak ada padding bawah)
-- Profile header layout pecah di layar kecil
-- Edit form dan overview cards tidak responsive
+## Overview
+- `/vendor/:slug` — Dashboard vendor (full suite + Business KYC)
+- `/team/:slug` — Dashboard team (full suite, tanpa KYC, tapi perlu approval admin)
 
-## Perubahan yang Akan Dilakukan
+## Database Changes
 
-### 1. Dashboard.tsx - Layout Utama
-- Ubah padding dari `px-6 py-8` menjadi responsive: `px-4 py-4 md:px-6 md:py-8`
-- Tambah `pb-24 md:pb-8` agar konten tidak tertutup bottom nav
-- Quick Actions: ubah dari `flex-wrap` menjadi horizontal scroll di mobile (`flex overflow-x-auto gap-2 md:flex-wrap md:gap-3`), dengan tombol lebih compact
-- Tabs: di mobile tampilkan hanya icon + label kecil dengan scroll horizontal yang lebih smooth, tambah `scrollbar-hide`
-- Tambah `max-w-4xl mx-auto` untuk desktop agar konten tidak terlalu lebar
+### 1. partner_teams — tambah kolom approval
+- `approval_status` (enum: pending, approved, rejected, merged) default 'pending'
+- `admin_notes` text nullable  
+- `suggested_team_id` uuid nullable (FK ke partner_teams, untuk suggest merge)
+- `rejection_reason` text nullable
 
-### 2. DashboardNav.tsx - Top Navigation
-- Sembunyikan di mobile (`hidden md:block`) karena sudah ada MobileBottomNav
-- Atau simplifikasi: hanya tampilkan logo + avatar di mobile (tanpa link Dashboard/Jobs)
+### 2. team_approval_requests (tabel baru)
+- `id`, `team_id` (FK partner_teams), `requested_by`, `status`, `admin_notes`, `suggested_team_id`, `reviewed_by`, `reviewed_at`, `created_at`
 
-### 3. ProfileHeader.tsx - Header Profil
-- Padding responsive: `p-4 md:p-8`
-- Avatar lebih kecil di mobile: `w-16 h-16 md:w-20 md:h-20`
-- Edit button menjadi icon-only di mobile
-- Badges wrap dengan gap lebih kecil di mobile
+## Pages & Components
 
-### 4. ProfileOverview.tsx - Overview Cards
-- Padding responsive: `p-4 md:p-8`
-- Grid satu kolom di mobile: `grid-cols-1 md:grid-cols-2`
-- Skills section full-width tetap
+### Vendor Dashboard (`/vendor/:slug`)
+Tabs: Overview, Members, Documents, KYC, Projects/Orders, Credits
+- Overview: info bisnis, stats
+- Members: invite, role management (owner/admin/member)  
+- Documents: upload & manage business docs
+- KYC: business KYC submission & status
+- Projects: order claims yang diterima vendor
+- Credits: company_credits balance & transactions
 
-### 5. ProfileEditForm.tsx - Form Edit
-- Padding responsive: `p-4 md:p-8`
-- Form fields tetap responsive (sudah `sm:grid-cols-2`)
-- Sticky save button di bottom untuk mobile
+### Team Dashboard (`/team/:slug`)
+Tabs: Overview, Members, Projects
+- Overview: team info, skills, status approval
+- Members: invite, role management (leader/member)
+- Projects: order claims yang diterima team
+- Approval banner: status pending/approved/rejected + suggested team info
 
-### 6. KYCBanner.tsx
-- Padding responsive: `p-3 md:p-5`
+## Routing
+- Tambah routes di App.tsx
+- Link dari TeamsTab ke `/team/:slug`
+- Link dari dashboard vendor list ke `/vendor/:slug`
 
-### 7. ExperienceTab.tsx & Tab Lainnya
-- Card padding responsive
-- Action buttons selalu terlihat di mobile (tidak hanya hover)
+## Admin Side (existing AdminTeams, AdminVendors)
+- Admin bisa approve/reject team creation
+- Admin bisa suggest existing team saat reject
+- Admin bisa manage business KYC (sudah ada di AdminKYC)
 
-### 8. index.css
-- Tambah `.scrollbar-hide` utility untuk tab scrolling
-
-## Technical Details
-
-### File yang Dimodifikasi
-
-| File | Perubahan |
-|------|-----------|
-| `src/pages/Dashboard.tsx` | Responsive padding, scroll quick actions, compact tabs, bottom padding |
-| `src/components/dashboard/DashboardNav.tsx` | Hide di mobile, simplify |
-| `src/components/dashboard/ProfileHeader.tsx` | Responsive padding & sizing |
-| `src/components/dashboard/ProfileOverview.tsx` | Responsive grid & padding |
-| `src/components/dashboard/ProfileEditForm.tsx` | Responsive padding, sticky save |
-| `src/components/dashboard/KYCBanner.tsx` | Responsive padding |
-| `src/components/dashboard/ExperienceTab.tsx` | Mobile-visible action buttons |
-| `src/components/dashboard/ServicesTab.tsx` | Responsive stats grid & padding |
-| `src/index.css` | scrollbar-hide utility |
-
-### Prinsip Desain
-- Mobile-first: semua styling dimulai dari mobile, lalu scale up dengan `md:` / `lg:`
-- Bottom nav safe area: konten utama selalu punya padding bawah cukup
-- Touch-friendly: minimum tap target 44px
-- Scrollable sections: quick actions dan tabs bisa di-scroll horizontal di mobile
-- Consistent spacing: `p-4` mobile, `p-6` tablet, `p-8` desktop
+## Implementation Order
+1. Database migration (approval columns + team_approval table)
+2. Vendor Dashboard page (reuse business_profiles data)
+3. Team Dashboard page
+4. Update TeamsTab to link ke team dashboard
+5. Update routing
+6. Update admin panel for team approval flow
 
