@@ -16,20 +16,20 @@ const heroItem = { id: "requests", label: "Request & Order", icon: FolderKanban 
 export const adminSections = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "requests", label: "Request & Order", icon: FolderKanban },
-  { id: "users", label: "Manajemen User", icon: Users },
-  { id: "companies", label: "Manajemen Perusahaan", icon: Building2 },
-  { id: "vendors", label: "Manajemen Vendor", icon: Store },
-  { id: "teams", label: "Manajemen Tim", icon: UsersRound },
-  { id: "kyc", label: "Verifikasi KYC", icon: Shield },
+  { id: "users", label: "User Management", icon: Users },
+  { id: "companies", label: "Company Management", icon: Building2 },
+  { id: "vendors", label: "Vendor Management", icon: Store },
+  { id: "teams", label: "Team Management", icon: UsersRound },
+  { id: "kyc", label: "KYC Verification", icon: Shield },
   { id: "hiring", label: "Hiring & Matching", icon: Briefcase },
-  { id: "credits", label: "Kredit & Wallet", icon: CreditCard },
-  { id: "content", label: "Peluang & Job", icon: FileText },
+  { id: "credits", label: "Credits & Wallet", icon: CreditCard },
+  { id: "content", label: "Opportunities & Jobs", icon: FileText },
   { id: "case_studies", label: "Case Studies", icon: ImageIcon },
-  { id: "learning", label: "Learning Program", icon: GraduationCap },
-  { id: "institutions", label: "Institusi", icon: Landmark },
+  { id: "learning", label: "Learning Programs", icon: GraduationCap },
+  { id: "institutions", label: "Institutions", icon: Landmark },
   { id: "assessment", label: "Assessment", icon: ClipboardCheck },
   { id: "insights", label: "Insights & Survey", icon: BarChart3 },
-  { id: "approvals", label: "Approval Profil", icon: UserCheck },
+  { id: "approvals", label: "Profile Approvals", icon: UserCheck },
 ];
 
 // Regular menu items (excluding overview & requests which are placed separately)
@@ -99,7 +99,7 @@ const AdminSidebar = ({ activeSection, onSectionChange }: AdminSidebarProps) => 
           <div className="mx-3 my-1 h-px bg-border" />
 
           {/* Regular menu items */}
-          <SidebarGroupLabel>Manajemen</SidebarGroupLabel>
+          <SidebarGroupLabel>Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {regularItems.map((s) => (

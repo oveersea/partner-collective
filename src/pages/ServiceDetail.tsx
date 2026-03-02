@@ -84,7 +84,6 @@ const ServiceDetailPage = () => {
         return;
       }
 
-      // Get category name
       const { data: cat } = await supabase
         .from("service_categories")
         .select("name")
@@ -97,7 +96,6 @@ const ServiceDetailPage = () => {
         category_name: cat?.name || null,
       });
 
-      // Get provider count
       const { count } = await supabase
         .from("user_services")
         .select("id", { count: "exact", head: true })
@@ -105,7 +103,6 @@ const ServiceDetailPage = () => {
         .eq("is_active", true);
       setProviderCount(count || 0);
 
-      // Get related services in same category
       const { data: related } = await supabase
         .from("services")
         .select("id, name, slug, description, required_skills")
@@ -123,7 +120,6 @@ const ServiceDetailPage = () => {
     fetchService();
   }, [slug]);
 
-  // Fetch user skills
   useEffect(() => {
     if (!user) return;
     const fetchUserSkills = async () => {
@@ -137,7 +133,6 @@ const ServiceDetailPage = () => {
     fetchUserSkills();
   }, [user]);
 
-  // Fetch recommended programs for missing skills
   useEffect(() => {
     if (!service || !user) return;
     const missingSkills = service.required_skills.filter(
@@ -159,7 +154,6 @@ const ServiceDetailPage = () => {
     fetchPrograms();
   }, [service, userSkills, user]);
 
-  // Fetch senior-level providers (match_score >= 50%) and their portfolios
   useEffect(() => {
     if (!service) return;
     const fetchProviders = async () => {
@@ -216,7 +210,6 @@ const ServiceDetailPage = () => {
     fetchProviders();
   }, [service]);
 
-  // Calculate skill match
   const calcSkillMatch = () => {
     if (!service) return { score: 0, matched: [] as string[], missing: [] as string[] };
     const required = service.required_skills;
@@ -260,10 +253,10 @@ const ServiceDetailPage = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-6 pt-32 pb-24 text-center">
-          <h1 className="text-3xl font-semibold text-foreground mb-4">Layanan tidak ditemukan</h1>
-          <p className="text-muted-foreground mb-8">Layanan yang Anda cari tidak tersedia.</p>
+          <h1 className="text-3xl font-semibold text-foreground mb-4">Service Not Found</h1>
+          <p className="text-muted-foreground mb-8">The service you're looking for is not available.</p>
           <Link to="/" className="inline-flex items-center gap-2 text-primary font-medium hover:underline">
-            <ArrowLeft className="w-4 h-4" /> Kembali ke beranda
+            <ArrowLeft className="w-4 h-4" /> Back to Home
           </Link>
         </div>
         <Footer />
@@ -278,9 +271,9 @@ const ServiceDetailPage = () => {
         <div className="container mx-auto px-6">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-            <Link to="/" className="hover:text-foreground transition-colors">Beranda</Link>
+            <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
             <span>/</span>
-            <span>Layanan</span>
+            <span>Services</span>
             {service.category_name && (
               <>
                 <span>/</span>
@@ -314,7 +307,7 @@ const ServiceDetailPage = () => {
               >
                 <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Target className="w-5 h-5 text-primary" />
-                  Skill yang Dibutuhkan
+                  Required Skills
                 </h2>
                 <div className="flex flex-wrap gap-2">
                   {service.required_skills.map((skill) => (
@@ -338,12 +331,12 @@ const ServiceDetailPage = () => {
                 className="border border-border bg-card p-6"
                 style={{ borderRadius: "5px" }}
               >
-                <h2 className="text-lg font-semibold text-foreground mb-6">Bagaimana Cara Kerjanya</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-6">How It Works</h2>
                 <div className="grid sm:grid-cols-3 gap-6">
                   {[
-                    { step: "01", title: "Pilih Layanan", desc: "Pilih layanan yang sesuai kebutuhan Anda." },
-                    { step: "02", title: "Match dengan Talent", desc: "Sistem kami mencocokkan Anda dengan talent terverifikasi." },
-                    { step: "03", title: "Mulai Kolaborasi", desc: "Mulai bekerja sama dan pantau progresnya." },
+                    { step: "01", title: "Choose Service", desc: "Select the service that fits your needs." },
+                    { step: "02", title: "Match with Talent", desc: "Our system matches you with verified talent." },
+                    { step: "03", title: "Start Collaboration", desc: "Begin working together and track progress." },
                   ].map((item) => (
                     <div key={item.step} className="text-center">
                       <span className="inline-flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground text-sm font-bold mb-3" style={{ borderRadius: "5px" }}>
@@ -367,9 +360,9 @@ const ServiceDetailPage = () => {
                 >
                   <h2 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
                     <Star className="w-5 h-5 text-primary" />
-                    Penyedia Layanan Senior
+                    Senior Service Providers
                   </h2>
-                  <p className="text-sm text-muted-foreground mb-5">Talent dengan skill match di atas 50% untuk layanan ini.</p>
+                  <p className="text-sm text-muted-foreground mb-5">Talent with skill match above 50% for this service.</p>
 
                   <div className="grid sm:grid-cols-2 gap-3">
                     {seniorProviders.map((provider) => {
@@ -408,7 +401,7 @@ const ServiceDetailPage = () => {
                             <div className="flex items-center gap-3 text-xs text-muted-foreground">
                               <span className="font-medium text-primary">{provider.match_score}% match</span>
                               {provider.years_of_experience != null && provider.years_of_experience > 0 && (
-                                <span>{provider.years_of_experience} thn pengalaman</span>
+                                <span>{provider.years_of_experience} yrs experience</span>
                               )}
                             </div>
                           </div>
@@ -430,9 +423,9 @@ const ServiceDetailPage = () => {
                 >
                   <h2 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
                     <Briefcase className="w-5 h-5 text-primary" />
-                    Portfolio Penyedia
+                    Provider Portfolio
                   </h2>
-                  <p className="text-sm text-muted-foreground mb-5">Hasil kerja dari talent penyedia layanan ini.</p>
+                  <p className="text-sm text-muted-foreground mb-5">Work samples from talent providing this service.</p>
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     {providerPortfolios.map((portfolio) => {
@@ -483,7 +476,7 @@ const ServiceDetailPage = () => {
                                 className="inline-flex items-center gap-1 text-xs text-primary font-medium mt-2 hover:underline"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                Lihat Project <ArrowRight className="w-3 h-3" />
+                                View Project <ArrowRight className="w-3 h-3" />
                               </a>
                             )}
                           </div>
@@ -507,7 +500,7 @@ const ServiceDetailPage = () => {
                 <div className="space-y-4 mb-6">
                   <div className="flex items-center gap-3 text-sm">
                     <Users className="w-4 h-4 text-primary" />
-                    <span className="text-muted-foreground">Ribuan talent terverifikasi siap membantu Anda</span>
+                    <span className="text-muted-foreground">Thousands of verified talent ready to help you</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-primary" />
@@ -544,7 +537,7 @@ const ServiceDetailPage = () => {
 
                 <Link to={`/services/${service.slug}/order`}>
                   <button className="w-full py-3 bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2" style={{ borderRadius: "5px" }}>
-                    Mulai Sekarang
+                    Get Started
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </Link>
@@ -552,7 +545,7 @@ const ServiceDetailPage = () => {
                 {user && service && (
                   <div className="mt-4 pt-4 border-t border-border">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">
-                      Kecocokan Skill Anda
+                      Your Skill Match
                     </span>
 
                     {/* Match Score Bar */}
@@ -562,7 +555,7 @@ const ServiceDetailPage = () => {
                           {matchScore}%
                         </span>
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${matchScore >= service.min_match_pct ? "bg-primary/20 text-primary" : "bg-destructive/20 text-destructive"}`}>
-                          {matchScore >= service.min_match_pct ? "Memenuhi syarat" : `Min ${service.min_match_pct}%`}
+                          {matchScore >= service.min_match_pct ? "Qualified" : `Min ${service.min_match_pct}%`}
                         </span>
                       </div>
                       <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
@@ -595,18 +588,18 @@ const ServiceDetailPage = () => {
                       <div className="rounded-md border border-amber-500/30 bg-amber-500/5 p-3 mb-3">
                         <div className="flex items-center gap-2 mb-2">
                           <Lightbulb className="w-4 h-4 text-amber-600" />
-                          <span className="text-xs font-semibold text-foreground">Tingkatkan Kecocokan</span>
+                          <span className="text-xs font-semibold text-foreground">Improve Your Match</span>
                         </div>
                         <ul className="space-y-1.5 text-xs text-muted-foreground">
                           {missingSkills.length > 0 && (
                             <li className="flex items-start gap-1.5">
                               <AlertCircle className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
-                              <span>Tambahkan skill: <strong className="text-foreground">{missingSkills.join(", ")}</strong></span>
+                              <span>Add skills: <strong className="text-foreground">{missingSkills.join(", ")}</strong></span>
                             </li>
                           )}
                           <li className="flex items-start gap-1.5">
                             <AlertCircle className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
-                            <span>Lengkapi profil dan sertifikasi Anda</span>
+                            <span>Complete your profile and certifications</span>
                           </li>
                         </ul>
 
@@ -615,7 +608,7 @@ const ServiceDetailPage = () => {
                           <div className="mt-3">
                             <p className="text-xs font-medium text-foreground mb-2 flex items-center gap-1.5">
                               <GraduationCap className="w-3.5 h-3.5 text-primary" />
-                              Rekomendasi Learning
+                              Recommended Learning
                             </p>
                             <div className="space-y-1.5">
                               {recommendedPrograms.map((prog) => (
@@ -647,7 +640,7 @@ const ServiceDetailPage = () => {
                             style={{ borderRadius: "5px" }}
                           >
                             <GraduationCap className="w-3.5 h-3.5" />
-                            Lihat Program untuk Skill yang Dibutuhkan
+                            View Programs for Required Skills
                             <ArrowRight className="w-3.5 h-3.5" />
                           </Link>
                         )}
@@ -659,13 +652,13 @@ const ServiceDetailPage = () => {
                       <Link to={`/services/${service.slug}/order`}>
                         <button className="w-full py-3 border border-primary text-primary font-semibold text-sm hover:bg-primary hover:text-primary-foreground transition-colors flex items-center justify-center gap-2" style={{ borderRadius: "5px" }}>
                           <Briefcase className="w-4 h-4" />
-                          Tawarkan Layanan Ini
+                          Offer This Service
                         </button>
                       </Link>
                     ) : (
                       <button disabled className="w-full py-3 border border-border text-muted-foreground font-semibold text-sm cursor-not-allowed flex items-center justify-center gap-2 opacity-60" style={{ borderRadius: "5px" }}>
                         <Briefcase className="w-4 h-4" />
-                        Skill Belum Memenuhi Syarat
+                        Skills Not Yet Qualified
                       </button>
                     )}
                   </div>
@@ -676,7 +669,7 @@ const ServiceDetailPage = () => {
                   <Link to="/auth">
                     <button className="w-full py-3 mt-3 border border-border text-foreground font-semibold text-sm hover:bg-muted transition-colors flex items-center justify-center gap-2" style={{ borderRadius: "5px" }}>
                       <Briefcase className="w-4 h-4" />
-                      Login untuk Tawarkan Layanan
+                      Login to Offer Service
                     </button>
                   </Link>
                 )}
@@ -692,7 +685,7 @@ const ServiceDetailPage = () => {
               viewport={{ once: true }}
               className="mt-20"
             >
-              <h2 className="text-2xl font-semibold text-foreground mb-6">Layanan Terkait</h2>
+              <h2 className="text-2xl font-semibold text-foreground mb-6">Related Services</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {relatedServices.map((rs) => (
                   <Link key={rs.id} to={`/services/${rs.slug}`}>
@@ -709,7 +702,7 @@ const ServiceDetailPage = () => {
                         ))}
                       </div>
                       <div className="mt-3 flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                        Lihat detail <ArrowRight className="w-3 h-3" />
+                        View details <ArrowRight className="w-3 h-3" />
                       </div>
                     </div>
                   </Link>

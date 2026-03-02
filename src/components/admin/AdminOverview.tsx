@@ -33,12 +33,12 @@ const AdminOverview = () => {
 
   const cards = stats
     ? [
-        { label: "Total User", value: stats.users, icon: Users, color: "text-primary" },
+        { label: "Total Users", value: stats.users, icon: Users, color: "text-primary" },
         { label: "KYC Pending", value: pendingKyc, icon: Shield, color: "text-amber-500" },
-        { label: "Lowongan Aktif", value: stats.activeJobs, icon: Briefcase, color: "text-blue-500" },
+        { label: "Active Jobs", value: stats.activeJobs, icon: Briefcase, color: "text-blue-500" },
         { label: "Fast Hiring", value: stats.fastHiring, icon: TrendingUp, color: "text-emerald-500" },
-        { label: "Order Pending", value: stats.pendingOrders, icon: CreditCard, color: "text-orange-500" },
-        { label: "Program Aktif", value: stats.programs, icon: FileText, color: "text-purple-500" },
+        { label: "Pending Orders", value: stats.pendingOrders, icon: CreditCard, color: "text-orange-500" },
+        { label: "Active Programs", value: stats.programs, icon: FileText, color: "text-purple-500" },
       ]
     : [];
 
