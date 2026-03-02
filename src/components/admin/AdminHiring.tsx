@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,7 @@ interface ShortageAlert {
 }
 
 const AdminHiring = () => {
+  const navigate = useNavigate();
   const [requests, setRequests] = useState<HiringRequest[]>([]);
   const [alerts, setAlerts] = useState<ShortageAlert[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,7 +124,7 @@ const AdminHiring = () => {
                   <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No data</td></tr>
                 ) : (
                   filteredReqs.map((r) => (
-                    <tr key={r.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                    <tr key={r.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/hiring/${r.id}`)}>
                       <td className="px-4 py-3 font-medium text-foreground">{r.title}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{r.business_profiles?.name || "—"}</td>
                       <td className="px-4 py-3">
@@ -136,20 +138,15 @@ const AdminHiring = () => {
                       <td className="px-4 py-3 text-muted-foreground text-xs">
                         {r.sla_deadline ? new Date(r.sla_deadline).toLocaleDateString("en-US") : "—"}
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        {r.status === "open" && (
-                          <div className="flex gap-1 justify-end">
-                            <Button size="sm" variant="outline" onClick={() => updateStatus(r.id, "sourcing")}>
-                              <Clock className="w-3 h-3 mr-1" /> Sourcing
-                            </Button>
-                            <Button size="sm" variant="outline" onClick={() => updateStatus(r.id, "filled")}>
-                              <CheckCircle2 className="w-3 h-3 mr-1" /> Filled
-                            </Button>
-                          </div>
+                      <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                        {r.status === "pending" && (
+                          <Button size="sm" variant="outline" onClick={() => updateStatus(r.id, "sourcing")}>
+                            <Clock className="w-3 h-3 mr-1" /> Sourcing
+                          </Button>
                         )}
                         {r.status === "sourcing" && (
-                          <Button size="sm" variant="outline" onClick={() => updateStatus(r.id, "filled")}>
-                            <CheckCircle2 className="w-3 h-3 mr-1" /> Filled
+                          <Button size="sm" variant="outline" onClick={() => updateStatus(r.id, "shortlisted")}>
+                            <CheckCircle2 className="w-3 h-3 mr-1" /> Shortlisted
                           </Button>
                         )}
                       </td>

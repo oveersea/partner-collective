@@ -24,6 +24,7 @@ import AdminAssessmentDetail from "./pages/AdminAssessmentDetail";
 import AdminOpportunityDetail from "./pages/AdminOpportunityDetail";
 import AdminCompanyDetail from "./pages/AdminCompanyDetail";
 import AdminCreditDetail from "./pages/AdminCreditDetail";
+import AdminHiringDetail from "./pages/AdminHiringDetail";
 import NotFound from "./pages/NotFound";
 import ServiceDetail from "./pages/ServiceDetail";
 import ServiceOrder from "./pages/ServiceOrder";
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/admin/opportunity/:opportunityId" element={<AdminOpportunityDetail />} />
             <Route path="/admin/company/:companyId" element={<AdminCompanyDetail />} />
             <Route path="/admin/credit/:id" element={<AdminCreditDetail />} />
+            <Route path="/admin/hiring/:id" element={<AdminHiringDetail />} />
             <Route path="/learning" element={<Learning />} />
             <Route path="/learning/:slug" element={<LearningDetail />} />
             <Route path="/credit-balance" element={<CreditBalance />} />
