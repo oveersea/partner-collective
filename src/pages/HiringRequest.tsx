@@ -127,9 +127,9 @@ const HiringRequest = () => {
         experience_min: parsed.data.experience_min,
         experience_max: parsed.data.experience_max,
         positions_count: parsed.data.positions_count,
-        hiring_type: parsed.data.hiring_type,
+        hiring_type: parsed.data.hiring_type === "normal" ? "regular" : "fast",
         credit_cost: creditCost,
-        status: "open",
+        status: "pending",
       });
 
       if (error) throw error;
