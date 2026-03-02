@@ -35,6 +35,7 @@ import CaseStudyDetail from "./pages/CaseStudyDetail";
 import VendorDashboard from "./pages/VendorDashboard";
 import TeamDashboard from "./pages/TeamDashboard";
 import CompanyDashboard from "./pages/CompanyDashboard";
+import Companies from "./pages/Companies";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +75,7 @@ const App = () => (
             <Route path="/case-studies/:slug" element={<CaseStudyDetail />} />
             <Route path="/vendor/:slug" element={<VendorDashboard />} />
             <Route path="/team/:slug" element={<TeamDashboard />} />
+            <Route path="/companies" element={<Companies />} />
             <Route path="/company/:slug" element={<CompanyDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

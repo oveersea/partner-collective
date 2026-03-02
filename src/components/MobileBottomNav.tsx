@@ -17,6 +17,7 @@ const dashboardMenuItems = [
   { label: "Education", icon: GraduationCap, href: "/dashboard?tab=education" },
   { label: "Portfolio", icon: FolderKanban, href: "/dashboard?tab=portfolio" },
   { label: "Teams", icon: Users, href: "/dashboard?tab=teams" },
+  { label: "Company", icon: Building2, href: "/companies" },
   { label: "Services", icon: Layers, href: "/dashboard?tab=services" },
   { label: "Hiring Request", icon: UserSearch, href: "/hiring-request" },
   { label: "Project Request", icon: FolderKanban, href: "/project-request" },
@@ -26,7 +27,7 @@ const dashboardMenuItems = [
   { label: "KYC", icon: Shield, href: "/kyc" },
 ];
 
-const dashboardRoutes = ["/dashboard", "/hiring-request", "/project-request", "/vendor-registration", "/credit-balance", "/kyc"];
+const dashboardRoutes = ["/dashboard", "/hiring-request", "/project-request", "/vendor-registration", "/credit-balance", "/kyc", "/companies", "/company"];
 
 const MobileBottomNav = () => {
   const location = useLocation();
