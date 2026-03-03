@@ -95,71 +95,63 @@ Deno.serve(async (req) => {
 
     const formatDate = (d: string | null) => {
       if (!d) return "";
+      const dt = new Date(d);
+      return dt.toLocaleDateString("en-US", { year: "numeric" });
+    };
+    const formatDateFull = (d: string | null) => {
+      if (!d) return "";
       return new Date(d).toLocaleDateString("id-ID", { month: "short", year: "numeric" });
+    };
+    const formatDateRange = (start: string | null, end: string | null, isCurrent: boolean) => {
+      const s = formatDateFull(start);
+      const e = isCurrent ? "Present" : formatDateFull(end);
+      if (!s && !e) return "";
+      return `${s} - ${e}`;
     };
 
     const locationParts = [profile.city, profile.province, profile.country].filter(Boolean);
     const location = locationParts.join(", ");
 
-    // Build contact section
-    let contactHtml = "";
+    // Build contact line for header
+    let contactLine = "";
     if (include_contact) {
-      const contactItems: string[] = [];
-      if (email) contactItems.push(`<span class="contact-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>${email}</span>`);
-      if (profile.phone_number) contactItems.push(`<span class="contact-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>${profile.phone_number}</span>`);
-      if (location) contactItems.push(`<span class="contact-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>${location}</span>`);
-      if (profile.linkedin_url) contactItems.push(`<span class="contact-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg><a href="${profile.linkedin_url}">LinkedIn</a></span>`);
-      if (profile.website_url) contactItems.push(`<span class="contact-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><a href="${profile.website_url}">Website</a></span>`);
-      if (contactItems.length > 0) {
-        contactHtml = `<div class="contact-bar">${contactItems.join("")}</div>`;
+      const parts: string[] = [];
+      if (location) parts.push(location);
+      if (profile.phone_number) parts.push(`T: ${profile.phone_number}`);
+      if (email) parts.push(`E: ${email}`);
+      if (profile.website_url) parts.push(profile.website_url);
+      if (parts.length > 0) {
+        contactLine = `<div class="header-contact">${parts.join("&nbsp;&nbsp;//&nbsp;&nbsp;")}</div>`;
       }
     }
 
-    // Skills
+    // Skills list
     const skills = Array.isArray(profile.skills) ? profile.skills : [];
-    const skillsHtml = skills.length > 0
-      ? `<div class="section"><h2>Keahlian</h2><div class="skills-grid">${skills.map((s: string) => `<span class="skill-tag">${s}</span>`).join("")}</div></div>`
-      : "";
 
     // Summary
     const summary = profile.professional_summary || profile.bio;
-    const summaryHtml = summary
-      ? `<div class="section"><h2>Ringkasan Profesional</h2><p class="summary-text">${summary}</p></div>`
-      : "";
 
-    // Experiences
-    const expHtml = experiences.length > 0
-      ? `<div class="section"><h2>Pengalaman Kerja</h2>${experiences.map((e: any) => `<div class="entry"><div class="entry-row"><div class="entry-title"><strong>${e.position || e.title || ""}</strong><span class="entry-org">${e.company || ""}</span></div><div class="entry-date">${formatDate(e.start_date)} – ${e.is_current ? "Sekarang" : formatDate(e.end_date)}</div></div>${e.description ? `<p class="entry-desc">${e.description}</p>` : ""}</div>`).join("")}</div>`
-      : "";
+    // Social links for footer
+    const socialLinks: string[] = [];
+    if (include_contact) {
+      if (profile.linkedin_url) socialLinks.push(`<div class="social-item"><span class="social-icon">in</span> ${profile.linkedin_url.replace(/^https?:\/\/(www\.)?/, '')}</div>`);
+      if (profile.website_url) socialLinks.push(`<div class="social-item"><span class="social-icon">⊕</span> ${profile.website_url.replace(/^https?:\/\/(www\.)?/, '')}</div>`);
+    }
 
-    // Education
-    const eduHtml = education.length > 0
-      ? `<div class="section"><h2>Pendidikan</h2>${education.map((e: any) => `<div class="entry"><div class="entry-row"><div class="entry-title"><strong>${e.degree || ""}${e.field_of_study ? ", " + e.field_of_study : ""}</strong><span class="entry-org">${e.institution || ""}</span></div><div class="entry-date">${formatDate(e.start_date)} – ${e.is_current ? "Sekarang" : formatDate(e.end_date)}</div></div>${e.description ? `<p class="entry-desc">${e.description}</p>` : ""}</div>`).join("")}</div>`
-      : "";
+    // Experiences rows
+    const expRows = experiences.map((e: any) => `<div class="timeline-row"><div class="timeline-date">${formatDateRange(e.start_date, e.end_date, e.is_current)}</div><div class="timeline-content"><div class="timeline-company">${e.company || ""}</div><div class="timeline-role">${e.position || e.title || ""}</div>${e.description ? `<p class="timeline-desc">${e.description}</p>` : ""}</div></div>`).join("");
 
-    // Certifications
-    const certHtml = certifications.length > 0
-      ? `<div class="section"><h2>Sertifikasi</h2>${certifications.map((c: any) => `<div class="entry"><div class="entry-row"><div class="entry-title"><strong>${c.name || ""}</strong><span class="entry-org">${c.issuing_organization || ""}</span></div><div class="entry-date">${formatDate(c.issue_date)}${c.expiry_date ? " – " + formatDate(c.expiry_date) : ""}</div></div>${c.credential_id ? `<p class="entry-desc">Credential ID: ${c.credential_id}</p>` : ""}</div>`).join("")}</div>`
-      : "";
+    const eduRows = education.map((e: any) => `<div class="timeline-row"><div class="timeline-date">${formatDateRange(e.start_date, e.end_date, e.is_current)}</div><div class="timeline-content"><div class="timeline-company">${e.degree || ""}${e.field_of_study ? ", " + e.field_of_study : ""}</div><div class="timeline-role">${e.institution || ""}</div>${e.description ? `<p class="timeline-desc">${e.description}</p>` : ""}</div></div>`).join("");
 
-    // Trainings
-    const trainHtml = trainings.length > 0
-      ? `<div class="section"><h2>Pelatihan</h2>${trainings.map((t: any) => `<div class="entry"><div class="entry-row"><div class="entry-title"><strong>${t.title || ""}</strong><span class="entry-org">${t.organizer || ""}</span></div><div class="entry-date">${formatDate(t.start_date)}${t.end_date ? " – " + formatDate(t.end_date) : ""}</div></div></div>`).join("")}</div>`
-      : "";
+    const certRows = certifications.map((c: any) => `<div class="timeline-row"><div class="timeline-date">${formatDateFull(c.issue_date)}${c.expiry_date ? " - " + formatDateFull(c.expiry_date) : ""}</div><div class="timeline-content"><div class="timeline-company">${c.name || ""}</div><div class="timeline-role">${c.issuing_organization || ""}</div>${c.credential_id ? `<p class="timeline-desc">ID: ${c.credential_id}</p>` : ""}</div></div>`).join("");
 
-    // Awards
-    const awardHtml = awards.length > 0
-      ? `<div class="section"><h2>Penghargaan</h2>${awards.map((a: any) => `<div class="entry"><div class="entry-row"><div class="entry-title"><strong>${a.title || ""}</strong><span class="entry-org">${a.issuer || ""}</span></div><div class="entry-date">${formatDate(a.date_received)}</div></div>${a.description ? `<p class="entry-desc">${a.description}</p>` : ""}</div>`).join("")}</div>`
-      : "";
+    const trainRows = trainings.map((t: any) => `<div class="timeline-row"><div class="timeline-date">${formatDateRange(t.start_date, t.end_date, false)}</div><div class="timeline-content"><div class="timeline-company">${t.title || ""}</div><div class="timeline-role">${t.organizer || ""}</div></div></div>`).join("");
 
-    // Organizations
-    const orgHtml = organizations.length > 0
-      ? `<div class="section"><h2>Organisasi</h2>${organizations.map((o: any) => `<div class="entry"><div class="entry-row"><div class="entry-title"><strong>${o.role || o.position || ""}</strong><span class="entry-org">${o.name || ""}</span></div><div class="entry-date">${formatDate(o.start_date)} – ${o.is_current ? "Sekarang" : formatDate(o.end_date)}</div></div></div>`).join("")}</div>`
-      : "";
+    const awardRows = awards.map((a: any) => `<div class="timeline-row"><div class="timeline-date">${formatDateFull(a.date_received)}</div><div class="timeline-content"><div class="timeline-company">${a.title || ""}</div><div class="timeline-role">${a.issuer || ""}</div>${a.description ? `<p class="timeline-desc">${a.description}</p>` : ""}</div></div>`).join("");
 
-    const primaryColor = "#D71920";
+    const orgRows = organizations.map((o: any) => `<div class="timeline-row"><div class="timeline-date">${formatDateRange(o.start_date, o.end_date, o.is_current)}</div><div class="timeline-content"><div class="timeline-company">${o.role || o.position || ""}</div><div class="timeline-role">${o.name || ""}</div></div></div>`).join("");
 
-    // Fetch logo and convert to base64 data URI — chunked to avoid stack overflow
+    // Fetch logo
     let logoDataUri = "";
     try {
       const logoRes = await fetch("https://partner-collective.lovable.app/oveersea-logo-dark-cv.png");
@@ -172,17 +164,29 @@ Deno.serve(async (req) => {
         }
         logoDataUri = `data:image/png;base64,${btoa(binary)}`;
       }
-    } catch {
-      // fallback handled below
+    } catch { /* fallback */ }
+
+    // Avatar
+    let avatarHtml = "";
+    if (profile.avatar_url) {
+      let avatarDataUri = "";
+      try {
+        const avRes = await fetch(profile.avatar_url);
+        if (avRes.ok) {
+          const ct = avRes.headers.get("content-type") || "image/jpeg";
+          const avBuf = new Uint8Array(await avRes.arrayBuffer());
+          let bin = "";
+          const cs = 8192;
+          for (let i = 0; i < avBuf.length; i += cs) {
+            bin += String.fromCharCode(...avBuf.subarray(i, i + cs));
+          }
+          avatarDataUri = `data:${ct};base64,${btoa(bin)}`;
+        }
+      } catch { /* skip */ }
+      if (avatarDataUri) {
+        avatarHtml = `<div class="header-photo"><img src="${avatarDataUri}" alt="Photo" /></div>`;
+      }
     }
-
-    const logoHtml = logoDataUri
-      ? `<img src="${logoDataUri}" alt="Oveersea" class="logo" />`
-      : `<span class="logo-text">OVEERSEA</span>`;
-
-    const footerLogoHtml = logoDataUri
-      ? `<img src="${logoDataUri}" alt="Oveersea" class="footer-logo" />`
-      : "";
 
     const html = `<!DOCTYPE html>
 <html lang="id">
@@ -191,145 +195,185 @@ Deno.serve(async (req) => {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CV – ${profile.full_name || "User"}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-  @page { margin: 12mm 14mm; size: A4; }
+  @page { margin: 0; size: A4; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: 'Plus Jakarta Sans', 'Segoe UI', -apple-system, sans-serif;
-    color: #1a1a2e; line-height: 1.6; max-width: 800px;
-    margin: 0 auto; padding: 36px 28px; background: #fff;
-    font-size: 13px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #222; line-height: 1.5; background: #666;
+    font-size: 12px;
   }
 
-  /* ─── Header ─── */
+  .page {
+    width: 210mm; min-height: 297mm; margin: 0 auto;
+    background: #fff; position: relative;
+    padding: 0;
+  }
+
+  /* ═══ HEADER (dark block) ═══ */
   .header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding-bottom: 24px; margin-bottom: 28px;
-    border-bottom: 2.5px solid ${primaryColor};
+    background: #1a1a1a; color: #fff; padding: 40px 48px 36px;
+    display: flex; justify-content: space-between; align-items: flex-start;
   }
-  .header-info { flex: 1; }
+  .header-left { flex: 1; }
+  .header-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 4px;
+    text-transform: uppercase; color: #999; margin-bottom: 8px;
+  }
+  .header-headline {
+    font-size: 11px; font-weight: 500; letter-spacing: 2.5px;
+    text-transform: uppercase; color: #bbb; margin-bottom: 10px;
+  }
   .header h1 {
-    font-size: 28px; font-weight: 800; color: #0d0d0d;
-    letter-spacing: -0.5px; margin-bottom: 4px; line-height: 1.2;
+    font-size: 38px; font-weight: 900; letter-spacing: -0.5px;
+    line-height: 1.05; margin-bottom: 16px; color: #fff;
+    text-transform: uppercase;
   }
-  .header .headline {
-    font-size: 14px; color: #555; font-weight: 500;
-    margin-bottom: 2px;
+  .header-contact {
+    font-size: 10.5px; color: #aaa; font-weight: 400;
+    line-height: 1.8;
   }
-  .logo { height: 40px; object-fit: contain; }
-  .logo-text { font-size: 20px; font-weight: 800; color: ${primaryColor}; letter-spacing: 1px; }
-
-  /* ─── Contact ─── */
-  .contact-bar {
-    display: flex; flex-wrap: wrap; gap: 8px 18px;
-    margin-top: 16px; padding: 10px 14px;
-    background: #f7f7f9; border-radius: 6px;
+  .header-photo {
+    width: 130px; height: 130px; flex-shrink: 0;
+    margin-left: 32px; overflow: hidden;
   }
-  .contact-item {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 11.5px; color: #444; font-weight: 500;
-  }
-  .contact-item svg { color: ${primaryColor}; flex-shrink: 0; }
-  .contact-item a { color: ${primaryColor}; text-decoration: none; font-weight: 600; }
-
-  /* ─── Sections ─── */
-  .section { margin-bottom: 24px; }
-  .section h2 {
-    font-size: 13px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.8px; color: ${primaryColor};
-    padding-bottom: 8px; margin-bottom: 14px;
-    border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px;
-  }
-  .section h2::before {
-    content: ''; display: inline-block; width: 4px; height: 16px;
-    background: ${primaryColor}; border-radius: 2px; flex-shrink: 0;
-  }
-  .summary-text { font-size: 12.5px; color: #333; line-height: 1.75; }
-
-  /* ─── Skills ─── */
-  .skills-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-  .skill-tag {
-    background: #f0f0f5; color: #1a1a2e; padding: 4px 12px;
-    border-radius: 4px; font-size: 11px; font-weight: 600;
-    border: 1px solid #e0e0e8;
+  .header-photo img {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block; filter: grayscale(100%);
   }
 
-  /* ─── Timeline Entries ─── */
-  .entry {
-    margin-bottom: 16px; padding-left: 14px;
-    border-left: 3px solid #e8e8ee; position: relative;
-  }
-  .entry::before {
-    content: ''; position: absolute; left: -5px; top: 6px;
-    width: 7px; height: 7px; border-radius: 50%;
-    background: ${primaryColor};
-  }
-  .entry-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-  .entry-title { flex: 1; }
-  .entry-title strong { font-size: 13px; color: #0d0d0d; font-weight: 700; }
-  .entry-org { display: block; font-size: 12px; color: #666; margin-top: 2px; font-weight: 500; }
-  .entry-date {
-    font-size: 11px; color: #999; white-space: nowrap;
-    font-weight: 600; background: #f5f5f8; padding: 2px 8px;
-    border-radius: 3px;
-  }
-  .entry-desc {
-    font-size: 12px; color: #444; margin-top: 6px; line-height: 1.65;
-    white-space: pre-line;
+  /* ═══ BODY ═══ */
+  .body-content { padding: 32px 48px 24px; }
+
+  /* ═══ SECTION ═══ */
+  .section { margin-bottom: 28px; }
+  .section-title {
+    font-size: 12px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: #1a1a1a;
+    padding-bottom: 10px; margin-bottom: 18px;
+    border-bottom: 2px solid #1a1a1a;
   }
 
-  /* ─── Footer ─── */
-  .footer {
-    margin-top: 36px; padding-top: 14px; border-top: 1px solid #e8e8ee;
+  /* ═══ TIMELINE ═══ */
+  .timeline-row {
+    display: flex; gap: 24px; margin-bottom: 18px;
+    page-break-inside: avoid;
+  }
+  .timeline-date {
+    width: 130px; flex-shrink: 0;
+    font-size: 11px; font-weight: 600; color: #555;
+    padding-top: 1px;
+  }
+  .timeline-content { flex: 1; }
+  .timeline-company {
+    font-size: 12.5px; font-weight: 800; color: #1a1a1a;
+    text-transform: uppercase; letter-spacing: 0.3px;
+    margin-bottom: 1px;
+  }
+  .timeline-role {
+    font-size: 11.5px; font-weight: 500; color: #555;
+    font-style: italic; margin-bottom: 4px;
+  }
+  .timeline-desc {
+    font-size: 11px; color: #555; line-height: 1.65;
+    margin-top: 4px; white-space: pre-line;
+  }
+
+  /* ═══ BOTTOM 3-COL ═══ */
+  .bottom-section {
+    padding: 24px 48px 32px; border-top: 2px solid #1a1a1a;
+    display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 32px;
+    margin-top: 8px;
+  }
+  .bottom-col-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; color: #1a1a1a;
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+  }
+  .bottom-col { font-size: 11px; color: #444; line-height: 1.8; }
+  .skill-item { font-weight: 500; }
+  .social-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 10.5px; }
+  .social-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; background: #1a1a1a; color: #fff;
+    border-radius: 3px; font-size: 9px; font-weight: 700; flex-shrink: 0;
+  }
+
+  /* ═══ FOOTER WATERMARK ═══ */
+  .footer-bar {
+    padding: 12px 48px; background: #f5f5f5;
     display: flex; justify-content: space-between; align-items: center;
   }
-  .footer-text { font-size: 9px; color: #aaa; font-weight: 500; letter-spacing: 0.5px; }
-  .footer-logo { height: 16px; opacity: 0.4; }
+  .footer-text { font-size: 8.5px; color: #aaa; font-weight: 500; letter-spacing: 0.5px; }
+  .footer-logo { height: 14px; opacity: 0.35; }
 
-  /* ─── Print ─── */
-  .no-print-bar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 24px; }
-  .btn-print {
-    background: ${primaryColor}; color: #fff; border: none;
-    padding: 10px 24px; border-radius: 6px; cursor: pointer;
-    font-size: 13px; font-weight: 700; letter-spacing: 0.3px;
-    font-family: inherit; transition: all 0.2s;
+  /* ═══ PRINT ═══ */
+  .no-print-bar {
+    display: flex; justify-content: center; gap: 8px;
+    padding: 16px; background: #555;
   }
-  .btn-print:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-print {
+    background: #1a1a1a; color: #fff; border: none;
+    padding: 10px 32px; border-radius: 4px; cursor: pointer;
+    font-size: 13px; font-weight: 700; font-family: inherit;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  .btn-print:hover { background: #333; }
   @media print {
-    body { padding: 0; font-size: 12px; }
+    body { background: #fff; }
     .no-print-bar { display: none !important; }
-    .entry { break-inside: avoid; }
+    .page { width: 100%; margin: 0; }
+    .timeline-row { break-inside: avoid; }
     .section { break-inside: avoid; }
   }
 </style>
 </head>
 <body>
 <div class="no-print-bar">
-  <button class="btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+  <button class="btn-print" onclick="window.print()">⎙ Print / Save as PDF</button>
 </div>
 
-<div class="header">
-  <div class="header-info">
-    <h1>${profile.full_name || "Nama Lengkap"}</h1>
-    ${profile.headline ? `<div class="headline">${profile.headline}</div>` : ""}
-    ${contactHtml}
+<div class="page">
+  <div class="header">
+    <div class="header-left">
+      <div class="header-label">Resume</div>
+      ${profile.headline ? `<div class="header-headline">${profile.headline}</div>` : ""}
+      <h1>${profile.full_name || "Nama Lengkap"}</h1>
+      ${contactLine}
+    </div>
+    ${avatarHtml}
   </div>
-  <div style="margin-left:20px;flex-shrink:0;">${logoHtml}</div>
-</div>
 
-${summaryHtml}
-${skillsHtml}
-${expHtml}
-${eduHtml}
-${certHtml}
-${trainHtml}
-${awardHtml}
-${orgHtml}
+  <div class="body-content">
+    ${experiences.length > 0 ? `<div class="section"><div class="section-title">Experience</div>${expRows}</div>` : ""}
+    ${education.length > 0 ? `<div class="section"><div class="section-title">Education</div>${eduRows}</div>` : ""}
+    ${certifications.length > 0 ? `<div class="section"><div class="section-title">Certifications</div>${certRows}</div>` : ""}
+    ${trainings.length > 0 ? `<div class="section"><div class="section-title">Training</div>${trainRows}</div>` : ""}
+    ${awards.length > 0 ? `<div class="section"><div class="section-title">Awards</div>${awardRows}</div>` : ""}
+    ${organizations.length > 0 ? `<div class="section"><div class="section-title">Organizations</div>${orgRows}</div>` : ""}
+  </div>
 
-<div class="footer">
-  <div class="footer-text">Generated by Oveersea · ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</div>
-  ${footerLogoHtml}
+  <div class="bottom-section">
+    <div>
+      <div class="bottom-col-title">Skills</div>
+      <div class="bottom-col">${skills.length > 0 ? skills.map((s: string) => `<div class="skill-item">${s}</div>`).join("") : "<em style='color:#999'>-</em>"}</div>
+    </div>
+    <div>
+      <div class="bottom-col-title">Summary</div>
+      <div class="bottom-col">${summary || "<em style='color:#999'>-</em>"}</div>
+    </div>
+    <div>
+      <div class="bottom-col-title">${socialLinks.length > 0 ? "Social & Links" : "Powered by"}</div>
+      <div class="bottom-col">${socialLinks.length > 0 ? socialLinks.join("") : ""}${logoDataUri ? `<div style="margin-top:${socialLinks.length > 0 ? '12' : '0'}px"><img src="${logoDataUri}" alt="Oveersea" style="height:20px;opacity:0.5" /></div>` : ""}</div>
+    </div>
+  </div>
+
+  <div class="footer-bar">
+    <div class="footer-text">Generated by Oveersea · ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</div>
+    ${logoDataUri ? `<img src="${logoDataUri}" alt="Oveersea" class="footer-logo" />` : ""}
+  </div>
 </div>
 
 </body>
