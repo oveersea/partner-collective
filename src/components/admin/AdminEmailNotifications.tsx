@@ -19,7 +19,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Mail, Send, Plus, FileText, Clock, CheckCircle2, XCircle, Loader2, Trash2, Eye, Edit, Search, MoreHorizontal, MailPlus,
+  Mail, Send, Plus, FileText, Clock, CheckCircle2, XCircle, Loader2, Trash2, Eye, Edit, Search, MoreHorizontal, MailPlus, Settings,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -63,6 +63,10 @@ const AdminEmailNotifications = () => {
   const [searchHistory, setSearchHistory] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
 
+  // Reminder interval
+  const [reminderInterval, setReminderInterval] = useState<string>("5");
+  const [savingInterval, setSavingInterval] = useState(false);
+
   // Template dialog
   const [templateDialog, setTemplateDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
@@ -90,13 +94,15 @@ const AdminEmailNotifications = () => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [tplRes, sendsRes, profilesRes] = await Promise.all([
+    const [tplRes, sendsRes, profilesRes, settingsRes] = await Promise.all([
       supabase.from("email_templates").select("*").order("created_at", { ascending: false }),
       supabase.from("email_sends").select("id, subject, recipient_email, recipient_name, send_type, status, error_message, sent_at, created_at").order("created_at", { ascending: false }).limit(100),
       supabase.from("profiles").select("user_id, full_name").limit(500),
+      supabase.from("app_settings").select("key, value").eq("key", "profile_reminder_interval_days").maybeSingle(),
     ]);
     if (tplRes.data) setTemplates(tplRes.data as EmailTemplate[]);
     if (sendsRes.data) setSends(sendsRes.data as EmailSend[]);
+    if (settingsRes.data) setReminderInterval(settingsRes.data.value || "5");
     if (profilesRes.data) {
       const { data: authData } = await supabase.rpc("admin_get_users_auth_info");
       const emailMap = new Map<string, string>();
@@ -111,6 +117,29 @@ const AdminEmailNotifications = () => {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  const handleSaveInterval = async (newInterval: string) => {
+    setSavingInterval(true);
+    const days = parseInt(newInterval);
+    if (isNaN(days) || days < 1 || days > 30) {
+      toast.error("Interval harus antara 1-30 hari");
+      setSavingInterval(false);
+      return;
+    }
+    const { error } = await supabase.rpc("update_profile_reminder_cron", { interval_days: days });
+    if (error) {
+      toast.error("Gagal update interval: " + error.message);
+    } else {
+      setReminderInterval(newInterval);
+      // Update template description
+      await supabase.from("email_templates")
+        .update({ description: `Automated reminder sent every ${days} days to users with profile completeness below 70%` })
+        .eq("template_key", "profile_reminder");
+      toast.success(`Interval reminder diubah ke setiap ${days} hari`);
+      fetchData();
+    }
+    setSavingInterval(false);
+  };
 
   // Filtered data
   const filteredTemplates = useMemo(() => {
@@ -341,6 +370,35 @@ const AdminEmailNotifications = () => {
           </Card>
         ))}
       </div>
+
+      {/* Profile Reminder Settings */}
+      <Card className="border-border/50">
+        <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600">
+              <Settings className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">Profile Completion Reminder</p>
+              <p className="text-xs text-muted-foreground">Kirim otomatis ke user dengan profil &lt;70%</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">Kirim setiap</span>
+            <Select value={reminderInterval} onValueChange={handleSaveInterval} disabled={savingInterval}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 5, 7, 10, 14, 21, 30].map(d => (
+                  <SelectItem key={d} value={d.toString()}>{d} hari</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {savingInterval && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Tabs */}
       <Tabs defaultValue="templates" className="space-y-4">

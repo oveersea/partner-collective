@@ -804,6 +804,33 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          description: string | null
+          key: string
+          label: string | null
+          updated_at: string
+          updated_by: string | null
+          value: string
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          label?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          value: string
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          label?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       article_purchases: {
         Row: {
           amount: number
@@ -11502,6 +11529,10 @@ export type Database = {
       }
       update_marketing_cron: {
         Args: { cron_expression: string; is_enabled: boolean }
+        Returns: undefined
+      }
+      update_profile_reminder_cron: {
+        Args: { interval_days: number }
         Returns: undefined
       }
     }
