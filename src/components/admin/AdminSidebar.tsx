@@ -32,6 +32,7 @@ export const adminSections = [
   { id: "approvals", label: "Profile Approvals", icon: UserCheck },
   { id: "email", label: "Email Notifications", icon: Mail },
   { id: "api_keys", label: "API Keys", icon: KeyRound },
+  { id: "settings", label: "Settings", icon: Shield },
 ];
 
 // Regular menu items (excluding overview & requests which are placed separately)

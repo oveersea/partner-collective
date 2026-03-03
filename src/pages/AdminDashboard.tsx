@@ -22,6 +22,7 @@ import AdminApprovals from "@/components/admin/AdminApprovals";
 import AdminTeams from "@/components/admin/AdminTeams";
 import AdminEmailNotifications from "@/components/admin/AdminEmailNotifications";
 import AdminApiKeys from "@/components/admin/AdminApiKeys";
+import AdminSettings from "@/components/admin/AdminSettings";
 import { LogOut, User, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -96,6 +97,7 @@ const AdminDashboard = () => {
       case "approvals": return <AdminApprovals />;
       case "email": return <AdminEmailNotifications />;
       case "api_keys": return <AdminApiKeys />;
+      case "settings": return <AdminSettings />;
       default: return <AdminOverview />;
     }
   };
