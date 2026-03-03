@@ -227,28 +227,55 @@ const AdminUsers = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { toast.error("Session expired"); return; }
 
+      let successCount = 0;
       for (const userId of selectedUsers) {
-        const res = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-cv`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.access_token}`,
-            },
-            body: JSON.stringify({ user_id: userId, include_contact: includeContact }),
+        try {
+          const res = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-cv`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({ user_id: userId, include_contact: includeContact }),
+            }
+          );
+          if (!res.ok) continue;
+          const html = await res.text();
+
+          // Use a hidden iframe to print-to-PDF directly without showing preview
+          const iframe = document.createElement("iframe");
+          iframe.style.position = "fixed";
+          iframe.style.left = "-9999px";
+          iframe.style.top = "-9999px";
+          iframe.style.width = "0";
+          iframe.style.height = "0";
+          iframe.style.border = "none";
+          document.body.appendChild(iframe);
+
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (iframeDoc) {
+            iframeDoc.open();
+            iframeDoc.write(html);
+            iframeDoc.close();
+
+            // Wait for content (fonts, images) to load
+            await new Promise((r) => setTimeout(r, 1000));
+
+            iframe.contentWindow?.print();
+            successCount++;
+
+            // Wait for print dialog before cleaning up
+            await new Promise((r) => setTimeout(r, 500));
           }
-        );
-        if (!res.ok) continue;
-        const html = await res.text();
-        const blob = new Blob([html], { type: "text/html" });
-        const url = URL.createObjectURL(blob);
-        const win = window.open(url, "_blank");
-        if (win) win.onload = () => win.print();
-        // Small delay between tabs to avoid browser blocking
-        await new Promise((r) => setTimeout(r, 500));
+
+          document.body.removeChild(iframe);
+        } catch {
+          continue;
+        }
       }
-      toast.success(`${selectedUsers.size} CV berhasil dibuka`);
+      if (successCount > 0) toast.success(`${successCount} CV siap didownload`);
     } catch (err: any) {
       toast.error("Gagal download CV: " + err.message);
     } finally {
