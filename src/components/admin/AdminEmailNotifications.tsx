@@ -19,7 +19,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Mail, Send, Plus, FileText, Clock, CheckCircle2, XCircle, Loader2, Trash2, Eye, Edit, Search, MoreHorizontal, MailPlus, Settings,
+  Mail, Send, Plus, FileText, Clock, CheckCircle2, XCircle, Loader2, Trash2, Eye, Edit, Search, MoreHorizontal, MailPlus, Settings, X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -187,6 +187,11 @@ const AdminEmailNotifications = () => {
     setTemplateDialog(true);
   };
 
+  const closeTemplateEditor = () => {
+    setTemplateDialog(false);
+    setEditingTemplate(null);
+  };
+
   const saveTemplate = async () => {
     if (!tplName || !tplKey || !tplSubject || !tplBody) {
       toast.error("Semua field wajib diisi");
@@ -212,7 +217,7 @@ const AdminEmailNotifications = () => {
       else toast.success("Template dibuat");
     }
     setSavingTpl(false);
-    setTemplateDialog(false);
+    closeTemplateEditor();
     fetchData();
   };
 
@@ -327,6 +332,103 @@ const AdminEmailNotifications = () => {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // ========== TEMPLATE EDITOR PAGE ==========
+  if (templateDialog) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={closeTemplateEditor}>
+            <X className="w-5 h-5" />
+          </Button>
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-foreground">
+              {editingTemplate ? "Edit Template" : "Buat Template Baru"}
+            </h2>
+            <p className="text-muted-foreground text-sm mt-0.5">Isi detail template email di bawah ini</p>
+          </div>
+          <Button onClick={saveTemplate} disabled={savingTpl}>
+            {savingTpl && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            Simpan Template
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-6">
+          {/* Left: Form fields */}
+          <div className="space-y-4">
+            <Card>
+              <CardContent className="p-5 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Nama Template</label>
+                    <Input value={tplName} onChange={e => setTplName(e.target.value)} placeholder="Welcome Email" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Template Key</label>
+                    <Input value={tplKey} onChange={e => setTplKey(e.target.value)} placeholder="welcome_email" className="font-mono" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Subject</label>
+                    <Input value={tplSubject} onChange={e => setTplSubject(e.target.value)} placeholder="Selamat Datang di Oveersea" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Kategori</label>
+                    <Select value={tplCategory} onValueChange={setTplCategory}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="general">General</SelectItem>
+                        <SelectItem value="onboarding">Onboarding</SelectItem>
+                        <SelectItem value="notification">Notification</SelectItem>
+                        <SelectItem value="marketing">Marketing</SelectItem>
+                        <SelectItem value="transactional">Transactional</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Deskripsi <span className="text-muted-foreground font-normal">(opsional)</span></label>
+                  <Input value={tplDesc} onChange={e => setTplDesc(e.target.value)} placeholder="Deskripsi singkat template ini" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-5 space-y-2">
+                <label className="text-sm font-medium">Body HTML</label>
+                <Textarea value={tplBody} onChange={e => setTplBody(e.target.value)} rows={20} placeholder="<html>...</html>" className="font-mono text-xs" />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right: Live Preview */}
+          <div className="space-y-2">
+            <Card className="sticky top-4">
+              <CardContent className="p-5 space-y-2">
+                <label className="text-sm font-medium">Preview</label>
+                {tplBody ? (
+                  <div className="border rounded-lg overflow-hidden bg-white">
+                    <iframe
+                      srcDoc={tplBody}
+                      className="w-full border-0"
+                      style={{ minHeight: 600 }}
+                      title="Email Preview"
+                      sandbox="allow-same-origin"
+                    />
+                  </div>
+                ) : (
+                  <div className="border rounded-lg p-12 text-center text-muted-foreground text-sm">
+                    Belum ada konten HTML. Tulis kode HTML di sebelah kiri untuk melihat preview.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
@@ -590,87 +692,6 @@ const AdminEmailNotifications = () => {
       </Tabs>
 
       {/* ========== DIALOGS ========== */}
-
-      {/* Template Dialog */}
-      <Dialog open={templateDialog} onOpenChange={setTemplateDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingTemplate ? "Edit Template" : "Buat Template Baru"}</DialogTitle>
-            <DialogDescription>Isi detail template email di bawah ini.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Nama Template</label>
-                <Input value={tplName} onChange={e => setTplName(e.target.value)} placeholder="Welcome Email" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Template Key</label>
-                <Input value={tplKey} onChange={e => setTplKey(e.target.value)} placeholder="welcome_email" className="font-mono" />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Subject</label>
-                <Input value={tplSubject} onChange={e => setTplSubject(e.target.value)} placeholder="Selamat Datang di Oveersea" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Kategori</label>
-                <Select value={tplCategory} onValueChange={setTplCategory}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">General</SelectItem>
-                    <SelectItem value="onboarding">Onboarding</SelectItem>
-                    <SelectItem value="notification">Notification</SelectItem>
-                    <SelectItem value="marketing">Marketing</SelectItem>
-                    <SelectItem value="transactional">Transactional</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Deskripsi <span className="text-muted-foreground font-normal">(opsional)</span></label>
-              <Input value={tplDesc} onChange={e => setTplDesc(e.target.value)} placeholder="Deskripsi singkat template ini" />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Body HTML</label>
-              <Tabs defaultValue="preview" className="w-full">
-                <TabsList className="w-full grid grid-cols-2">
-                  <TabsTrigger value="preview">Preview</TabsTrigger>
-                  <TabsTrigger value="code">Kode HTML</TabsTrigger>
-                </TabsList>
-                <TabsContent value="preview" className="mt-2">
-                  {tplBody ? (
-                    <div className="border rounded-lg overflow-hidden bg-white">
-                      <iframe
-                        srcDoc={tplBody}
-                        className="w-full border-0"
-                        style={{ minHeight: 400 }}
-                        title="Email Preview"
-                        sandbox="allow-same-origin"
-                      />
-                    </div>
-                  ) : (
-                    <div className="border rounded-lg p-8 text-center text-muted-foreground text-sm">
-                      Belum ada konten HTML
-                    </div>
-                  )}
-                </TabsContent>
-                <TabsContent value="code" className="mt-2">
-                  <Textarea value={tplBody} onChange={e => setTplBody(e.target.value)} rows={14} placeholder="<html>...</html>" className="font-mono text-xs" />
-                </TabsContent>
-              </Tabs>
-            </div>
-          </div>
-          <DialogFooter className="pt-2">
-            <Button variant="outline" onClick={() => setTemplateDialog(false)}>Batal</Button>
-            <Button onClick={saveTemplate} disabled={savingTpl}>
-              {savingTpl && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Simpan
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Send Email Dialog */}
       <Dialog open={sendDialog} onOpenChange={setSendDialog}>
