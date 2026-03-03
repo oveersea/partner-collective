@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, Shield, Briefcase, CreditCard, FileText, Building2,
   GraduationCap, ClipboardCheck, BarChart3, Landmark, FolderKanban, UserCheck, UsersRound, Store,
-  Image as ImageIcon, Zap, Mail,
+  Image as ImageIcon, Zap, Mail, KeyRound,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -31,6 +31,7 @@ export const adminSections = [
   { id: "insights", label: "Insights & Survey", icon: BarChart3 },
   { id: "approvals", label: "Profile Approvals", icon: UserCheck },
   { id: "email", label: "Email Notifications", icon: Mail },
+  { id: "api_keys", label: "API Keys", icon: KeyRound },
 ];
 
 // Regular menu items (excluding overview & requests which are placed separately)
