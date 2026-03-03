@@ -15,7 +15,7 @@ const AuthPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [accountType, setAccountType] = useState<"personal" | "business">("personal");
+  const accountType = "personal";
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,36 +107,6 @@ const AuthPage = () => {
                       required
                       className="pl-10"
                     />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-card-foreground">Account Type</Label>
-                  <div className="grid grid-cols-2 gap-3 mt-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setAccountType("personal")}
-                      className={`p-3 rounded-xl border text-sm font-medium transition-all ${
-                        accountType === "personal"
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border text-muted-foreground hover:border-primary/30"
-                      }`}
-                    >
-                      <User className="w-5 h-5 mx-auto mb-1" />
-                      Partner
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAccountType("business")}
-                      className={`p-3 rounded-xl border text-sm font-medium transition-all ${
-                        accountType === "business"
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border text-muted-foreground hover:border-primary/30"
-                      }`}
-                    >
-                      <Shield className="w-5 h-5 mx-auto mb-1" />
-                      Client
-                    </button>
                   </div>
                 </div>
               </>
