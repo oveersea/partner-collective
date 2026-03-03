@@ -157,8 +157,25 @@ Deno.serve(async (req) => {
       ? `<div class="section"><h2>ORGANISASI</h2>${organizations.map((o: any) => `<div class="item"><div class="item-header"><strong>${o.role || o.position || ""}</strong> @ ${o.name || ""}</div><div class="item-date">${formatDate(o.start_date)} – ${o.is_current ? "Sekarang" : formatDate(o.end_date)}</div></div>`).join("")}</div>`
       : "";
 
-    const logoUrl = "https://partner-collective.lovable.app/logo-dark.png";
     const primaryColor = "#D71920";
+
+    // Fetch logo and convert to base64 data URI for reliable embedding
+    let logoDataUri = "";
+    try {
+      const logoRes = await fetch("https://partner-collective.lovable.app/logo-dark.png");
+      if (logoRes.ok) {
+        const logoBuffer = await logoRes.arrayBuffer();
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(logoBuffer)));
+        logoDataUri = `data:image/png;base64,${base64}`;
+      }
+    } catch {
+      // If logo fetch fails, try the Supabase storage or skip
+    }
+
+    // Fallback: use inline SVG text if logo fetch failed
+    const logoHtml = logoDataUri
+      ? `<img src="${logoDataUri}" alt="Oveersea" style="height:32px;" />`
+      : `<span style="font-size:20px;font-weight:700;color:${primaryColor};">OVEERSEA</span>`;
 
     const html = `<!DOCTYPE html>
 <html lang="id">
@@ -198,7 +215,7 @@ Deno.serve(async (req) => {
       <h1>${profile.full_name || "Nama Lengkap"}</h1>
       ${profile.headline ? `<div class="headline">${profile.headline}</div>` : ""}
     </div>
-    <div class="header-logo"><img src="${logoUrl}" alt="Oveersea" /></div>
+    <div class="header-logo">${logoHtml}</div>
   </div>
   ${contactHtml}
 </div>
