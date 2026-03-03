@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Shield, ArrowLeft, Mail, Lock, User } from "lucide-react";
+import { ArrowLeft, Mail, Lock, User } from "lucide-react";
+import logoDark from "@/assets/logo-dark.png";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -78,11 +79,8 @@ const AuthPage = () => {
 
         <div className="bg-card rounded-2xl p-8 shadow-card-hover border border-border">
           {/* Logo */}
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-semibold text-sm">O</span>
-            </div>
-            <span className="font-display text-lg font-semibold text-card-foreground">Oveersea</span>
+          <div className="mb-6">
+            <img src={logoDark} alt="Oveersea" className="h-8" />
           </div>
 
           <h1 className="text-2xl font-semibold text-card-foreground mb-1">
