@@ -1,38 +1,91 @@
 
-# Company Dashboard
+# Fitur Download CV (With/Without Contact) - Admin Dashboard
 
 ## Ringkasan
-Membuat halaman Company Dashboard yang dapat diakses oleh member perusahaan (business_members). Desain dan fungsionalitas mirip dengan Vendor Dashboard yang sudah ada, namun khusus untuk `business_type = 'company'`.
+Menambahkan tombol "Download CV" pada halaman detail user di admin dashboard. Admin/superadmin dapat mengunduh CV dalam format PDF dengan dua opsi: **dengan kontak** (email, phone, alamat) atau **tanpa kontak** (privasi terjaga).
 
-## Apa yang akan dibangun
+## Pendekatan
+CV akan di-generate di **server-side** menggunakan Supabase Edge Function yang menghasilkan file HTML yang dirender sebagai PDF-style document. Karena Deno edge functions tidak mendukung library PDF native yang berat, kita akan menggunakan pendekatan **HTML-to-downloadable-HTML** yang bisa langsung di-print/save-as-PDF dari browser, atau menggunakan library ringan `jsPDF` di client-side.
 
-### 1. Halaman CompanyDashboard (`src/pages/CompanyDashboard.tsx`)
-- Route: `/company/:slug`
-- Mengambil data dari tabel `business_profiles` dengan filter `business_type = 'company'`
-- Validasi akses: hanya user yang terdaftar di `business_members` untuk company tersebut yang bisa mengakses
-- Role admin (owner/admin/created_by) mendapat akses kelola member
+**Pendekatan yang dipilih: Client-side PDF generation** menggunakan native browser print API (`window.print()`), yang lebih ringan dan tidak butuh dependency tambahan.
 
-**Tab yang tersedia:**
-- **Overview** - Informasi bisnis (industry, lokasi, website, email, phone, NPWP, NIB, deskripsi) + quick stats (members, documents, credits)
-- **Members** - Daftar member dengan invite/remove (khusus admin)
-- **Documents** - Dokumen perusahaan dari `business_documents`
-- **KYC** - Status verifikasi KYC bisnis
-- **Projects** - Placeholder untuk proyek perusahaan
-- **Credits** - Saldo kredit dari `company_credits`
+## Perubahan yang akan dilakukan
 
-### 2. Route baru di App.tsx
+### 1. Buat Edge Function `generate-cv` 
+**File:** `supabase/functions/generate-cv/index.ts`
+
+- Menerima parameter: `user_id`, `include_contact` (boolean)
+- Hanya bisa diakses oleh admin/superadmin (cek `user_roles`)
+- Query semua data profil user: profiles, user_education, user_experiences, user_certifications, user_trainings, user_awards, user_organizations
+- Jika `include_contact = false`: redact email, phone_number, address
+- Menghasilkan response berupa **HTML document** yang terformat sebagai CV profesional
+- HTML sudah di-style dengan inline CSS agar siap print/save as PDF
+
+### 2. Update Halaman Admin User Detail
+**File:** `src/pages/AdminUserDetail.tsx`
+
+- Tambahkan tombol dropdown "Download CV" di header (sebelah tombol Edit Profil)
+- Dropdown berisi dua opsi:
+  - "Download CV (With Contact)" -- termasuk email, phone, alamat lengkap
+  - "Download CV (Without Contact)" -- tanpa info kontak sensitif
+- Saat diklik:
+  1. Panggil edge function `generate-cv`
+  2. Buka HTML response di tab/window baru
+  3. Otomatis trigger `window.print()` sehingga user bisa Save as PDF
+
+### 3. Update Supabase Config
+**File:** `supabase/config.toml`
+
+- Tambahkan entry untuk edge function `generate-cv` dengan `verify_jwt = true` (hanya authenticated admin)
+
+## Format CV yang Dihasilkan
+
+```text
++------------------------------------------+
+| [Nama Lengkap]                           |
+| [Headline]                               |
+| [Kontak: Email, Phone, Lokasi]*          |
+| [LinkedIn, Website]*                     |
++------------------------------------------+
+| RINGKASAN PROFESIONAL                    |
+| [professional_summary / bio]             |
++------------------------------------------+
+| SKILLS                                   |
+| [tag] [tag] [tag] ...                    |
++------------------------------------------+
+| PENGALAMAN KERJA                         |
+| - Position @ Company (start - end)       |
+|   Description                            |
++------------------------------------------+
+| PENDIDIKAN                               |
+| - Degree, Field @ Institution (year)     |
++------------------------------------------+
+| SERTIFIKASI                              |
+| - Cert Name - Issuer (date)              |
++------------------------------------------+
+| PELATIHAN                                |
+| - Training Title - Organizer (date)      |
++------------------------------------------+
+| PENGHARGAAN                              |
+| - Award Name - Issuer (date)             |
++------------------------------------------+
+| ORGANISASI                               |
+| - Role @ Organization (start - end)      |
++------------------------------------------+
 ```
-/company/:slug -> CompanyDashboard
-```
 
-### 3. Akses kontrol
-- Query `business_members` untuk cek apakah user login adalah member aktif
-- Role owner/admin mendapat fitur invite & remove member
-- RLS sudah ada di tabel `business_profiles` dan `business_members`
+*Bagian kontak hanya muncul jika `include_contact = true`
 
 ## Detail Teknis
 
-- File baru: `src/pages/CompanyDashboard.tsx` (mengikuti pola `VendorDashboard.tsx`)
-- Edit: `src/App.tsx` - tambah route `/company/:slug`
-- Tidak perlu migrasi database karena tabel dan RLS sudah tersedia
-- Menggunakan tabel: `business_profiles`, `business_members`, `business_documents`, `company_credits`, `profiles`
+### Edge Function Logic
+- Auth check: verify JWT, lalu query `user_roles` untuk memastikan caller adalah admin/superadmin
+- Fetch email dari `auth.users` menggunakan fungsi `get_user_email(user_id)` yang sudah ada
+- Query 7 tabel secara paralel (profiles, education, experiences, certifications, trainings, awards, organizations)
+- Return `Content-Type: text/html` dengan inline print styles (`@media print`, `@page`)
+
+### UI Button di AdminUserDetail
+- Menggunakan komponen `DropdownMenu` yang sudah ada
+- Icon: `Download` dari lucide-react
+- Posisi: di sebelah tombol "Edit Profil" pada header sticky
+- State loading saat fetching CV
