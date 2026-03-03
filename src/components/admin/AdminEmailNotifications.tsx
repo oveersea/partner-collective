@@ -39,13 +39,16 @@ type EmailTemplate = {
 type EmailSend = {
   id: string;
   subject: string;
+  body_html: string | null;
   recipient_email: string;
   recipient_name: string | null;
+  recipient_user_id: string | null;
   send_type: string;
   status: string;
   error_message: string | null;
   sent_at: string | null;
   created_at: string;
+  template_id: string | null;
 };
 
 type Profile = {
@@ -88,6 +91,9 @@ const AdminEmailNotifications = () => {
   const [sending, setSending] = useState(false);
   const [searchUser, setSearchUser] = useState("");
 
+  // Detail view
+  const [viewingSend, setViewingSend] = useState<EmailSend | null>(null);
+
   // Preview
   const [previewDialog, setPreviewDialog] = useState(false);
   const [previewHtml, setPreviewHtml] = useState("");
@@ -96,7 +102,7 @@ const AdminEmailNotifications = () => {
     setLoading(true);
     const [tplRes, sendsRes, profilesRes, settingsRes] = await Promise.all([
       supabase.from("email_templates").select("*").order("created_at", { ascending: false }),
-      supabase.from("email_sends").select("id, subject, recipient_email, recipient_name, send_type, status, error_message, sent_at, created_at").order("created_at", { ascending: false }).limit(100),
+      supabase.from("email_sends").select("id, subject, body_html, recipient_email, recipient_name, recipient_user_id, send_type, status, error_message, sent_at, created_at, template_id").order("created_at", { ascending: false }).limit(100),
       supabase.from("profiles").select("user_id, full_name").limit(500),
       supabase.from("app_settings").select("key, value").eq("key", "profile_reminder_interval_days").maybeSingle(),
     ]);
@@ -332,6 +338,124 @@ const AdminEmailNotifications = () => {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // ========== EMAIL DETAIL PAGE ==========
+  if (viewingSend) {
+    const tplName = viewingSend.template_id
+      ? templates.find(t => t.id === viewingSend.template_id)?.name
+      : null;
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => setViewingSend(null)}>
+            <X className="w-5 h-5" />
+          </Button>
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-foreground">Detail Email</h2>
+            <p className="text-muted-foreground text-sm mt-0.5">Riwayat pengiriman email</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-6">
+          {/* Left: Metadata */}
+          <div className="space-y-4">
+            <Card>
+              <CardContent className="p-5 space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Status</span>
+                    {viewingSend.status === "sent" ? (
+                      <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">
+                        <CheckCircle2 className="w-3 h-3 mr-1" />Sent
+                      </Badge>
+                    ) : viewingSend.status === "failed" ? (
+                      <Badge variant="destructive" className="text-xs">
+                        <XCircle className="w-3 h-3 mr-1" />Failed
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-xs">
+                        <Clock className="w-3 h-3 mr-1" />Pending
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="h-px bg-border" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Penerima</span>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">{viewingSend.recipient_name || "-"}</p>
+                      <p className="text-xs text-muted-foreground">{viewingSend.recipient_email}</p>
+                    </div>
+                  </div>
+                  <div className="h-px bg-border" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Subject</span>
+                    <p className="text-sm font-medium text-right max-w-[60%]">{viewingSend.subject}</p>
+                  </div>
+                  <div className="h-px bg-border" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Tipe</span>
+                    <Badge variant="outline" className="text-xs capitalize">{viewingSend.send_type}</Badge>
+                  </div>
+                  <div className="h-px bg-border" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Waktu Kirim</span>
+                    <p className="text-sm">
+                      {viewingSend.sent_at
+                        ? new Date(viewingSend.sent_at).toLocaleString("id-ID", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })
+                        : "-"}
+                    </p>
+                  </div>
+                  {tplName && (
+                    <>
+                      <div className="h-px bg-border" />
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Template</span>
+                        <Badge variant="outline" className="text-xs">{tplName}</Badge>
+                      </div>
+                    </>
+                  )}
+                  {viewingSend.error_message && (
+                    <>
+                      <div className="h-px bg-border" />
+                      <div>
+                        <span className="text-sm text-muted-foreground">Error</span>
+                        <p className="text-sm text-destructive mt-1 bg-destructive/5 p-2 rounded text-xs font-mono break-all">{viewingSend.error_message}</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right: Email Body Preview */}
+          <div className="space-y-2">
+            <Card className="sticky top-4">
+              <CardContent className="p-5 space-y-2">
+                <label className="text-sm font-medium">Preview Email</label>
+                {viewingSend.body_html ? (
+                  <div className="border rounded-lg overflow-hidden bg-white">
+                    <iframe
+                      srcDoc={viewingSend.body_html}
+                      className="w-full border-0"
+                      style={{ minHeight: 500 }}
+                      title="Email Preview"
+                      sandbox="allow-same-origin"
+                    />
+                  </div>
+                ) : (
+                  <div className="border rounded-lg p-12 text-center text-muted-foreground text-sm">
+                    Body email tidak tersedia.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
@@ -655,7 +779,7 @@ const AdminEmailNotifications = () => {
                       </TableCell>
                     </TableRow>
                   ) : filteredSends.map(s => (
-                    <TableRow key={s.id}>
+                    <TableRow key={s.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setViewingSend(s)}>
                       <TableCell>
                         <p className="text-sm font-medium">{s.recipient_name || "-"}</p>
                         <p className="text-xs text-muted-foreground">{s.recipient_email}</p>
