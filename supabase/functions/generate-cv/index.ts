@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
     // Fetch logo and convert to base64 data URI — chunked to avoid stack overflow
     let logoDataUri = "";
     try {
-      const logoRes = await fetch("https://partner-collective.lovable.app/logo-dark.png");
+      const logoRes = await fetch("https://partner-collective.lovable.app/oveersea-logo-dark-cv.png");
       if (logoRes.ok) {
         const logoBuffer = new Uint8Array(await logoRes.arrayBuffer());
         let binary = "";
