@@ -157,6 +157,9 @@ Deno.serve(async (req) => {
       ? `<div class="section"><h2>ORGANISASI</h2>${organizations.map((o: any) => `<div class="item"><div class="item-header"><strong>${o.role || o.position || ""}</strong> @ ${o.name || ""}</div><div class="item-date">${formatDate(o.start_date)} – ${o.is_current ? "Sekarang" : formatDate(o.end_date)}</div></div>`).join("")}</div>`
       : "";
 
+    const logoUrl = "https://partner-collective.lovable.app/logo-dark.png";
+    const primaryColor = "#D71920";
+
     const html = `<!DOCTYPE html>
 <html lang="id">
 <head>
@@ -167,11 +170,13 @@ Deno.serve(async (req) => {
   @page { margin: 15mm; size: A4; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1a1a1a; line-height: 1.5; max-width: 800px; margin: 0 auto; padding: 32px 24px; }
-  .header { border-bottom: 2px solid #0f766e; padding-bottom: 16px; margin-bottom: 20px; }
-  .header h1 { font-size: 28px; font-weight: 700; color: #0f766e; margin-bottom: 2px; }
+  .header { border-bottom: 2px solid ${primaryColor}; padding-bottom: 16px; margin-bottom: 20px; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .header-logo img { height: 32px; }
+  .header h1 { font-size: 28px; font-weight: 700; color: ${primaryColor}; margin-bottom: 2px; }
   .header .headline { font-size: 15px; color: #555; }
   .section { margin-bottom: 20px; }
-  .section h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #0f766e; border-bottom: 1px solid #d1d5db; padding-bottom: 4px; margin-bottom: 10px; }
+  .section h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: ${primaryColor}; border-bottom: 1px solid #d1d5db; padding-bottom: 4px; margin-bottom: 10px; }
   .section p { font-size: 13px; color: #333; }
   .item { margin-bottom: 12px; }
   .item-header { font-size: 14px; }
@@ -185,11 +190,16 @@ Deno.serve(async (req) => {
 </head>
 <body>
 <div class="no-print" style="text-align:right;margin-bottom:16px;">
-  <button onclick="window.print()" style="background:#0f766e;color:#fff;border:none;padding:10px 24px;border-radius:6px;cursor:pointer;font-size:14px;">🖨️ Print / Save as PDF</button>
+  <button onclick="window.print()" style="background:${primaryColor};color:#fff;border:none;padding:10px 24px;border-radius:6px;cursor:pointer;font-size:14px;">🖨️ Print / Save as PDF</button>
 </div>
 <div class="header">
-  <h1>${profile.full_name || "Nama Lengkap"}</h1>
-  ${profile.headline ? `<div class="headline">${profile.headline}</div>` : ""}
+  <div class="header-top">
+    <div>
+      <h1>${profile.full_name || "Nama Lengkap"}</h1>
+      ${profile.headline ? `<div class="headline">${profile.headline}</div>` : ""}
+    </div>
+    <div class="header-logo"><img src="${logoUrl}" alt="Oveersea" /></div>
+  </div>
   ${contactHtml}
 </div>
 ${summaryHtml}
