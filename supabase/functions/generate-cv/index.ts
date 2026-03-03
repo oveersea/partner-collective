@@ -180,6 +180,10 @@ Deno.serve(async (req) => {
       ? `<img src="${logoDataUri}" alt="Oveersea" class="logo" />`
       : `<span class="logo-text">OVEERSEA</span>`;
 
+    const footerLogoHtml = logoDataUri
+      ? `<img src="${logoDataUri}" alt="Oveersea" class="footer-logo" />`
+      : "";
+
     const html = `<!DOCTYPE html>
 <html lang="id">
 <head>
@@ -187,72 +191,114 @@ Deno.serve(async (req) => {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CV – ${profile.full_name || "User"}</title>
 <style>
-  @page { margin: 14mm 16mm; size: A4; }
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+  @page { margin: 12mm 14mm; size: A4; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: #1e293b; line-height: 1.55; max-width: 820px;
-    margin: 0 auto; padding: 40px 32px; background: #fff;
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', -apple-system, sans-serif;
+    color: #1a1a2e; line-height: 1.6; max-width: 800px;
+    margin: 0 auto; padding: 36px 28px; background: #fff;
+    font-size: 13px;
   }
 
-  /* Header */
-  .header { display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 20px; margin-bottom: 24px; border-bottom: 3px solid ${primaryColor}; }
+  /* ─── Header ─── */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 24px; margin-bottom: 28px;
+    border-bottom: 2.5px solid ${primaryColor};
+  }
   .header-info { flex: 1; }
-  .header h1 { font-size: 26px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px; margin-bottom: 2px; }
-  .header .headline { font-size: 14px; color: #64748b; font-weight: 500; }
-  .logo { height: 36px; object-fit: contain; }
-  .logo-text { font-size: 22px; font-weight: 800; color: ${primaryColor}; letter-spacing: 1px; }
-
-  /* Contact Bar */
-  .contact-bar { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 14px; padding: 12px 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
-  .contact-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; }
-  .contact-item svg { color: ${primaryColor}; flex-shrink: 0; }
-  .contact-item a { color: ${primaryColor}; text-decoration: none; }
-
-  /* Sections */
-  .section { margin-bottom: 22px; }
-  .section h2 {
-    font-size: 11px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 2px; color: ${primaryColor};
-    padding-bottom: 6px; margin-bottom: 12px;
-    border-bottom: 1.5px solid #fecaca;
+  .header h1 {
+    font-size: 28px; font-weight: 800; color: #0d0d0d;
+    letter-spacing: -0.5px; margin-bottom: 4px; line-height: 1.2;
   }
-  .summary-text { font-size: 13px; color: #334155; line-height: 1.7; }
+  .header .headline {
+    font-size: 14px; color: #555; font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .logo { height: 40px; object-fit: contain; }
+  .logo-text { font-size: 20px; font-weight: 800; color: ${primaryColor}; letter-spacing: 1px; }
 
-  /* Skills */
+  /* ─── Contact ─── */
+  .contact-bar {
+    display: flex; flex-wrap: wrap; gap: 8px 18px;
+    margin-top: 16px; padding: 10px 14px;
+    background: #f7f7f9; border-radius: 6px;
+  }
+  .contact-item {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11.5px; color: #444; font-weight: 500;
+  }
+  .contact-item svg { color: ${primaryColor}; flex-shrink: 0; }
+  .contact-item a { color: ${primaryColor}; text-decoration: none; font-weight: 600; }
+
+  /* ─── Sections ─── */
+  .section { margin-bottom: 24px; }
+  .section h2 {
+    font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.8px; color: ${primaryColor};
+    padding-bottom: 8px; margin-bottom: 14px;
+    border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px;
+  }
+  .section h2::before {
+    content: ''; display: inline-block; width: 4px; height: 16px;
+    background: ${primaryColor}; border-radius: 2px; flex-shrink: 0;
+  }
+  .summary-text { font-size: 12.5px; color: #333; line-height: 1.75; }
+
+  /* ─── Skills ─── */
   .skills-grid { display: flex; flex-wrap: wrap; gap: 6px; }
   .skill-tag {
-    background: linear-gradient(135deg, #fff1f2, #fee2e2);
-    color: ${primaryColor}; padding: 4px 12px; border-radius: 20px;
-    font-size: 11px; font-weight: 600; border: 1px solid #fecaca;
+    background: #f0f0f5; color: #1a1a2e; padding: 4px 12px;
+    border-radius: 4px; font-size: 11px; font-weight: 600;
+    border: 1px solid #e0e0e8;
   }
 
-  /* Entries */
-  .entry { margin-bottom: 14px; padding-left: 12px; border-left: 2px solid #e2e8f0; }
-  .entry:hover { border-left-color: ${primaryColor}; }
+  /* ─── Timeline Entries ─── */
+  .entry {
+    margin-bottom: 16px; padding-left: 14px;
+    border-left: 3px solid #e8e8ee; position: relative;
+  }
+  .entry::before {
+    content: ''; position: absolute; left: -5px; top: 6px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: ${primaryColor};
+  }
   .entry-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
   .entry-title { flex: 1; }
-  .entry-title strong { font-size: 13.5px; color: #0f172a; }
-  .entry-org { display: block; font-size: 12.5px; color: #64748b; margin-top: 1px; }
-  .entry-date { font-size: 11.5px; color: #94a3b8; white-space: nowrap; font-weight: 500; }
-  .entry-desc { font-size: 12px; color: #475569; margin-top: 4px; line-height: 1.6; }
+  .entry-title strong { font-size: 13px; color: #0d0d0d; font-weight: 700; }
+  .entry-org { display: block; font-size: 12px; color: #666; margin-top: 2px; font-weight: 500; }
+  .entry-date {
+    font-size: 11px; color: #999; white-space: nowrap;
+    font-weight: 600; background: #f5f5f8; padding: 2px 8px;
+    border-radius: 3px;
+  }
+  .entry-desc {
+    font-size: 12px; color: #444; margin-top: 6px; line-height: 1.65;
+    white-space: pre-line;
+  }
 
-  /* Footer */
-  .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-  .footer-text { font-size: 10px; color: #94a3b8; }
-  .footer-logo { height: 18px; opacity: 0.5; }
+  /* ─── Footer ─── */
+  .footer {
+    margin-top: 36px; padding-top: 14px; border-top: 1px solid #e8e8ee;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-text { font-size: 9px; color: #aaa; font-weight: 500; letter-spacing: 0.5px; }
+  .footer-logo { height: 16px; opacity: 0.4; }
 
-  /* Print */
-  .no-print-bar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 20px; }
+  /* ─── Print ─── */
+  .no-print-bar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 24px; }
   .btn-print {
     background: ${primaryColor}; color: #fff; border: none;
-    padding: 10px 28px; border-radius: 8px; cursor: pointer;
-    font-size: 13px; font-weight: 600; transition: opacity 0.2s;
+    padding: 10px 24px; border-radius: 6px; cursor: pointer;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.3px;
+    font-family: inherit; transition: all 0.2s;
   }
-  .btn-print:hover { opacity: 0.9; }
+  .btn-print:hover { opacity: 0.85; transform: translateY(-1px); }
   @media print {
-    body { padding: 0; }
-    .no-print-bar { display: none; }
+    body { padding: 0; font-size: 12px; }
+    .no-print-bar { display: none !important; }
     .entry { break-inside: avoid; }
     .section { break-inside: avoid; }
   }
@@ -269,7 +315,7 @@ Deno.serve(async (req) => {
     ${profile.headline ? `<div class="headline">${profile.headline}</div>` : ""}
     ${contactHtml}
   </div>
-  <div style="margin-left:24px;flex-shrink:0;">${logoHtml}</div>
+  <div style="margin-left:20px;flex-shrink:0;">${logoHtml}</div>
 </div>
 
 ${summaryHtml}
@@ -283,7 +329,7 @@ ${orgHtml}
 
 <div class="footer">
   <div class="footer-text">Generated by Oveersea · ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</div>
-  ${logoDataUri ? `<img src="${logoDataUri}" alt="Oveersea" class="footer-logo" />` : ""}
+  ${footerLogoHtml}
 </div>
 
 </body>
