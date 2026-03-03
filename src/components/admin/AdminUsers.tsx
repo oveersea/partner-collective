@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Shield, User, MoreVertical, Trash2, UserX, ArrowUpDown, ArrowUp, ArrowDown, CalendarDays, ChevronLeft, ChevronRight, FileUp } from "lucide-react";
+import { Search, Shield, User, MoreVertical, Trash2, UserX, ArrowUpDown, ArrowUp, ArrowDown, CalendarDays, ChevronLeft, ChevronRight, FileUp, Download } from "lucide-react";
 import InviteUsersDialog from "./InviteUsersDialog";
 import AdminBulkCV from "./AdminBulkCV";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -91,6 +92,8 @@ const AdminUsers = () => {
   const [page, setPage] = useState(1);
   const [activityMap, setActivityMap] = useState<Record<string, LoginActivity>>({});
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; type: "deactivate" | "delete"; userId: string; name: string }>({ open: false, type: "deactivate", userId: "", name: "" });
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [bulkDownloading, setBulkDownloading] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -197,6 +200,62 @@ const AdminUsers = () => {
     }
   };
 
+  const toggleSelectUser = (userId: string) => {
+    setSelectedUsers((prev) => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedUsers.size === pagedUsers.length) {
+      setSelectedUsers(new Set());
+    } else {
+      setSelectedUsers(new Set(pagedUsers.map((u) => u.user_id)));
+    }
+  };
+
+  const handleBulkDownloadCV = async (includeContact: boolean) => {
+    if (selectedUsers.size === 0) {
+      toast.error("Pilih minimal satu user untuk download CV");
+      return;
+    }
+    setBulkDownloading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast.error("Session expired"); return; }
+
+      for (const userId of selectedUsers) {
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-cv`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ user_id: userId, include_contact: includeContact }),
+          }
+        );
+        if (!res.ok) continue;
+        const html = await res.text();
+        const blob = new Blob([html], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
+        const win = window.open(url, "_blank");
+        if (win) win.onload = () => win.print();
+        // Small delay between tabs to avoid browser blocking
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      toast.success(`${selectedUsers.size} CV berhasil dibuka`);
+    } catch (err: any) {
+      toast.error("Gagal download CV: " + err.message);
+    } finally {
+      setBulkDownloading(false);
+    }
+  };
+
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ArrowUpDown className="w-3 h-3 ml-1 opacity-40" />;
     return sortDir === "desc" ? <ArrowDown className="w-3 h-3 ml-1" /> : <ArrowUp className="w-3 h-3 ml-1" />;
@@ -244,7 +303,7 @@ const AdminUsers = () => {
     return list;
   }, [users, search, sortKey, sortDir, activityMap]);
 
-  useEffect(() => { setPage(1); }, [search]);
+  useEffect(() => { setPage(1); setSelectedUsers(new Set()); }, [search]);
 
   const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / PAGE_SIZE));
   const pagedUsers = sortedFiltered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -272,6 +331,24 @@ const AdminUsers = () => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-foreground">User Management</h2>
         <div className="flex items-center gap-3">
+          {selectedUsers.size > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={bulkDownloading}>
+                  <Download className="w-4 h-4 mr-1.5" />
+                  Download CV ({selectedUsers.size})
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleBulkDownloadCV(true)}>
+                  With Contact
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleBulkDownloadCV(false)}>
+                  Without Contact
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           <InviteUsersDialog onComplete={fetchUsers} />
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -285,6 +362,12 @@ const AdminUsers = () => {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50">
+                <th className="w-10 px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={pagedUsers.length > 0 && selectedUsers.size === pagedUsers.length}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">User</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Oveercode</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Type</th>
@@ -311,11 +394,11 @@ const AdminUsers = () => {
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-b border-border">
-                    <td colSpan={10} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td>
+                    <td colSpan={11} className="px-4 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td>
                   </tr>
                 ))
               ) : sortedFiltered.length === 0 ? (
-                <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">No data found</td></tr>
+                <tr><td colSpan={11} className="px-4 py-8 text-center text-muted-foreground">No data found</td></tr>
               ) : (
                 pagedUsers.map((u) => {
                   const pScore = calcProfileScore(u);
@@ -324,6 +407,12 @@ const AdminUsers = () => {
                   const totalLogins = activity?.total_logins || 0;
                   return (
                   <tr key={u.user_id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/user/${u.user_id}`)}>
+                    <td className="w-10 px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={selectedUsers.has(u.user_id)}
+                        onCheckedChange={() => toggleSelectUser(u.user_id)}
+                      />
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
