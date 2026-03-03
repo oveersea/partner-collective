@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.request-quote]
 verify_jwt = false
+
+[functions.generate-cv]
+verify_jwt = false

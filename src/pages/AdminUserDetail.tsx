@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft, User, MapPin, Phone, Globe, Linkedin, Briefcase,
   Calendar, Shield, Star, GraduationCap, Clock, Pencil, Save, X, Camera,
-  Award, Heart, CreditCard, Building2, Users,
+  Award, Heart, CreditCard, Building2, Users, Download, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -189,6 +189,7 @@ const AdminUserDetail = () => {
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
+  const [downloadingCV, setDownloadingCV] = useState(false);
 
   // Related data
   const [education, setEducation] = useState<any[]>([]);
@@ -326,6 +327,40 @@ const AdminUserDetail = () => {
 
   const set = (key: string, value: any) => setEditData((prev) => ({ ...prev, [key]: value }));
 
+  const handleDownloadCV = async (includeContact: boolean) => {
+    setDownloadingCV(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast.error("Sesi kadaluarsa, silakan login ulang"); return; }
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-cv`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ user_id: userId, include_contact: includeContact }),
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Gagal generate CV" }));
+        throw new Error(err.error || "Gagal generate CV");
+      }
+      const html = await res.text();
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, "_blank");
+      if (win) {
+        win.onload = () => win.print();
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Gagal download CV");
+    } finally {
+      setDownloadingCV(false);
+    }
+  };
+
 
   const kycColor = (s: string) => {
     if (s === "approved" || s === "verified") return "text-primary bg-primary/10";
@@ -369,10 +404,30 @@ const AdminUserDetail = () => {
             <span className="text-muted-foreground">/</span>
             <span className="text-sm font-medium text-foreground">Detail User</span>
           </div>
-          {isSuperadmin && !editing && (
-            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-              <Pencil className="w-4 h-4 mr-1" /> Edit Profil
-            </Button>
+          {!editing && (
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={downloadingCV}>
+                    {downloadingCV ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
+                    Download CV
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleDownloadCV(true)}>
+                    Download CV (With Contact)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleDownloadCV(false)}>
+                    Download CV (Without Contact)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {isSuperadmin && (
+                <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+                  <Pencil className="w-4 h-4 mr-1" /> Edit Profil
+                </Button>
+              )}
+            </div>
           )}
           {editing && (
             <div className="flex items-center gap-2">
