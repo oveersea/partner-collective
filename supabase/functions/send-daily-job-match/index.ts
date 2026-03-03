@@ -321,36 +321,37 @@ function buildEmailHtml(p: EmailParams): string {
     <tr>
       <td align="center" style="padding: 24px 16px;">
         <table cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px;">
-          <!-- Header -->
+          <!-- Header (Light with dark logo) -->
           <tr>
-            <td style="background: ${darkBg}; border-radius: 12px 12px 0 0; padding: 28px 32px; text-align: center;">
-              <img src="${p.appUrl}/oveersea-logo-dark-cv.png" alt="Oveersea" height="28" style="margin-bottom: 16px;" />
-              <div style="font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.3px;">
-                ${p.hasMatches ? "Peluang Kerja Untukmu 🎯" : "Rekomendasi Hari Ini 💡"}
-              </div>
-              <div style="font-size: 13px; color: #aaa; margin-top: 6px;">${p.today}</div>
+            <td style="background: #ffffff; border-radius: 12px 12px 0 0; padding: 28px 32px 20px; text-align: center;">
+              <img src="${p.appUrl}/logo-dark.png" alt="Oveersea" height="36" style="margin-bottom: 0;" />
             </td>
+          </tr>
+          <tr>
+            <td style="padding: 0;"><div style="height: 3px; background: ${primaryColor};"></div></td>
           </tr>
 
           <!-- Body -->
           <tr>
-            <td style="background: #ffffff; padding: 32px;">
-              <div style="font-size: 15px; color: #333; margin-bottom: 20px; line-height: 1.6;">
-                Hai <strong>${p.firstName}</strong>! 👋
+            <td style="background: #ffffff; padding: 32px 40px;">
+              <h1 style="font-size: 22px; font-weight: 800; color: ${darkBg}; margin: 0 0 16px;">
+                Hi ${p.firstName},
+              </h1>
+              <p style="font-size: 15px; color: #555; margin: 0 0 24px; line-height: 1.7;">
                 ${
                   p.hasMatches
-                    ? `<br/>Kami menemukan <strong>${p.topMatches.length} peluang</strong> yang cocok dengan keahlianmu:`
-                    : `<br/>Belum ada peluang yang cocok dengan profilmu saat ini. Yuk tingkatkan profilmu agar lebih banyak peluang datang!`
+                    ? `Kami menemukan <strong>${p.topMatches.length} peluang</strong> yang cocok dengan keahlianmu hari ini. Profil yang lengkap membantu kamu tampil menonjol di hadapan employer.`
+                    : `Belum ada peluang yang cocok dengan profilmu saat ini. Profil yang lengkap membantu kamu tampil menonjol dan membuka lebih banyak peluang di platform.`
                 }
-              </div>
-
-              ${p.hasMatches ? `<table cellpadding="0" cellspacing="0" border="0" width="100%">${matchCards}</table>` : ""}
+              </p>
 
               ${p.hasMatches ? `
+              <div style="font-size: 15px; font-weight: 700; color: ${darkBg}; margin-bottom: 12px;">Peluang yang cocok:</div>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">${matchCards}</table>
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
-                  <td align="center" style="padding: 16px 0 0;">
-                    <a href="${p.appUrl}/matchmaking" style="display: inline-block; background: ${primaryColor}; color: #fff; padding: 12px 32px; border-radius: 8px; font-size: 14px; font-weight: 700; text-decoration: none;">
+                  <td align="center" style="padding: 20px 0 0;">
+                    <a href="${p.appUrl}/matchmaking" style="display: inline-block; background: ${primaryColor}; color: #fff; padding: 14px 36px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none;">
                       Lihat Semua Peluang →
                     </a>
                   </td>
@@ -359,15 +360,28 @@ function buildEmailHtml(p: EmailParams): string {
 
               ${profileSection}
               ${trainingSection}
+
+              ${!p.hasMatches && !p.isProfileIncomplete ? `
+              <p style="font-size: 14px; color: #555; line-height: 1.6; margin-top: 16px;">
+                Luangkan waktu sejenak untuk melengkapi profilmu dan tingkatkan visibilitasmu.
+              </p>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding: 20px 0 0;">
+                    <a href="${p.appUrl}/dashboard" style="display: inline-block; background: ${primaryColor}; color: #fff; padding: 14px 36px; border-radius: 8px; font-size: 15px; font-weight: 700; text-decoration: none;">
+                      Complete My Profile →
+                    </a>
+                  </td>
+                </tr>
+              </table>` : ""}
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="background: #fafafa; border-radius: 0 0 12px 12px; padding: 20px 32px; text-align: center; border-top: 1px solid #eee;">
+            <td style="background: #f9f9f9; border-radius: 0 0 12px 12px; padding: 20px 32px; text-align: center; border-top: 1px solid #eee;">
               <div style="font-size: 11px; color: #999; line-height: 1.6;">
-                Email ini dikirim otomatis oleh <strong>Oveersea</strong>.<br/>
-                Jika tidak ingin menerima email ini, hubungi admin.
+                © ${new Date().getFullYear()} Oveersea. All rights reserved.
               </div>
             </td>
           </tr>
