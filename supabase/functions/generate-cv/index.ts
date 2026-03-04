@@ -38,11 +38,8 @@ Deno.serve(async (req) => {
     }
 
     const callerId = claimsData.claims.sub;
-
-    // Use service role client for data fetching
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check admin role
     const { data: roleData } = await supabase
       .from("user_roles")
       .select("role")
@@ -64,7 +61,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch all data in parallel
     const [profileRes, eduRes, expRes, certRes, trainRes, awardRes, orgRes, emailRes] =
       await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user_id).single(),
@@ -93,286 +89,292 @@ Deno.serve(async (req) => {
     const awards = awardRes.data || [];
     const organizations = orgRes.data || [];
 
-    const formatDate = (d: string | null) => {
-      if (!d) return "";
-      const dt = new Date(d);
-      return dt.toLocaleDateString("en-US", { year: "numeric" });
+    const esc = (s: string | null | undefined) => {
+      if (!s) return "";
+      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     };
-    const formatDateFull = (d: string | null) => {
+
+    const fmtDate = (d: string | null) => {
       if (!d) return "";
-      return new Date(d).toLocaleDateString("id-ID", { month: "short", year: "numeric" });
+      return new Date(d).toLocaleDateString("en-US", { month: "short", year: "numeric" });
     };
-    const formatDateRange = (start: string | null, end: string | null, isCurrent: boolean) => {
-      const s = formatDateFull(start);
-      const e = isCurrent ? "Present" : formatDateFull(end);
+    const fmtRange = (start: string | null, end: string | null, isCurrent: boolean) => {
+      const s = fmtDate(start);
+      const e = isCurrent ? "Present" : fmtDate(end);
       if (!s && !e) return "";
-      return `${s} - ${e}`;
+      return `${s} — ${e}`;
     };
 
     const locationParts = [profile.city, profile.province, profile.country].filter(Boolean);
     const location = locationParts.join(", ");
-
-    // Build contact line for header
-    let contactLine = "";
-    if (include_contact) {
-      const parts: string[] = [];
-      if (location) parts.push(location);
-      if (profile.phone_number) parts.push(`T: ${profile.phone_number}`);
-      if (email) parts.push(`E: ${email}`);
-      if (profile.website_url) parts.push(profile.website_url);
-      if (parts.length > 0) {
-        contactLine = `<div class="header-contact">${parts.join("&nbsp;&nbsp;//&nbsp;&nbsp;")}</div>`;
-      }
-    }
-
-    // Skills list
     const skills = Array.isArray(profile.skills) ? profile.skills : [];
+    const summary = profile.professional_summary || profile.bio || "";
 
-    // Summary
-    const summary = profile.professional_summary || profile.bio;
-
-    // Social links for footer
-    const socialLinks: string[] = [];
+    // Contact info
+    const contactItems: string[] = [];
     if (include_contact) {
-      if (profile.linkedin_url) socialLinks.push(`<div class="social-item"><span class="social-icon">in</span> ${profile.linkedin_url.replace(/^https?:\/\/(www\.)?/, '')}</div>`);
-      if (profile.website_url) socialLinks.push(`<div class="social-item"><span class="social-icon">⊕</span> ${profile.website_url.replace(/^https?:\/\/(www\.)?/, '')}</div>`);
+      if (location) contactItems.push(esc(location));
+      if (profile.phone_number) contactItems.push(esc(profile.phone_number));
+      if (email) contactItems.push(esc(email));
+      if (profile.linkedin_url) contactItems.push(esc(profile.linkedin_url));
+      if (profile.website_url) contactItems.push(esc(profile.website_url));
+    } else {
+      if (location) contactItems.push(esc(location));
     }
 
-    // Experiences rows
-    const expRows = experiences.map((e: any) => `<div class="timeline-row"><div class="timeline-date">${formatDateRange(e.start_date, e.end_date, e.is_current)}</div><div class="timeline-content"><div class="timeline-company">${e.company || ""}</div><div class="timeline-role">${e.position || e.title || ""}</div>${e.description ? `<p class="timeline-desc">${e.description}</p>` : ""}</div></div>`).join("");
+    // Build sections
+    const buildEntry = (date: string, title: string, subtitle: string, desc: string) => `
+      <div class="entry">
+        <div class="entry-header">
+          <div class="entry-title">${title}</div>
+          <div class="entry-date">${date}</div>
+        </div>
+        ${subtitle ? `<div class="entry-subtitle">${subtitle}</div>` : ""}
+        ${desc ? `<div class="entry-desc">${desc}</div>` : ""}
+      </div>`;
 
-    const eduRows = education.map((e: any) => `<div class="timeline-row"><div class="timeline-date">${formatDateRange(e.start_date, e.end_date, e.is_current)}</div><div class="timeline-content"><div class="timeline-company">${e.degree || ""}${e.field_of_study ? ", " + e.field_of_study : ""}</div><div class="timeline-role">${e.institution || ""}</div>${e.description ? `<p class="timeline-desc">${e.description}</p>` : ""}</div></div>`).join("");
+    const expHtml = experiences.map((e: any) => buildEntry(
+      fmtRange(e.start_date, e.end_date, e.is_current),
+      `${esc(e.position || e.title || "")}`,
+      esc(e.company || ""),
+      esc(e.description || "")
+    )).join("");
 
-    const certRows = certifications.map((c: any) => `<div class="timeline-row"><div class="timeline-date">${formatDateFull(c.issue_date)}${c.expiry_date ? " - " + formatDateFull(c.expiry_date) : ""}</div><div class="timeline-content"><div class="timeline-company">${c.name || ""}</div><div class="timeline-role">${c.issuing_organization || ""}</div>${c.credential_id ? `<p class="timeline-desc">ID: ${c.credential_id}</p>` : ""}</div></div>`).join("");
+    const eduHtml = education.map((e: any) => buildEntry(
+      fmtRange(e.start_date, e.end_date, e.is_current),
+      `${esc(e.degree || "")}${e.field_of_study ? " in " + esc(e.field_of_study) : ""}`,
+      esc(e.institution || ""),
+      esc(e.description || "")
+    )).join("");
 
-    const trainRows = trainings.map((t: any) => `<div class="timeline-row"><div class="timeline-date">${formatDateRange(t.start_date, t.end_date, false)}</div><div class="timeline-content"><div class="timeline-company">${t.title || ""}</div><div class="timeline-role">${t.organizer || ""}</div></div></div>`).join("");
+    const certHtml = certifications.map((c: any) => buildEntry(
+      fmtDate(c.issue_date) + (c.expiry_date ? ` — ${fmtDate(c.expiry_date)}` : ""),
+      esc(c.name || ""),
+      esc(c.issuing_organization || ""),
+      c.credential_id ? `Credential ID: ${esc(c.credential_id)}` : ""
+    )).join("");
 
-    const awardRows = awards.map((a: any) => `<div class="timeline-row"><div class="timeline-date">${formatDateFull(a.date_received)}</div><div class="timeline-content"><div class="timeline-company">${a.title || ""}</div><div class="timeline-role">${a.issuer || ""}</div>${a.description ? `<p class="timeline-desc">${a.description}</p>` : ""}</div></div>`).join("");
+    const trainHtml = trainings.map((t: any) => buildEntry(
+      fmtRange(t.start_date, t.end_date, false),
+      esc(t.title || ""),
+      esc(t.organizer || ""),
+      ""
+    )).join("");
 
-    const orgRows = organizations.map((o: any) => `<div class="timeline-row"><div class="timeline-date">${formatDateRange(o.start_date, o.end_date, o.is_current)}</div><div class="timeline-content"><div class="timeline-company">${o.role || o.position || ""}</div><div class="timeline-role">${o.name || ""}</div></div></div>`).join("");
+    const awardHtml = awards.map((a: any) => buildEntry(
+      fmtDate(a.date_received),
+      esc(a.title || ""),
+      esc(a.issuer || ""),
+      esc(a.description || "")
+    )).join("");
 
-    // Fetch logo
-    let logoDataUri = "";
-    try {
-      const logoRes = await fetch("https://partner-collective.lovable.app/oveersea-logo-dark-cv.png");
-      if (logoRes.ok) {
-        const logoBuffer = new Uint8Array(await logoRes.arrayBuffer());
-        let binary = "";
-        const chunkSize = 8192;
-        for (let i = 0; i < logoBuffer.length; i += chunkSize) {
-          binary += String.fromCharCode(...logoBuffer.subarray(i, i + chunkSize));
-        }
-        logoDataUri = `data:image/png;base64,${btoa(binary)}`;
-      }
-    } catch { /* fallback */ }
+    const orgHtml = organizations.map((o: any) => buildEntry(
+      fmtRange(o.start_date, o.end_date, o.is_current),
+      `${esc(o.role || o.position || "")}`,
+      esc(o.name || ""),
+      ""
+    )).join("");
 
-    // Avatar
-    let avatarHtml = "";
-    if (profile.avatar_url) {
-      let avatarDataUri = "";
-      try {
-        const avRes = await fetch(profile.avatar_url);
-        if (avRes.ok) {
-          const ct = avRes.headers.get("content-type") || "image/jpeg";
-          const avBuf = new Uint8Array(await avRes.arrayBuffer());
-          let bin = "";
-          const cs = 8192;
-          for (let i = 0; i < avBuf.length; i += cs) {
-            bin += String.fromCharCode(...avBuf.subarray(i, i + cs));
-          }
-          avatarDataUri = `data:${ct};base64,${btoa(bin)}`;
-        }
-      } catch { /* skip */ }
-      if (avatarDataUri) {
-        avatarHtml = `<div class="header-photo"><img src="${avatarDataUri}" alt="Photo" /></div>`;
-      }
-    }
+    const section = (title: string, content: string) => content ? `
+      <div class="section">
+        <h2>${title}</h2>
+        ${content}
+      </div>` : "";
 
     const html = `<!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CV – ${profile.full_name || "User"}</title>
+<title>CV – ${esc(profile.full_name) || "User"}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
-  @page { margin: 0; size: A4; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @page { margin: 12mm 16mm; size: A4; }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
   body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    color: #222; line-height: 1.5; background: #666;
-    font-size: 12px;
+    font-family: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif;
+    font-size: 9.5pt;
+    color: #1a1a1a;
+    line-height: 1.45;
+    background: #6b7280;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .page {
-    width: 210mm; min-height: 297mm; margin: 0 auto;
-    background: #fff; position: relative;
-    padding: 0;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: #fff;
+    padding: 40px 48px;
   }
 
-  /* ═══ HEADER (dark block) ═══ */
-  .header {
-    background: #1a1a1a; color: #fff; padding: 40px 48px 36px;
-    display: flex; justify-content: space-between; align-items: flex-start;
+  /* ── NAME & CONTACT ── */
+  .cv-header { margin-bottom: 20px; }
+  .cv-name {
+    font-size: 22pt;
+    font-weight: 700;
+    color: #111;
+    letter-spacing: -0.3px;
+    line-height: 1.15;
   }
-  .header-left { flex: 1; }
-  .header-label {
-    font-size: 10px; font-weight: 600; letter-spacing: 4px;
-    text-transform: uppercase; color: #999; margin-bottom: 8px;
+  .cv-headline {
+    font-size: 10.5pt;
+    color: #555;
+    font-weight: 500;
+    margin-top: 3px;
   }
-  .header-headline {
-    font-size: 11px; font-weight: 500; letter-spacing: 2.5px;
-    text-transform: uppercase; color: #bbb; margin-bottom: 10px;
-  }
-  .header h1 {
-    font-size: 38px; font-weight: 900; letter-spacing: -0.5px;
-    line-height: 1.05; margin-bottom: 16px; color: #fff;
-    text-transform: uppercase;
-  }
-  .header-contact {
-    font-size: 10.5px; color: #aaa; font-weight: 400;
-    line-height: 1.8;
-  }
-  .header-photo {
-    width: 130px; height: 130px; flex-shrink: 0;
-    margin-left: 32px; overflow: hidden;
-  }
-  .header-photo img {
-    width: 100%; height: 100%; object-fit: cover;
-    display: block; filter: grayscale(100%);
-  }
-
-  /* ═══ BODY ═══ */
-  .body-content { padding: 32px 48px 24px; }
-
-  /* ═══ SECTION ═══ */
-  .section { margin-bottom: 28px; }
-  .section-title {
-    font-size: 12px; font-weight: 700; letter-spacing: 3px;
-    text-transform: uppercase; color: #1a1a1a;
-    padding-bottom: 10px; margin-bottom: 18px;
-    border-bottom: 2px solid #1a1a1a;
-  }
-
-  /* ═══ TIMELINE ═══ */
-  .timeline-row {
-    display: flex; gap: 24px; margin-bottom: 18px;
-    page-break-inside: avoid;
-  }
-  .timeline-date {
-    width: 130px; flex-shrink: 0;
-    font-size: 11px; font-weight: 600; color: #555;
-    padding-top: 1px;
-  }
-  .timeline-content { flex: 1; }
-  .timeline-company {
-    font-size: 12.5px; font-weight: 800; color: #1a1a1a;
-    text-transform: uppercase; letter-spacing: 0.3px;
-    margin-bottom: 1px;
-  }
-  .timeline-role {
-    font-size: 11.5px; font-weight: 500; color: #555;
-    font-style: italic; margin-bottom: 4px;
-  }
-  .timeline-desc {
-    font-size: 11px; color: #555; line-height: 1.65;
-    margin-top: 4px; white-space: pre-line;
-  }
-
-  /* ═══ BOTTOM 3-COL ═══ */
-  .bottom-section {
-    padding: 24px 48px 32px; border-top: 2px solid #1a1a1a;
-    display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 32px;
+  .cv-contact {
     margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    font-size: 8.5pt;
+    color: #444;
   }
-  .bottom-col-title {
-    font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
-    text-transform: uppercase; color: #1a1a1a;
-    margin-bottom: 12px; padding-bottom: 8px;
-    border-bottom: 1px solid #ddd;
-  }
-  .bottom-col { font-size: 11px; color: #444; line-height: 1.8; }
-  .skill-item { font-weight: 500; }
-  .social-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 10.5px; }
-  .social-icon {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 16px; height: 16px; background: #1a1a1a; color: #fff;
-    border-radius: 3px; font-size: 9px; font-weight: 700; flex-shrink: 0;
+  .cv-contact span { white-space: nowrap; }
+  .cv-divider {
+    border: none;
+    border-top: 1.5px solid #111;
+    margin: 16px 0 0;
   }
 
-  /* ═══ FOOTER WATERMARK ═══ */
-  .footer-bar {
-    padding: 12px 48px; background: #f5f5f5;
-    display: flex; justify-content: space-between; align-items: center;
+  /* ── SECTIONS ── */
+  .section { margin-top: 18px; }
+  .section h2 {
+    font-size: 9pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #111;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
   }
-  .footer-text { font-size: 8.5px; color: #aaa; font-weight: 500; letter-spacing: 0.5px; }
-  .footer-logo { height: 14px; opacity: 0.35; }
 
-  /* ═══ PRINT ═══ */
-  .no-print-bar {
+  /* ── ENTRIES ── */
+  .entry { margin-bottom: 12px; page-break-inside: avoid; }
+  .entry:last-child { margin-bottom: 0; }
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .entry-title {
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: #111;
+  }
+  .entry-date {
+    font-size: 8.5pt;
+    color: #666;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .entry-subtitle {
+    font-size: 9pt;
+    color: #555;
+    margin-top: 1px;
+  }
+  .entry-desc {
+    font-size: 8.5pt;
+    color: #444;
+    margin-top: 4px;
+    line-height: 1.55;
+    white-space: pre-line;
+  }
+
+  /* ── SKILLS ── */
+  .skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .skill-tag {
+    font-size: 8pt;
+    font-weight: 500;
+    color: #333;
+    background: #f3f4f6;
+    padding: 3px 10px;
+    border-radius: 3px;
+    border: 1px solid #e5e7eb;
+  }
+
+  /* ── SUMMARY ── */
+  .summary-text {
+    font-size: 9pt;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  /* ── FOOTER ── */
+  .cv-footer {
+    margin-top: 24px;
+    padding-top: 10px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+    font-size: 7pt;
+    color: #aaa;
+  }
+
+  /* ── PRINT BAR ── */
+  .print-bar {
     display: flex; justify-content: center; gap: 8px;
-    padding: 16px; background: #555;
+    padding: 14px; background: #374151;
   }
   .btn-print {
-    background: #1a1a1a; color: #fff; border: none;
-    padding: 10px 32px; border-radius: 4px; cursor: pointer;
-    font-size: 13px; font-weight: 700; font-family: inherit;
-    letter-spacing: 1px; text-transform: uppercase;
+    background: #fff; color: #111; border: none;
+    padding: 10px 36px; border-radius: 6px; cursor: pointer;
+    font-size: 13px; font-weight: 600; font-family: inherit;
   }
-  .btn-print:hover { background: #333; }
+  .btn-print:hover { background: #f3f4f6; }
+
   @media print {
     body { background: #fff; }
-    .no-print-bar { display: none !important; }
-    .page { width: 100%; margin: 0; }
-    .timeline-row { break-inside: avoid; }
+    .print-bar { display: none !important; }
+    .page { width: 100%; min-height: auto; margin: 0; padding: 0; }
     .section { break-inside: avoid; }
+    .entry { break-inside: avoid; }
   }
 </style>
 </head>
 <body>
-<div class="no-print-bar">
+<div class="print-bar">
   <button class="btn-print" onclick="window.print()">⎙ Print / Save as PDF</button>
 </div>
 
 <div class="page">
-  <div class="header">
-    <div class="header-left">
-      <div class="header-label">Resume</div>
-      ${profile.headline ? `<div class="header-headline">${profile.headline}</div>` : ""}
-      <h1>${profile.full_name || "Nama Lengkap"}</h1>
-      ${contactLine}
-    </div>
-    ${avatarHtml}
+  <div class="cv-header">
+    <div class="cv-name">${esc(profile.full_name) || "Full Name"}</div>
+    ${profile.headline ? `<div class="cv-headline">${esc(profile.headline)}</div>` : ""}
+    ${contactItems.length > 0 ? `<div class="cv-contact">${contactItems.map(c => `<span>${c}</span>`).join('<span style="color:#ccc">|</span>')}</div>` : ""}
+    <hr class="cv-divider" />
   </div>
 
-  <div class="body-content">
-    ${experiences.length > 0 ? `<div class="section"><div class="section-title">Experience</div>${expRows}</div>` : ""}
-    ${education.length > 0 ? `<div class="section"><div class="section-title">Education</div>${eduRows}</div>` : ""}
-    ${certifications.length > 0 ? `<div class="section"><div class="section-title">Certifications</div>${certRows}</div>` : ""}
-    ${trainings.length > 0 ? `<div class="section"><div class="section-title">Training</div>${trainRows}</div>` : ""}
-    ${awards.length > 0 ? `<div class="section"><div class="section-title">Awards</div>${awardRows}</div>` : ""}
-    ${organizations.length > 0 ? `<div class="section"><div class="section-title">Organizations</div>${orgRows}</div>` : ""}
-  </div>
+  ${summary ? `
+  <div class="section">
+    <h2>Summary</h2>
+    <div class="summary-text">${esc(summary)}</div>
+  </div>` : ""}
 
-  <div class="bottom-section">
-    <div>
-      <div class="bottom-col-title">Skills</div>
-      <div class="bottom-col">${skills.length > 0 ? skills.map((s: string) => `<div class="skill-item">${s}</div>`).join("") : "<em style='color:#999'>-</em>"}</div>
-    </div>
-    <div>
-      <div class="bottom-col-title">Summary</div>
-      <div class="bottom-col">${summary || "<em style='color:#999'>-</em>"}</div>
-    </div>
-    <div>
-      <div class="bottom-col-title">${socialLinks.length > 0 ? "Social & Links" : "Powered by"}</div>
-      <div class="bottom-col">${socialLinks.length > 0 ? socialLinks.join("") : ""}${logoDataUri ? `<div style="margin-top:${socialLinks.length > 0 ? '12' : '0'}px"><img src="${logoDataUri}" alt="Oveersea" style="height:20px;opacity:0.5" /></div>` : ""}</div>
-    </div>
-  </div>
+  ${skills.length > 0 ? `
+  <div class="section">
+    <h2>Skills</h2>
+    <div class="skills-list">${skills.map((s: string) => `<span class="skill-tag">${esc(s)}</span>`).join("")}</div>
+  </div>` : ""}
 
-  <div class="footer-bar">
-    <div class="footer-text">Generated by Oveersea · ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</div>
-    ${logoDataUri ? `<img src="${logoDataUri}" alt="Oveersea" class="footer-logo" />` : ""}
+  ${section("Work Experience", expHtml)}
+  ${section("Education", eduHtml)}
+  ${section("Certifications", certHtml)}
+  ${section("Training", trainHtml)}
+  ${section("Awards & Achievements", awardHtml)}
+  ${section("Organizations", orgHtml)}
+
+  <div class="cv-footer">
+    Generated by Oveersea &middot; ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
   </div>
 </div>
 
