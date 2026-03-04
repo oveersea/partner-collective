@@ -129,15 +129,15 @@ const SkillRadarEditor = ({ skills, onChange }: { skills: SkillScore[]; onChange
   const add = () => {
     const n = newName.trim();
     if (n && !skills.some((s) => s.name === n)) {
-      onChange([...skills, { name: n, score: Math.min(20, Math.max(0, newScore)) }]);
+      onChange([...skills, { name: n, score: Math.min(100, Math.max(0, newScore)) }]);
       setNewName("");
-      setNewScore(10);
+      setNewScore(50);
     }
   };
 
   const remove = (name: string) => onChange(skills.filter((s) => s.name !== name));
   const updateScore = (name: string, score: number) =>
-    onChange(skills.map((s) => (s.name === name ? { ...s, score: Math.min(20, Math.max(0, score)) } : s)));
+    onChange(skills.map((s) => (s.name === name ? { ...s, score: Math.min(100, Math.max(0, score)) } : s)));
 
   return (
     <div className="space-y-3">
@@ -146,7 +146,7 @@ const SkillRadarEditor = ({ skills, onChange }: { skills: SkillScore[]; onChange
           <RadarChart data={skills} cx="50%" cy="50%" outerRadius="75%">
             <PolarGrid stroke="hsl(var(--border))" />
             <PolarAngleAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-            <PolarRadiusAxis angle={90} domain={[0, 20]} tick={{ fontSize: 10 }} />
+            <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
             <Radar dataKey="score" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.3)" fillOpacity={0.6} />
           </RadarChart>
         </ResponsiveContainer>
@@ -158,7 +158,7 @@ const SkillRadarEditor = ({ skills, onChange }: { skills: SkillScore[]; onChange
             <Input
               type="number"
               min={0}
-              max={20}
+              max={100}
               className="w-20 h-8 text-sm"
               value={s.score}
               onChange={(e) => updateScore(s.name, Number(e.target.value))}
@@ -170,10 +170,10 @@ const SkillRadarEditor = ({ skills, onChange }: { skills: SkillScore[]; onChange
       <div className="flex gap-2">
         <Input placeholder="Nama skill..." value={newName} onChange={(e) => setNewName(e.target.value)} className="flex-1 h-9"
           onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), add())} />
-        <Input type="number" min={0} max={20} value={newScore} onChange={(e) => setNewScore(Number(e.target.value))} className="w-16 h-9" />
+        <Input type="number" min={0} max={100} value={newScore} onChange={(e) => setNewScore(Number(e.target.value))} className="w-16 h-9" />
         <Button variant="outline" size="sm" onClick={add}>+</Button>
       </div>
-      <p className="text-xs text-muted-foreground">Skor 0–20</p>
+      <p className="text-xs text-muted-foreground">Skor 0–100</p>
     </div>
   );
 };
