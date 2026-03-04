@@ -255,14 +255,18 @@ const AdminUsers = () => {
           if (!res.ok) continue;
           const html = await res.text();
 
-          // Use isolated iframe to prevent Tailwind CSS conflicts
+          // Use isolated iframe to prevent CSS conflicts while keeping it inside viewport for html2canvas
           const iframe = document.createElement("iframe");
+          iframe.setAttribute("aria-hidden", "true");
           iframe.style.position = "fixed";
-          iframe.style.left = "-9999px";
           iframe.style.top = "0";
-          iframe.style.width = "210mm";
-          iframe.style.height = "297mm";
-          iframe.style.border = "none";
+          iframe.style.left = "0";
+          iframe.style.width = "794px";
+          iframe.style.height = "1123px";
+          iframe.style.border = "0";
+          iframe.style.opacity = "0.01";
+          iframe.style.pointerEvents = "none";
+          iframe.style.zIndex = "-1";
           document.body.appendChild(iframe);
 
           const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
@@ -272,8 +276,13 @@ const AdminUsers = () => {
           iframeDoc.write(html);
           iframeDoc.close();
 
-          // Wait for content to render
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          // Wait for document, fonts, and images to render
+          await new Promise((resolve) => setTimeout(resolve, 120));
+          const iframeFonts = (iframeDoc as Document & { fonts?: FontFaceSet }).fonts;
+          if (iframeFonts?.ready) {
+            await iframeFonts.ready;
+          }
+
           const iframeImgs = Array.from(iframeDoc.querySelectorAll("img"));
           await Promise.all(
             iframeImgs.map(
@@ -285,7 +294,7 @@ const AdminUsers = () => {
                 })
             )
           );
-          await new Promise((resolve) => setTimeout(resolve, 300));
+          await new Promise((resolve) => setTimeout(resolve, 120));
 
           const renderTarget = iframeDoc.querySelector(".page") as HTMLElement;
           if (!renderTarget) { document.body.removeChild(iframe); continue; }
@@ -299,7 +308,17 @@ const AdminUsers = () => {
               margin: [10, 12, 10, 12],
               filename: `CV_${userName}_${contactLabel}.pdf`,
               image: { type: "jpeg", quality: 0.98 },
-              html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false, backgroundColor: "#ffffff" },
+              html2canvas: {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                logging: false,
+                backgroundColor: "#ffffff",
+                scrollX: 0,
+                scrollY: 0,
+                windowWidth: renderTarget.scrollWidth || 794,
+                windowHeight: renderTarget.scrollHeight || 1123,
+              },
               jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
               pagebreak: { mode: ["css", "legacy"] },
             })
