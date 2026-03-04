@@ -15,6 +15,7 @@ interface HiringRequest {
   positions_count: number;
   credit_cost: number;
   sla_deadline: string | null;
+  oveercode: string | null;
   created_at: string;
   business_profiles: { name: string } | null;
 }
@@ -44,7 +45,7 @@ const AdminHiring = () => {
     const [reqRes, alertRes] = await Promise.all([
       supabase
         .from("hiring_requests")
-        .select("id, title, hiring_type, status, positions_count, credit_cost, sla_deadline, created_at, business_profiles(name)")
+        .select("id, title, hiring_type, status, positions_count, credit_cost, sla_deadline, oveercode, created_at, business_profiles(name)")
         .order("created_at", { ascending: false })
         .limit(50),
       supabase
@@ -124,7 +125,7 @@ const AdminHiring = () => {
                   <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No data</td></tr>
                 ) : (
                   filteredReqs.map((r) => (
-                    <tr key={r.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/hiring/${r.id}`)}>
+                    <tr key={r.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/hiring/${r.oveercode}`)}>
                       <td className="px-4 py-3 font-medium text-foreground">{r.title}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{r.business_profiles?.name || "—"}</td>
                       <td className="px-4 py-3">

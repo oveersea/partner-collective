@@ -66,7 +66,7 @@ interface Instructor {
 }
 
 const AdminProgramEdit = () => {
-  const { programId } = useParams();
+  const { oveercode: paramCode } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState<ProgramData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,15 +103,15 @@ const AdminProgramEdit = () => {
     fetchProgram();
     fetchInstitutions();
     fetchInstructors();
-  }, [programId]);
+  }, [paramCode]);
 
   const fetchProgram = async () => {
-    if (!programId) return;
+    if (!paramCode) return;
     setLoading(true);
     const { data: prog, error } = await supabase
       .from("programs")
       .select("*")
-      .eq("id", programId)
+      .eq("oveercode", paramCode)
       .single();
 
     if (error || !prog) {

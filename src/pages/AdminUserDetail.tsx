@@ -178,7 +178,7 @@ const SkillRadarEditor = ({ skills, onChange }: { skills: SkillScore[]; onChange
 };
 
 const AdminUserDetail = () => {
-  const { userId } = useParams<{ userId: string }>();
+  const { oveercode: paramCode } = useParams<{ oveercode: string }>();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -200,13 +200,15 @@ const AdminUserDetail = () => {
   const [creditScores, setCreditScores] = useState<any[]>([]);
   const [medicalRecords, setMedicalRecords] = useState<any[]>([]);
 
+  const [resolvedUserId, setResolvedUserId] = useState<string | null>(null);
+
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user) checkAdminAndFetch();
-  }, [user, userId]);
+    if (user && paramCode) checkAdminAndFetch();
+  }, [user, paramCode]);
 
   const checkAdminAndFetch = async () => {
     const { data: adminData } = await supabase
@@ -221,16 +223,31 @@ const AdminUserDetail = () => {
     }
     setIsSuperadmin(adminData.some((r: any) => r.role === "superadmin"));
 
+    // Resolve oveercode to user_id
+    const { data: profileLookup } = await supabase
+      .from("profiles")
+      .select("user_id")
+      .eq("oveercode", paramCode!)
+      .single();
+
+    if (!profileLookup) {
+      toast.error("User tidak ditemukan");
+      navigate("/admin");
+      return;
+    }
+    const userId = profileLookup.user_id;
+    setResolvedUserId(userId);
+
     const [profileRes, rolesRes] = await Promise.all([
       supabase
         .from("profiles")
         .select("user_id, full_name, headline, bio, avatar_url, address, city, district, subdistrict, province, country, postal_code, latitude, longitude, formatted_address, phone_number, skills, soft_skills, technical_skills, kyc_status, account_type, oveercode, years_of_experience, daily_rate, linkedin_url, website_url, opportunity_availability, professional_summary, highest_education, created_at, last_online")
-        .eq("user_id", userId!)
+        .eq("user_id", userId)
         .single(),
       supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", userId!),
+        .eq("user_id", userId),
     ]);
 
     if (profileRes.data) {
@@ -244,14 +261,14 @@ const AdminUserDetail = () => {
 
     // Fetch related data in parallel
     const [eduRes, expRes, orgRes, certRes, trainRes, awardRes, creditRes, medRes] = await Promise.all([
-      supabase.from("user_education").select("*").eq("user_id", userId!).order("start_date", { ascending: false }),
-      supabase.from("user_experiences").select("*").eq("user_id", userId!).order("start_date", { ascending: false }),
-      supabase.from("user_organizations").select("*").eq("user_id", userId!).order("start_date", { ascending: false }),
-      supabase.from("user_certifications").select("*").eq("user_id", userId!).order("issue_date", { ascending: false }),
-      supabase.from("user_trainings").select("*").eq("user_id", userId!).order("start_date", { ascending: false }),
-      supabase.from("user_awards").select("*").eq("user_id", userId!).order("date_received", { ascending: false }),
-      supabase.from("user_credit_scores").select("*").eq("user_id", userId!).order("report_date", { ascending: false }),
-      supabase.from("user_medical_records").select("*").eq("user_id", userId!).order("record_date", { ascending: false }),
+      supabase.from("user_education").select("*").eq("user_id", userId).order("start_date", { ascending: false }),
+      supabase.from("user_experiences").select("*").eq("user_id", userId).order("start_date", { ascending: false }),
+      supabase.from("user_organizations").select("*").eq("user_id", userId).order("start_date", { ascending: false }),
+      supabase.from("user_certifications").select("*").eq("user_id", userId).order("issue_date", { ascending: false }),
+      supabase.from("user_trainings").select("*").eq("user_id", userId).order("start_date", { ascending: false }),
+      supabase.from("user_awards").select("*").eq("user_id", userId).order("date_received", { ascending: false }),
+      supabase.from("user_credit_scores").select("*").eq("user_id", userId).order("report_date", { ascending: false }),
+      supabase.from("user_medical_records").select("*").eq("user_id", userId).order("record_date", { ascending: false }),
     ]);
 
     if (eduRes.data) setEducation(eduRes.data);
@@ -268,13 +285,13 @@ const AdminUserDetail = () => {
 
   const assignRole = async (role: string) => {
     const { error } = await (supabase.from("user_roles") as any).upsert(
-      { user_id: userId, role },
+      { user_id: profile?.user_id, role },
       { onConflict: "user_id,role" }
     );
     if (error) toast.error("Gagal assign role: " + error.message);
     else {
       toast.success(`Role '${role}' berhasil ditambahkan`);
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId!);
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", profile?.user_id!);
       if (data) setRoles(data as UserRole[]);
     }
   };
@@ -312,7 +329,7 @@ const AdminUserDetail = () => {
         professional_summary: editData.professional_summary,
         highest_education: editData.highest_education,
       } as any)
-      .eq("user_id", userId!);
+      .eq("user_id", profile?.user_id!);
 
     if (error) {
       toast.error("Gagal menyimpan: " + error.message);
@@ -339,7 +356,7 @@ const AdminUserDetail = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
           },
-          body: JSON.stringify({ user_id: userId, include_contact: includeContact }),
+          body: JSON.stringify({ user_id: profile?.user_id, include_contact: includeContact }),
         }
       );
       if (!res.ok) {

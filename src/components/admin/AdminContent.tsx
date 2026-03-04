@@ -14,6 +14,7 @@ interface Opportunity {
   category: string | null;
   job_type: string | null;
   location: string | null;
+  oveercode: string | null;
   created_at: string;
   business_profiles: { name: string } | null;
 }
@@ -52,7 +53,7 @@ const AdminContent = () => {
     while (oppHasMore) {
       const { data } = await supabase
         .from("opportunities")
-        .select("id, title, status, category, job_type, location, created_at, business_profiles!opportunities_business_id_fkey(name)")
+        .select("id, title, status, category, job_type, location, oveercode, created_at, business_profiles!opportunities_business_id_fkey(name)")
         .order("created_at", { ascending: false })
         .range(oppFrom, oppFrom + batchSize - 1);
       if (data) {
@@ -173,7 +174,7 @@ const AdminContent = () => {
                   <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">No data</td></tr>
                 ) : (
                   pagedOpps.map((o) => (
-                    <tr key={o.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/opportunity/${o.id}`)}>
+                    <tr key={o.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/opportunity/${o.oveercode}`)}>
                       <td className="px-4 py-3 font-medium text-foreground max-w-[200px] truncate">{o.title}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{o.business_profiles?.name || "—"}</td>
                       <td className="px-4 py-3"><Badge variant="secondary" className="text-xs">{o.category || "—"}</Badge></td>

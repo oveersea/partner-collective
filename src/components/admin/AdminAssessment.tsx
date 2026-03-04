@@ -20,6 +20,7 @@ interface CompetencyTest {
   currency: string;
   is_active: boolean;
   description: string | null;
+  oveercode: string | null;
   created_at: string;
 }
 
@@ -92,7 +93,7 @@ const AdminAssessment = () => {
     const [testRes, orderRes, attemptRes, evidenceRes, profilesRes] = await Promise.all([
       supabase
         .from("competency_tests")
-        .select("id, title, skill_name, assessment_type, test_tier, total_questions, passing_score, time_limit_minutes, price_cents, currency, is_active, description, created_at")
+        .select("id, title, skill_name, assessment_type, test_tier, total_questions, passing_score, time_limit_minutes, price_cents, currency, is_active, description, oveercode, created_at")
         .order("created_at", { ascending: false }),
       supabase
         .from("assessment_orders")
@@ -288,7 +289,7 @@ const AdminAssessment = () => {
                   <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
                 ) : (
                   pagedTests.map((t) => (
-                    <tr key={t.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/assessment/${t.id}`)}>
+                    <tr key={t.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/assessment/${t.oveercode}`)}>
                       <td className="px-4 py-3 font-medium text-foreground max-w-[200px] truncate">{t.title}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{t.skill_name}</td>
                       <td className="px-4 py-3"><Badge variant="secondary" className="text-xs">{t.assessment_type}</Badge></td>

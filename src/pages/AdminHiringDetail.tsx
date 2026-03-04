@@ -44,7 +44,7 @@ const statusConfig: Record<string, { color: string; label: string }> = {
 };
 
 const AdminHiringDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { oveercode: paramCode } = useParams<{ oveercode: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [data, setData] = useState<HiringDetail | null>(null);
@@ -55,9 +55,9 @@ const AdminHiringDetail = () => {
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
-    if (id) fetchDetail();
+    if (paramCode) fetchDetail();
     if (user) checkSuperadmin();
-  }, [id, user]);
+  }, [paramCode, user]);
 
   const checkSuperadmin = async () => {
     const { data } = await supabase
@@ -72,7 +72,7 @@ const AdminHiringDetail = () => {
     const { data: row, error } = await supabase
       .from("hiring_requests")
       .select("*, business_profiles(name), client_profiles(company_name, user_id)")
-      .eq("id", id!)
+      .eq("oveercode", paramCode!)
       .maybeSingle();
 
     if (error || !row) {

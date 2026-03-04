@@ -163,7 +163,7 @@ const AdminCompanies = () => {
                 <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">No company data found</td></tr>
               ) : (
                 paged.map((c) => (
-                  <tr key={c.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/company/${c.id}`)}>
+                  <tr key={c.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/company/${c.oveercode}`)}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
@@ -204,7 +204,7 @@ const AdminCompanies = () => {
                           <Button variant="ghost" size="sm"><MoreVertical className="w-4 h-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => navigate(`/admin/company/${c.id}`)}>
+                          <DropdownMenuItem onClick={() => navigate(`/admin/company/${c.oveercode}`)}>
                             <Users className="w-4 h-4 mr-2" /> View Details
                           </DropdownMenuItem>
                           {c.website && (
