@@ -95,7 +95,6 @@ const SkillRadarView = ({ skills, color, fillColor }: { skills: SkillScore[]; co
   if (skills.length === 0) return <p className="text-sm text-muted-foreground">Belum ada data skill</p>;
   const sorted = [...skills].sort((a, b) => b.score - a.score);
   const radarData = sorted.slice(0, 6);
-  const remaining = sorted.slice(6);
   return (
     <div>
       <ResponsiveContainer width="100%" height={300}>
@@ -106,11 +105,11 @@ const SkillRadarView = ({ skills, color, fillColor }: { skills: SkillScore[]; co
           <Radar dataKey="score" stroke={color} fill={fillColor} fillOpacity={0.6} />
         </RadarChart>
       </ResponsiveContainer>
-      {remaining.length > 0 && (
+      {sorted.length > 0 && (
         <div className="mt-3 border-t border-border pt-3">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Skill lainnya</p>
+          <p className="text-xs font-medium text-muted-foreground mb-2">Semua skill ({sorted.length})</p>
           <div className="flex flex-wrap gap-2">
-            {remaining.map((s) => (
+            {sorted.map((s) => (
               <span key={s.name} className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
                 {s.name} <span className="font-semibold">{s.score}</span>
               </span>
