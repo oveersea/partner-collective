@@ -1,6 +1,9 @@
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { User, MapPin, Shield, Edit3, X } from "lucide-react";
+import { User, MapPin, Shield, Edit3, X, Camera, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Profile {
   full_name: string | null;
@@ -18,6 +21,7 @@ interface ProfileHeaderProps {
   profile: Profile;
   editing: boolean;
   onToggleEdit: () => void;
+  onAvatarUpdated?: (url: string) => void;
 }
 
 const kycBadgeMap: Record<string, { label: string; color: string }> = {
@@ -33,9 +37,71 @@ const availabilityMap: Record<string, { emoji: string; label: string; color: str
   unavailable: { emoji: "⚫", label: "Not Available", color: "bg-muted text-muted-foreground" },
 };
 
-const ProfileHeader = ({ profile, editing, onToggleEdit }: ProfileHeaderProps) => {
+const ProfileHeader = ({ profile, editing, onToggleEdit, onAvatarUpdated }: ProfileHeaderProps) => {
   const kycBadge = kycBadgeMap[profile.kyc_status] || { label: profile.kyc_status, color: "bg-muted text-muted-foreground border-border" };
   const availability = profile.opportunity_availability ? availabilityMap[profile.opportunity_availability] : null;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file
+    if (!file.type.startsWith("image/")) {
+      toast.error("File harus berupa gambar");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Ukuran file maksimal 2MB");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const ext = file.name.split(".").pop();
+      const filePath = `${user.id}/avatar.${ext}`;
+
+      // Upload file
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      // Add cache-buster
+      const avatarUrl = `${publicUrl}?t=${Date.now()}`;
+
+      // Update profile
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: avatarUrl } as any)
+        .eq("user_id", user.id);
+
+      if (updateError) throw updateError;
+
+      onAvatarUpdated?.(avatarUrl);
+      toast.success("Foto profil berhasil diperbarui");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal mengupload foto");
+    } finally {
+      setUploading(false);
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   return (
     <motion.div
@@ -44,12 +110,32 @@ const ProfileHeader = ({ profile, editing, onToggleEdit }: ProfileHeaderProps) =
       className="bg-card rounded-2xl border border-border p-4 md:p-8 shadow-card"
     >
       <div className="flex items-start gap-4 md:gap-6">
-        <div className="w-14 h-14 md:w-20 md:h-20 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+        {/* Avatar with upload overlay */}
+        <div
+          className="relative w-14 h-14 md:w-20 md:h-20 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 cursor-pointer group"
+          onClick={handleAvatarClick}
+        >
           {profile.avatar_url ? (
             <img src={profile.avatar_url} alt="" className="w-14 h-14 md:w-20 md:h-20 rounded-2xl object-cover" />
           ) : (
             <User className="w-7 h-7 md:w-10 md:h-10 text-primary" />
           )}
+          {/* Hover overlay */}
+          <div className="absolute inset-0 rounded-2xl bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            {uploading ? (
+              <Loader2 className="w-5 h-5 md:w-6 md:h-6 text-white animate-spin" />
+            ) : (
+              <Camera className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+            disabled={uploading}
+          />
         </div>
 
         <div className="flex-1 min-w-0">

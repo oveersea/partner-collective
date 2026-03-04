@@ -169,6 +169,7 @@ const Dashboard = () => {
             if (editing) { setEditing(false); setEditData(profile); }
             else { setEditing(true); setActiveTab("profile"); }
           }}
+          onAvatarUpdated={(url) => setProfile((prev) => prev ? { ...prev, avatar_url: url } : prev)}
         />
 
         {/* Quick Actions */}
