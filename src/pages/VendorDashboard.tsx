@@ -61,7 +61,7 @@ interface Document {
 }
 
 const VendorDashboard = () => {
-  const { slug } = useParams();
+  const { oveercode } = useParams();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [vendor, setVendor] = useState<VendorProfile | null>(null);
@@ -84,14 +84,14 @@ const VendorDashboard = () => {
   }, [user, authLoading]);
 
   useEffect(() => {
-    if (user && slug) fetchVendor();
-  }, [user, slug]);
+    if (user && oveercode) fetchVendor();
+  }, [user, oveercode]);
 
   const fetchVendor = async () => {
     const { data, error } = await supabase
       .from("business_profiles")
       .select("*")
-      .eq("slug", slug)
+      .eq("oveercode", oveercode)
       .single();
 
     if (error || !data) {

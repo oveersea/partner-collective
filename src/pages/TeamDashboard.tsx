@@ -46,12 +46,13 @@ interface SuggestedTeam {
   id: string;
   name: string;
   slug: string;
+  oveercode: string | null;
   description: string | null;
   skills: string[] | null;
 }
 
 const TeamDashboard = () => {
-  const { slug } = useParams();
+  const { oveercode } = useParams();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [team, setTeam] = useState<Team | null>(null);
@@ -73,14 +74,14 @@ const TeamDashboard = () => {
   }, [user, authLoading]);
 
   useEffect(() => {
-    if (user && slug) fetchTeam();
-  }, [user, slug]);
+    if (user && oveercode) fetchTeam();
+  }, [user, oveercode]);
 
   const fetchTeam = async () => {
     const { data, error } = await supabase
       .from("partner_teams")
       .select("*")
-      .eq("slug", slug)
+      .eq("oveercode", oveercode)
       .single();
 
     if (error || !data) {
@@ -176,7 +177,7 @@ const TeamDashboard = () => {
     if (error) toast.error("Failed to join: " + error.message);
     else {
       toast.success("Joined " + suggestedTeam.name + "!");
-      navigate(`/team/${suggestedTeam.slug}`);
+      navigate(`/team/${suggestedTeam.oveercode || suggestedTeam.slug}`);
     }
   };
 

@@ -61,7 +61,7 @@ interface Document {
 }
 
 const CompanyDashboard = () => {
-  const { slug } = useParams();
+  const { oveercode } = useParams();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [company, setCompany] = useState<CompanyProfile | null>(null);
@@ -83,14 +83,14 @@ const CompanyDashboard = () => {
   }, [user, authLoading]);
 
   useEffect(() => {
-    if (user && slug) fetchCompany();
-  }, [user, slug]);
+    if (user && oveercode) fetchCompany();
+  }, [user, oveercode]);
 
   const fetchCompany = async () => {
     const { data, error } = await supabase
       .from("business_profiles")
       .select("*")
-      .eq("slug", slug)
+      .eq("oveercode", oveercode)
       .eq("business_type", "company")
       .maybeSingle();
 
