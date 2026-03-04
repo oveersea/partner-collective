@@ -164,7 +164,7 @@ const TeamsTab = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
               className="bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-card-hover transition-all cursor-pointer"
-              onClick={() => navigate(`/team/${team.slug}`)}
+              onClick={() => navigate(`/team/${(team as any).oveercode || team.slug}`)}
             >
               <div className="flex items-start justify-between mb-3">
                 <div>

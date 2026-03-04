@@ -18,6 +18,7 @@ interface CompanyItem {
     city: string | null;
     description: string | null;
     kyc_status: string;
+    oveercode: string | null;
   };
 }
 
@@ -48,7 +49,7 @@ const CompanyTab = () => {
     const ids = members.map((m) => m.business_id);
     const { data: businesses } = await supabase
       .from("business_profiles")
-      .select("id, name, slug, logo_url, industry, city, description, kyc_status")
+      .select("id, name, slug, logo_url, industry, city, description, kyc_status, oveercode")
       .in("id", ids);
 
     const merged = members.map((m) => ({
@@ -63,6 +64,7 @@ const CompanyTab = () => {
         city: null,
         description: null,
         kyc_status: "pending",
+        oveercode: null,
       },
     }));
     setCompanies(merged);
@@ -104,7 +106,7 @@ const CompanyTab = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
               className="bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-card-hover transition-all cursor-pointer group"
-              onClick={() => navigate(`/company/${c.business.slug}`)}
+              onClick={() => navigate(`/company/${c.business.oveercode}`)}
             >
               <div className="flex items-start gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">

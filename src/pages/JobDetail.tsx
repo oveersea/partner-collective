@@ -72,7 +72,7 @@ const formatBudget = (min: number | null, max: number | null): string => {
 };
 
 const JobDetail = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { oveercode } = useParams<{ oveercode: string }>();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -92,15 +92,15 @@ const JobDetail = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user && slug) fetchData();
-  }, [user, slug]);
+    if (user && oveercode) fetchData();
+  }, [user, oveercode]);
 
   const fetchData = async () => {
     const [oppRes, profileRes] = await Promise.all([
       supabase
         .from("opportunities")
-        .select("id, title, description, category, skills_required, budget_min, budget_max, is_remote, location, demand_type, project_duration, deadline, company_name, job_type, min_experience_years, created_at, slug, user_id, project_scope")
-        .eq("slug", slug!)
+        .select("id, title, description, category, skills_required, budget_min, budget_max, is_remote, location, demand_type, project_duration, deadline, company_name, job_type, min_experience_years, created_at, slug, user_id, project_scope, oveercode")
+        .eq("oveercode", oveercode!)
         .single(),
       supabase
         .from("profiles")
@@ -570,7 +570,7 @@ const JobDetail = () => {
                                 {recommendedPrograms.map((prog) => (
                                   <Link
                                     key={prog.id}
-                                    to={`/learning/${prog.slug}`}
+                                    to={`/learning/${(prog as any).oveercode || prog.slug}`}
                                     className="flex items-center gap-3 p-2 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors group"
                                   >
                                     {prog.thumbnail_url ? (

@@ -37,6 +37,7 @@ interface Opportunity {
   created_at: string;
   slug: string;
   user_id: string;
+  oveercode: string | null;
 }
 
 interface UserProfile {
@@ -143,7 +144,7 @@ const Matchmaking = () => {
     const [oppRes, profileRes, appsRes, ordersRes, hiringRes, claimsRes, vendorsRes, teamsRes] = await Promise.all([
       supabase
         .from("opportunities")
-        .select("id, title, description, category, skills_required, budget_min, budget_max, is_remote, location, demand_type, project_duration, deadline, company_name, job_type, min_experience_years, created_at, slug, user_id")
+        .select("id, title, description, category, skills_required, budget_min, budget_max, is_remote, location, demand_type, project_duration, deadline, company_name, job_type, min_experience_years, created_at, slug, user_id, oveercode")
         .eq("status", "open")
         .neq("user_id", user.id)
         .order("created_at", { ascending: false })
@@ -452,7 +453,7 @@ const Matchmaking = () => {
               const matchedSkills = opp.skills_required?.filter((s) => profile?.skills?.some((ps) => ps.toLowerCase() === s.toLowerCase())) || [];
 
               return (
-                <motion.div key={opp.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-lg transition-shadow flex flex-col cursor-pointer" onClick={() => navigate(`/job/${opp.slug}`)}>
+                <motion.div key={opp.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-lg transition-shadow flex flex-col cursor-pointer" onClick={() => navigate(`/job/${opp.oveercode || opp.slug}`)}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -505,7 +506,7 @@ const Matchmaking = () => {
                       ) : (
                         <Button size="sm" onClick={(e) => { e.stopPropagation(); setApplyModal(opp); }}><Send className="w-3.5 h-3.5" /> Apply</Button>
                       )}
-                      <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); navigate(`/job/${opp.slug}`); }}><Eye className="w-3.5 h-3.5" /> Detail</Button>
+                      <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); navigate(`/job/${opp.oveercode || opp.slug}`); }}><Eye className="w-3.5 h-3.5" /> Detail</Button>
                     </div>
                   </div>
                 </motion.div>

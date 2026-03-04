@@ -614,7 +614,7 @@ const ServiceDetailPage = () => {
                               {recommendedPrograms.map((prog) => (
                                 <Link
                                   key={prog.id}
-                                  to={`/learning/${prog.slug}`}
+                                  to={`/learning/${(prog as any).oveercode || prog.slug}`}
                                   className="flex items-center gap-2.5 p-2 rounded-md bg-card border border-border hover:border-primary/30 transition-colors group"
                                 >
                                   {prog.thumbnail_url ? (

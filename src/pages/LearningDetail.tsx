@@ -29,15 +29,15 @@ const formatRupiah = (cents: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(cents);
 
 const LearningDetail = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { oveercode } = useParams<{ oveercode: string }>();
   const [program, setProgram] = useState<ProgramDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!slug) return;
+    if (!oveercode) return;
     const fetch = async () => {
       setLoading(true);
-      const { data } = await supabase.from("programs").select("*").eq("slug", slug).eq("status", "approved").maybeSingle();
+      const { data } = await supabase.from("programs").select("*").eq("oveercode", oveercode).eq("status", "approved").maybeSingle();
       if (data) {
         setProgram({
           ...data,
@@ -51,7 +51,7 @@ const LearningDetail = () => {
       setLoading(false);
     };
     fetch();
-  }, [slug]);
+  }, [oveercode]);
 
   if (loading) {
     return (

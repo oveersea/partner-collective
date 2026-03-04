@@ -19,6 +19,7 @@ interface Program {
   id: string;
   title: string;
   slug: string;
+  oveercode: string | null;
   description: string | null;
   category: string;
   level: string | null;
@@ -180,7 +181,7 @@ const Learning = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {paginated.map((p, i) => (
               <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-                <Link to={`/learning/${p.slug}`}>
+                <Link to={`/learning/${p.oveercode || p.slug}`}>
                   <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col">
                     <div className="relative aspect-video bg-muted overflow-hidden">
                       {p.thumbnail_url ? (
