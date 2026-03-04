@@ -7,6 +7,97 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function populateProfileData(adminClient: any, userId: string, parsedData: any, adminUserId: string) {
+  try {
+    console.log("Populating profile data for user:", userId);
+
+    // Update profile basic info
+    const profileUpdate: Record<string, any> = {};
+    if (parsedData.phone) profileUpdate.phone_number = parsedData.phone;
+    if (parsedData.city) profileUpdate.city = parsedData.city;
+    if (parsedData.country) profileUpdate.country = parsedData.country;
+    if (parsedData.nationality) profileUpdate.nationality = parsedData.nationality;
+    if (parsedData.current_title) profileUpdate.headline = parsedData.current_title;
+    if (parsedData.summary) profileUpdate.professional_summary = parsedData.summary;
+    if (parsedData.skills && parsedData.skills.length > 0) profileUpdate.skills = parsedData.skills;
+    if (parsedData.languages && parsedData.languages.length > 0) {
+      profileUpdate.languages = parsedData.languages.map((l: any) => 
+        typeof l === "string" ? l : `${l.language}${l.proficiency ? ` (${l.proficiency})` : ""}`
+      ).join(", ");
+    }
+
+    if (Object.keys(profileUpdate).length > 0) {
+      const { error: profileErr } = await adminClient
+        .from("profiles")
+        .update(profileUpdate)
+        .eq("user_id", userId);
+      if (profileErr) console.error("Profile update error:", profileErr.message);
+    }
+
+    // Insert work experiences
+    if (parsedData.work_experience && parsedData.work_experience.length > 0) {
+      const experiences = parsedData.work_experience.map((exp: any) => ({
+        user_id: userId,
+        company: exp.company || "Unknown Company",
+        position: exp.title || "Unknown Position",
+        start_date: exp.start_date || null,
+        end_date: exp.is_current ? null : (exp.end_date || null),
+        is_current: exp.is_current || false,
+        description: exp.description || null,
+        location: exp.location || null,
+        status: "approved",
+        reviewed_by: adminUserId,
+        reviewed_at: new Date().toISOString(),
+      }));
+
+      const { error: expErr } = await adminClient.from("user_experiences").insert(experiences);
+      if (expErr) console.error("Experiences insert error:", expErr.message);
+      else console.log(`Inserted ${experiences.length} work experiences`);
+    }
+
+    // Insert education
+    if (parsedData.education && parsedData.education.length > 0) {
+      const education = parsedData.education.map((edu: any) => ({
+        user_id: userId,
+        institution: edu.institution || "Unknown Institution",
+        degree: edu.degree || null,
+        field_of_study: edu.field_of_study || null,
+        start_date: edu.start_year ? `${edu.start_year}-01-01` : null,
+        end_date: edu.end_year ? `${edu.end_year}-01-01` : null,
+        description: edu.gpa ? `GPA: ${edu.gpa}` : null,
+        status: "approved",
+        reviewed_by: adminUserId,
+        reviewed_at: new Date().toISOString(),
+      }));
+
+      const { error: eduErr } = await adminClient.from("user_education").insert(education);
+      if (eduErr) console.error("Education insert error:", eduErr.message);
+      else console.log(`Inserted ${education.length} education records`);
+    }
+
+    // Insert certifications
+    if (parsedData.certifications && parsedData.certifications.length > 0) {
+      const certs = parsedData.certifications.map((cert: any) => ({
+        user_id: userId,
+        name: cert.name || "Unknown Certification",
+        issuing_organization: cert.issuer || "Unknown",
+        issue_date: cert.year ? `${cert.year}-01-01` : null,
+        status: "approved",
+        reviewed_by: adminUserId,
+        reviewed_at: new Date().toISOString(),
+      }));
+
+      const { error: certErr } = await adminClient.from("user_certifications").insert(certs);
+      if (certErr) console.error("Certifications insert error:", certErr.message);
+      else console.log(`Inserted ${certs.length} certifications`);
+    }
+
+    console.log("Profile data population completed for user:", userId);
+  } catch (err) {
+    console.error("populateProfileData error:", err);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -368,12 +459,9 @@ If information is not found, use null. Always call the extract_cv_data tool with
           console.log("Auto-invite success:", candidateEmail, "userId:", invitedUserId);
           inviteResult = { invited: true, user_id: invitedUserId };
 
-          // Update profile with phone if available
-          if (invitedUserId && parsedData.phone) {
-            await adminClient
-              .from("profiles")
-              .update({ phone_number: parsedData.phone })
-              .eq("user_id", invitedUserId);
+          // Update profile with parsed data
+          if (invitedUserId) {
+            await populateProfileData(adminClient, invitedUserId, parsedData, userId);
           }
 
           // Log invitation in user_invitations table
