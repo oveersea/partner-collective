@@ -227,6 +227,17 @@ const AdminUsers = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { toast.error("Session expired"); return; }
 
+      // Load html2pdf.js dynamically
+      if (!(window as any).html2pdf) {
+        await new Promise<void>((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js";
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error("Gagal memuat html2pdf"));
+          document.head.appendChild(script);
+        });
+      }
+
       let successCount = 0;
       for (const userId of selectedUsers) {
         try {
@@ -244,33 +255,42 @@ const AdminUsers = () => {
           if (!res.ok) continue;
           const html = await res.text();
 
-          // Use a hidden iframe to print-to-PDF directly without showing preview
-          const iframe = document.createElement("iframe");
-          iframe.style.position = "fixed";
-          iframe.style.left = "-9999px";
-          iframe.style.top = "-9999px";
-          iframe.style.width = "0";
-          iframe.style.height = "0";
-          iframe.style.border = "none";
-          document.body.appendChild(iframe);
+          const container = document.createElement("div");
+          container.style.position = "fixed";
+          container.style.left = "-9999px";
+          container.style.top = "0";
+          container.style.width = "210mm";
+          document.body.appendChild(container);
 
-          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-          if (iframeDoc) {
-            iframeDoc.open();
-            iframeDoc.write(html);
-            iframeDoc.close();
-
-            // Wait for content (fonts, images) to load
-            await new Promise((r) => setTimeout(r, 1000));
-
-            iframe.contentWindow?.print();
-            successCount++;
-
-            // Wait for print dialog before cleaning up
-            await new Promise((r) => setTimeout(r, 500));
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, "text/html");
+          const pageEl = doc.querySelector(".page");
+          if (pageEl) {
+            const styles = doc.querySelectorAll("style");
+            styles.forEach(s => container.appendChild(s.cloneNode(true)));
+            container.appendChild(pageEl.cloneNode(true));
+          } else {
+            container.innerHTML = html;
           }
 
-          document.body.removeChild(iframe);
+          const nameEl = doc.querySelector(".cv-name");
+          const userName = nameEl?.textContent?.replace(/[^a-zA-Z0-9]/g, "_") || userId.slice(0, 8);
+          const contactLabel = includeContact ? "with_contact" : "without_contact";
+
+          await (window as any).html2pdf()
+            .set({
+              margin: [10, 12, 10, 12],
+              filename: `CV_${userName}_${contactLabel}.pdf`,
+              image: { type: "jpeg", quality: 0.98 },
+              html2canvas: { scale: 2, useCORS: true, logging: false },
+              jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+              pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+            })
+            .from(container)
+            .save();
+
+          document.body.removeChild(container);
+          successCount++;
         } catch {
           continue;
         }

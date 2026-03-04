@@ -348,23 +348,55 @@ const AdminUserDetail = () => {
         throw new Error(err.error || "Gagal generate CV");
       }
       const html = await res.text();
-      const iframe = document.createElement("iframe");
-      iframe.style.position = "fixed";
-      iframe.style.right = "0";
-      iframe.style.bottom = "0";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
-      iframe.style.border = "none";
-      document.body.appendChild(iframe);
-      iframe.contentDocument?.open();
-      iframe.contentDocument?.write(html);
-      iframe.contentDocument?.close();
-      iframe.onload = () => {
-        setTimeout(() => {
-          iframe.contentWindow?.print();
-          setTimeout(() => document.body.removeChild(iframe), 1000);
-        }, 300);
-      };
+
+      // Load html2pdf.js dynamically
+      if (!(window as any).html2pdf) {
+        await new Promise<void>((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js";
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error("Gagal memuat html2pdf"));
+          document.head.appendChild(script);
+        });
+      }
+
+      // Create hidden container with the CV HTML
+      const container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      container.style.width = "210mm";
+      document.body.appendChild(container);
+
+      // Parse and inject only the .page content
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const pageEl = doc.querySelector(".page");
+      if (pageEl) {
+        // Copy styles
+        const styles = doc.querySelectorAll("style");
+        styles.forEach(s => container.appendChild(s.cloneNode(true)));
+        container.appendChild(pageEl.cloneNode(true));
+      } else {
+        container.innerHTML = html;
+      }
+
+      const userName = profile?.full_name?.replace(/[^a-zA-Z0-9]/g, "_") || "CV";
+      const contactLabel = includeContact ? "with_contact" : "without_contact";
+
+      await (window as any).html2pdf()
+        .set({
+          margin: [10, 12, 10, 12],
+          filename: `CV_${userName}_${contactLabel}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, logging: false },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+          pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+        })
+        .from(container)
+        .save();
+
+      document.body.removeChild(container);
     } catch (err: any) {
       toast.error(err.message || "Gagal download CV");
     } finally {
