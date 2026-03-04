@@ -381,14 +381,16 @@ const AdminUserDetail = () => {
         });
       }
 
-      // Create off-screen (but still rendered) container
+      // Create hidden-but-renderable container (avoid offscreen blank capture)
       container = document.createElement("div");
       container.style.position = "fixed";
-      container.style.left = "-10000px";
+      container.style.left = "0";
       container.style.top = "0";
       container.style.width = "210mm";
-      container.style.opacity = "1";
+      container.style.opacity = "0.01";
+      container.style.zIndex = "-1";
       container.style.pointerEvents = "none";
+      container.style.background = "white";
       document.body.appendChild(container);
 
       // Parse and inject only the .page content
@@ -404,8 +406,10 @@ const AdminUserDetail = () => {
         container.innerHTML = html;
       }
 
+      const renderTarget = (container.querySelector(".page") as HTMLElement | null) ?? container;
+
       // Ensure external assets are ready before capture
-      const imgs = Array.from(container.querySelectorAll("img"));
+      const imgs = Array.from(renderTarget.querySelectorAll("img"));
       await Promise.all(
         imgs.map(
           (img) =>
@@ -416,7 +420,11 @@ const AdminUserDetail = () => {
             })
         )
       );
-      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      if ("fonts" in document) {
+        await (document as Document & { fonts: FontFaceSet }).fonts.ready;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 250));
 
       const userName = profile?.full_name?.replace(/[^a-zA-Z0-9]/g, "_") || "CV";
       const contactLabel = includeContact ? "with_contact" : "without_contact";
@@ -426,11 +434,19 @@ const AdminUserDetail = () => {
           margin: [10, 12, 10, 12],
           filename: `CV_${userName}_${contactLabel}.pdf`,
           image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 794 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: "#ffffff",
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: Math.max(renderTarget.scrollWidth, 794),
+          },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+          pagebreak: { mode: ["css", "legacy"] },
         })
-        .from(container)
+        .from(renderTarget)
         .save();
     } catch (err: any) {
       toast.error(err.message || "Gagal download CV");
