@@ -345,7 +345,7 @@ const AdminUserDetail = () => {
 
   const handleDownloadCV = async (includeContact: boolean) => {
     setDownloadingCV(true);
-    let container: HTMLDivElement | null = null;
+    let iframe: HTMLIFrameElement | null = null;
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -381,37 +381,28 @@ const AdminUserDetail = () => {
         });
       }
 
-      // Create hidden-but-renderable container (avoid offscreen blank capture)
-      container = document.createElement("div");
-      container.style.position = "fixed";
-      container.style.left = "0";
-      container.style.top = "0";
-      container.style.width = "210mm";
-      container.style.opacity = "0.01";
-      container.style.zIndex = "-1";
-      container.style.pointerEvents = "none";
-      container.style.background = "white";
-      document.body.appendChild(container);
+      // Use isolated iframe to prevent Tailwind CSS conflicts
+      iframe = document.createElement("iframe");
+      iframe.style.position = "fixed";
+      iframe.style.left = "-9999px";
+      iframe.style.top = "0";
+      iframe.style.width = "210mm";
+      iframe.style.height = "297mm";
+      iframe.style.border = "none";
+      document.body.appendChild(iframe);
 
-      // Parse and inject only the .page content
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
-      const pageEl = doc.querySelector(".page");
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) throw new Error("Cannot access iframe document");
 
-      if (pageEl) {
-        const styles = doc.querySelectorAll("style");
-        styles.forEach((s) => container!.appendChild(s.cloneNode(true)));
-        container.appendChild(pageEl.cloneNode(true));
-      } else {
-        container.innerHTML = html;
-      }
+      iframeDoc.open();
+      iframeDoc.write(html);
+      iframeDoc.close();
 
-      const renderTarget = (container.querySelector(".page") as HTMLElement | null) ?? container;
-
-      // Ensure external assets are ready before capture
-      const imgs = Array.from(renderTarget.querySelectorAll("img"));
+      // Wait for fonts and images to load inside iframe
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const iframeImgs = Array.from(iframeDoc.querySelectorAll("img"));
       await Promise.all(
-        imgs.map(
+        iframeImgs.map(
           (img) =>
             new Promise<void>((resolve) => {
               if (img.complete) return resolve();
@@ -420,11 +411,10 @@ const AdminUserDetail = () => {
             })
         )
       );
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-      if ("fonts" in document) {
-        await (document as Document & { fonts: FontFaceSet }).fonts.ready;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      const renderTarget = iframeDoc.querySelector(".page") as HTMLElement;
+      if (!renderTarget) throw new Error("CV page element not found");
 
       const userName = profile?.full_name?.replace(/[^a-zA-Z0-9]/g, "_") || "CV";
       const contactLabel = includeContact ? "with_contact" : "without_contact";
@@ -437,11 +427,12 @@ const AdminUserDetail = () => {
           html2canvas: {
             scale: 2,
             useCORS: true,
+            allowTaint: true,
             logging: false,
             backgroundColor: "#ffffff",
             scrollX: 0,
             scrollY: 0,
-            windowWidth: Math.max(renderTarget.scrollWidth, 794),
+            windowWidth: 794,
           },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
           pagebreak: { mode: ["css", "legacy"] },
@@ -451,8 +442,8 @@ const AdminUserDetail = () => {
     } catch (err: any) {
       toast.error(err.message || "Gagal download CV");
     } finally {
-      if (container && document.body.contains(container)) {
-        document.body.removeChild(container);
+      if (iframe && document.body.contains(iframe)) {
+        document.body.removeChild(iframe);
       }
       setDownloadingCV(false);
     }

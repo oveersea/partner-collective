@@ -205,17 +205,15 @@ Deno.serve(async (req) => {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CV – ${esc(profile.full_name) || "User"}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
-
   @page { margin: 12mm 16mm; size: A4; }
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  *, *::before, *::after { margin: 0 !important; padding: 0 !important; box-sizing: border-box !important; border: none !important; }
 
   body {
-    font-family: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif;
-    font-size: 9.5pt;
-    color: #1a1a1a;
-    line-height: 1.45;
-    background: #6b7280;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, Helvetica, sans-serif !important;
+    font-size: 9.5pt !important;
+    color: #1a1a1a !important;
+    line-height: 1.45 !important;
+    background: #6b7280 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -224,8 +222,9 @@ Deno.serve(async (req) => {
     width: 210mm;
     min-height: 297mm;
     margin: 0 auto;
-    background: #fff;
+    background: #fff !important;
     padding: 40px 48px;
+    color: #1a1a1a !important;
   }
 
   /* ── NAME & CONTACT ── */
@@ -251,16 +250,16 @@ Deno.serve(async (req) => {
     border-radius: 2px;
   }
   .cv-name {
-    font-size: 22pt;
-    font-weight: 700;
-    color: #111;
+    font-size: 22pt !important;
+    font-weight: 700 !important;
+    color: #111 !important;
     letter-spacing: -0.3px;
     line-height: 1.15;
   }
   .cv-headline {
-    font-size: 10.5pt;
-    color: #555;
-    font-weight: 500;
+    font-size: 10.5pt !important;
+    color: #555 !important;
+    font-weight: 500 !important;
     margin-top: 3px;
   }
   .cv-contact {
@@ -281,14 +280,14 @@ Deno.serve(async (req) => {
   /* ── SECTIONS ── */
   .section { margin-top: 18px; }
   .section h2 {
-    font-size: 9pt;
-    font-weight: 700;
+    font-size: 9pt !important;
+    font-weight: 700 !important;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: #D71920;
-    border-bottom: 1px solid #e5e7eb;
+    color: #D71920 !important;
+    border-bottom: 1px solid #e5e7eb !important;
     padding-bottom: 5px;
-    margin-bottom: 10px;
+    margin-bottom: 10px !important;
   }
 
   /* ── ENTRIES ── */
@@ -301,24 +300,24 @@ Deno.serve(async (req) => {
     gap: 12px;
   }
   .entry-title {
-    font-size: 9.5pt;
-    font-weight: 600;
-    color: #111;
+    font-size: 9.5pt !important;
+    font-weight: 600 !important;
+    color: #111 !important;
   }
   .entry-date {
-    font-size: 8.5pt;
-    color: #666;
+    font-size: 8.5pt !important;
+    color: #666 !important;
     white-space: nowrap;
     flex-shrink: 0;
   }
   .entry-subtitle {
-    font-size: 9pt;
-    color: #555;
+    font-size: 9pt !important;
+    color: #555 !important;
     margin-top: 1px;
   }
   .entry-desc {
-    font-size: 8.5pt;
-    color: #444;
+    font-size: 8.5pt !important;
+    color: #444 !important;
     margin-top: 4px;
     line-height: 1.55;
     white-space: pre-line;
