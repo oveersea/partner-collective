@@ -125,7 +125,7 @@ const AdminProgramEdit = () => {
     const { data: assigned } = await supabase
       .from("program_instructors")
       .select("instructor_id, sort_order")
-      .eq("program_id", programId)
+      .eq("program_id", prog.id)
       .order("sort_order");
     if (assigned && assigned.length > 0) {
       const ids = assigned.map((a: any) => a.instructor_id);
