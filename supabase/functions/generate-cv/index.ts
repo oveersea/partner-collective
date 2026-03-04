@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import QRCode from "https://esm.sh/qrcode@1.5.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -109,6 +110,21 @@ Deno.serve(async (req) => {
     const location = locationParts.join(", ");
     const skills = Array.isArray(profile.skills) ? profile.skills : [];
     const summary = profile.professional_summary || profile.bio || "";
+    const oveercode = profile.oveercode || "";
+    const validationUrl = `https://partner-collective.lovable.app/verification?code=${encodeURIComponent(oveercode)}`;
+
+    // Generate QR code as data URL
+    let qrDataUrl = "";
+    try {
+      qrDataUrl = await QRCode.toDataURL(validationUrl, {
+        width: 200,
+        margin: 1,
+        color: { dark: "#1a1a1a", light: "#ffffff" },
+        errorCorrectionLevel: "H", // High error correction to allow logo overlay
+      });
+    } catch (_e) {
+      console.error("QR generation failed:", _e);
+    }
 
     // Contact info
     const contactItems: string[] = [];
@@ -319,18 +335,60 @@ Deno.serve(async (req) => {
   /* ── FOOTER ── */
   .cv-footer {
     margin-top: 24px;
-    padding-top: 10px;
+    padding-top: 14px;
     border-top: 2px solid #D71920;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    justify-content: space-between;
     font-size: 7pt;
     color: #999;
+  }
+  .cv-footer-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
   .cv-footer-logo {
     height: 20px;
     opacity: 0.7;
+  }
+  .cv-footer-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .qr-wrapper {
+    position: relative;
+    width: 64px;
+    height: 64px;
+  }
+  .qr-wrapper img.qr-code {
+    width: 64px;
+    height: 64px;
+    display: block;
+  }
+  .qr-wrapper .qr-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 3px;
+    padding: 1px;
+  }
+  .qr-label {
+    font-size: 6.5pt;
+    color: #999;
+    text-align: right;
+    line-height: 1.4;
+    max-width: 100px;
+  }
+  .qr-label strong {
+    color: #D71920;
+    font-weight: 600;
+    font-size: 7pt;
   }
 
   /* ── PRINT BAR ── */
@@ -388,8 +446,21 @@ Deno.serve(async (req) => {
   ${section("Organizations", orgHtml)}
 
   <div class="cv-footer">
-    <img src="https://partner-collective.lovable.app/oveersea-logo-dark-cv.png" alt="Oveersea" class="cv-footer-logo" />
-    <span>${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+    <div class="cv-footer-left">
+      <img src="https://partner-collective.lovable.app/oveersea-logo-dark-cv.png" alt="Oveersea" class="cv-footer-logo" />
+      <span>Generated ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+    </div>
+    <div class="cv-footer-right">
+      <div class="qr-label">
+        Scan to verify<br/>
+        <strong>${esc(oveercode)}</strong>
+      </div>
+      ${qrDataUrl ? `
+      <div class="qr-wrapper">
+        <img class="qr-code" src="${qrDataUrl}" alt="QR Verification" />
+        <img class="qr-logo" src="https://partner-collective.lovable.app/oveersea-icon.png" alt="" />
+      </div>` : ""}
+    </div>
   </div>
 </div>
 
