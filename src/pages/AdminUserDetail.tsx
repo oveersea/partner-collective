@@ -102,7 +102,7 @@ const SkillRadarView = ({ skills, color, fillColor }: { skills: SkillScore[]; co
         <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="75%">
           <PolarGrid stroke="hsl(var(--border))" />
           <PolarAngleAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-          <PolarRadiusAxis angle={90} domain={[0, 20]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+          <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
           <Radar dataKey="score" stroke={color} fill={fillColor} fillOpacity={0.6} />
         </RadarChart>
       </ResponsiveContainer>
