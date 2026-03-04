@@ -213,6 +213,12 @@ Deno.serve(async (req) => {
 
   /* ── NAME & CONTACT ── */
   .cv-header { margin-bottom: 20px; }
+  .cv-accent-bar {
+    height: 4px;
+    background: #D71920;
+    margin-bottom: 16px;
+    border-radius: 2px;
+  }
   .cv-name {
     font-size: 22pt;
     font-weight: 700;
@@ -237,7 +243,7 @@ Deno.serve(async (req) => {
   .cv-contact span { white-space: nowrap; }
   .cv-divider {
     border: none;
-    border-top: 1.5px solid #111;
+    border-top: 2px solid #D71920;
     margin: 16px 0 0;
   }
 
@@ -248,8 +254,8 @@ Deno.serve(async (req) => {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: #111;
-    border-bottom: 1px solid #d1d5db;
+    color: #D71920;
+    border-bottom: 1px solid #e5e7eb;
     padding-bottom: 5px;
     margin-bottom: 10px;
   }
@@ -314,17 +320,17 @@ Deno.serve(async (req) => {
   .cv-footer {
     margin-top: 24px;
     padding-top: 10px;
-    border-top: 1px solid #e5e7eb;
+    border-top: 2px solid #D71920;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     font-size: 7pt;
-    color: #aaa;
+    color: #999;
   }
   .cv-footer-logo {
-    height: 14px;
-    opacity: 0.5;
+    height: 20px;
+    opacity: 0.7;
   }
 
   /* ── PRINT BAR ── */
@@ -355,9 +361,10 @@ Deno.serve(async (req) => {
 
 <div class="page">
   <div class="cv-header">
+    <div class="cv-accent-bar"></div>
     <div class="cv-name">${esc(profile.full_name) || "Full Name"}</div>
     ${profile.headline ? `<div class="cv-headline">${esc(profile.headline)}</div>` : ""}
-    ${contactItems.length > 0 ? `<div class="cv-contact">${contactItems.map(c => `<span>${c}</span>`).join('<span style="color:#ccc">|</span>')}</div>` : ""}
+    ${contactItems.length > 0 ? `<div class="cv-contact">${contactItems.map(c => `<span>${c}</span>`).join('<span style="color:#D71920">|</span>')}</div>` : ""}
     <hr class="cv-divider" />
   </div>
 
