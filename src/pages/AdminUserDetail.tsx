@@ -345,9 +345,12 @@ const AdminUserDetail = () => {
 
   const handleDownloadCV = async (includeContact: boolean) => {
     setDownloadingCV(true);
+    let container: HTMLDivElement | null = null;
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { toast.error("Sesi kadaluarsa, silakan login ulang"); return; }
+
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-cv`,
         {
@@ -359,10 +362,12 @@ const AdminUserDetail = () => {
           body: JSON.stringify({ user_id: profile?.user_id, include_contact: includeContact }),
         }
       );
+
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: "Gagal generate CV" }));
         throw new Error(err.error || "Gagal generate CV");
       }
+
       const html = await res.text();
 
       // Load html2pdf.js dynamically
@@ -376,14 +381,13 @@ const AdminUserDetail = () => {
         });
       }
 
-      // Create hidden container with the CV HTML
-      const container = document.createElement("div");
-      container.style.position = "absolute";
-      container.style.left = "0";
+      // Create off-screen (but still rendered) container
+      container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "-10000px";
       container.style.top = "0";
       container.style.width = "210mm";
-      container.style.opacity = "0";
-      container.style.zIndex = "-9999";
+      container.style.opacity = "1";
       container.style.pointerEvents = "none";
       document.body.appendChild(container);
 
@@ -391,17 +395,28 @@ const AdminUserDetail = () => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
       const pageEl = doc.querySelector(".page");
+
       if (pageEl) {
-        // Copy styles
         const styles = doc.querySelectorAll("style");
-        styles.forEach(s => container.appendChild(s.cloneNode(true)));
+        styles.forEach((s) => container!.appendChild(s.cloneNode(true)));
         container.appendChild(pageEl.cloneNode(true));
       } else {
         container.innerHTML = html;
       }
 
-      // Wait for images/fonts to load
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Ensure external assets are ready before capture
+      const imgs = Array.from(container.querySelectorAll("img"));
+      await Promise.all(
+        imgs.map(
+          (img) =>
+            new Promise<void>((resolve) => {
+              if (img.complete) return resolve();
+              img.onload = () => resolve();
+              img.onerror = () => resolve();
+            })
+        )
+      );
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       const userName = profile?.full_name?.replace(/[^a-zA-Z0-9]/g, "_") || "CV";
       const contactLabel = includeContact ? "with_contact" : "without_contact";
@@ -417,11 +432,12 @@ const AdminUserDetail = () => {
         })
         .from(container)
         .save();
-
-      document.body.removeChild(container);
     } catch (err: any) {
       toast.error(err.message || "Gagal download CV");
     } finally {
+      if (container && document.body.contains(container)) {
+        document.body.removeChild(container);
+      }
       setDownloadingCV(false);
     }
   };
