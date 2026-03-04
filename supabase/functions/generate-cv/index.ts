@@ -230,6 +230,20 @@ Deno.serve(async (req) => {
 
   /* ── NAME & CONTACT ── */
   .cv-header { margin-bottom: 20px; }
+  .cv-header-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .cv-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid #D71920;
+  }
+  .cv-header-info { flex: 1; }
   .cv-accent-bar {
     height: 4px;
     background: #D71920;
@@ -415,9 +429,14 @@ Deno.serve(async (req) => {
 <div class="page">
   <div class="cv-header">
     <div class="cv-accent-bar"></div>
-    <div class="cv-name">${esc(profile.full_name) || "Full Name"}</div>
-    ${profile.headline ? `<div class="cv-headline">${esc(profile.headline)}</div>` : ""}
-    ${contactItems.length > 0 ? `<div class="cv-contact">${contactItems.map(c => `<span>${c}</span>`).join('<span style="color:#D71920">|</span>')}</div>` : ""}
+    <div class="cv-header-row">
+      ${profile.avatar_url ? `<img class="cv-avatar" src="${esc(profile.avatar_url)}" alt="Photo" />` : ""}
+      <div class="cv-header-info">
+        <div class="cv-name">${esc(profile.full_name) || "Full Name"}</div>
+        ${profile.headline ? `<div class="cv-headline">${esc(profile.headline)}</div>` : ""}
+        ${contactItems.length > 0 ? `<div class="cv-contact">${contactItems.map(c => `<span>${c}</span>`).join('<span style="color:#D71920">|</span>')}</div>` : ""}
+      </div>
+    </div>
     <hr class="cv-divider" />
   </div>
 
