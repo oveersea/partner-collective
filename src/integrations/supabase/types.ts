@@ -125,6 +125,7 @@ export type Database = {
       acc_invoice_items: {
         Row: {
           amount: number | null
+          cost_price: number | null
           description: string
           id: string
           invoice_id: string
@@ -133,6 +134,7 @@ export type Database = {
         }
         Insert: {
           amount?: number | null
+          cost_price?: number | null
           description: string
           id?: string
           invoice_id: string
@@ -141,6 +143,7 @@ export type Database = {
         }
         Update: {
           amount?: number | null
+          cost_price?: number | null
           description?: string
           id?: string
           invoice_id?: string
@@ -167,8 +170,13 @@ export type Database = {
           invoice_number: string
           issue_date: string
           notes: string | null
+          sales_commission_amount: number | null
+          sales_commission_pct: number | null
+          salesperson_id: string | null
           status: string
           total: number | null
+          total_cost: number | null
+          total_margin: number | null
           updated_at: string
           user_id: string
         }
@@ -181,8 +189,13 @@ export type Database = {
           invoice_number: string
           issue_date?: string
           notes?: string | null
+          sales_commission_amount?: number | null
+          sales_commission_pct?: number | null
+          salesperson_id?: string | null
           status?: string
           total?: number | null
+          total_cost?: number | null
+          total_margin?: number | null
           updated_at?: string
           user_id: string
         }
@@ -195,8 +208,13 @@ export type Database = {
           invoice_number?: string
           issue_date?: string
           notes?: string | null
+          sales_commission_amount?: number | null
+          sales_commission_pct?: number | null
+          salesperson_id?: string | null
           status?: string
           total?: number | null
+          total_cost?: number | null
+          total_margin?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -213,6 +231,13 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acc_invoices_salesperson_id_fkey"
+            columns: ["salesperson_id"]
+            isOneToOne: false
+            referencedRelation: "hrm_employees"
             referencedColumns: ["id"]
           },
         ]
@@ -2150,6 +2175,7 @@ export type Database = {
         Row: {
           address: string | null
           created_at: string
+          currency: string | null
           date_format: string
           email: string | null
           id: string
@@ -2159,6 +2185,7 @@ export type Database = {
           logo_url: string | null
           name: string
           phone: string | null
+          sales_commission_pct: number
           slug: string
           timezone: string
           updated_at: string
@@ -2167,6 +2194,7 @@ export type Database = {
         Insert: {
           address?: string | null
           created_at?: string
+          currency?: string | null
           date_format?: string
           email?: string | null
           id?: string
@@ -2176,6 +2204,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           phone?: string | null
+          sales_commission_pct?: number
           slug: string
           timezone?: string
           updated_at?: string
@@ -2184,6 +2213,7 @@ export type Database = {
         Update: {
           address?: string | null
           created_at?: string
+          currency?: string | null
           date_format?: string
           email?: string | null
           id?: string
@@ -2193,6 +2223,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           phone?: string | null
+          sales_commission_pct?: number
           slug?: string
           timezone?: string
           updated_at?: string
@@ -4737,31 +4768,40 @@ export type Database = {
       }
       hrm_claim_settings: {
         Row: {
-          annual_limit: number
           claim_type: string
           company_id: string
           created_at: string | null
           description: string | null
+          employee_id: string | null
           id: string
           is_active: boolean | null
+          limit_amount: number
+          limit_mode: string
+          limit_period: string
         }
         Insert: {
-          annual_limit?: number
           claim_type: string
           company_id: string
           created_at?: string | null
           description?: string | null
+          employee_id?: string | null
           id?: string
           is_active?: boolean | null
+          limit_amount?: number
+          limit_mode?: string
+          limit_period?: string
         }
         Update: {
-          annual_limit?: number
           claim_type?: string
           company_id?: string
           created_at?: string | null
           description?: string | null
+          employee_id?: string | null
           id?: string
           is_active?: boolean | null
+          limit_amount?: number
+          limit_mode?: string
+          limit_period?: string
         }
         Relationships: [
           {
@@ -4769,6 +4809,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hrm_claim_settings_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "hrm_employees"
             referencedColumns: ["id"]
           },
         ]
@@ -5225,6 +5272,8 @@ export type Database = {
       hrm_leave_requests: {
         Row: {
           approved_by: string | null
+          attachment_name: string | null
+          attachment_url: string | null
           category_id: string | null
           company_id: string | null
           created_at: string
@@ -5242,6 +5291,8 @@ export type Database = {
         }
         Insert: {
           approved_by?: string | null
+          attachment_name?: string | null
+          attachment_url?: string | null
           category_id?: string | null
           company_id?: string | null
           created_at?: string
@@ -5259,6 +5310,8 @@ export type Database = {
         }
         Update: {
           approved_by?: string | null
+          attachment_name?: string | null
+          attachment_url?: string | null
           category_id?: string | null
           company_id?: string | null
           created_at?: string
