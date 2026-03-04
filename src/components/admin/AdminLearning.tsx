@@ -106,7 +106,7 @@ const AdminLearning = () => {
                 <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
               ) : (
                 paged.map((p) => (
-                  <tr key={p.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/program/${p.id}`)}>
+                  <tr key={p.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/program/${p.oveercode}`)}>
                     <td className="px-4 py-3 font-medium text-foreground max-w-[200px] truncate">{p.title}</td>
                     <td className="px-4 py-3"><Badge variant="secondary" className="text-xs">{p.category}</Badge></td>
                     <td className="px-4 py-3 text-muted-foreground text-xs capitalize">{p.level || "—"}</td>

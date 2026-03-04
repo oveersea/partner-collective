@@ -453,7 +453,7 @@ const AdminUsers = () => {
                   const activity = activityMap[u.user_id];
                   const totalLogins = activity?.total_logins || 0;
                   return (
-                  <tr key={u.user_id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/user/${u.user_id}`)}>
+                  <tr key={u.user_id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/user/${u.oveercode}`)}>
                     <td className="w-10 px-4 py-3" onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selectedUsers.has(u.user_id)}

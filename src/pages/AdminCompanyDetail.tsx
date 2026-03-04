@@ -57,7 +57,7 @@ interface VendorMember {
 }
 
 const AdminCompanyDetail = () => {
-  const { companyId } = useParams();
+  const { oveercode: paramCode } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [data, setData] = useState<CompanyData | null>(null);
@@ -77,24 +77,27 @@ const AdminCompanyDetail = () => {
   const [showAddMember, setShowAddMember] = useState(false);
 
   useEffect(() => {
-    if (companyId) fetchAll();
-  }, [companyId]);
+    if (paramCode) fetchAll();
+  }, [paramCode]);
 
   const fetchAll = async () => {
     setLoading(true);
-    const [compRes, oppRes] = await Promise.all([
-      supabase.from("business_profiles").select("*").eq("id", companyId!).single(),
-      supabase.from("opportunities").select("id").eq("business_id", companyId!),
-    ]);
+    const { data: compData, error: compErr } = await supabase
+      .from("business_profiles")
+      .select("*")
+      .eq("oveercode", paramCode!)
+      .single();
 
-    if (compRes.error || !compRes.data) {
+    if (compErr || !compData) {
       toast.error("Perusahaan tidak ditemukan");
       navigate("/admin");
       return;
     }
-    setData(compRes.data as unknown as CompanyData);
-    setOppCount(oppRes.data?.length || 0);
-    await fetchMembers(companyId!);
+    setData(compData as unknown as CompanyData);
+
+    const { data: oppData } = await supabase.from("opportunities").select("id").eq("business_id", compData.id);
+    setOppCount(oppData?.length || 0);
+    await fetchMembers(compData.id);
     setLoading(false);
   };
 

@@ -58,28 +58,28 @@ const App = () => (
             <Route path="/project-request" element={<ProjectRequest />} />
             <Route path="/vendor-registration" element={<VendorRegistration />} />
             <Route path="/matchmaking" element={<Matchmaking />} />
-            <Route path="/job/:slug" element={<JobDetail />} />
+            <Route path="/job/:oveercode" element={<JobDetail />} />
             <Route path="/services" element={<Services />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/user/:userId" element={<AdminUserDetail />} />
-            <Route path="/admin/program/:programId" element={<AdminProgramEdit />} />
-            <Route path="/admin/assessment/:testId" element={<AdminAssessmentDetail />} />
-            <Route path="/admin/opportunity/:opportunityId" element={<AdminOpportunityDetail />} />
-            <Route path="/admin/company/:companyId" element={<AdminCompanyDetail />} />
+            <Route path="/admin/user/:oveercode" element={<AdminUserDetail />} />
+            <Route path="/admin/program/:oveercode" element={<AdminProgramEdit />} />
+            <Route path="/admin/assessment/:oveercode" element={<AdminAssessmentDetail />} />
+            <Route path="/admin/opportunity/:oveercode" element={<AdminOpportunityDetail />} />
+            <Route path="/admin/company/:oveercode" element={<AdminCompanyDetail />} />
             <Route path="/admin/credit/:id" element={<AdminCreditDetail />} />
-            <Route path="/admin/hiring/:id" element={<AdminHiringDetail />} />
+            <Route path="/admin/hiring/:oveercode" element={<AdminHiringDetail />} />
             <Route path="/learning" element={<Learning />} />
-            <Route path="/learning/:slug" element={<LearningDetail />} />
+            <Route path="/learning/:oveercode" element={<LearningDetail />} />
             <Route path="/credit-balance" element={<CreditBalance />} />
             <Route path="/services/:slug" element={<ServiceDetail />} />
             <Route path="/services/:slug/order" element={<ServiceOrder />} />
             <Route path="/portfolios" element={<Portfolios />} />
             <Route path="/case-studies" element={<CaseStudies />} />
             <Route path="/case-studies/:slug" element={<CaseStudyDetail />} />
-            <Route path="/vendor/:slug" element={<VendorDashboard />} />
-            <Route path="/team/:slug" element={<TeamDashboard />} />
+            <Route path="/vendor/:oveercode" element={<VendorDashboard />} />
+            <Route path="/team/:oveercode" element={<TeamDashboard />} />
             <Route path="/companies" element={<Companies />} />
-            <Route path="/company/:slug" element={<CompanyDashboard />} />
+            <Route path="/company/:oveercode" element={<CompanyDashboard />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/request-quote" element={<RequestQuote />} />
             <Route path="/verification" element={<Verification />} />

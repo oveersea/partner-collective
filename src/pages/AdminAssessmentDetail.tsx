@@ -44,7 +44,7 @@ const TIER_OPTIONS = ["basic", "intermediate", "advanced", "comprehensive"];
 const TYPE_OPTIONS = ["multiple_choice", "practical", "portfolio"];
 
 const AdminAssessmentDetail = () => {
-  const { testId } = useParams();
+  const { oveercode: paramCode } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [test, setTest] = useState<TestData | null>(null);
@@ -56,16 +56,21 @@ const AdminAssessmentDetail = () => {
   const [orderCount, setOrderCount] = useState(0);
 
   useEffect(() => {
-    if (testId) fetchData();
-  }, [testId]);
+    if (paramCode) fetchData();
+  }, [paramCode]);
 
   const fetchData = async () => {
     setLoading(true);
+    // First resolve oveercode to id
+    const { data: testLookup } = await supabase.from("competency_tests").select("id").eq("oveercode", paramCode!).single();
+    if (!testLookup) { toast.error("Data assessment tidak ditemukan"); navigate("/admin"); return; }
+    const testId = testLookup.id;
+
     const [testRes, questionRes, attemptRes, orderRes] = await Promise.all([
-      supabase.from("competency_tests").select("*").eq("id", testId!).single(),
-      supabase.from("assessment_questions").select("*").eq("test_id", testId!).order("sort_order"),
-      supabase.from("assessment_attempts").select("id", { count: "exact" }).eq("test_id", testId!),
-      supabase.from("assessment_orders").select("id", { count: "exact" }).eq("test_id", testId!),
+      supabase.from("competency_tests").select("*").eq("id", testId).single(),
+      supabase.from("assessment_questions").select("*").eq("test_id", testId).order("sort_order"),
+      supabase.from("assessment_attempts").select("id", { count: "exact" }).eq("test_id", testId),
+      supabase.from("assessment_orders").select("id", { count: "exact" }).eq("test_id", testId),
     ]);
 
     if (testRes.error || !testRes.data) {

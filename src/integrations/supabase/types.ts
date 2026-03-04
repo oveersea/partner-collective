@@ -2417,6 +2417,7 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean
+          oveercode: string | null
           passing_score: number
           price_cents: number
           skill_name: string
@@ -2435,6 +2436,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          oveercode?: string | null
           passing_score?: number
           price_cents?: number
           skill_name: string
@@ -2453,6 +2455,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          oveercode?: string | null
           passing_score?: number
           price_cents?: number
           skill_name?: string
@@ -4151,6 +4154,7 @@ export type Database = {
           experience_min: number | null
           hiring_type: string | null
           id: string
+          oveercode: string | null
           positions_count: number | null
           required_skills: string[] | null
           sla_deadline: string | null
@@ -4168,6 +4172,7 @@ export type Database = {
           experience_min?: number | null
           hiring_type?: string | null
           id?: string
+          oveercode?: string | null
           positions_count?: number | null
           required_skills?: string[] | null
           sla_deadline?: string | null
@@ -4185,6 +4190,7 @@ export type Database = {
           experience_min?: number | null
           hiring_type?: string | null
           id?: string
+          oveercode?: string | null
           positions_count?: number | null
           required_skills?: string[] | null
           sla_deadline?: string | null
@@ -7472,6 +7478,7 @@ export type Database = {
           logo_url: string | null
           max_members: number | null
           name: string
+          oveercode: string | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -7491,6 +7498,7 @@ export type Database = {
           logo_url?: string | null
           max_members?: number | null
           name: string
+          oveercode?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -7510,6 +7518,7 @@ export type Database = {
           logo_url?: string | null
           max_members?: number | null
           name?: string
+          oveercode?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null

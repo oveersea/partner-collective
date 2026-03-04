@@ -55,7 +55,7 @@ interface OpportunityData {
 }
 
 const AdminOpportunityDetail = () => {
-  const { opportunityId } = useParams();
+  const { oveercode: paramCode } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState<OpportunityData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,15 +67,15 @@ const AdminOpportunityDetail = () => {
 
   useEffect(() => {
     fetchOpportunity();
-  }, [opportunityId]);
+  }, [paramCode]);
 
   const fetchOpportunity = async () => {
-    if (!opportunityId) return;
+    if (!paramCode) return;
     setLoading(true);
     const { data: opp, error } = await supabase
       .from("opportunities")
       .select("*")
-      .eq("id", opportunityId)
+      .eq("oveercode", paramCode)
       .single();
 
     if (error || !opp) {
