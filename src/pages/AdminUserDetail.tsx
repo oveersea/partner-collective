@@ -9,6 +9,7 @@ import {
   Calendar, Shield, Star, GraduationCap, Clock, Pencil, Save, X, Camera,
   Award, Heart, CreditCard, Building2, Users, Download, Loader2,
 } from "lucide-react";
+import { renderCvToPdf, ensureHtml2Pdf } from "@/lib/cv-pdf-helper";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -345,8 +346,6 @@ const AdminUserDetail = () => {
 
   const handleDownloadCV = async (includeContact: boolean) => {
     setDownloadingCV(true);
-    let iframe: HTMLIFrameElement | null = null;
-
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { toast.error("Sesi kadaluarsa, silakan login ulang"); return; }
@@ -369,92 +368,17 @@ const AdminUserDetail = () => {
       }
 
       const html = await res.text();
-
-      // Load html2pdf.js dynamically
-      if (!(window as any).html2pdf) {
-        await new Promise<void>((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js";
-          script.onload = () => resolve();
-          script.onerror = () => reject(new Error("Gagal memuat html2pdf"));
-          document.head.appendChild(script);
-        });
-      }
-
-      // Use isolated iframe to prevent CSS conflicts while keeping it inside viewport for html2canvas
-      iframe = document.createElement("iframe");
-      iframe.setAttribute("aria-hidden", "true");
-      iframe.style.position = "fixed";
-      iframe.style.top = "0";
-      iframe.style.left = "0";
-      iframe.style.width = "794px";
-      iframe.style.height = "1123px";
-      iframe.style.border = "0";
-      iframe.style.opacity = "0.01";
-      iframe.style.pointerEvents = "none";
-      iframe.style.zIndex = "-1";
-      document.body.appendChild(iframe);
-
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!iframeDoc) throw new Error("Cannot access iframe document");
-
-      iframeDoc.open();
-      iframeDoc.write(html);
-      iframeDoc.close();
-
-      // Wait until document, fonts, and images are ready inside iframe
-      await new Promise((resolve) => setTimeout(resolve, 120));
-      const iframeFonts = (iframeDoc as Document & { fonts?: FontFaceSet }).fonts;
-      if (iframeFonts?.ready) {
-        await iframeFonts.ready;
-      }
-
-      const iframeImgs = Array.from(iframeDoc.querySelectorAll("img"));
-      await Promise.all(
-        iframeImgs.map(
-          (img) =>
-            new Promise<void>((resolve) => {
-              if (img.complete) return resolve();
-              img.onload = () => resolve();
-              img.onerror = () => resolve();
-            })
-        )
-      );
-      await new Promise((resolve) => setTimeout(resolve, 120));
-
-      const renderTarget = iframeDoc.querySelector(".page") as HTMLElement;
-      if (!renderTarget) throw new Error("CV page element not found");
-
       const userName = profile?.full_name?.replace(/[^a-zA-Z0-9]/g, "_") || "CV";
       const contactLabel = includeContact ? "with_contact" : "without_contact";
 
-      await (window as any).html2pdf()
-        .set({
-          margin: [10, 12, 10, 12],
-          filename: `CV_${userName}_${contactLabel}.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            backgroundColor: "#ffffff",
-            scrollX: 0,
-            scrollY: 0,
-            windowWidth: renderTarget.scrollWidth || 794,
-            windowHeight: renderTarget.scrollHeight || 1123,
-          },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: ["css", "legacy"] },
-        })
-        .from(renderTarget)
-        .save();
+      const ok = await renderCvToPdf({
+        html,
+        fileName: `CV_${userName}_${contactLabel}.pdf`,
+      });
+      if (!ok) throw new Error("PDF generation failed");
     } catch (err: any) {
       toast.error(err.message || "Gagal download CV");
     } finally {
-      if (iframe && document.body.contains(iframe)) {
-        document.body.removeChild(iframe);
-      }
       setDownloadingCV(false);
     }
   };

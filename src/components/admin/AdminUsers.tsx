@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Shield, User, MoreVertical, Trash2, UserX, ArrowUpDown, ArrowUp, ArrowDown, CalendarDays, ChevronLeft, ChevronRight, FileUp, Download } from "lucide-react";
+import { renderCvToPdf, ensureHtml2Pdf } from "@/lib/cv-pdf-helper";
 import InviteUsersDialog from "./InviteUsersDialog";
 import AdminBulkCV from "./AdminBulkCV";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -227,16 +228,7 @@ const AdminUsers = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { toast.error("Session expired"); return; }
 
-      // Load html2pdf.js dynamically
-      if (!(window as any).html2pdf) {
-        await new Promise<void>((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js";
-          script.onload = () => resolve();
-          script.onerror = () => reject(new Error("Gagal memuat html2pdf"));
-          document.head.appendChild(script);
-        });
-      }
+      await ensureHtml2Pdf();
 
       let successCount = 0;
       for (const userId of selectedUsers) {
@@ -255,78 +247,16 @@ const AdminUsers = () => {
           if (!res.ok) continue;
           const html = await res.text();
 
-          // Use isolated iframe to prevent CSS conflicts while keeping it inside viewport for html2canvas
-          const iframe = document.createElement("iframe");
-          iframe.setAttribute("aria-hidden", "true");
-          iframe.style.position = "fixed";
-          iframe.style.top = "0";
-          iframe.style.left = "0";
-          iframe.style.width = "794px";
-          iframe.style.height = "1123px";
-          iframe.style.border = "0";
-          iframe.style.opacity = "0.01";
-          iframe.style.pointerEvents = "none";
-          iframe.style.zIndex = "-1";
-          document.body.appendChild(iframe);
-
-          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-          if (!iframeDoc) { document.body.removeChild(iframe); continue; }
-
-          iframeDoc.open();
-          iframeDoc.write(html);
-          iframeDoc.close();
-
-          // Wait for document, fonts, and images to render
-          await new Promise((resolve) => setTimeout(resolve, 120));
-          const iframeFonts = (iframeDoc as Document & { fonts?: FontFaceSet }).fonts;
-          if (iframeFonts?.ready) {
-            await iframeFonts.ready;
-          }
-
-          const iframeImgs = Array.from(iframeDoc.querySelectorAll("img"));
-          await Promise.all(
-            iframeImgs.map(
-              (img) =>
-                new Promise<void>((resolve) => {
-                  if (img.complete) return resolve();
-                  img.onload = () => resolve();
-                  img.onerror = () => resolve();
-                })
-            )
-          );
-          await new Promise((resolve) => setTimeout(resolve, 120));
-
-          const renderTarget = iframeDoc.querySelector(".page") as HTMLElement;
-          if (!renderTarget) { document.body.removeChild(iframe); continue; }
-
-          const nameEl = iframeDoc.querySelector(".cv-name");
-          const userName = nameEl?.textContent?.replace(/[^a-zA-Z0-9]/g, "_") || userId.slice(0, 8);
+          // Extract name from HTML for filename
+          const nameMatch = html.match(/<div class="cv-name">([^<]*)<\/div>/);
+          const userName = nameMatch?.[1]?.replace(/[^a-zA-Z0-9]/g, "_") || userId.slice(0, 8);
           const contactLabel = includeContact ? "with_contact" : "without_contact";
 
-          await (window as any).html2pdf()
-            .set({
-              margin: [10, 12, 10, 12],
-              filename: `CV_${userName}_${contactLabel}.pdf`,
-              image: { type: "jpeg", quality: 0.98 },
-              html2canvas: {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-                logging: false,
-                backgroundColor: "#ffffff",
-                scrollX: 0,
-                scrollY: 0,
-                windowWidth: renderTarget.scrollWidth || 794,
-                windowHeight: renderTarget.scrollHeight || 1123,
-              },
-              jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-              pagebreak: { mode: ["css", "legacy"] },
-            })
-            .from(renderTarget)
-            .save();
-
-          document.body.removeChild(iframe);
-          successCount++;
+          const ok = await renderCvToPdf({
+            html,
+            fileName: `CV_${userName}_${contactLabel}.pdf`,
+          });
+          if (ok) successCount++;
         } catch {
           continue;
         }

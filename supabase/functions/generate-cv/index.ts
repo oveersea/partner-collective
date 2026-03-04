@@ -218,6 +218,14 @@ Deno.serve(async (req) => {
     print-color-adjust: exact;
   }
 
+  /* ── CAPTURE-SAFE: ensure all text is explicitly colored ── */
+  .page, .page * {
+    color: inherit;
+  }
+  .page {
+    color: #1a1a1a !important;
+  }
+
   .page {
     width: 210mm;
     min-height: 297mm;
