@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import QRCode from "https://esm.sh/qrcode@1.5.4";
+import QRCode from "npm:qrcode@1.5.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -113,14 +113,15 @@ Deno.serve(async (req) => {
     const oveercode = profile.oveercode || "";
     const validationUrl = `https://partner-collective.lovable.app/verification?code=${encodeURIComponent(oveercode)}`;
 
-    // Generate QR code as data URL
-    let qrDataUrl = "";
+    // Generate QR code as SVG
+    let qrSvg = "";
     try {
-      qrDataUrl = await QRCode.toDataURL(validationUrl, {
+      qrSvg = await QRCode.toString(validationUrl, {
+        type: "svg",
         width: 200,
         margin: 1,
         color: { dark: "#1a1a1a", light: "#ffffff" },
-        errorCorrectionLevel: "H", // High error correction to allow logo overlay
+        errorCorrectionLevel: "H",
       });
     } catch (_e) {
       console.error("QR generation failed:", _e);
@@ -362,7 +363,7 @@ Deno.serve(async (req) => {
     width: 64px;
     height: 64px;
   }
-  .qr-wrapper img.qr-code {
+  .qr-wrapper svg {
     width: 64px;
     height: 64px;
     display: block;
@@ -455,9 +456,9 @@ Deno.serve(async (req) => {
         Scan to verify<br/>
         <strong>${esc(oveercode)}</strong>
       </div>
-      ${qrDataUrl ? `
+      ${qrSvg ? `
       <div class="qr-wrapper">
-        <img class="qr-code" src="${qrDataUrl}" alt="QR Verification" />
+        ${qrSvg}
         <img class="qr-logo" src="https://partner-collective.lovable.app/oveersea-icon.png" alt="" />
       </div>` : ""}
     </div>
