@@ -1,91 +1,59 @@
 
-# Fitur Download CV (With/Without Contact) - Admin Dashboard
 
-## Ringkasan
-Menambahkan tombol "Download CV" pada halaman detail user di admin dashboard. Admin/superadmin dapat mengunduh CV dalam format PDF dengan dua opsi: **dengan kontak** (email, phone, alamat) atau **tanpa kontak** (privasi terjaga).
+# Fix CV PDF Download - Hanya Garis Tanpa Tulisan
 
-## Pendekatan
-CV akan di-generate di **server-side** menggunakan Supabase Edge Function yang menghasilkan file HTML yang dirender sebagai PDF-style document. Karena Deno edge functions tidak mendukung library PDF native yang berat, kita akan menggunakan pendekatan **HTML-to-downloadable-HTML** yang bisa langsung di-print/save-as-PDF dari browser, atau menggunakan library ringan `jsPDF` di client-side.
+## Akar Masalah
 
-**Pendekatan yang dipilih: Client-side PDF generation** menggunakan native browser print API (`window.print()`), yang lebih ringan dan tidak butuh dependency tambahan.
+CV HTML dari edge function diinjeksi sebagai `<div>` ke dalam halaman admin. Halaman admin sudah memiliki **Tailwind CSS global reset** yang menimpa semua style CV:
 
-## Perubahan yang akan dilakukan
+- `* { border-border }` dari Tailwind menambah border ke semua elemen
+- `body { font-family, color }` dari Tailwind menimpa font IBM Plex Sans
+- `h1-h6 { font-display }` menimpa heading CV
+- Opacity `0.01` pada container menyebabkan html2canvas merender warna teks hampir transparan
 
-### 1. Buat Edge Function `generate-cv` 
-**File:** `supabase/functions/generate-cv/index.ts`
+Hasilnya: teks tidak terlihat, hanya garis-garis border yang muncul di PDF.
 
-- Menerima parameter: `user_id`, `include_contact` (boolean)
-- Hanya bisa diakses oleh admin/superadmin (cek `user_roles`)
-- Query semua data profil user: profiles, user_education, user_experiences, user_certifications, user_trainings, user_awards, user_organizations
-- Jika `include_contact = false`: redact email, phone_number, address
-- Menghasilkan response berupa **HTML document** yang terformat sebagai CV profesional
-- HTML sudah di-style dengan inline CSS agar siap print/save as PDF
+## Solusi: Gunakan Iframe Terisolasi
 
-### 2. Update Halaman Admin User Detail
-**File:** `src/pages/AdminUserDetail.tsx`
+Ganti pendekatan dari `<div>` menjadi **hidden `<iframe>`**. Iframe memiliki document terpisah sehingga CSS halaman admin tidak bocor ke dalam CV.
 
-- Tambahkan tombol dropdown "Download CV" di header (sebelah tombol Edit Profil)
-- Dropdown berisi dua opsi:
-  - "Download CV (With Contact)" -- termasuk email, phone, alamat lengkap
-  - "Download CV (Without Contact)" -- tanpa info kontak sensitif
-- Saat diklik:
-  1. Panggil edge function `generate-cv`
-  2. Buka HTML response di tab/window baru
-  3. Otomatis trigger `window.print()` sehingga user bisa Save as PDF
+### Alur baru:
+1. Panggil edge function → dapat HTML lengkap
+2. Buat `<iframe>` tersembunyi, tulis HTML ke dalamnya via `srcdoc` atau `contentDocument.write()`
+3. Tunggu font + gambar selesai dimuat di dalam iframe
+4. Jalankan `html2pdf().from(iframe.contentDocument.querySelector('.page')).save()`
+5. Hapus iframe setelah selesai
 
-### 3. Update Supabase Config
-**File:** `supabase/config.toml`
+### Perubahan File
 
-- Tambahkan entry untuk edge function `generate-cv` dengan `verify_jwt = true` (hanya authenticated admin)
+**1. `src/pages/AdminUserDetail.tsx`** — Fungsi `handleDownloadCV`
+- Hapus pembuatan `<div>` container
+- Ganti dengan `<iframe>` yang ditulis via `contentDocument.open/write/close`
+- Target html2pdf ke `iframe.contentDocument.querySelector('.page')`
+- Tambahkan `allowTaint: true` pada html2canvas config
 
-## Format CV yang Dihasilkan
+**2. `src/components/admin/AdminUsers.tsx`** — Fungsi `handleBulkDownloadCV`
+- Perubahan yang sama: ganti `<div>` dengan `<iframe>` terisolasi
+
+**3. `supabase/functions/generate-cv/index.ts`** — Perkuat CSS
+- Hapus `@import url()` untuk Google Fonts (tidak reliable di iframe/html2canvas)
+- Ganti dengan `@font-face` inline atau fallback ke system font stack yang pasti ada
+- Tambahkan `!important` pada properti kritis (color, font-size, font-weight) sebagai safety net
+
+### Detail Teknis
 
 ```text
-+------------------------------------------+
-| [Nama Lengkap]                           |
-| [Headline]                               |
-| [Kontak: Email, Phone, Lokasi]*          |
-| [LinkedIn, Website]*                     |
-+------------------------------------------+
-| RINGKASAN PROFESIONAL                    |
-| [professional_summary / bio]             |
-+------------------------------------------+
-| SKILLS                                   |
-| [tag] [tag] [tag] ...                    |
-+------------------------------------------+
-| PENGALAMAN KERJA                         |
-| - Position @ Company (start - end)       |
-|   Description                            |
-+------------------------------------------+
-| PENDIDIKAN                               |
-| - Degree, Field @ Institution (year)     |
-+------------------------------------------+
-| SERTIFIKASI                              |
-| - Cert Name - Issuer (date)              |
-+------------------------------------------+
-| PELATIHAN                                |
-| - Training Title - Organizer (date)      |
-+------------------------------------------+
-| PENGHARGAAN                              |
-| - Award Name - Issuer (date)             |
-+------------------------------------------+
-| ORGANISASI                               |
-| - Role @ Organization (start - end)      |
-+------------------------------------------+
+SEBELUM (broken):
+  Page DOM (Tailwind CSS active)
+    └── <div style="opacity:0.01"> ← CSS conflict
+         └── <style>CV styles</style>  ← kalah vs Tailwind
+         └── <div class="page">...</div>
+
+SESUDAH (fixed):
+  Page DOM (Tailwind CSS active)
+    └── <iframe style="position:fixed;left:-9999px"> ← isolated document
+         └── <!DOCTYPE html>
+              └── <style>CV styles only</style> ← no conflict
+              └── <div class="page">...</div>
 ```
 
-*Bagian kontak hanya muncul jika `include_contact = true`
-
-## Detail Teknis
-
-### Edge Function Logic
-- Auth check: verify JWT, lalu query `user_roles` untuk memastikan caller adalah admin/superadmin
-- Fetch email dari `auth.users` menggunakan fungsi `get_user_email(user_id)` yang sudah ada
-- Query 7 tabel secara paralel (profiles, education, experiences, certifications, trainings, awards, organizations)
-- Return `Content-Type: text/html` dengan inline print styles (`@media print`, `@page`)
-
-### UI Button di AdminUserDetail
-- Menggunakan komponen `DropdownMenu` yang sudah ada
-- Icon: `Download` dari lucide-react
-- Posisi: di sebelah tombol "Edit Profil" pada header sticky
-- State loading saat fetching CV
