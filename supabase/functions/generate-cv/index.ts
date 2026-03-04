@@ -113,15 +113,15 @@ Deno.serve(async (req) => {
     const oveercode = profile.oveercode || "";
     const validationUrl = `https://partner-collective.lovable.app/verification?code=${encodeURIComponent(oveercode)}`;
 
-    // Generate QR code as SVG
+    // Generate QR code as SVG (high contrast for print)
     let qrSvg = "";
     try {
       qrSvg = await QRCode.toString(validationUrl, {
         type: "svg",
-        width: 200,
-        margin: 1,
-        color: { dark: "#1a1a1a", light: "#ffffff" },
-        errorCorrectionLevel: "H",
+        width: 240,
+        margin: 2,
+        color: { dark: "#000000", light: "#ffffff" },
+        errorCorrectionLevel: "M",
       });
     } catch (_e) {
       console.error("QR generation failed:", _e);
@@ -359,25 +359,19 @@ Deno.serve(async (req) => {
     gap: 10px;
   }
   .qr-wrapper {
-    position: relative;
-    width: 64px;
-    height: 64px;
+    width: 78px;
+    height: 78px;
+    flex-shrink: 0;
   }
   .qr-wrapper svg {
-    width: 64px;
-    height: 64px;
+    width: 78px;
+    height: 78px;
     display: block;
-  }
-  .qr-wrapper .qr-logo {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 18px;
-    height: 18px;
     background: #fff;
-    border-radius: 3px;
-    padding: 1px;
+  }
+  .qr-wrapper svg path,
+  .qr-wrapper svg rect {
+    fill: #000 !important;
   }
   .qr-label {
     font-size: 6.5pt;
@@ -459,7 +453,6 @@ Deno.serve(async (req) => {
       ${qrSvg ? `
       <div class="qr-wrapper">
         ${qrSvg}
-        <img class="qr-logo" src="https://partner-collective.lovable.app/oveersea-icon.png" alt="" />
       </div>` : ""}
     </div>
   </div>
