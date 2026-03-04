@@ -255,25 +255,42 @@ const AdminUsers = () => {
           if (!res.ok) continue;
           const html = await res.text();
 
-          const container = document.createElement("div");
-          container.style.position = "fixed";
-          container.style.left = "-9999px";
-          container.style.top = "0";
-          container.style.width = "210mm";
-          document.body.appendChild(container);
+          // Use isolated iframe to prevent Tailwind CSS conflicts
+          const iframe = document.createElement("iframe");
+          iframe.style.position = "fixed";
+          iframe.style.left = "-9999px";
+          iframe.style.top = "0";
+          iframe.style.width = "210mm";
+          iframe.style.height = "297mm";
+          iframe.style.border = "none";
+          document.body.appendChild(iframe);
 
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, "text/html");
-          const pageEl = doc.querySelector(".page");
-          if (pageEl) {
-            const styles = doc.querySelectorAll("style");
-            styles.forEach(s => container.appendChild(s.cloneNode(true)));
-            container.appendChild(pageEl.cloneNode(true));
-          } else {
-            container.innerHTML = html;
-          }
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (!iframeDoc) { document.body.removeChild(iframe); continue; }
 
-          const nameEl = doc.querySelector(".cv-name");
+          iframeDoc.open();
+          iframeDoc.write(html);
+          iframeDoc.close();
+
+          // Wait for content to render
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          const iframeImgs = Array.from(iframeDoc.querySelectorAll("img"));
+          await Promise.all(
+            iframeImgs.map(
+              (img) =>
+                new Promise<void>((resolve) => {
+                  if (img.complete) return resolve();
+                  img.onload = () => resolve();
+                  img.onerror = () => resolve();
+                })
+            )
+          );
+          await new Promise((resolve) => setTimeout(resolve, 300));
+
+          const renderTarget = iframeDoc.querySelector(".page") as HTMLElement;
+          if (!renderTarget) { document.body.removeChild(iframe); continue; }
+
+          const nameEl = iframeDoc.querySelector(".cv-name");
           const userName = nameEl?.textContent?.replace(/[^a-zA-Z0-9]/g, "_") || userId.slice(0, 8);
           const contactLabel = includeContact ? "with_contact" : "without_contact";
 
@@ -282,14 +299,14 @@ const AdminUsers = () => {
               margin: [10, 12, 10, 12],
               filename: `CV_${userName}_${contactLabel}.pdf`,
               image: { type: "jpeg", quality: 0.98 },
-              html2canvas: { scale: 2, useCORS: true, logging: false },
+              html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false, backgroundColor: "#ffffff" },
               jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-              pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+              pagebreak: { mode: ["css", "legacy"] },
             })
-            .from(container)
+            .from(renderTarget)
             .save();
 
-          document.body.removeChild(container);
+          document.body.removeChild(iframe);
           successCount++;
         } catch {
           continue;
