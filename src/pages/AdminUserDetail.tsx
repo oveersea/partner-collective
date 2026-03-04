@@ -381,14 +381,18 @@ const AdminUserDetail = () => {
         });
       }
 
-      // Use isolated iframe to prevent Tailwind CSS conflicts
+      // Use isolated iframe to prevent CSS conflicts while keeping it inside viewport for html2canvas
       iframe = document.createElement("iframe");
+      iframe.setAttribute("aria-hidden", "true");
       iframe.style.position = "fixed";
-      iframe.style.left = "-9999px";
       iframe.style.top = "0";
-      iframe.style.width = "210mm";
-      iframe.style.height = "297mm";
-      iframe.style.border = "none";
+      iframe.style.left = "0";
+      iframe.style.width = "794px";
+      iframe.style.height = "1123px";
+      iframe.style.border = "0";
+      iframe.style.opacity = "0.01";
+      iframe.style.pointerEvents = "none";
+      iframe.style.zIndex = "-1";
       document.body.appendChild(iframe);
 
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
@@ -398,8 +402,13 @@ const AdminUserDetail = () => {
       iframeDoc.write(html);
       iframeDoc.close();
 
-      // Wait for fonts and images to load inside iframe
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Wait until document, fonts, and images are ready inside iframe
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      const iframeFonts = (iframeDoc as Document & { fonts?: FontFaceSet }).fonts;
+      if (iframeFonts?.ready) {
+        await iframeFonts.ready;
+      }
+
       const iframeImgs = Array.from(iframeDoc.querySelectorAll("img"));
       await Promise.all(
         iframeImgs.map(
@@ -411,7 +420,7 @@ const AdminUserDetail = () => {
             })
         )
       );
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 120));
 
       const renderTarget = iframeDoc.querySelector(".page") as HTMLElement;
       if (!renderTarget) throw new Error("CV page element not found");
@@ -432,7 +441,8 @@ const AdminUserDetail = () => {
             backgroundColor: "#ffffff",
             scrollX: 0,
             scrollY: 0,
-            windowWidth: 794,
+            windowWidth: renderTarget.scrollWidth || 794,
+            windowHeight: renderTarget.scrollHeight || 1123,
           },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
           pagebreak: { mode: ["css", "legacy"] },
