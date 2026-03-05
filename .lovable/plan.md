@@ -1,43 +1,58 @@
 
 
-## Plan: Create Learning Program Page (Admin)
+## Problem
 
-### Current State
-- `AdminLearning` component lists programs in a table with search/pagination
-- `AdminProgramEdit` page (`/admin/program/:oveercode`) handles **editing** existing programs -- full-page layout with cards for basic info, status, pricing, learning details, instructors, and admin notes
-- The `programs` table requires: `title` (string), `slug` (string), `instructor_id` (string) as mandatory insert fields. Other fields have defaults.
-- There is NO "Create New Program" flow yet -- only edit existing ones.
+The profile completion percentage (`calcProfileScore` in `AdminUsers.tsx` and `calcProfileCompleteness` in `AdminUserDetail.tsx`) currently checks only 10 basic profile fields from the `profiles` table. It does not verify whether the user actually has:
 
-### What to Build
+- **Experience records** (from `user_experiences` table)
+- **Education records** (from `user_education` table)
+- **Certifications** (from `user_certifications` table)
 
-**1. Add "Create Program" button to `AdminLearning` component**
-- Place a `+ Buat Program` button next to the search bar in the header
-- On click, navigate to `/admin/program/new`
+This means a user who fills in basic text fields like `full_name`, `phone_number`, `city`, `bio`, `skills`, `highest_education` can already reach 60%+ without any real experience or education data.
 
-**2. Modify `AdminProgramEdit` to support create mode**
-- Currently the page only loads an existing program by `oveercode` param
-- When `oveercode === "new"`, switch to **create mode**:
-  - Initialize empty `ProgramData` with sensible defaults (status: "draft", category: "online", certificate_method: "none")
-  - Generate a slug from the title on the fly (lowercase, hyphenated)
-  - Use the current user's ID as `instructor_id` (required field) -- admin can change later via instructor selector
-  - On save, call `supabase.from("programs").insert(...)` instead of `.update(...)`
-  - After successful insert, navigate to `/admin/program/:oveercode` (the newly created program's oveercode)
-- Header shows "Program Baru" instead of the oveercode/title when in create mode
-- Save button label changes to "Buat Program" in create mode
+Additionally, the `send-daily-job-match` edge function has its own simpler 5-field completion check that also ignores these records.
 
-**3. Files to modify:**
-- `src/components/admin/AdminLearning.tsx` -- add create button
-- `src/pages/AdminProgramEdit.tsx` -- add create mode logic
+## Plan
 
-No database changes needed -- the `programs` table already has auto-generated `oveercode`, `slug` trigger, and appropriate defaults.
+### 1. Update profile completion logic in `AdminUsers.tsx`
 
-### Technical Details
+Modify `calcProfileScore` to include 14 criteria (instead of 10):
 
-**Slug generation**: Generate client-side from title: `title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()`. The DB trigger `generate_opportunity_slug` style function likely exists for programs too, but we provide a client-side slug since it's a required insert field.
+| # | Field | Check |
+|---|-------|-------|
+| 1 | full_name | non-empty |
+| 2 | avatar_url | non-empty |
+| 3 | phone_number | non-empty |
+| 4 | skills | length > 0 |
+| 5 | years_of_experience | > 0 |
+| 6 | highest_education | non-empty |
+| 7 | bio / professional_summary | non-empty |
+| 8 | city or country | non-empty |
+| 9 | linkedin_url or website_url | non-empty |
+| 10 | kyc_status | verified/approved |
+| 11 | date_of_birth | non-empty |
+| 12 | nationality | non-empty |
+| 13 | has experience records | count > 0 (from fetched data) |
+| 14 | has education records | count > 0 (from fetched data) |
 
-**instructor_id**: Required non-nullable field. Use `auth.uid()` as placeholder on insert. The admin can reassign via the instructor selector.
+Since the AdminUsers list page needs experience/education counts per user, we'll fetch aggregate counts. Two approaches:
 
-**Insert payload**: Strip `id`, `created_at`, `updated_at`, `oveercode`, `approved_at` from the data object. Include `title`, `slug`, `category`, `status`, `instructor_id`, and all other editable fields.
+- **Option A**: Fetch `user_experiences` and `user_education` counts in bulk alongside the users query (two additional queries, group by user_id).
+- **Option B**: Add `experience_count` and `education_count` as computed/stored fields on profiles (requires migration).
 
-**Post-insert flow**: After insert, fetch the created row to get the generated `oveercode`, then `navigate(`/admin/program/${oveercode}`)` to switch to edit mode seamlessly.
+**Option A** is simpler and avoids schema changes. We'll fetch counts for all displayed users and pass them to the score function.
+
+### 2. Update the same logic in `AdminUserDetail.tsx`
+
+The `calcProfileCompleteness` function will be updated with the same 14 criteria. This page already fetches experience and education data, so we just need to pass the counts.
+
+### 3. Update `send-daily-job-match` edge function
+
+Update the completion calculation to use the expanded criteria (or at minimum add experience check since it already checks `years_of_experience`).
+
+### Files to modify
+
+- `src/components/admin/AdminUsers.tsx` — update `calcProfileScore`, add experience/education count queries
+- `src/pages/AdminUserDetail.tsx` — update `calcProfileCompleteness` to include experience/education counts
+- `supabase/functions/send-daily-job-match/index.ts` — update completion calculation
 
