@@ -103,55 +103,43 @@ const LearningDetail = () => {
       } as ProgramDetail;
       setProgram(prog);
 
-      // Fetch instructor profile (main instructor)
-      if (prog.instructor_id) {
-        const { data: instrProfile } = await supabase
-          .from("instructor_profiles")
-          .select("*")
-          .eq("user_id", prog.instructor_id)
-          .maybeSingle();
-
-        // Get name & avatar from profiles table
-        const { data: userProfile } = await supabase
-          .from("profiles")
-          .select("full_name, avatar_url")
-          .eq("user_id", prog.instructor_id)
-          .maybeSingle();
-
-        setInstructor({
-          name: userProfile?.full_name || prog.instructor_name || "Instructor",
-          avatar_url: userProfile?.avatar_url || prog.instructor_avatar_url,
-          profile: instrProfile as InstructorProfile | null,
-        });
-      }
-
-      // Fetch additional instructors from program_instructors junction
-      const { data: extraInstructors } = await supabase
+      // Fetch instructors from program_instructors junction table (source of truth)
+      const { data: junctionInstructors } = await supabase
         .from("program_instructors")
         .select("instructor_id, sort_order")
         .eq("program_id", prog.id)
         .order("sort_order", { ascending: true });
 
-      if (extraInstructors && extraInstructors.length > 0) {
-        const extraIds = extraInstructors
-          .map(ei => ei.instructor_id)
-          .filter(id => id !== prog.instructor_id);
+      const junctionIds = junctionInstructors?.map(ji => ji.instructor_id) ?? [];
 
-        if (extraIds.length > 0) {
-          const extras: InstructorWithProfile[] = [];
-          for (const uid of extraIds) {
-            const [{ data: ip }, { data: up }] = await Promise.all([
-              supabase.from("instructor_profiles").select("*").eq("user_id", uid).maybeSingle(),
-              supabase.from("profiles").select("full_name, avatar_url").eq("user_id", uid).maybeSingle(),
-            ]);
-            extras.push({
-              name: up?.full_name || "Instructor",
-              avatar_url: up?.avatar_url,
-              profile: ip as InstructorProfile | null,
-            });
-          }
-          setAdditionalInstructors(extras);
+      if (junctionIds.length > 0) {
+        // Use junction table as sole source
+        const allFetched: InstructorWithProfile[] = [];
+        for (const uid of junctionIds) {
+          const [{ data: ip }, { data: up }] = await Promise.all([
+            supabase.from("instructor_profiles").select("*").eq("user_id", uid).maybeSingle(),
+            supabase.from("profiles").select("full_name, avatar_url").eq("user_id", uid).maybeSingle(),
+          ]);
+          allFetched.push({
+            name: up?.full_name || "Instructor",
+            avatar_url: up?.avatar_url,
+            profile: ip as InstructorProfile | null,
+          });
         }
+        // Set first as main, rest as additional
+        setInstructor(allFetched[0] || null);
+        setAdditionalInstructors(allFetched.slice(1));
+      } else if (prog.instructor_id) {
+        // Fallback: use program.instructor_id only if no junction entries
+        const [{ data: instrProfile }, { data: userProfile }] = await Promise.all([
+          supabase.from("instructor_profiles").select("*").eq("user_id", prog.instructor_id).maybeSingle(),
+          supabase.from("profiles").select("full_name, avatar_url").eq("user_id", prog.instructor_id).maybeSingle(),
+        ]);
+        setInstructor({
+          name: userProfile?.full_name || prog.instructor_name || "Instructor",
+          avatar_url: userProfile?.avatar_url || prog.instructor_avatar_url,
+          profile: instrProfile as InstructorProfile | null,
+        });
       }
 
       // Fetch institution
