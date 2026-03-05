@@ -35,9 +35,17 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Invalid payload" }, 400);
     }
 
+    const serviceRoleKey =
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
+      Deno.env.get("SB_SERVICE_ROLE_KEY");
+
+    if (!serviceRoleKey) {
+      return jsonResponse({ error: "Missing service role key" }, 500);
+    }
+
     const adminClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SB_SERVICE_ROLE_KEY")!
+      serviceRoleKey
     );
 
     const checkoutType = metadata?.checkout_type || String(external_id).split("_")[0];
