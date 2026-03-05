@@ -99,19 +99,31 @@ const PublicProfile = () => {
         body: { profile_user_id: userId },
       });
 
-      const result = (data || (error as any) || {}) as {
+      const result = (data || {}) as {
         error?: string;
         balance?: number;
         required?: number;
       };
 
+      let backendError = result.error;
+
+      // Supabase FunctionsError often stores real JSON body in error.context
+      if (!backendError && error && typeof (error as any)?.context?.json === "function") {
+        try {
+          const payload = await (error as any).context.json();
+          backendError = payload?.error;
+        } catch {
+          // ignore parse error
+        }
+      }
+
       // Treat 402 (insufficient credits) as expected business response, not runtime error
-      if (result.error === "Insufficient credits") {
+      if (backendError === "Insufficient credits") {
         return { ok: false as const, reason: "insufficient_credits" as const };
       }
 
-      if (error || result.error) {
-        throw new Error(result.error || error?.message || "Gagal membuka kontak");
+      if (error || backendError) {
+        throw new Error(backendError || "Gagal membuka kontak");
       }
 
       return { ok: true as const };
@@ -133,6 +145,17 @@ const PublicProfile = () => {
       queryClient.invalidateQueries({ queryKey: ["profile-unlock", user?.id, userId] });
     },
     onError: (err: Error) => {
+      if (err.message.includes("non-2xx") || err.message.includes("Edge function returned")) {
+        toast.error("Kredit tidak cukup", {
+          description: "Silakan topup kredit terlebih dahulu.",
+          action: {
+            label: "Top Up",
+            onClick: () => navigate("/credit-balance"),
+          },
+          duration: 6000,
+        });
+        return;
+      }
       toast.error(err.message);
     },
   });
