@@ -1,37 +1,43 @@
 
 
-## Diagnosis
+## Plan: Create Learning Program Page (Admin)
 
-I examined the uploaded PDF output and the HTML/CSS from the edge function. There are **two critical bugs**:
+### Current State
+- `AdminLearning` component lists programs in a table with search/pagination
+- `AdminProgramEdit` page (`/admin/program/:oveercode`) handles **editing** existing programs -- full-page layout with cards for basic info, status, pricing, learning details, instructors, and admin notes
+- The `programs` table requires: `title` (string), `slug` (string), `instructor_id` (string) as mandatory insert fields. Other fields have defaults.
+- There is NO "Create New Program" flow yet -- only edit existing ones.
 
-### Bug 1: CSS Global Reset Destroys Layout
-Line 209 of `generate-cv/index.ts`:
-```css
-*, *::before, *::after { margin: 0 !important; padding: 0 !important; box-sizing: border-box !important; border: none !important; }
-```
-This `!important` reset **overrides** all subsequent styles:
-- `.page { padding: 40px 48px; }` is killed by `padding: 0 !important` -- content has NO padding, flush against edges
-- `.page { margin: 0 auto; }` is killed -- page not centered
-- `.section h2 { border-bottom: 1px solid #e5e7eb !important; }` is killed by `border: none !important` (same specificity, reset wins on some browsers)
-- `.cv-divider { border-top: 2px solid #D71920; }` killed -- red divider lines disappear
+### What to Build
 
-This explains why the PDF shows content cropped on the left and missing visual separators.
+**1. Add "Create Program" button to `AdminLearning` component**
+- Place a `+ Buat Program` button next to the search bar in the header
+- On click, navigate to `/admin/program/new`
 
-### Bug 2: Off-Screen Iframe (`left: -9999px`) Causes Clipping
-`html2canvas` captures based on element coordinates. When the iframe is at `left: -9999px`, the rasterizer clips or misaligns content from the left edge. This is why the left portion of every text line is cut off in the PDF.
+**2. Modify `AdminProgramEdit` to support create mode**
+- Currently the page only loads an existing program by `oveercode` param
+- When `oveercode === "new"`, switch to **create mode**:
+  - Initialize empty `ProgramData` with sensible defaults (status: "draft", category: "online", certificate_method: "none")
+  - Generate a slug from the title on the fly (lowercase, hyphenated)
+  - Use the current user's ID as `instructor_id` (required field) -- admin can change later via instructor selector
+  - On save, call `supabase.from("programs").insert(...)` instead of `.update(...)`
+  - After successful insert, navigate to `/admin/program/:oveercode` (the newly created program's oveercode)
+- Header shows "Program Baru" instead of the oveercode/title when in create mode
+- Save button label changes to "Buat Program" in create mode
 
-### Plan
+**3. Files to modify:**
+- `src/components/admin/AdminLearning.tsx` -- add create button
+- `src/pages/AdminProgramEdit.tsx` -- add create mode logic
 
-**File 1: `supabase/functions/generate-cv/index.ts`**
-- Remove the destructive global `*` reset. Replace with a targeted reset that does NOT use `!important` on padding/margin/border.
-- Add `!important` to `.page` padding and the elements that need specific borders.
-- Ensure `.page` has proper dimensions with explicit padding.
+No database changes needed -- the `programs` table already has auto-generated `oveercode`, `slug` trigger, and appropriate defaults.
 
-**File 2: `src/lib/cv-pdf-helper.ts`**
-- Change iframe position from `left: -9999px` to `left: 0; top: 0` so html2canvas captures from proper coordinates.
-- Keep `opacity: 1`, `pointer-events: none`, `z-index: -9999` to hide from user interaction while remaining capturable.
-- Increase the iframe dimensions to accommodate the full `.page` width (210mm = ~794px + some margin).
-- Add `overflow: hidden` to prevent any visual bleed.
+### Technical Details
 
-These two fixes together will restore the full layout: proper padding, visible borders/dividers, centered content, no left-side clipping, and multi-page support.
+**Slug generation**: Generate client-side from title: `title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()`. The DB trigger `generate_opportunity_slug` style function likely exists for programs too, but we provide a client-side slug since it's a required insert field.
+
+**instructor_id**: Required non-nullable field. Use `auth.uid()` as placeholder on insert. The admin can reassign via the instructor selector.
+
+**Insert payload**: Strip `id`, `created_at`, `updated_at`, `oveercode`, `approved_at` from the data object. Include `title`, `slug`, `category`, `status`, `instructor_id`, and all other editable fields.
+
+**Post-insert flow**: After insert, fetch the created row to get the generated `oveercode`, then `navigate(`/admin/program/${oveercode}`)` to switch to edit mode seamlessly.
 
