@@ -206,9 +206,14 @@ const AdminApiKeys = () => {
           <div className="rounded-lg bg-muted p-4 font-mono text-xs space-y-2 overflow-x-auto">
             <p className="text-muted-foreground">// 1. Generate login token dari mobile app</p>
             <p>{`POST /functions/v1/generate-login-token`}</p>
-            <p>{`{ "api_key": "ovr_xxx...", "email": "user@email.com" }`}</p>
+            <p>{`Content-Type: application/json`}</p>
+            <p>{`{`}</p>
+            <p>{`  "api_key": "ovr_xxx...",`}</p>
+            <p>{`  "email": "user@email.com",`}</p>
+            <p>{`  "password": "user_password"`}</p>
+            <p>{`}`}</p>
             <br />
-            <p className="text-muted-foreground">// 2. Response berisi verification URL</p>
+            <p className="text-muted-foreground">// 2. Response berisi verification URL & token</p>
             <p>{`{ "verification_url": "https://oveersea.com/verification?token=...", "token": "...", "expires_in": 900 }`}</p>
             <br />
             <p className="text-muted-foreground">// 3. Buka URL di PWA → session otomatis tercipta</p>
