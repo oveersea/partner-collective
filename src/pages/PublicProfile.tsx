@@ -103,7 +103,7 @@ const PublicProfile = () => {
       if (error || result?.error) {
         const msg = result?.error || error?.message || "Gagal membuka kontak";
         if (msg === "Insufficient credits" || result?.error === "Insufficient credits") {
-          throw new Error(`Credit tidak cukup. Saldo: ${result?.balance ?? 0}, dibutuhkan: ${result?.required ?? 2}`);
+          throw new Error("INSUFFICIENT_CREDITS");
         }
         throw new Error(msg);
       }
@@ -114,7 +114,18 @@ const PublicProfile = () => {
       queryClient.invalidateQueries({ queryKey: ["profile-unlock", user?.id, userId] });
     },
     onError: (err: Error) => {
-      toast.error(err.message);
+      if (err.message === "INSUFFICIENT_CREDITS") {
+        toast.error("Kredit tidak cukup", {
+          description: "Silakan top up kredit terlebih dahulu.",
+          action: {
+            label: "Top Up",
+            onClick: () => navigate("/credit-balance"),
+          },
+          duration: 6000,
+        });
+      } else {
+        toast.error(err.message);
+      }
     },
   });
 
