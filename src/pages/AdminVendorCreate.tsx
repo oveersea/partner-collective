@@ -4,9 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { CountrySelect } from "@/components/ui/country-select";
-import { CitySelect } from "@/components/ui/city-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import LocationPicker from "@/components/ui/location-picker";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Crown, X, Loader2, Plus } from "lucide-react";
@@ -177,20 +176,14 @@ const AdminVendorCreate = () => {
             {/* Lokasi */}
             <section className="bg-card rounded-2xl border border-border p-6">
               <h2 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Lokasi</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Kota</Label>
-                  <CitySelect value={city} onChange={setCity} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Negara</Label>
-                  <CountrySelect value={country} onChange={setCountry} />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Alamat Lengkap</Label>
-                  <Textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Jl. Sudirman No. 1, Jakarta Pusat" rows={2} />
-                </div>
-              </div>
+              <LocationPicker
+                city={city}
+                country={country}
+                address={address}
+                onCityChange={setCity}
+                onCountryChange={setCountry}
+                onAddressChange={setAddress}
+              />
             </section>
 
             {/* Dokumen Legal */}
