@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Users, Shield, Briefcase, CreditCard, FileText, Building2,
+  LayoutDashboard, Users, Shield, CreditCard, FileText, Building2,
   GraduationCap, ClipboardCheck, BarChart3, Landmark, FolderKanban, UserCheck, UsersRound, Store,
   Image as ImageIcon, Zap, Mail, KeyRound,
 } from "lucide-react";
@@ -21,7 +21,7 @@ export const adminSections = [
   { id: "vendors", label: "Vendor Management", icon: Store },
   { id: "teams", label: "Team Management", icon: UsersRound },
   { id: "kyc", label: "KYC Verification", icon: Shield },
-  { id: "hiring", label: "Hiring & Matching", icon: Briefcase },
+  
   { id: "credits", label: "Credits & Wallet", icon: CreditCard },
   { id: "content", label: "Opportunities & Jobs", icon: FileText },
   { id: "case_studies", label: "Case Studies", icon: ImageIcon },
