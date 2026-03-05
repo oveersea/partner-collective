@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CountrySelect } from "@/components/ui/country-select";
+import { CitySelect } from "@/components/ui/city-select";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -282,7 +283,14 @@ const AdminCompanyDetail = () => {
                 </div>
                 <div>
                   <Label>Tahun Berdiri</Label>
-                  <Input type="number" value={data.founded_year ?? ""} onChange={(e) => update("founded_year", e.target.value ? Number(e.target.value) : null)} />
+                  <Select value={data.founded_year?.toString() || ""} onValueChange={(v) => update("founded_year", v ? Number(v) : null)}>
+                    <SelectTrigger><SelectValue placeholder="Pilih tahun" /></SelectTrigger>
+                    <SelectContent className="max-h-[240px]">
+                      {Array.from({ length: 80 }, (_, i) => (new Date().getFullYear() - i).toString()).map(y => (
+                        <SelectItem key={y} value={y}>{y}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label>Tipe Bisnis</Label>
@@ -324,7 +332,7 @@ const AdminCompanyDetail = () => {
                 </div>
                 <div>
                   <Label>Kota</Label>
-                  <Input value={data.city || ""} onChange={(e) => update("city", e.target.value)} />
+                  <CitySelect value={data.city || ""} onChange={(v) => update("city", v)} />
                 </div>
                 <div>
                   <Label>Negara</Label>

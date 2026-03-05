@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { CountrySelect } from "@/components/ui/country-select";
+import { CitySelect } from "@/components/ui/city-select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -762,7 +763,7 @@ const AdminVendors = () => {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Kota</Label>
-                <Input value={newVendorCity} onChange={(e) => setNewVendorCity(e.target.value)} placeholder="Jakarta" />
+                <CitySelect value={newVendorCity} onChange={setNewVendorCity} />
               </div>
               <div className="space-y-2">
                 <Label>Negara</Label>

@@ -14,7 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { CountrySelect } from "@/components/ui/country-select";
+import { CitySelect } from "@/components/ui/city-select";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -515,19 +517,25 @@ const AdminUserDetail = () => {
                         <div className="flex gap-3">
                           <div className="flex-1">
                             <Label className="text-xs text-muted-foreground">Account Type</Label>
-                            <select className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background text-sm" value={editData.account_type || "personal"} onChange={(e) => set("account_type", e.target.value)}>
-                              <option value="personal">Personal</option>
-                              <option value="business">Business</option>
-                            </select>
+                            <Select value={editData.account_type || "personal"} onValueChange={(v) => set("account_type", v)}>
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="personal">Personal</SelectItem>
+                                <SelectItem value="business">Business</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                           <div className="flex-1">
                             <Label className="text-xs text-muted-foreground">KYC Status</Label>
-                            <select className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background text-sm" value={editData.kyc_status || "unverified"} onChange={(e) => set("kyc_status", e.target.value)}>
-                              <option value="unverified">Unverified</option>
-                              <option value="pending">Pending</option>
-                              <option value="approved">Approved</option>
-                              <option value="rejected">Rejected</option>
-                            </select>
+                            <Select value={editData.kyc_status || "unverified"} onValueChange={(v) => set("kyc_status", v)}>
+                              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="unverified">Unverified</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="approved">Approved</SelectItem>
+                                <SelectItem value="rejected">Rejected</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
                       </div>
@@ -832,7 +840,7 @@ const AdminUserDetail = () => {
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <Label className="text-xs text-muted-foreground">Kota</Label>
-                        <Input className="mt-1" value={editData.city || ""} onChange={(e) => set("city", e.target.value)} />
+                        <CitySelect className="mt-1" value={editData.city || ""} onChange={(v) => set("city", v)} />
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">Provinsi</Label>
