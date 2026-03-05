@@ -58,7 +58,7 @@ const Learning = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("programs")
-        .select("id, title, slug, description, category, level, duration, delivery_mode, price_cents, currency, rating, student_count, badge, thumbnail_url, location, instructor_name")
+        .select("id, title, slug, oveercode, description, category, level, duration, delivery_mode, price_cents, currency, rating, student_count, badge, thumbnail_url, location, instructor_name")
         .eq("status", "approved")
         .order("created_at", { ascending: false });
       if (!error && data) setPrograms(data as Program[]);
