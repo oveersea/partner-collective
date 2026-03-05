@@ -407,7 +407,7 @@ const LearningDetail = () => {
 
       {/* ===== MAIN CONTENT ===== */}
       <main className="container mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 lg:gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 lg:gap-10">
 
           {/* LEFT COLUMN (70%) */}
           <div className="min-w-0">
