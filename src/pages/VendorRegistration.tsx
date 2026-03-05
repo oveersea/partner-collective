@@ -11,6 +11,7 @@ import {
 import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import DashboardNav from "@/components/dashboard/DashboardNav";
@@ -299,7 +300,7 @@ const VendorRegistration = () => {
                   </div>
                   <div>
                     <Label className="text-card-foreground">Phone *</Label>
-                    <Input className="mt-1.5" placeholder="021-12345678" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+                    <PhoneInput className="mt-1.5" value={form.phone} onChange={(v) => set("phone", v)} />
                     {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
                   </div>
                 </div>

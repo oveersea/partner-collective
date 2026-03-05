@@ -9,6 +9,7 @@ import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 
@@ -298,7 +299,7 @@ const KYCVerification = () => {
 
                       <div>
                         <Label className="text-card-foreground">Phone Number</Label>
-                        <Input className="mt-1.5" placeholder="+62 812-XXXX-XXXX" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                        <PhoneInput className="mt-1.5" value={phone} onChange={setPhone} />
                       </div>
 
                       <div>

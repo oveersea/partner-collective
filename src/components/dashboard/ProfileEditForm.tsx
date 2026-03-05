@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { CountrySelect } from "@/components/ui/country-select";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -75,7 +76,7 @@ const ProfileEditForm = ({ editData, onChange, onSave, onCancel }: ProfileEditFo
         </div>
         <div>
           <Label className="text-card-foreground">Phone Number</Label>
-          <Input className="mt-1.5" placeholder="+62812..." value={editData.phone_number || ""} onChange={(e) => set("phone_number", e.target.value)} />
+          <PhoneInput className="mt-1.5" value={editData.phone_number || ""} onChange={(v) => set("phone_number", v)} />
         </div>
         <div>
           <Label className="text-card-foreground">Languages</Label>
