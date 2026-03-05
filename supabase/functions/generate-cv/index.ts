@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
     const skills = Array.isArray(profile.skills) ? profile.skills : [];
     const summary = profile.professional_summary || profile.bio || "";
     const oveercode = profile.oveercode || "";
-    const validationUrl = `https://partner-collective.lovable.app/verification?code=${encodeURIComponent(oveercode)}`;
+    const validationUrl = `https://partner-collective.lovable.app/p/${encodeURIComponent(oveercode)}`;
 
     // Generate QR code as SVG (high contrast for print)
     let qrSvg = "";
