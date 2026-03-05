@@ -349,7 +349,7 @@ const LearningDetail = () => {
             <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
               <div className="rounded-2xl overflow-hidden bg-muted aspect-video shadow-xl">
                 {program.thumbnail_url ? (
-                  <img src={program.thumbnail_url} alt={program.title} className="w-full h-full object-cover" />
+                  <img src={program.thumbnail_url} alt={program.title} className="w-full h-full object-contain" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
                     <GraduationCap className="w-20 h-20 text-primary/30" />
