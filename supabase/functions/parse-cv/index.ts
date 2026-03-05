@@ -10,9 +10,17 @@ const corsHeaders = {
 async function populateProfileData(adminClient: any, userId: string, parsedData: any, adminUserId: string) {
   try {
     console.log("Populating profile data for user:", userId);
+    console.log("Parsed data keys:", Object.keys(parsedData));
+    console.log("Work experience count:", parsedData.work_experience?.length || 0);
+    console.log("Education count:", parsedData.education?.length || 0);
+    console.log("Certifications count:", parsedData.certifications?.length || 0);
+
+    // Wait briefly for handle_new_user trigger to create profile row
+    await new Promise((r) => setTimeout(r, 1500));
 
     // Update profile basic info
     const profileUpdate: Record<string, any> = {};
+    if (parsedData.full_name) profileUpdate.full_name = parsedData.full_name;
     if (parsedData.phone) profileUpdate.phone_number = parsedData.phone;
     if (parsedData.city) profileUpdate.city = parsedData.city;
     if (parsedData.country) profileUpdate.country = parsedData.country;
@@ -20,6 +28,7 @@ async function populateProfileData(adminClient: any, userId: string, parsedData:
     if (parsedData.current_title) profileUpdate.headline = parsedData.current_title;
     if (parsedData.summary) profileUpdate.professional_summary = parsedData.summary;
     if (parsedData.skills && parsedData.skills.length > 0) profileUpdate.skills = parsedData.skills;
+    if (parsedData.years_of_experience) profileUpdate.years_of_experience = parsedData.years_of_experience;
     if (parsedData.languages && parsedData.languages.length > 0) {
       profileUpdate.languages = parsedData.languages.map((l: any) => 
         typeof l === "string" ? l : `${l.language}${l.proficiency ? ` (${l.proficiency})` : ""}`
@@ -27,19 +36,29 @@ async function populateProfileData(adminClient: any, userId: string, parsedData:
     }
 
     if (Object.keys(profileUpdate).length > 0) {
+      console.log("Updating profile with:", JSON.stringify(profileUpdate));
       const { error: profileErr } = await adminClient
         .from("profiles")
         .update(profileUpdate)
         .eq("user_id", userId);
       if (profileErr) console.error("Profile update error:", profileErr.message);
+      else console.log("Profile updated successfully");
     }
+
+    // Delete existing parsed data to avoid duplicates on re-parse
+    await Promise.all([
+      adminClient.from("user_experiences").delete().eq("user_id", userId).eq("status", "approved"),
+      adminClient.from("user_education").delete().eq("user_id", userId).eq("status", "approved"),
+      adminClient.from("user_certifications").delete().eq("user_id", userId).eq("status", "approved"),
+    ]);
 
     // Insert work experiences
     if (parsedData.work_experience && parsedData.work_experience.length > 0) {
       const experiences = parsedData.work_experience.map((exp: any) => ({
         user_id: userId,
         company: exp.company || "Unknown Company",
-        position: exp.title || "Unknown Position",
+        position: exp.title || exp.position || "Unknown Position",
+        title: exp.title || exp.position || null,
         start_date: exp.start_date || null,
         end_date: exp.is_current ? null : (exp.end_date || null),
         is_current: exp.is_current || false,
@@ -50,6 +69,7 @@ async function populateProfileData(adminClient: any, userId: string, parsedData:
         reviewed_at: new Date().toISOString(),
       }));
 
+      console.log("Inserting experiences:", JSON.stringify(experiences));
       const { error: expErr } = await adminClient.from("user_experiences").insert(experiences);
       if (expErr) console.error("Experiences insert error:", expErr.message);
       else console.log(`Inserted ${experiences.length} work experiences`);
@@ -62,14 +82,16 @@ async function populateProfileData(adminClient: any, userId: string, parsedData:
         institution: edu.institution || "Unknown Institution",
         degree: edu.degree || null,
         field_of_study: edu.field_of_study || null,
-        start_date: edu.start_year ? `${edu.start_year}-01-01` : null,
-        end_date: edu.end_year ? `${edu.end_year}-01-01` : null,
+        start_date: edu.start_year ? `${edu.start_year}-01-01` : (edu.start_date || null),
+        end_date: edu.end_year ? `${edu.end_year}-01-01` : (edu.end_date || null),
+        is_current: edu.is_current || false,
         description: edu.gpa ? `GPA: ${edu.gpa}` : null,
         status: "approved",
         reviewed_by: adminUserId,
         reviewed_at: new Date().toISOString(),
       }));
 
+      console.log("Inserting education:", JSON.stringify(education));
       const { error: eduErr } = await adminClient.from("user_education").insert(education);
       if (eduErr) console.error("Education insert error:", eduErr.message);
       else console.log(`Inserted ${education.length} education records`);
@@ -80,13 +102,14 @@ async function populateProfileData(adminClient: any, userId: string, parsedData:
       const certs = parsedData.certifications.map((cert: any) => ({
         user_id: userId,
         name: cert.name || "Unknown Certification",
-        issuing_organization: cert.issuer || "Unknown",
-        issue_date: cert.year ? `${cert.year}-01-01` : null,
+        issuing_organization: cert.issuer || cert.issuing_organization || "Unknown",
+        issue_date: cert.year ? `${cert.year}-01-01` : (cert.issue_date || null),
         status: "approved",
         reviewed_by: adminUserId,
         reviewed_at: new Date().toISOString(),
       }));
 
+      console.log("Inserting certifications:", JSON.stringify(certs));
       const { error: certErr } = await adminClient.from("user_certifications").insert(certs);
       if (certErr) console.error("Certifications insert error:", certErr.message);
       else console.log(`Inserted ${certs.length} certifications`);
@@ -443,35 +466,46 @@ If information is not found, use null. Always call the extract_cv_data tool with
       try {
         console.log("Auto-inviting candidate:", candidateEmail);
 
-        const { data: inviteData, error: inviteError } =
-          await adminClient.auth.admin.inviteUserByEmail(candidateEmail, {
-            data: {
-              full_name: parsedData.full_name || "",
-              phone_number: parsedData.phone || "",
-            },
-          });
+        // First check if user already exists
+        const { data: existingUserId } = await adminClient.rpc("get_user_id_by_email", {
+          target_email: candidateEmail,
+        });
 
-        if (inviteError) {
-          console.error("Auto-invite error:", inviteError.message);
-          inviteResult = { invited: false, error: inviteError.message };
+        if (existingUserId) {
+          // User already exists — populate their profile data directly
+          console.log("User already exists:", candidateEmail, "userId:", existingUserId);
+          inviteResult = { invited: false, error: "User already registered", user_id: existingUserId };
+          await populateProfileData(adminClient, existingUserId, parsedData, userId);
         } else {
-          const invitedUserId = inviteData?.user?.id;
-          console.log("Auto-invite success:", candidateEmail, "userId:", invitedUserId);
-          inviteResult = { invited: true, user_id: invitedUserId };
+          // New user — invite and populate
+          const { data: inviteData, error: inviteError } =
+            await adminClient.auth.admin.inviteUserByEmail(candidateEmail, {
+              data: {
+                full_name: parsedData.full_name || "",
+                phone_number: parsedData.phone || "",
+              },
+            });
 
-          // Update profile with parsed data
-          if (invitedUserId) {
-            await populateProfileData(adminClient, invitedUserId, parsedData, userId);
+          if (inviteError) {
+            console.error("Auto-invite error:", inviteError.message);
+            inviteResult = { invited: false, error: inviteError.message };
+          } else {
+            const invitedUserId = inviteData?.user?.id;
+            console.log("Auto-invite success:", candidateEmail, "userId:", invitedUserId);
+            inviteResult = { invited: true, user_id: invitedUserId };
+
+            if (invitedUserId) {
+              await populateProfileData(adminClient, invitedUserId, parsedData, userId);
+            }
+
+            await adminClient.from("user_invitations").insert({
+              email: candidateEmail,
+              full_name: parsedData.full_name || "",
+              phone_number: parsedData.phone || null,
+              invited_by: userId,
+              status: "pending",
+            });
           }
-
-          // Log invitation in user_invitations table
-          await adminClient.from("user_invitations").insert({
-            email: candidateEmail,
-            full_name: parsedData.full_name || "",
-            phone_number: parsedData.phone || null,
-            invited_by: userId,
-            status: "pending",
-          });
         }
       } catch (inviteErr) {
         console.error("Auto-invite exception:", inviteErr);
