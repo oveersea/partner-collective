@@ -77,26 +77,28 @@ const AssessmentsTab = ({ userId }: { userId?: string }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {tests.map((t) => (
-        <Card key={t.id} className="hover:shadow-md transition-shadow">
-          <CardContent className="p-5 space-y-3">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-sm text-foreground">{t.title}</h3>
-              <Badge variant="secondary" className="text-[10px] shrink-0">{t.test_tier}</Badge>
-            </div>
-            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-              <span>{t.skill_name}</span>
-              <span>·</span>
-              <span>{t.total_questions} soal</span>
-              {t.time_limit_minutes && <><span>·</span><span>{t.time_limit_minutes} menit</span></>}
-            </div>
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-sm font-semibold text-foreground">
-                {t.price_cents === 0 ? "Gratis" : formatRupiah(t.price_cents)}
-              </span>
-              <Badge className="text-[10px]">Passing: {t.passing_score}%</Badge>
-            </div>
-          </CardContent>
-        </Card>
+        <Link key={t.id} to={`/assessment/${t.oveercode || t.id}`}>
+          <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-semibold text-sm text-foreground">{t.title}</h3>
+                <Badge variant="secondary" className="text-[10px] shrink-0">{t.test_tier}</Badge>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                <span>{t.skill_name}</span>
+                <span>·</span>
+                <span>{t.total_questions} soal</span>
+                {t.time_limit_minutes && <><span>·</span><span>{t.time_limit_minutes} menit</span></>}
+              </div>
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-sm font-semibold text-foreground">
+                  {t.price_cents === 0 ? "Gratis" : formatRupiah(t.price_cents)}
+                </span>
+                <Badge className="text-[10px]">Passing: {t.passing_score}%</Badge>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       ))}
     </div>
   );
