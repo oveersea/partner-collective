@@ -407,409 +407,453 @@ const LearningDetail = () => {
 
       {/* ===== MAIN CONTENT ===== */}
       <main className="container mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 lg:gap-10">
 
-        {/* PROGRAM SECTION */}
-        <section id="program" ref={(el) => { sectionRefs.current["program"] = el; }} className="py-16">
-          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">PROGRAM</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
-            Yang akan kamu pelajari di program ini
-          </h2>
-          <p className="text-muted-foreground mb-8 max-w-2xl">
-            {program.description || `Pelajari ${program.title} dan kuasai keahlian yang dibutuhkan industri.`}
-          </p>
+          {/* LEFT COLUMN (70%) */}
+          <div className="min-w-0">
 
-          {/* Outcomes grid */}
-          {outcomes.length > 0 && (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-              {outcomes.map((o, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 15 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                  className="flex items-start gap-3 p-4 rounded-xl bg-card border border-border hover:shadow-md transition-shadow"
-                >
-                  <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                  <span className="text-sm text-foreground">{o}</span>
-                </motion.div>
-              ))}
-            </div>
-          )}
-
-          {/* Target Audience */}
-          {audience.length > 0 && (
-            <div className="mt-10">
-              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary" /> Siapa yang cocok mengikuti program ini?
-              </h3>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {audience.map((a, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                    <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm text-muted-foreground">{a}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Prerequisites */}
-          {prereqs.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-primary" /> Prasyarat
-              </h3>
-              <ul className="space-y-2">
-                {prereqs.map((p, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
-                    <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0 mt-0.5">{i + 1}</span>
-                    {p}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </section>
-
-        <Separator />
-
-        {/* KURIKULUM SECTION */}
-        <section id="kurikulum" ref={(el) => { sectionRefs.current["kurikulum"] = el; }} className="py-16">
-          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">KURIKULUM</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
-            Kurikulum Teruji Industri
-          </h2>
-          {syllabus.length > 0 ? (
-            <>
+            {/* PROGRAM SECTION */}
+            <section id="program" ref={(el) => { sectionRefs.current["program"] = el; }} className="py-12">
+              <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">PROGRAM</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+                Yang akan kamu pelajari di program ini
+              </h2>
               <p className="text-muted-foreground mb-8 max-w-2xl">
-                {syllabus.length} modul dirancang untuk memberikan pemahaman menyeluruh dari dasar hingga mahir.
+                {program.description || `Pelajari ${program.title} dan kuasai keahlian yang dibutuhkan industri.`}
               </p>
-              <div className="space-y-3">
-                {syllabus.map((mod, i) => (
-                  <Collapsible key={i}>
-                    <Card className="overflow-hidden">
-                      <CollapsibleTrigger className="w-full">
-                        <CardContent className="p-0">
-                          <div className="flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors">
-                            <div className="w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center shrink-0">
-                              <span className="text-[10px] font-semibold text-primary uppercase">Modul</span>
-                              <span className="text-lg font-bold text-primary leading-none">{i + 1}</span>
-                            </div>
-                            <div className="flex-1 text-left min-w-0">
-                              <h3 className="font-semibold text-foreground text-sm sm:text-base">{mod.title}</h3>
-                              {mod.topics && (
-                                <p className="text-xs text-muted-foreground mt-0.5">{mod.topics.length} topik</p>
+
+              {/* Outcomes grid */}
+              {outcomes.length > 0 && (
+                <div className="grid sm:grid-cols-2 gap-4 mb-10">
+                  {outcomes.map((o, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 15 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.05 }}
+                      className="flex items-start gap-3 p-4 rounded-xl bg-card border border-border hover:shadow-md transition-shadow"
+                    >
+                      <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                      <span className="text-sm text-foreground">{o}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+
+              {/* Target Audience */}
+              {audience.length > 0 && (
+                <div className="mt-10">
+                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-primary" /> Siapa yang cocok mengikuti program ini?
+                  </h3>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {audience.map((a, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                        <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                        <span className="text-sm text-muted-foreground">{a}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Prerequisites */}
+              {prereqs.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-primary" /> Prasyarat
+                  </h3>
+                  <ul className="space-y-2">
+                    {prereqs.map((p, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
+                        <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0 mt-0.5">{i + 1}</span>
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
+
+            <Separator />
+
+            {/* KURIKULUM SECTION */}
+            <section id="kurikulum" ref={(el) => { sectionRefs.current["kurikulum"] = el; }} className="py-12">
+              <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">KURIKULUM</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+                Kurikulum Teruji Industri
+              </h2>
+              {syllabus.length > 0 ? (
+                <>
+                  <p className="text-muted-foreground mb-8 max-w-2xl">
+                    {syllabus.length} modul dirancang untuk memberikan pemahaman menyeluruh dari dasar hingga mahir.
+                  </p>
+                  <div className="space-y-3">
+                    {syllabus.map((mod, i) => (
+                      <Collapsible key={i}>
+                        <Card className="overflow-hidden">
+                          <CollapsibleTrigger className="w-full">
+                            <CardContent className="p-0">
+                              <div className="flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors">
+                                <div className="w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center shrink-0">
+                                  <span className="text-[10px] font-semibold text-primary uppercase">Modul</span>
+                                  <span className="text-lg font-bold text-primary leading-none">{i + 1}</span>
+                                </div>
+                                <div className="flex-1 text-left min-w-0">
+                                  <h3 className="font-semibold text-foreground text-sm sm:text-base">{mod.title}</h3>
+                                  {mod.topics && (
+                                    <p className="text-xs text-muted-foreground mt-0.5">{mod.topics.length} topik</p>
+                                  )}
+                                </div>
+                                <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0 transition-transform" />
+                              </div>
+                            </CardContent>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="px-5 pb-5 pl-[4.75rem] space-y-3 border-t border-border pt-4">
+                              {mod.description && (
+                                <p className="text-sm text-muted-foreground leading-relaxed">{mod.description}</p>
+                              )}
+                              {mod.topics && mod.topics.length > 0 && (
+                                <ul className="space-y-1.5">
+                                  {mod.topics.map((t, j) => (
+                                    <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                      <Play className="w-3 h-3 text-primary mt-1 shrink-0 fill-primary" />
+                                      {t}
+                                    </li>
+                                  ))}
+                                </ul>
                               )}
                             </div>
-                            <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0 transition-transform" />
-                          </div>
-                        </CardContent>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="px-5 pb-5 pl-[4.75rem] space-y-3 border-t border-border pt-4">
-                          {mod.description && (
-                            <p className="text-sm text-muted-foreground leading-relaxed">{mod.description}</p>
-                          )}
-                          {mod.topics && mod.topics.length > 0 && (
-                            <ul className="space-y-1.5">
-                              {mod.topics.map((t, j) => (
-                                <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
-                                  <Play className="w-3 h-3 text-primary mt-1 shrink-0 fill-primary" />
-                                  {t}
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      </CollapsibleContent>
-                    </Card>
-                  </Collapsible>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
-                <BookOpen className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground text-sm">Kurikulum untuk program ini belum tersedia.</p>
-            </div>
-          )}
-        </section>
+                          </CollapsibleContent>
+                        </Card>
+                      </Collapsible>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
+                    <BookOpen className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground text-sm">Kurikulum untuk program ini belum tersedia.</p>
+                </div>
+              )}
+            </section>
 
-        <Separator />
+            <Separator />
 
-        {/* INSTRUKTUR SECTION */}
-        {allInstructors.length > 0 && (
-          <section id="instruktur" ref={(el) => { sectionRefs.current["instruktur"] = el; }} className="py-16">
-            <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">INSTRUKTUR</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
-              Belajar Langsung dari Para Ahli
-            </h2>
-            <p className="text-muted-foreground mb-8 max-w-2xl">
-              Instruktur berpengalaman yang siap membimbing kamu menguasai materi.
-            </p>
+            {/* INSTRUKTUR SECTION */}
+            {allInstructors.length > 0 && (
+              <section id="instruktur" ref={(el) => { sectionRefs.current["instruktur"] = el; }} className="py-12">
+                <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">INSTRUKTUR</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+                  Belajar Langsung dari Para Ahli
+                </h2>
+                <p className="text-muted-foreground mb-8 max-w-2xl">
+                  Instruktur berpengalaman yang siap membimbing kamu menguasai materi.
+                </p>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {allInstructors.map((instr, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1 }}
-                >
-                  <Card
-                    className={`h-full overflow-hidden hover:shadow-lg transition-shadow ${instr.oveercode ? "cursor-pointer" : ""}`}
-                    onClick={() => instr.oveercode && navigate(`/p/${instr.oveercode}`)}
-                  >
-                    <CardContent className="p-0">
-                      {/* Avatar area */}
-                      <div className="relative bg-gradient-to-br from-primary/10 to-accent/10 p-6 pb-4 flex flex-col items-center text-center">
-                        {instr.avatar_url ? (
-                          <img src={instr.avatar_url} alt={instr.name} className="w-24 h-24 rounded-full object-cover border-4 border-background shadow-md" />
-                        ) : (
-                          <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center border-4 border-background shadow-md">
-                            <User className="w-10 h-10 text-primary" />
-                          </div>
-                        )}
-                        <h3 className="font-semibold text-foreground mt-3">{instr.name}</h3>
-                        {instr.profile?.title && (
-                          <p className="text-sm text-muted-foreground">{instr.profile.title}</p>
-                        )}
-                      </div>
-
-                      {/* Details */}
-                      <div className="p-5 space-y-3">
-                        {/* Quick stats */}
-                        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                          {instr.profile?.experience_years != null && (
-                            <span className="flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />{instr.profile.experience_years} thn</span>
-                          )}
-                          {instr.profile?.instructor_rating != null && (
-                            <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />{instr.profile.instructor_rating}</span>
-                          )}
-                          {instr.profile?.total_programs != null && (
-                            <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" />{instr.profile.total_programs} program</span>
-                          )}
-                          {instr.profile?.location && (
-                            <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{instr.profile.location}</span>
-                          )}
-                        </div>
-
-                        {instr.profile?.bio && (
-                          <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">{instr.profile.bio}</p>
-                        )}
-
-                        {instr.profile?.expertise && instr.profile.expertise.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5">
-                            {instr.profile.expertise.slice(0, 5).map((e, i) => (
-                              <Badge key={i} variant="secondary" className="text-xs">{e}</Badge>
-                            ))}
-                            {instr.profile.expertise.length > 5 && (
-                              <Badge variant="outline" className="text-xs">+{instr.profile.expertise.length - 5}</Badge>
+                <div className="grid sm:grid-cols-2 gap-6">
+                  {allInstructors.map((instr, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.1 }}
+                    >
+                      <Card
+                        className={`h-full overflow-hidden hover:shadow-lg transition-shadow ${instr.oveercode ? "cursor-pointer" : ""}`}
+                        onClick={() => instr.oveercode && navigate(`/p/${instr.oveercode}`)}
+                      >
+                        <CardContent className="p-0">
+                          <div className="relative bg-gradient-to-br from-primary/10 to-accent/10 p-6 pb-4 flex flex-col items-center text-center">
+                            {instr.avatar_url ? (
+                              <img src={instr.avatar_url} alt={instr.name} className="w-24 h-24 rounded-full object-cover border-4 border-background shadow-md" />
+                            ) : (
+                              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center border-4 border-background shadow-md">
+                                <User className="w-10 h-10 text-primary" />
+                              </div>
+                            )}
+                            <h3 className="font-semibold text-foreground mt-3">{instr.name}</h3>
+                            {instr.profile?.title && (
+                              <p className="text-sm text-muted-foreground">{instr.profile.title}</p>
                             )}
                           </div>
-                        )}
 
-                        {instr.profile?.achievements && instr.profile.achievements.length > 0 && (
-                          <div>
-                            <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-                              <Award className="w-3 h-3 text-primary" /> Pencapaian
-                            </p>
-                            <ul className="space-y-0.5">
-                              {instr.profile.achievements.slice(0, 3).map((a, i) => (
-                                <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                  <CheckCircle2 className="w-3 h-3 text-primary mt-0.5 shrink-0" /> {a}
-                                </li>
-                              ))}
-                            </ul>
+                          <div className="p-5 space-y-3">
+                            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                              {instr.profile?.experience_years != null && (
+                                <span className="flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />{instr.profile.experience_years} thn</span>
+                              )}
+                              {instr.profile?.instructor_rating != null && (
+                                <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />{instr.profile.instructor_rating}</span>
+                              )}
+                              {instr.profile?.total_programs != null && (
+                                <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" />{instr.profile.total_programs} program</span>
+                              )}
+                              {instr.profile?.location && (
+                                <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{instr.profile.location}</span>
+                              )}
+                            </div>
+
+                            {instr.profile?.bio && (
+                              <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">{instr.profile.bio}</p>
+                            )}
+
+                            {instr.profile?.expertise && instr.profile.expertise.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5">
+                                {instr.profile.expertise.slice(0, 5).map((e, i) => (
+                                  <Badge key={i} variant="secondary" className="text-xs">{e}</Badge>
+                                ))}
+                                {instr.profile.expertise.length > 5 && (
+                                  <Badge variant="outline" className="text-xs">+{instr.profile.expertise.length - 5}</Badge>
+                                )}
+                              </div>
+                            )}
+
+                            {instr.profile?.achievements && instr.profile.achievements.length > 0 && (
+                              <div>
+                                <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
+                                  <Award className="w-3 h-3 text-primary" /> Pencapaian
+                                </p>
+                                <ul className="space-y-0.5">
+                                  {instr.profile.achievements.slice(0, 3).map((a, i) => (
+                                    <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                                      <CheckCircle2 className="w-3 h-3 text-primary mt-0.5 shrink-0" /> {a}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {allInstructors.length > 0 && <Separator />}
+
+            {/* INSTITUSI SECTION */}
+            {institution && (
+              <section id="institusi" ref={(el) => { sectionRefs.current["institusi"] = el; }} className="py-12">
+                <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">INSTITUSI</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
+                  Penyelenggara Program
+                </h2>
+
+                <Card className="overflow-hidden">
+                  <CardContent className="p-0">
+                    <div className="flex flex-col sm:flex-row">
+                      <div className="sm:w-48 bg-gradient-to-br from-primary/5 to-accent/5 p-6 flex items-center justify-center shrink-0">
+                        {institution.logo_url ? (
+                          <img src={institution.logo_url} alt={institution.name} className="w-24 h-24 object-contain" />
+                        ) : (
+                          <div className="w-24 h-24 rounded-2xl bg-primary/10 flex items-center justify-center">
+                            <Building2 className="w-12 h-12 text-primary" />
                           </div>
                         )}
                       </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {allInstructors.length > 0 && <Separator />}
-
-        {/* INSTITUSI SECTION */}
-        {institution && (
-          <section id="institusi" ref={(el) => { sectionRefs.current["institusi"] = el; }} className="py-16">
-            <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">INSTITUSI</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
-              Penyelenggara Program
-            </h2>
-
-            <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                <div className="flex flex-col sm:flex-row">
-                  {/* Logo side */}
-                  <div className="sm:w-64 bg-gradient-to-br from-primary/5 to-accent/5 p-8 flex items-center justify-center shrink-0">
-                    {institution.logo_url ? (
-                      <img src={institution.logo_url} alt={institution.name} className="w-32 h-32 object-contain" />
-                    ) : (
-                      <div className="w-32 h-32 rounded-2xl bg-primary/10 flex items-center justify-center">
-                        <Building2 className="w-16 h-16 text-primary" />
+                      <div className="flex-1 p-6">
+                        <h3 className="text-xl font-bold text-foreground mb-2">{institution.name}</h3>
+                        <div className="flex flex-wrap gap-3 mb-4">
+                          {institution.institution_type && (
+                            <Badge variant="secondary" className="text-xs capitalize">{institution.institution_type}</Badge>
+                          )}
+                          {(institution.city || institution.country) && (
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <MapPin className="w-3.5 h-3.5" /> {[institution.city, institution.country].filter(Boolean).join(", ")}
+                            </span>
+                          )}
+                          {institution.founded_year && (
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Calendar className="w-3.5 h-3.5" /> Berdiri {institution.founded_year}
+                            </span>
+                          )}
+                        </div>
+                        {institution.description && (
+                          <p className="text-sm text-muted-foreground leading-relaxed mb-4">{institution.description}</p>
+                        )}
+                        {institution.website && (
+                          <a
+                            href={institution.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline font-medium"
+                          >
+                            <Globe className="w-4 h-4" /> Kunjungi Website <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  {/* Info side */}
-                  <div className="flex-1 p-6 sm:p-8">
-                    <h3 className="text-xl font-bold text-foreground mb-2">{institution.name}</h3>
-                    <div className="flex flex-wrap gap-3 mb-4">
-                      {institution.institution_type && (
-                        <Badge variant="secondary" className="text-xs capitalize">{institution.institution_type}</Badge>
-                      )}
-                      {(institution.city || institution.country) && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <MapPin className="w-3.5 h-3.5" /> {[institution.city, institution.country].filter(Boolean).join(", ")}
-                        </span>
-                      )}
-                      {institution.founded_year && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Calendar className="w-3.5 h-3.5" /> Berdiri {institution.founded_year}
-                        </span>
-                      )}
                     </div>
-                    {institution.description && (
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-4">{institution.description}</p>
-                    )}
-                    {institution.website && (
-                      <a
-                        href={institution.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline font-medium"
-                      >
-                        <Globe className="w-4 h-4" /> Kunjungi Website <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
+                  </CardContent>
+                </Card>
+              </section>
+            )}
+
+            {institution && <Separator />}
+
+            {/* FAQ SECTION */}
+            {faq.length > 0 && (
+              <section id="faq" ref={(el) => { sectionRefs.current["faq"] = el; }} className="py-12">
+                <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">FAQ</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
+                  Pertanyaan yang Sering Ditanyakan
+                </h2>
+
+                <div className="space-y-3">
+                  {faq.map((f, i) => (
+                    <Collapsible key={i}>
+                      <Card>
+                        <CollapsibleTrigger className="w-full">
+                          <CardContent className="p-4 sm:p-5 flex items-center justify-between gap-4">
+                            <span className="font-medium text-sm sm:text-base text-foreground text-left">{f.question}</span>
+                            <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0" />
+                          </CardContent>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="px-4 sm:px-5 pb-4 sm:pb-5 border-t border-border pt-4">
+                            <p className="text-sm text-muted-foreground leading-relaxed">{f.answer}</p>
+                          </div>
+                        </CollapsibleContent>
+                      </Card>
+                    </Collapsible>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          </section>
-        )}
+              </section>
+            )}
 
-        {institution && <Separator />}
-
-        {/* JADWAL & BIAYA SECTION */}
-        <section id="jadwal" ref={(el) => { sectionRefs.current["jadwal"] = el; }} className="py-16">
-          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">JADWAL & BIAYA</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
-            Mulai perjalanan belajarmu
-          </h2>
-
-          <div className="max-w-lg">
-            <Card className="overflow-hidden border-primary/20">
-              <div className="bg-gradient-to-r from-primary to-primary/80 p-6 text-primary-foreground">
-                <p className="text-sm font-medium opacity-90 mb-1">{program.category}</p>
-                <h3 className="text-xl font-bold">{program.title}</h3>
-              </div>
-              <CardContent className="p-6 space-y-5">
-                {/* Price */}
-                <div>
-                  <span className="text-3xl font-bold text-foreground">
-                    {program.price_cents > 0 ? formatRupiah(program.price_cents) : "Gratis"}
-                  </span>
-                  {program.currency && program.currency !== "IDR" && program.price_cents > 0 && (
-                    <span className="text-sm text-muted-foreground ml-1">({program.currency})</span>
-                  )}
-                </div>
-
-                <Separator />
-
-                {/* Details list */}
-                <div className="space-y-3 text-sm">
-                  {program.duration && (
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <Clock className="w-4 h-4 shrink-0 text-primary" />
-                      <span>Durasi: <strong className="text-foreground">{program.duration}</strong></span>
-                    </div>
-                  )}
-                  {program.delivery_mode && (
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <MapPin className="w-4 h-4 shrink-0 text-primary" />
-                      <span>Mode: <strong className="text-foreground capitalize">{program.delivery_mode}</strong></span>
-                    </div>
-                  )}
-                  {program.level && (
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <Layers className="w-4 h-4 shrink-0 text-primary" />
-                      <span>Level: <strong className="text-foreground capitalize">{program.level}</strong></span>
-                    </div>
-                  )}
-                  {program.location && (
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <MapPin className="w-4 h-4 shrink-0 text-primary" />
-                      <span>Lokasi: <strong className="text-foreground">{program.location}</strong></span>
-                    </div>
-                  )}
-                  {program.certificate_method && program.certificate_method !== "none" && (
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <Award className="w-4 h-4 shrink-0 text-primary" />
-                      <span>Sertifikat: <strong className="text-foreground capitalize">{program.certificate_method}</strong></span>
-                    </div>
-                  )}
-                  {syllabus.length > 0 && (
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <BookOpen className="w-4 h-4 shrink-0 text-primary" />
-                      <span><strong className="text-foreground">{syllabus.length} modul</strong> materi</span>
-                    </div>
-                  )}
-                </div>
-
-                <Button className="w-full" size="lg" onClick={handleEnroll} disabled={enrolling}>
-                  <GraduationCap className="w-4 h-4 mr-2" /> {enrolling ? "Memproses..." : "Daftar Sekarang"}
-                </Button>
-
-                {program.oveercode && (
-                  <p className="text-xs text-center text-muted-foreground font-mono">
-                    Kode Program: {program.oveercode}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
           </div>
-        </section>
 
-        {faq.length > 0 && <Separator />}
+          {/* RIGHT COLUMN (30%) — Sticky Sidebar */}
+          <div className="hidden lg:block">
+            <div className="sticky top-24">
+              <section id="jadwal" ref={(el) => { sectionRefs.current["jadwal"] = el; }}>
+                <Card className="overflow-hidden border-primary/20 shadow-lg">
+                  <div className="bg-gradient-to-r from-primary to-primary/80 p-5 text-primary-foreground">
+                    <p className="text-xs font-medium opacity-90 mb-1">{program.category}</p>
+                    <h3 className="text-lg font-bold">{program.title}</h3>
+                  </div>
+                  <CardContent className="p-5 space-y-5">
+                    {/* Price */}
+                    <div>
+                      <span className="text-3xl font-bold text-foreground">
+                        {program.price_cents > 0 ? formatRupiah(program.price_cents) : "Gratis"}
+                      </span>
+                      {program.currency && program.currency !== "IDR" && program.price_cents > 0 && (
+                        <span className="text-sm text-muted-foreground ml-1">({program.currency})</span>
+                      )}
+                    </div>
 
-        {/* FAQ SECTION */}
-        {faq.length > 0 && (
-          <section id="faq" ref={(el) => { sectionRefs.current["faq"] = el; }} className="py-16">
-            <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">FAQ</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
-              Pertanyaan yang Sering Ditanyakan
-            </h2>
+                    <Separator />
 
-            <div className="max-w-2xl space-y-3">
-              {faq.map((f, i) => (
-                <Collapsible key={i}>
-                  <Card>
-                    <CollapsibleTrigger className="w-full">
-                      <CardContent className="p-4 sm:p-5 flex items-center justify-between gap-4">
-                        <span className="font-medium text-sm sm:text-base text-foreground text-left">{f.question}</span>
-                        <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0" />
-                      </CardContent>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="px-4 sm:px-5 pb-4 sm:pb-5 border-t border-border pt-4">
-                        <p className="text-sm text-muted-foreground leading-relaxed">{f.answer}</p>
-                      </div>
-                    </CollapsibleContent>
-                  </Card>
-                </Collapsible>
-              ))}
+                    {/* Details list */}
+                    <div className="space-y-3 text-sm">
+                      {program.duration && (
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <Clock className="w-4 h-4 shrink-0 text-primary" />
+                          <span>Durasi: <strong className="text-foreground">{program.duration}</strong></span>
+                        </div>
+                      )}
+                      {program.delivery_mode && (
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <MapPin className="w-4 h-4 shrink-0 text-primary" />
+                          <span>Mode: <strong className="text-foreground capitalize">{program.delivery_mode}</strong></span>
+                        </div>
+                      )}
+                      {program.level && (
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <Layers className="w-4 h-4 shrink-0 text-primary" />
+                          <span>Level: <strong className="text-foreground capitalize">{program.level}</strong></span>
+                        </div>
+                      )}
+                      {program.location && (
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <MapPin className="w-4 h-4 shrink-0 text-primary" />
+                          <span>Lokasi: <strong className="text-foreground">{program.location}</strong></span>
+                        </div>
+                      )}
+                      {program.certificate_method && program.certificate_method !== "none" && (
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <Award className="w-4 h-4 shrink-0 text-primary" />
+                          <span>Sertifikat: <strong className="text-foreground capitalize">{program.certificate_method}</strong></span>
+                        </div>
+                      )}
+                      {syllabus.length > 0 && (
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <BookOpen className="w-4 h-4 shrink-0 text-primary" />
+                          <span><strong className="text-foreground">{syllabus.length} modul</strong> materi</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <Button className="w-full" size="lg" onClick={handleEnroll} disabled={enrolling}>
+                      <GraduationCap className="w-4 h-4 mr-2" /> {enrolling ? "Memproses..." : "Daftar Sekarang"}
+                    </Button>
+
+                    {program.oveercode && (
+                      <p className="text-xs text-center text-muted-foreground font-mono">
+                        Kode Program: {program.oveercode}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              </section>
             </div>
-          </section>
-        )}
+          </div>
+
+          {/* MOBILE: Jadwal & Biaya card (shown below content on small screens) */}
+          <div className="lg:hidden">
+            <Separator className="mb-8" />
+            <section id="jadwal-mobile" ref={(el) => { if (!sectionRefs.current["jadwal"]) sectionRefs.current["jadwal"] = el; }}>
+              <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">JADWAL & BIAYA</p>
+              <h2 className="text-2xl font-bold text-foreground mb-6">Mulai perjalanan belajarmu</h2>
+              <Card className="overflow-hidden border-primary/20">
+                <div className="bg-gradient-to-r from-primary to-primary/80 p-5 text-primary-foreground">
+                  <p className="text-xs font-medium opacity-90 mb-1">{program.category}</p>
+                  <h3 className="text-lg font-bold">{program.title}</h3>
+                </div>
+                <CardContent className="p-5 space-y-5">
+                  <div>
+                    <span className="text-3xl font-bold text-foreground">
+                      {program.price_cents > 0 ? formatRupiah(program.price_cents) : "Gratis"}
+                    </span>
+                  </div>
+                  <Separator />
+                  <div className="space-y-3 text-sm">
+                    {program.duration && (
+                      <div className="flex items-center gap-3 text-muted-foreground">
+                        <Clock className="w-4 h-4 shrink-0 text-primary" />
+                        <span>Durasi: <strong className="text-foreground">{program.duration}</strong></span>
+                      </div>
+                    )}
+                    {program.delivery_mode && (
+                      <div className="flex items-center gap-3 text-muted-foreground">
+                        <MapPin className="w-4 h-4 shrink-0 text-primary" />
+                        <span>Mode: <strong className="text-foreground capitalize">{program.delivery_mode}</strong></span>
+                      </div>
+                    )}
+                    {program.level && (
+                      <div className="flex items-center gap-3 text-muted-foreground">
+                        <Layers className="w-4 h-4 shrink-0 text-primary" />
+                        <span>Level: <strong className="text-foreground capitalize">{program.level}</strong></span>
+                      </div>
+                    )}
+                  </div>
+                  <Button className="w-full" size="lg" onClick={handleEnroll} disabled={enrolling}>
+                    <GraduationCap className="w-4 h-4 mr-2" /> {enrolling ? "Memproses..." : "Daftar Sekarang"}
+                  </Button>
+                </CardContent>
+              </Card>
+            </section>
+          </div>
+
+        </div>
 
         {/* Bottom spacer */}
         <div className="h-16" />
