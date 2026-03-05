@@ -40,6 +40,7 @@ interface InstructorWithProfile {
   name: string;
   avatar_url: string | null;
   profile: InstructorProfile | null;
+  oveercode: string | null;
 }
 
 interface InstitutionData {
@@ -127,12 +128,13 @@ const LearningDetail = () => {
         for (const uid of junctionIds) {
           const [{ data: ip }, { data: up }] = await Promise.all([
             supabase.from("instructor_profiles").select("*").eq("user_id", uid).maybeSingle(),
-            supabase.from("profiles").select("full_name, avatar_url").eq("user_id", uid).maybeSingle(),
+            supabase.from("profiles").select("full_name, avatar_url, oveercode").eq("user_id", uid).maybeSingle(),
           ]);
           allFetched.push({
             name: up?.full_name || "Instructor",
             avatar_url: up?.avatar_url,
             profile: ip as InstructorProfile | null,
+            oveercode: up?.oveercode || null,
           });
         }
         setInstructor(allFetched[0] || null);
@@ -140,12 +142,13 @@ const LearningDetail = () => {
       } else if (prog.instructor_id) {
         const [{ data: instrProfile }, { data: userProfile }] = await Promise.all([
           supabase.from("instructor_profiles").select("*").eq("user_id", prog.instructor_id).maybeSingle(),
-          supabase.from("profiles").select("full_name, avatar_url").eq("user_id", prog.instructor_id).maybeSingle(),
+          supabase.from("profiles").select("full_name, avatar_url, oveercode").eq("user_id", prog.instructor_id).maybeSingle(),
         ]);
         setInstructor({
           name: userProfile?.full_name || prog.instructor_name || "Instructor",
           avatar_url: userProfile?.avatar_url || prog.instructor_avatar_url,
           profile: instrProfile as InstructorProfile | null,
+          oveercode: userProfile?.oveercode || null,
         });
       }
 
@@ -532,7 +535,13 @@ const LearningDetail = () => {
                             <User className="w-10 h-10 text-primary" />
                           </div>
                         )}
-                        <h3 className="font-semibold text-foreground mt-3">{instr.name}</h3>
+                        {instr.oveercode ? (
+                          <Link to={`/p/${instr.oveercode}`} className="font-semibold text-foreground mt-3 hover:text-primary transition-colors hover:underline">
+                            {instr.name}
+                          </Link>
+                        ) : (
+                          <h3 className="font-semibold text-foreground mt-3">{instr.name}</h3>
+                        )}
                         {instr.profile?.title && (
                           <p className="text-sm text-muted-foreground">{instr.profile.title}</p>
                         )}
