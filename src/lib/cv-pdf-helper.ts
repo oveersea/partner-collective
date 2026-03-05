@@ -3,12 +3,11 @@
  * Used by both single (AdminUserDetail) and bulk (AdminUsers) download flows.
  *
  * Key design decisions:
- * - Iframe is rendered at full opacity (opacity:1) so html2canvas captures
- *   text at full intensity. It is hidden from the user via
- *   position:fixed; left:-9999px (completely off-screen but still rendered
- *   by the browser engine – unlike opacity:0 which causes blank rasters).
- * - Fixed A4 pixel dimensions (794×1123 at 96 dpi) are used for
- *   windowWidth/windowHeight so layout is deterministic.
+ * - Iframe is rendered at opacity:0 initially, switched to opacity:1 right
+ *   before html2canvas capture so text is rasterized at full intensity.
+ * - Positioned at left:0;top:0 with z-index:-9999 and pointer-events:none
+ *   so html2canvas captures correct coordinates without user seeing it.
+ * - Fixed A4 pixel dimensions (794×1123 at 96 dpi) for deterministic layout.
  * - allowTaint is false; useCORS is true to avoid tainted-canvas issues.
  */
 
@@ -45,7 +44,7 @@ export async function renderCvToPdf({
   try {
     await ensureHtml2Pdf();
 
-    // Create a fully-rendered but off-screen iframe
+    // Create a fully-rendered but hidden iframe
     iframe = document.createElement("iframe");
     iframe.setAttribute("aria-hidden", "true");
     iframe.style.position = "fixed";
@@ -54,7 +53,7 @@ export async function renderCvToPdf({
     iframe.style.width = `${A4_WIDTH_PX + 40}px`;
     iframe.style.height = `${A4_HEIGHT_PX * 3}px`;
     iframe.style.border = "0";
-    iframe.style.opacity = "1"; // MUST be 1 for html2canvas to capture text
+    iframe.style.opacity = "0"; // hidden during layout
     iframe.style.pointerEvents = "none";
     iframe.style.zIndex = "-9999";
     iframe.style.overflow = "hidden";
@@ -94,6 +93,10 @@ export async function renderCvToPdf({
     // Extra settle time after assets
     await sleep(200);
 
+    // Switch to visible for html2canvas capture (must be opacity:1 for text)
+    iframe.style.opacity = "1";
+    await sleep(50);
+
     const renderTarget = iframeDoc.querySelector(".page") as HTMLElement;
     if (!renderTarget)
       throw new Error("CV .page element not found in iframe");
@@ -101,9 +104,9 @@ export async function renderCvToPdf({
     await (window as any)
       .html2pdf()
       .set({
-        margin: [10, 12, 10, 12],
+        margin: 0, // .page already has internal padding
         filename: fileName,
-        image: { type: "jpeg", quality: 0.98 },
+        image: { type: "jpeg", quality: 0.92 },
         html2canvas: {
           scale: 2,
           useCORS: true,
