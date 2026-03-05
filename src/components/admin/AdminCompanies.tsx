@@ -7,11 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Search, Building2, MapPin, Globe, ChevronLeft, ChevronRight, ExternalLink,
-  MoreVertical, Shield, ShieldCheck, ShieldX, Users,
+  MoreVertical, Shield, ShieldCheck, ShieldX, Users, Plus, Crown, X, Loader2,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 interface Company {
   id: string;
@@ -39,6 +43,18 @@ const AdminCompanies = () => {
   const [page, setPage] = useState(1);
   const [oppCounts, setOppCounts] = useState<Record<string, number>>({});
   const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
+
+  // Create company
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newIndustry, setNewIndustry] = useState("");
+  const [newCity, setNewCity] = useState("");
+  const [newCountry, setNewCountry] = useState("Indonesia");
+  const [ownerSearch, setOwnerSearch] = useState("");
+  const [ownerResults, setOwnerResults] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [selectedOwnerId, setSelectedOwnerId] = useState("");
+  const [searchingOwner, setSearchingOwner] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -71,6 +87,45 @@ const AdminCompanies = () => {
       toast.success(`KYC status changed to "${status}"`);
       setCompanies((prev) => prev.map((c) => (c.id === id ? { ...c, kyc_status: status } : c)));
     }
+  };
+
+  // ── Create Company ──
+  const searchOwnerFn = async (q: string) => {
+    setOwnerSearch(q);
+    if (q.length < 2) { setOwnerResults([]); return; }
+    setSearchingOwner(true);
+    const { data } = await supabase.from("profiles").select("user_id, full_name").ilike("full_name", `%${q}%`).limit(10);
+    setOwnerResults(data || []);
+    setSearchingOwner(false);
+  };
+
+  const createCompany = async () => {
+    if (!newName.trim()) { toast.error("Nama company wajib diisi"); return; }
+    if (!selectedOwnerId) { toast.error("Pilih owner untuk company"); return; }
+    setCreating(true);
+    const slug = newName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let oveercode = "C";
+    for (let i = 0; i < 8; i++) oveercode += chars.charAt(Math.floor(Math.random() * chars.length));
+
+    const { data: bp, error: bpErr } = await supabase
+      .from("business_profiles")
+      .insert({
+        name: newName.trim(), slug, oveercode, business_type: "company",
+        industry: newIndustry.trim() || null, city: newCity.trim() || null,
+        country: newCountry.trim() || null, created_by: selectedOwnerId, kyc_status: "unverified",
+      })
+      .select("id").single();
+
+    if (bpErr || !bp) { toast.error("Gagal membuat company: " + (bpErr?.message || "")); setCreating(false); return; }
+
+    await supabase.from("business_members").insert({ business_id: bp.id, user_id: selectedOwnerId, role: "owner", status: "active" });
+    toast.success("Company berhasil dibuat");
+    setCreateOpen(false);
+    setNewName(""); setNewIndustry(""); setNewCity(""); setNewCountry("Indonesia");
+    setOwnerSearch(""); setOwnerResults([]); setSelectedOwnerId("");
+    fetchData();
+    setCreating(false);
   };
 
   const filtered = companies.filter(
@@ -111,9 +166,14 @@ const AdminCompanies = () => {
           <h2 className="text-xl font-semibold text-foreground">Company Management</h2>
           <p className="text-sm text-muted-foreground">Companies are job providers / clients</p>
         </div>
-        <div className="relative w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Search name, code, industry, city..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        <div className="flex items-center gap-3">
+          <Button onClick={() => setCreateOpen(true)} className="gap-1.5">
+            <Plus className="w-4 h-4" /> Tambah Company
+          </Button>
+          <div className="relative w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input className="pl-9" placeholder="Search name, code, industry, city..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
         </div>
       </div>
 
@@ -229,7 +289,64 @@ const AdminCompanies = () => {
               )}
             </tbody>
           </table>
-        </div>
+
+      {/* Create Company Dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tambah Company Baru</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nama Company *</Label>
+              <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="PT Company Indonesia" />
+            </div>
+            <div className="space-y-2">
+              <Label>Industry</Label>
+              <Input value={newIndustry} onChange={(e) => setNewIndustry(e.target.value)} placeholder="Technology, Finance, etc." />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Kota</Label>
+                <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="Jakarta" />
+              </div>
+              <div className="space-y-2">
+                <Label>Negara</Label>
+                <Input value={newCountry} onChange={(e) => setNewCountry(e.target.value)} placeholder="Indonesia" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Owner *</Label>
+              <Input value={ownerSearch} onChange={(e) => searchOwnerFn(e.target.value)} placeholder="Cari nama user..." />
+              {searchingOwner && <p className="text-xs text-muted-foreground">Mencari...</p>}
+              {ownerResults.length > 0 && !selectedOwnerId && (
+                <div className="border border-border rounded-lg max-h-40 overflow-y-auto divide-y divide-border">
+                  {ownerResults.map((u) => (
+                    <button key={u.user_id} className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => { setSelectedOwnerId(u.user_id); setOwnerSearch(u.full_name || ""); setOwnerResults([]); }}>
+                      {u.full_name || "—"}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {selectedOwnerId && (
+                <div className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm">
+                  <Crown className="w-4 h-4 text-amber-500" />
+                  <span className="flex-1">{ownerSearch}</span>
+                  <button onClick={() => { setSelectedOwnerId(""); setOwnerSearch(""); }} className="text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateOpen(false)}>Batal</Button>
+            <Button onClick={createCompany} disabled={creating || !newName.trim() || !selectedOwnerId}>
+              {creating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+              Buat Company
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
         {!loading && filtered.length > PAGE_SIZE && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-border">
             <span className="text-xs text-muted-foreground">
