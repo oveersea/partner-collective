@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { CountrySelect } from "@/components/ui/country-select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -758,7 +759,7 @@ const AdminVendors = () => {
               </div>
               <div className="space-y-2">
                 <Label>Negara</Label>
-                <Input value={newVendorCountry} onChange={(e) => setNewVendorCountry(e.target.value)} placeholder="Indonesia" />
+                <CountrySelect value={newVendorCountry} onChange={setNewVendorCountry} />
               </div>
             </div>
             <div className="space-y-2">

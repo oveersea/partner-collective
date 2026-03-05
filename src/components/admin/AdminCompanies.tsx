@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { CountrySelect } from "@/components/ui/country-select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -312,7 +313,7 @@ const AdminCompanies = () => {
               </div>
               <div className="space-y-2">
                 <Label>Negara</Label>
-                <Input value={newCountry} onChange={(e) => setNewCountry(e.target.value)} placeholder="Indonesia" />
+                <CountrySelect value={newCountry} onChange={setNewCountry} />
               </div>
             </div>
             <div className="space-y-2">

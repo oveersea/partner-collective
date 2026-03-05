@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CountrySelect } from "@/components/ui/country-select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -306,7 +307,7 @@ const AdminInstitutions = () => {
               </div>
               <div>
                 <Label>Negara</Label>
-                <Input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} placeholder="Indonesia" />
+                <CountrySelect value={form.country} onChange={(v) => setForm({ ...form, country: v })} />
               </div>
             </div>
             <div>

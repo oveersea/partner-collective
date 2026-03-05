@@ -13,6 +13,7 @@ import { renderCvToPdf } from "@/lib/cv-pdf-helper";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { CountrySelect } from "@/components/ui/country-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -840,7 +841,7 @@ const AdminUserDetail = () => {
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <Label className="text-xs text-muted-foreground">Negara</Label>
-                        <Input className="mt-1" value={editData.country || ""} onChange={(e) => set("country", e.target.value)} />
+                        <CountrySelect className="mt-1" value={editData.country || ""} onChange={(v) => set("country", v)} />
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">Kode Pos</Label>
