@@ -4095,6 +4095,63 @@ export type Database = {
           },
         ]
       }
+      hiring_matched_candidates: {
+        Row: {
+          candidate_archive_id: string | null
+          created_at: string
+          hiring_request_id: string
+          id: string
+          match_score: number | null
+          matched_by: string | null
+          notes: string | null
+          profile_user_id: string | null
+          source_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_archive_id?: string | null
+          created_at?: string
+          hiring_request_id: string
+          id?: string
+          match_score?: number | null
+          matched_by?: string | null
+          notes?: string | null
+          profile_user_id?: string | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_archive_id?: string | null
+          created_at?: string
+          hiring_request_id?: string
+          id?: string
+          match_score?: number | null
+          matched_by?: string | null
+          notes?: string | null
+          profile_user_id?: string | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hiring_matched_candidates_candidate_archive_id_fkey"
+            columns: ["candidate_archive_id"]
+            isOneToOne: false
+            referencedRelation: "candidates_archive"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hiring_matched_candidates_hiring_request_id_fkey"
+            columns: ["hiring_request_id"]
+            isOneToOne: false
+            referencedRelation: "hiring_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hiring_request_talents: {
         Row: {
           created_at: string | null

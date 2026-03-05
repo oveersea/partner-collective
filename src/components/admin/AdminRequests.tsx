@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import HiringCandidatePanel from "@/components/admin/HiringCandidatePanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
@@ -707,6 +708,16 @@ const AdminRequests = () => {
                           <span key={s} className="text-xs px-2 py-0.5 rounded-md bg-primary/10 text-primary">{s}</span>
                         ))}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Hiring Candidate Matching Panel */}
+                  {req.type === "hiring" && (
+                    <div className="border-t border-border pt-3">
+                      <HiringCandidatePanel
+                        hiringRequestId={req.id}
+                        requiredSkills={req.skills_required || []}
+                      />
                     </div>
                   )}
 
