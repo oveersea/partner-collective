@@ -51,38 +51,48 @@ const AdminSidebar = ({ activeSection, onSectionChange }: AdminSidebarProps) => 
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          {!collapsed && (
+          {!collapsed ? (
             <div className="px-3 py-4">
               <img src={logoLight} alt="Oveersea" className="h-8" />
+            </div>
+          ) : (
+            <div className="flex justify-center py-4">
+              <img src="/oveersea-icon.png" alt="Oveersea" className="h-7 w-7 rounded" />
             </div>
           )}
 
           {/* Overview */}
-          <div className="px-2 mt-1 mb-1">
+          <div className={collapsed ? "px-1 mt-1 mb-1 flex justify-center" : "px-2 mt-1 mb-1"}>
             <button
               onClick={() => onSectionChange("overview")}
-              className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${
+              className={`flex items-center justify-center gap-2.5 rounded-lg text-sm font-semibold transition-all ${
+                collapsed ? "w-10 h-10 p-0" : "w-full px-3 py-2.5"
+              } ${
                 activeSection === "overview"
                   ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                   : "bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
               }`}
+              title={collapsed ? "Overview" : undefined}
             >
-              <LayoutDashboard className="w-4 h-4" />
+              <LayoutDashboard className={collapsed ? "w-5 h-5" : "w-4 h-4"} />
               {!collapsed && <span>Overview</span>}
             </button>
           </div>
 
           {/* Hero: Request & Order */}
-          <div className="px-2 mt-1 mb-1">
+          <div className={collapsed ? "px-1 mt-1 mb-1 flex justify-center" : "px-2 mt-1 mb-1"}>
             <button
               onClick={() => onSectionChange("requests")}
-              className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${
+              className={`flex items-center justify-center gap-2.5 rounded-lg text-sm font-semibold transition-all ${
+                collapsed ? "w-10 h-10 p-0" : "w-full px-3 py-2.5"
+              } ${
                 activeSection === "requests"
                   ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                   : "bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
               }`}
+              title={collapsed ? "Request & Order" : undefined}
             >
-              <Zap className="w-4 h-4" />
+              <Zap className={collapsed ? "w-5 h-5" : "w-4 h-4"} />
               {!collapsed && (
                 <>
                   <span className="flex-1 text-left">Request & Order</span>
@@ -112,7 +122,7 @@ const AdminSidebar = ({ activeSection, onSectionChange }: AdminSidebarProps) => 
                     isActive={activeSection === s.id}
                     tooltip={s.label}
                   >
-                    <s.icon className="w-4 h-4" />
+                    <s.icon className={collapsed ? "!w-5 !h-5" : "w-4 h-4"} />
                     {!collapsed && <span>{s.label}</span>}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
