@@ -19,6 +19,7 @@ interface CompanyItem {
     industry: string | null;
     city: string | null;
     kyc_status: string;
+    oveercode: string | null;
   };
 }
 
@@ -43,8 +44,8 @@ const Companies = () => {
         const ids = members.map((m) => m.business_id);
         const { data: businesses } = await supabase
           .from("business_profiles")
-          .select("id, name, slug, logo_url, industry, city, kyc_status")
-          .in("id", ids);
+      .select("id, name, slug, logo_url, industry, city, kyc_status, oveercode")
+      .in("id", ids);
 
         const merged = members.map((m) => ({
           id: m.id,
@@ -58,6 +59,7 @@ const Companies = () => {
             industry: null,
             city: null,
             kyc_status: "pending",
+            oveercode: null,
           },
         }));
         setCompanies(merged);
@@ -98,7 +100,7 @@ const Companies = () => {
             {companies.map((c) => (
               <Link
                 key={c.id}
-                to={`/company/${c.business.slug}`}
+                to={`/company/${c.business.oveercode}`}
                 className="flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors group"
               >
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
