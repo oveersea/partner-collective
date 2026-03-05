@@ -157,6 +157,10 @@ Deno.serve(async (req) => {
 
       // Send email
       try {
+        const emailSubject = hasMatches
+          ? `${topMatches.length} peluang kerja cocok untukmu`
+          : "Tingkatkan profilmu untuk mendapatkan peluang terbaik";
+
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -166,21 +170,37 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             from: "Oveersea <noreply@oveersea.com>",
             to: [email],
-            subject: hasMatches
-              ? `🎯 ${topMatches.length} peluang kerja cocok untukmu hari ini`
-              : "💡 Tingkatkan profilmu untuk mendapatkan peluang terbaik",
+            subject: emailSubject,
             html: emailHtml,
           }),
         });
 
+        const resBody = await res.json();
+        let errorMsg: string | null = null;
+
         if (!res.ok) {
-          const errData = await res.json();
-          errors.push(`${email}: ${errData?.message || res.status}`);
+          errorMsg = resBody?.message || resBody?.error || `HTTP ${res.status}`;
+          errors.push(`${email}: ${errorMsg}`);
         } else {
           sentCount++;
         }
 
-        // Log to email_sends
+        // Log to email_sends with error_message
+        await supabase.from("email_sends").insert({
+          subject: emailSubject,
+          body_html: emailHtml,
+          recipient_email: email,
+          recipient_name: profile.full_name,
+          recipient_user_id: profile.user_id,
+          send_type: "automated_daily_match",
+          status: res.ok ? "sent" : "failed",
+          error_message: errorMsg,
+          sent_at: new Date().toISOString(),
+        });
+      } catch (e) {
+        const errStr = String(e);
+        errors.push(`${email}: ${errStr}`);
+        // Log catch errors too
         await supabase.from("email_sends").insert({
           subject: hasMatches
             ? `${topMatches.length} peluang kerja cocok untukmu`
@@ -190,15 +210,14 @@ Deno.serve(async (req) => {
           recipient_name: profile.full_name,
           recipient_user_id: profile.user_id,
           send_type: "automated_daily_match",
-          status: res.ok ? "sent" : "failed",
+          status: "failed",
+          error_message: errStr,
           sent_at: new Date().toISOString(),
-        });
-      } catch (e) {
-        errors.push(`${email}: ${String(e)}`);
+        }).catch(() => {}); // don't fail on logging error
       }
 
-      // Rate limit: small delay between emails
-      await new Promise((r) => setTimeout(r, 100));
+      // Rate limit: 200ms delay to avoid Resend rate limits (10 req/s)
+      await new Promise((r) => setTimeout(r, 200));
     }
 
     return new Response(
