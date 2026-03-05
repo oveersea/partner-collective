@@ -49,14 +49,15 @@ export async function renderCvToPdf({
     iframe = document.createElement("iframe");
     iframe.setAttribute("aria-hidden", "true");
     iframe.style.position = "fixed";
-    iframe.style.left = "-9999px";
+    iframe.style.left = "0";
     iframe.style.top = "0";
-    iframe.style.width = `${A4_WIDTH_PX}px`;
-    iframe.style.height = `${A4_HEIGHT_PX}px`;
+    iframe.style.width = `${A4_WIDTH_PX + 40}px`;
+    iframe.style.height = `${A4_HEIGHT_PX * 3}px`;
     iframe.style.border = "0";
     iframe.style.opacity = "1"; // MUST be 1 for html2canvas to capture text
     iframe.style.pointerEvents = "none";
     iframe.style.zIndex = "-9999";
+    iframe.style.overflow = "hidden";
     document.body.appendChild(iframe);
 
     const iframeDoc =

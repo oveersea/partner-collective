@@ -206,7 +206,7 @@ Deno.serve(async (req) => {
 <title>CV – ${esc(profile.full_name) || "User"}</title>
 <style>
   @page { margin: 12mm 16mm; size: A4; }
-  *, *::before, *::after { margin: 0 !important; padding: 0 !important; box-sizing: border-box !important; border: none !important; }
+  *, *::before, *::after { box-sizing: border-box; }
 
   body {
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, Helvetica, sans-serif !important;
@@ -229,14 +229,14 @@ Deno.serve(async (req) => {
   .page {
     width: 210mm;
     min-height: 297mm;
-    margin: 0 auto;
+    margin: 0 auto !important;
     background: #fff !important;
-    padding: 40px 48px;
+    padding: 40px 48px !important;
     color: #1a1a1a !important;
   }
 
   /* ── NAME & CONTACT ── */
-  .cv-header { margin-bottom: 20px; }
+  .cv-header { margin-bottom: 20px !important; }
   .cv-header-row {
     display: flex;
     align-items: flex-start;
@@ -280,27 +280,27 @@ Deno.serve(async (req) => {
   }
   .cv-contact span { white-space: nowrap; }
   .cv-divider {
-    border: none;
-    border-top: 2px solid #D71920;
-    margin: 16px 0 0;
+    border: none !important;
+    border-top: 2px solid #D71920 !important;
+    margin: 16px 0 0 !important;
   }
 
   /* ── SECTIONS ── */
-  .section { margin-top: 18px; }
+  .section { margin-top: 18px !important; }
   .section h2 {
     font-size: 9pt !important;
     font-weight: 700 !important;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     color: #D71920 !important;
-    border-bottom: 1px solid #e5e7eb !important;
-    padding-bottom: 5px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 5px !important;
     margin-bottom: 10px !important;
   }
 
   /* ── ENTRIES ── */
-  .entry { margin-bottom: 12px; page-break-inside: avoid; }
-  .entry:last-child { margin-bottom: 0; }
+  .entry { margin-bottom: 12px !important; page-break-inside: avoid; }
+  .entry:last-child { margin-bottom: 0 !important; }
   .entry-header {
     display: flex;
     justify-content: space-between;
@@ -333,18 +333,18 @@ Deno.serve(async (req) => {
 
   /* ── SKILLS ── */
   .skills-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
   }
   .skill-tag {
     font-size: 8pt;
     font-weight: 500;
     color: #333;
-    background: #f3f4f6;
-    padding: 3px 10px;
-    border-radius: 3px;
-    border: 1px solid #e5e7eb;
+    background: #f3f4f6 !important;
+    padding: 3px 10px !important;
+    border-radius: 3px !important;
+    border: 1px solid #e5e7eb !important;
   }
 
   /* ── SUMMARY ── */
@@ -356,9 +356,9 @@ Deno.serve(async (req) => {
 
   /* ── FOOTER ── */
   .cv-footer {
-    margin-top: 24px;
-    padding-top: 14px;
-    border-top: 2px solid #D71920;
+    margin-top: 24px !important;
+    padding-top: 14px !important;
+    border-top: 2px solid #D71920 !important;
     display: flex;
     align-items: center;
     justify-content: space-between;
