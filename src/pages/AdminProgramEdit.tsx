@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,8 +69,10 @@ interface Instructor {
 const AdminProgramEdit = () => {
   const { oveercode: paramCode } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isCreateMode = paramCode === "new";
   const [data, setData] = useState<ProgramData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!isCreateMode);
   const [saving, setSaving] = useState(false);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
@@ -100,13 +103,52 @@ const AdminProgramEdit = () => {
   };
 
   useEffect(() => {
-    fetchProgram();
+    if (isCreateMode) {
+      setData({
+        id: "",
+        title: "",
+        slug: "",
+        description: null,
+        category: "online",
+        status: "draft",
+        level: "beginner",
+        price_cents: 0,
+        currency: "IDR",
+        duration: null,
+        student_count: 0,
+        oveercode: null,
+        thumbnail_url: null,
+        instructor_id: user?.id || null,
+        instructor_name: null,
+        instructor_bio: null,
+        instructor_avatar_url: null,
+        organizer_type: null,
+        institution_id: null,
+        delivery_mode: "Online",
+        certificate_method: "none",
+        badge: null,
+        rating: null,
+        location: null,
+        latitude: null,
+        longitude: null,
+        learning_outcomes: [],
+        target_audience: [],
+        prerequisites: [],
+        admin_notes: null,
+        approved_at: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+      setLoading(false);
+    } else {
+      fetchProgram();
+    }
     fetchInstitutions();
     fetchInstructors();
   }, [paramCode]);
 
   const fetchProgram = async () => {
-    if (!paramCode) return;
+    if (!paramCode || isCreateMode) return;
     setLoading(true);
     const { data: prog, error } = await supabase
       .from("programs")
@@ -182,9 +224,50 @@ const AdminProgramEdit = () => {
     setData({ ...data, [field]: value });
   };
 
+  const generateSlug = (title: string) => {
+    return title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  };
+
   const handleSave = async () => {
     if (!data) return;
+    if (!data.title.trim()) {
+      toast.error("Judul program wajib diisi");
+      return;
+    }
     setSaving(true);
+
+    if (isCreateMode) {
+      const slug = generateSlug(data.title);
+      const { id: _id, created_at: _ca, updated_at: _ua, oveercode: _ov, approved_at: _aa, slug: _sl, ...fields } = data as any;
+      const insertPayload = { ...fields, slug, instructor_id: user?.id || data.instructor_id };
+
+      const { data: inserted, error } = await supabase
+        .from("programs")
+        .insert(insertPayload as any)
+        .select("oveercode, id")
+        .single();
+
+      if (error) {
+        toast.error("Gagal membuat program: " + error.message);
+        setSaving(false);
+        return;
+      }
+
+      if (inserted && selectedInstructors.length > 0) {
+        const rows = selectedInstructors.map((inst, i) => ({
+          program_id: (inserted as any).id,
+          instructor_id: inst.user_id,
+          sort_order: i,
+        }));
+        await supabase.from("program_instructors").insert(rows);
+      }
+
+      toast.success("Program berhasil dibuat");
+      setSaving(false);
+      navigate(`/admin/program/${(inserted as any).oveercode}`, { replace: true });
+      return;
+    }
+
     const { id: _id, created_at: _ca, updated_at: _ua, oveercode: _ov, slug: _sl, approved_at: _aa, ...fields } = data as any;
     const { error } = await supabase.from("programs").update(fields).eq("id", data.id);
     if (error) {
@@ -193,7 +276,6 @@ const AdminProgramEdit = () => {
       return;
     }
 
-    // Save instructors to junction table
     await supabase.from("program_instructors").delete().eq("program_id", data.id);
     if (selectedInstructors.length > 0) {
       const rows = selectedInstructors.map((inst, i) => ({
@@ -251,28 +333,34 @@ const AdminProgramEdit = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-sm font-semibold text-foreground truncate max-w-[400px]">{data.title}</h1>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="font-mono text-xs text-muted-foreground">{data.oveercode}</span>
-                <Badge className={`text-[10px] px-1.5 py-0 ${statusColor(data.status)}`}>{data.status}</Badge>
-              </div>
+              <h1 className="text-sm font-semibold text-foreground truncate max-w-[400px]">
+                {isCreateMode ? "Program Baru" : data.title}
+              </h1>
+              {!isCreateMode && (
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="font-mono text-xs text-muted-foreground">{data.oveercode}</span>
+                  <Badge className={`text-[10px] px-1.5 py-0 ${statusColor(data.status)}`}>{data.status}</Badge>
+                </div>
+              )}
             </div>
           </div>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
             <Save className="w-4 h-4" />
-            {saving ? "Menyimpan..." : "Simpan"}
+            {saving ? "Menyimpan..." : isCreateMode ? "Buat Program" : "Simpan"}
           </Button>
         </div>
       </header>
 
       <div className="w-full px-4 sm:px-8 py-6 space-y-6">
         {/* Meta info row */}
-        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> Dibuat: {new Date(data.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span>
-          <span className="inline-flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {data.student_count || 0} peserta</span>
-          {data.rating && <span className="inline-flex items-center gap-1"><Star className="w-3.5 h-3.5" /> {data.rating}</span>}
-          {data.approved_at && <span className="inline-flex items-center gap-1"><Award className="w-3.5 h-3.5" /> Approved: {new Date(data.approved_at).toLocaleDateString("id-ID")}</span>}
-        </div>
+        {!isCreateMode && (
+          <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> Dibuat: {new Date(data.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span>
+            <span className="inline-flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {data.student_count || 0} peserta</span>
+            {data.rating && <span className="inline-flex items-center gap-1"><Star className="w-3.5 h-3.5" /> {data.rating}</span>}
+            {data.approved_at && <span className="inline-flex items-center gap-1"><Award className="w-3.5 h-3.5" /> Approved: {new Date(data.approved_at).toLocaleDateString("id-ID")}</span>}
+          </div>
+        )}
 
         {/* Row 1: Basic Info + Status & Classification */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
