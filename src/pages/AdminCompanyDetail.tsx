@@ -260,11 +260,25 @@ const AdminCompanyDetail = () => {
                 </div>
                 <div>
                   <Label>Industri</Label>
-                  <Input value={data.industry || ""} onChange={(e) => update("industry", e.target.value)} />
+                  <Select value={data.industry || ""} onValueChange={(v) => update("industry", v)}>
+                    <SelectTrigger><SelectValue placeholder="Pilih industri" /></SelectTrigger>
+                    <SelectContent>
+                      {["Technology","Finance & Banking","Healthcare","Education","E-Commerce","Manufacturing","Real Estate","Media & Entertainment","Government","Logistics","F&B","Professional Services","Construction","Trading","Retail","Hospitality","Agriculture","Energy","Telecommunications","Automotive"].map(i => (
+                        <SelectItem key={i} value={i}>{i}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label>Ukuran Perusahaan</Label>
-                  <Input value={data.company_size || ""} onChange={(e) => update("company_size", e.target.value)} placeholder="e.g. 50-100" />
+                  <Select value={data.company_size || ""} onValueChange={(v) => update("company_size", v)}>
+                    <SelectTrigger><SelectValue placeholder="Pilih ukuran" /></SelectTrigger>
+                    <SelectContent>
+                      {["1-10","11-50","51-200","201-500","501-1000","1000+"].map(s => (
+                        <SelectItem key={s} value={s}>{s} karyawan</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label>Tahun Berdiri</Label>

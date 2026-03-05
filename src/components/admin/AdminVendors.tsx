@@ -750,7 +750,14 @@ const AdminVendors = () => {
             </div>
             <div className="space-y-2">
               <Label>Industry</Label>
-              <Input value={newVendorIndustry} onChange={(e) => setNewVendorIndustry(e.target.value)} placeholder="Technology, Marketing, etc." />
+              <Select value={newVendorIndustry} onValueChange={setNewVendorIndustry}>
+                <SelectTrigger><SelectValue placeholder="Pilih industri" /></SelectTrigger>
+                <SelectContent>
+                  {["Technology","Finance & Banking","Healthcare","Education","E-Commerce","Manufacturing","Real Estate","Media & Entertainment","Government","Logistics","F&B","Professional Services","Construction","Trading","Retail","Hospitality","Agriculture","Energy","Telecommunications","Automotive"].map(i => (
+                    <SelectItem key={i} value={i}>{i}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { CountrySelect } from "@/components/ui/country-select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -304,7 +305,14 @@ const AdminCompanies = () => {
             </div>
             <div className="space-y-2">
               <Label>Industry</Label>
-              <Input value={newIndustry} onChange={(e) => setNewIndustry(e.target.value)} placeholder="Technology, Finance, etc." />
+              <Select value={newIndustry} onValueChange={setNewIndustry}>
+                <SelectTrigger><SelectValue placeholder="Pilih industri" /></SelectTrigger>
+                <SelectContent>
+                  {["Technology","Finance & Banking","Healthcare","Education","E-Commerce","Manufacturing","Real Estate","Media & Entertainment","Government","Logistics","F&B","Professional Services","Construction","Trading","Retail","Hospitality","Agriculture","Energy","Telecommunications","Automotive"].map(i => (
+                    <SelectItem key={i} value={i}>{i}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
