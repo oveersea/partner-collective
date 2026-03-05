@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { CountrySelect } from "@/components/ui/country-select";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -860,7 +861,7 @@ const AdminUserDetail = () => {
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">No. Telepon</Label>
-                      <Input className="mt-1" value={editData.phone_number || ""} onChange={(e) => set("phone_number", e.target.value)} />
+                      <PhoneInput className="mt-1" value={editData.phone_number || ""} onChange={(v) => set("phone_number", v)} />
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">LinkedIn URL</Label>

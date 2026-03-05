@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/landing/Navbar";
@@ -397,7 +398,7 @@ const RequestQuote = () => {
                                 <Label className="text-card-foreground flex items-center gap-2">
                                   <Phone className="w-4 h-4 text-primary" /> Phone Number *
                                 </Label>
-                                <Input className="mt-1.5" type="tel" placeholder="+62 812 3456 7890" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+                                <PhoneInput className="mt-1.5" value={form.phone} onChange={(v) => set("phone", v)} />
                                 {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
                               </div>
                             </div>
