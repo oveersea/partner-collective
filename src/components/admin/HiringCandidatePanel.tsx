@@ -105,6 +105,28 @@ const HiringCandidatePanel = ({ hiringRequestId, requiredSkills }: Props) => {
 
   useEffect(() => { fetchMatched(); }, [fetchMatched]);
 
+  const fetchAllFromTable = async (table: "profiles" | "archive", filterQuery?: string) => {
+    const allData: any[] = [];
+    const batchSize = 1000;
+    let from = 0;
+    let hasMore = true;
+    while (hasMore) {
+      let qb = table === "profiles"
+        ? supabase.from("profiles").select("user_id, full_name, skills, headline, oveercode").order("full_name").range(from, from + batchSize - 1)
+        : supabase.from("candidates_archive").select("id, full_name, skills, current_title, oveercode, email").order("full_name").range(from, from + batchSize - 1);
+      if (filterQuery && filterQuery.length >= 2) {
+        qb = qb.or(`full_name.ilike.%${filterQuery}%,oveercode.ilike.%${filterQuery}%`) as any;
+      }
+      const { data } = await qb;
+      if (data && data.length > 0) {
+        allData.push(...data);
+        from += batchSize;
+        hasMore = data.length === batchSize;
+      } else { hasMore = false; }
+    }
+    return allData;
+  };
+
   const searchCandidates = async (query: string) => {
     setSearching(true);
 
@@ -112,14 +134,7 @@ const HiringCandidatePanel = ({ hiringRequestId, requiredSkills }: Props) => {
     const existingArchiveIds = matched.filter(m => m.candidate_archive_id).map(m => m.candidate_archive_id);
 
     if (activeSearchTab === "profile") {
-      let qb = supabase
-        .from("profiles")
-        .select("user_id, full_name, skills, current_title, oveercode")
-        .order("full_name");
-      if (query.length >= 2) {
-        qb = qb.or(`full_name.ilike.%${query}%,oveercode.ilike.%${query}%`);
-      }
-      const { data } = await qb.limit(50);
+      const data = await fetchAllFromTable("profiles", query);
 
       setSearchResults(
         (data || [])
@@ -129,20 +144,13 @@ const HiringCandidatePanel = ({ hiringRequestId, requiredSkills }: Props) => {
             name: p.full_name,
             email: null,
             skills: p.skills || [],
-            title: p.current_title,
+            title: p.headline,
             source: "profile" as const,
             oveercode: p.oveercode,
           }))
       );
     } else {
-      let qb = supabase
-        .from("candidates_archive")
-        .select("id, full_name, skills, current_title, oveercode, email")
-        .order("full_name");
-      if (query.length >= 2) {
-        qb = qb.or(`full_name.ilike.%${query}%,oveercode.ilike.%${query}%`);
-      }
-      const { data } = await qb.limit(50);
+      const data = await fetchAllFromTable("archive", query);
 
       setSearchResults(
         (data || [])
