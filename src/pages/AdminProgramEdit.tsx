@@ -11,12 +11,15 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Save, Calendar, Users, Star, MapPin, Award, X, Plus, Building2, Upload, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Calendar, Users, Star, MapPin, Award, X, Plus, Building2, Upload, Trash2, BookOpen, ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
 
 const STATUS_OPTIONS = ["draft", "pending", "approved", "rejected", "archived"];
 const LEVEL_OPTIONS = ["beginner", "intermediate", "advanced"];
 const CATEGORY_OPTIONS = ["online", "Certification", "Workshop", "Bootcamp"];
 const CERT_METHOD_OPTIONS = ["auto", "manual", "none"];
+
+interface SyllabusModule { title: string; description?: string; topics?: string[]; }
+interface FAQItem { question: string; answer: string; }
 
 interface ProgramData {
   id: string;
@@ -48,6 +51,8 @@ interface ProgramData {
   learning_outcomes: string[] | null;
   target_audience: string[] | null;
   prerequisites: string[] | null;
+  syllabus: SyllabusModule[] | null;
+  faq: FAQItem[] | null;
   admin_notes: string | null;
   approved_at: string | null;
   created_at: string;
@@ -134,6 +139,8 @@ const AdminProgramEdit = () => {
         learning_outcomes: [],
         target_audience: [],
         prerequisites: [],
+        syllabus: [],
+        faq: [],
         admin_notes: null,
         approved_at: null,
         created_at: new Date().toISOString(),
@@ -161,7 +168,12 @@ const AdminProgramEdit = () => {
       navigate("/admin");
       return;
     }
-    setData(prog as unknown as ProgramData);
+    const parsed: ProgramData = {
+      ...(prog as unknown as ProgramData),
+      syllabus: Array.isArray(prog.syllabus) ? (prog.syllabus as unknown as SyllabusModule[]) : [],
+      faq: Array.isArray(prog.faq) ? (prog.faq as unknown as FAQItem[]) : [],
+    };
+    setData(parsed);
 
     // Fetch assigned instructors
     const { data: assigned } = await supabase
@@ -591,7 +603,201 @@ const AdminProgramEdit = () => {
           </CardContent>
         </Card>
 
-        {/* Row 4: Instructor + Admin Notes */}
+        {/* Row 3b: Kurikulum / Syllabus */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-primary" /> Kurikulum / Syllabus
+              </CardTitle>
+              <Button size="sm" variant="outline" onClick={() => {
+                const modules = [...(data.syllabus || [])];
+                modules.push({ title: "", description: "", topics: [] });
+                update("syllabus", modules);
+              }}>
+                <Plus className="w-4 h-4 mr-1" /> Tambah Modul
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(!data.syllabus || data.syllabus.length === 0) ? (
+              <div className="text-center py-8 text-muted-foreground text-sm border border-dashed border-border rounded-lg">
+                Belum ada modul kurikulum. Klik "Tambah Modul" untuk mulai.
+              </div>
+            ) : (
+              data.syllabus.map((mod, modIdx) => (
+                <div key={modIdx} className="border border-border rounded-xl p-4 space-y-3 bg-muted/20">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex flex-col items-center justify-center shrink-0">
+                      <span className="text-[9px] font-semibold text-primary uppercase">Modul</span>
+                      <span className="text-sm font-bold text-primary leading-none">{modIdx + 1}</span>
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <Input
+                        value={mod.title}
+                        onChange={(e) => {
+                          const modules = [...(data.syllabus || [])];
+                          modules[modIdx] = { ...modules[modIdx], title: e.target.value };
+                          update("syllabus", modules);
+                        }}
+                        placeholder="Judul modul..."
+                        className="font-medium"
+                      />
+                      <Textarea
+                        rows={2}
+                        value={mod.description || ""}
+                        onChange={(e) => {
+                          const modules = [...(data.syllabus || [])];
+                          modules[modIdx] = { ...modules[modIdx], description: e.target.value };
+                          update("syllabus", modules);
+                        }}
+                        placeholder="Deskripsi modul (opsional)..."
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      {modIdx > 0 && (
+                        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => {
+                          const modules = [...(data.syllabus || [])];
+                          [modules[modIdx - 1], modules[modIdx]] = [modules[modIdx], modules[modIdx - 1]];
+                          update("syllabus", modules);
+                        }}>
+                          <ChevronUp className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {modIdx < (data.syllabus?.length || 0) - 1 && (
+                        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => {
+                          const modules = [...(data.syllabus || [])];
+                          [modules[modIdx], modules[modIdx + 1]] = [modules[modIdx + 1], modules[modIdx]];
+                          update("syllabus", modules);
+                        }}>
+                          <ChevronDown className="w-4 h-4" />
+                        </Button>
+                      )}
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => {
+                        const modules = [...(data.syllabus || [])];
+                        modules.splice(modIdx, 1);
+                        update("syllabus", modules);
+                      }}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Topics */}
+                  <div className="ml-[52px]">
+                    <Label className="text-xs text-muted-foreground mb-1.5 block">Topik dalam modul ini</Label>
+                    {mod.topics && mod.topics.length > 0 && (
+                      <div className="space-y-1.5 mb-2">
+                        {mod.topics.map((topic, topicIdx) => (
+                          <div key={topicIdx} className="flex items-center gap-2 group">
+                            <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">{topicIdx + 1}</span>
+                            <Input
+                              value={topic}
+                              onChange={(e) => {
+                                const modules = [...(data.syllabus || [])];
+                                const topics = [...(modules[modIdx].topics || [])];
+                                topics[topicIdx] = e.target.value;
+                                modules[modIdx] = { ...modules[modIdx], topics };
+                                update("syllabus", modules);
+                              }}
+                              className="h-8 text-sm"
+                            />
+                            <button
+                              onClick={() => {
+                                const modules = [...(data.syllabus || [])];
+                                const topics = [...(modules[modIdx].topics || [])];
+                                topics.splice(topicIdx, 1);
+                                modules[modIdx] = { ...modules[modIdx], topics };
+                                update("syllabus", modules);
+                              }}
+                              className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <Button size="sm" variant="ghost" className="text-xs gap-1 h-7" onClick={() => {
+                      const modules = [...(data.syllabus || [])];
+                      const topics = [...(modules[modIdx].topics || []), ""];
+                      modules[modIdx] = { ...modules[modIdx], topics };
+                      update("syllabus", modules);
+                    }}>
+                      <Plus className="w-3 h-3" /> Tambah Topik
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Row 3c: FAQ */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-primary" /> FAQ
+              </CardTitle>
+              <Button size="sm" variant="outline" onClick={() => {
+                const items = [...(data.faq || [])];
+                items.push({ question: "", answer: "" });
+                update("faq", items);
+              }}>
+                <Plus className="w-4 h-4 mr-1" /> Tambah FAQ
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {(!data.faq || data.faq.length === 0) ? (
+              <div className="text-center py-6 text-muted-foreground text-sm border border-dashed border-border rounded-lg">
+                Belum ada FAQ. Klik "Tambah FAQ" untuk mulai.
+              </div>
+            ) : (
+              data.faq.map((item, faqIdx) => (
+                <div key={faqIdx} className="border border-border rounded-lg p-4 space-y-2 bg-muted/20">
+                  <div className="flex items-start gap-2">
+                    <span className="text-xs font-bold text-primary mt-2">Q{faqIdx + 1}</span>
+                    <Input
+                      value={item.question}
+                      onChange={(e) => {
+                        const items = [...(data.faq || [])];
+                        items[faqIdx] = { ...items[faqIdx], question: e.target.value };
+                        update("faq", items);
+                      }}
+                      placeholder="Pertanyaan..."
+                      className="font-medium"
+                    />
+                    <button
+                      onClick={() => {
+                        const items = [...(data.faq || [])];
+                        items.splice(faqIdx, 1);
+                        update("faq", items);
+                      }}
+                      className="text-muted-foreground hover:text-destructive mt-2"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="ml-6">
+                    <Textarea
+                      rows={2}
+                      value={item.answer}
+                      onChange={(e) => {
+                        const items = [...(data.faq || [])];
+                        items[faqIdx] = { ...items[faqIdx], answer: e.target.value };
+                        update("faq", items);
+                      }}
+                      placeholder="Jawaban..."
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader><CardTitle className="text-base">Instruktur</CardTitle></CardHeader>
