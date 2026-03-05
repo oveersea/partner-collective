@@ -427,7 +427,11 @@ const MyRequests = () => {
                           ) : (
                             <div className="space-y-2">
                               {candidatesMap[h.id].map((c) => (
-                                <div key={c.id} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg border border-border">
+                                <div
+                                  key={c.id}
+                                  className={`flex items-start gap-3 p-3 bg-muted/30 rounded-lg border border-border ${c.oveercode ? "cursor-pointer hover:bg-muted/60 transition-colors" : ""}`}
+                                  onClick={() => c.oveercode && navigate(`/p/${c.oveercode}`)}
+                                >
                                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                                     {c.source_type === "profile" ? (
                                       <Users className="w-3.5 h-3.5 text-primary" />
