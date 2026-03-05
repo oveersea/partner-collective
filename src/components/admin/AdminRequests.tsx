@@ -143,7 +143,7 @@ const AdminRequests = () => {
         .order("created_at", { ascending: false }),
       supabase
         .from("hiring_requests")
-        .select("id, title, description, hiring_type, status, positions_count, required_skills, credit_cost, sla_deadline, oveercode, created_at, client_id, business_id, admin_notes, assigned_to, assigned_vendor_id, business_profiles(name)")
+        .select("id, title, description, hiring_type, status, positions_count, required_skills, credit_cost, sla_deadline, oveercode, created_at, client_id, business_id, business_profiles(name)")
         .order("created_at", { ascending: false }),
       supabase
         .from("talent_shortage_alerts")
@@ -226,9 +226,9 @@ const AdminRequests = () => {
           status: h.status,
           sla_type: h.hiring_type === "fast" ? "urgent" : "normal",
           sla_deadline: h.sla_deadline,
-          assigned_to: h.assigned_to || null,
-          assigned_vendor_id: h.assigned_vendor_id || null,
-          admin_notes: h.admin_notes || null,
+          assigned_to: null,
+          assigned_vendor_id: null,
+          admin_notes: null,
           created_at: h.created_at,
           user_id: resolvedUserId,
           user_name: profileMap.get(resolvedUserId) || ((h.business_profiles as any)?.name) || "—",
