@@ -8,7 +8,7 @@ import AdminOverview from "@/components/admin/AdminOverview";
 import AdminUsers from "@/components/admin/AdminUsers";
 import AdminCompanies from "@/components/admin/AdminCompanies";
 import AdminKYC from "@/components/admin/AdminKYC";
-import AdminHiring from "@/components/admin/AdminHiring";
+
 import AdminCredits from "@/components/admin/AdminCredits";
 import AdminContent from "@/components/admin/AdminContent";
 import AdminCaseStudies from "@/components/admin/AdminCaseStudies";
@@ -85,7 +85,7 @@ const AdminDashboard = () => {
       case "vendors": return <AdminVendors />;
       case "teams": return <AdminTeams />;
       case "kyc": return <AdminKYC />;
-      case "hiring": return <AdminHiring />;
+      
       case "credits": return <AdminCredits />;
       case "requests": return <AdminRequests />;
       case "content": return <AdminContent />;

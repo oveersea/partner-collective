@@ -75,11 +75,21 @@ const statusColors: Record<string, string> = {
   closed: "bg-muted text-muted-foreground",
 };
 
-type TabKey = "all" | "urgent" | "pending" | "assigned" | "overdue" | "completed";
+type TabKey = "all" | "urgent" | "pending" | "assigned" | "overdue" | "completed" | "shortage";
+
+interface ShortageAlert {
+  id: string;
+  skill_tags: string[];
+  shortage_count: number;
+  status: string;
+  sla_type: string;
+  created_at: string;
+}
 
 const AdminRequests = () => {
   const { user } = useAuth();
   const [requests, setRequests] = useState<UnifiedRequest[]>([]);
+  const [shortageAlerts, setShortageAlerts] = useState<ShortageAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<"all" | RequestType>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -121,7 +131,7 @@ const AdminRequests = () => {
   const fetchRequests = async () => {
     setLoading(true);
 
-    const [projectsRes, ordersRes, hiringRes] = await Promise.all([
+    const [projectsRes, ordersRes, hiringRes, shortageRes] = await Promise.all([
       supabase
         .from("opportunities")
         .select("id, title, description, status, sla_type, sla_deadline, assigned_to, assigned_vendor_id, admin_notes, created_at, user_id, category, skills_required, budget_min, budget_max")
@@ -135,6 +145,11 @@ const AdminRequests = () => {
         .from("hiring_requests")
         .select("id, title, description, hiring_type, status, positions_count, required_skills, credit_cost, sla_deadline, oveercode, created_at, client_id, business_id, admin_notes, assigned_to, assigned_vendor_id, business_profiles(name)")
         .order("created_at", { ascending: false }),
+      supabase
+        .from("talent_shortage_alerts")
+        .select("id, skill_tags, shortage_count, status, sla_type, created_at")
+        .order("created_at", { ascending: false })
+        .limit(30),
     ]);
 
     const projects = projectsRes.data || [];
@@ -225,6 +240,7 @@ const AdminRequests = () => {
     ];
 
     setRequests(unified);
+    setShortageAlerts((shortageRes.data || []) as unknown as ShortageAlert[]);
     setLoading(false);
   };
 
@@ -396,6 +412,8 @@ const AdminRequests = () => {
     );
   }
 
+  const openShortageAlerts = shortageAlerts.filter(a => a.status === "open").length;
+
   const tabs: { key: TabKey; label: string; count: number; icon: typeof Clock; color?: string }[] = [
     { key: "all", label: "All", count: stats.total, icon: FolderKanban },
     { key: "urgent", label: "Urgent", count: stats.urgent, icon: Zap, color: "text-destructive" },
@@ -403,6 +421,7 @@ const AdminRequests = () => {
     { key: "assigned", label: "In Progress", count: stats.assigned, icon: TrendingUp, color: "text-blue-500" },
     { key: "overdue", label: "Overdue", count: stats.overdue, icon: AlertTriangle, color: "text-destructive" },
     { key: "completed", label: "Completed", count: stats.completed, icon: CheckCircle2, color: "text-emerald-500" },
+    { key: "shortage", label: "Shortage Alerts", count: openShortageAlerts, icon: AlertTriangle, color: "text-amber-600" },
   ];
 
   return (
@@ -514,7 +533,50 @@ const AdminRequests = () => {
         </Button>
       </div>
 
-      {/* Request List */}
+      {/* Shortage Alerts Tab */}
+      {activeTab === "shortage" ? (
+        <div className="bg-card rounded-2xl border border-border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Skills</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Shortage</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">SLA</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {shortageAlerts.length === 0 ? (
+                  <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No shortage alerts</td></tr>
+                ) : (
+                  shortageAlerts.map((a) => (
+                    <tr key={a.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {a.skill_tags?.map((s) => (
+                            <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-destructive font-semibold">{a.shortage_count}</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${a.sla_type === "fast" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{a.sla_type}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${a.status === "open" ? "bg-amber-500/10 text-amber-600" : "bg-primary/10 text-primary"}`}>{a.status}</span>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(a.created_at).toLocaleDateString("en-US")}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+      /* Request List */
       <div className="space-y-3">
         {tabFiltered.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
@@ -683,6 +745,7 @@ const AdminRequests = () => {
           );
         })}
       </div>
+      )}
 
       {/* Assignment Dialog */}
       <Dialog open={assignDialog} onOpenChange={setAssignDialog}>
