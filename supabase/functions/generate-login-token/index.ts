@@ -11,9 +11,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { api_key, email } = await req.json();
-    if (!api_key || !email) {
-      return new Response(JSON.stringify({ error: "api_key and email are required" }), {
+    const { api_key, email, password } = await req.json();
+    if (!api_key || !email || !password) {
+      return new Response(JSON.stringify({ error: "api_key, email, and password are required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -22,6 +22,18 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    // Validate password by attempting sign-in
+    const { data: signInData, error: signInErr } = await supabaseAdmin.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInErr || !signInData?.user) {
+      return new Response(JSON.stringify({ error: "Invalid email or password" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Hash the API key
     const keyBytes = new TextEncoder().encode(api_key);
@@ -48,13 +60,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Find user by email
-    const { data: userData } = await supabaseAdmin.rpc("get_user_id_by_email", { target_email: email });
-    if (!userData) {
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const userId = signInData.user.id;
 
     // Generate one-time login token
     const rawToken = crypto.randomUUID() + "-" + crypto.randomUUID();
@@ -64,7 +70,7 @@ Deno.serve(async (req) => {
 
     const { error: insertErr } = await supabaseAdmin.from("login_tokens").insert({
       token_hash: tokenHash,
-      user_id: userData,
+      user_id: userId,
       api_key_id: apiKey.id,
       expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(), // 15 min
     });
