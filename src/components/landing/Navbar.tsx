@@ -98,11 +98,11 @@ const megaMenus: MegaMenuData[] = [
         icon: Layers,
         subItems: [
           { icon: Layers, title: "Overview", description: "Profile summary, stats, & notifications", href: "/dashboard" },
-          { icon: UserCheck, title: "Edit Profile", description: "Update personal info, photo, & bio", href: "/dashboard" },
-          { icon: GraduationCap, title: "Education", description: "Manage formal education history", href: "/dashboard" },
-          { icon: Briefcase, title: "Work Experience", description: "Add & edit career history", href: "/dashboard" },
-          { icon: FolderOpen, title: "Portfolio", description: "Upload & showcase your best projects", href: "/dashboard" },
-          { icon: Users, title: "Teams & Organizations", description: "View teams & organization affiliations", href: "/dashboard" },
+          { icon: UserCheck, title: "Edit Profile", description: "Update personal info, photo, & bio", href: "/dashboard?tab=profile" },
+          { icon: GraduationCap, title: "Education", description: "Manage formal education history", href: "/dashboard?tab=education" },
+          { icon: Briefcase, title: "Work Experience", description: "Add & edit career history", href: "/dashboard?tab=experience" },
+          { icon: FolderOpen, title: "Portfolio", description: "Upload & showcase your best projects", href: "/dashboard?tab=portfolio" },
+          { icon: Users, title: "Teams & Organizations", description: "View teams & organization affiliations", href: "/dashboard?tab=teams" },
         ],
       },
       {
