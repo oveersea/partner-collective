@@ -145,46 +145,46 @@ const PublicProfile = () => {
       <div className="bg-[#D71920] h-36 md:h-44" />
 
       <div className="max-w-6xl mx-auto px-4 -mt-20 pb-16">
+        {/* Avatar floating above card */}
+        <div className="flex justify-center sm:justify-start sm:pl-8 mb-[-64px] relative z-10">
+          <div className="w-32 h-32 rounded-2xl border-4 border-card bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
+            {profile.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.full_name || ""}
+                className="w-full h-full object-cover object-top"
+              />
+            ) : (
+              <span className="text-4xl font-bold text-muted-foreground">
+                {(profile.full_name || "?").charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
+        </div>
+
         {/* Profile header card */}
         <Card className="mb-6 overflow-hidden">
-          <CardContent className="p-6 md:p-8">
-            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-5 -mt-16 sm:-mt-12 mb-4">
-              {/* Avatar — larger, rounded-xl, object-cover */}
-              <div className="w-32 h-32 rounded-2xl border-4 border-card bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
-                {profile.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt={profile.full_name || ""}
-                    className="w-full h-full object-cover object-top"
-                  />
-                ) : (
-                  <span className="text-4xl font-bold text-muted-foreground">
-                    {(profile.full_name || "?").charAt(0).toUpperCase()}
-                  </span>
+          <CardContent className="pt-20 p-6 md:px-8 md:pb-8">
+            <div className="text-center sm:text-left">
+              <div className="flex items-center gap-2 justify-center sm:justify-start">
+                <h1 className="text-2xl font-bold text-foreground">{profile.full_name}</h1>
+                {profile.kyc_status === "verified" && (
+                  <CheckCircle2 className="w-5 h-5 text-[#D71920]" />
                 )}
               </div>
-
-              <div className="text-center sm:text-left flex-1 pb-1">
-                <div className="flex items-center gap-2 justify-center sm:justify-start">
-                  <h1 className="text-2xl font-bold text-foreground">{profile.full_name}</h1>
-                  {profile.kyc_status === "verified" && (
-                    <CheckCircle2 className="w-5 h-5 text-[#D71920]" />
-                  )}
-                </div>
-                {profile.headline && (
-                  <p className="text-muted-foreground mt-1">{profile.headline}</p>
-                )}
-                {location && (
-                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1 justify-center sm:justify-start">
-                    <MapPin className="w-3.5 h-3.5" /> {location}
-                  </p>
-                )}
-                {profile.opportunity_availability && (
-                  <Badge variant="outline" className="mt-2 text-xs">
-                    {availabilityLabel[profile.opportunity_availability] || profile.opportunity_availability}
-                  </Badge>
-                )}
-              </div>
+              {profile.headline && (
+                <p className="text-muted-foreground mt-1">{profile.headline}</p>
+              )}
+              {location && (
+                <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1 justify-center sm:justify-start">
+                  <MapPin className="w-3.5 h-3.5" /> {location}
+                </p>
+              )}
+              {profile.opportunity_availability && (
+                <Badge variant="outline" className="mt-2 text-xs">
+                  {availabilityLabel[profile.opportunity_availability] || profile.opportunity_availability}
+                </Badge>
+              )}
             </div>
           </CardContent>
         </Card>
