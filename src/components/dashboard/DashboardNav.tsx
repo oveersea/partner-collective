@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User, LayoutDashboard, ShieldCheck, Briefcase, Building2, FileText } from "lucide-react";
+import { LogOut, User, LayoutDashboard, ShieldCheck, Briefcase, Building2, FileText, Store } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import logoLight from "@/assets/logo-light.png";
 
@@ -19,6 +19,7 @@ const DashboardNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [vendorOveercode, setVendorOveercode] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -28,6 +29,24 @@ const DashboardNav = () => {
         .eq("user_id", user.id)
         .in("role", ["admin", "superadmin"])
         .then(({ data }) => setIsAdmin(!!data && data.length > 0));
+
+      // Check if user is an approved vendor
+      supabase
+        .from("business_members")
+        .select("business_id, business_profiles!inner(oveercode, business_type, kyc_status)")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .then(({ data }) => {
+          if (data && data.length > 0) {
+            const vendor = data.find((d: any) => {
+              const bp = d.business_profiles as any;
+              return bp?.business_type === "vendor";
+            });
+            if (vendor) {
+              setVendorOveercode((vendor.business_profiles as any)?.oveercode || null);
+            }
+          }
+        });
     }
   }, [user]);
 
@@ -80,6 +99,17 @@ const DashboardNav = () => {
               <Building2 className="w-4 h-4" />
               Company
             </Link>
+            {vendorOveercode && (
+              <Link
+                to={`/vendor/${vendorOveercode}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  location.pathname.startsWith("/vendor") ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                <Store className="w-4 h-4" />
+                Vendor
+              </Link>
+            )}
           </div>
         </div>
         <DropdownMenu>
