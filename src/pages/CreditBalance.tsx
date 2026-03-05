@@ -8,7 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  CreditCard, Wallet, ChevronLeft, ChevronRight, Check, Coins, ArrowUpRight, ArrowDownRight, Clock,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  CreditCard, Wallet, ChevronLeft, ChevronRight, Check, Coins, ArrowUpRight, ArrowDownRight, Clock, ShieldCheck,
 } from "lucide-react";
 
 interface CreditBalance {
@@ -74,6 +77,7 @@ const CreditBalancePage = () => {
   const [creditOrders, setCreditOrders] = useState<CreditOrder[]>([]);
   const [orderPage, setOrderPage] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [confirmPkg, setConfirmPkg] = useState<CreditPackage | null>(null);
 
   // Wallet state
   const [walletBal, setWalletBal] = useState<WalletBalance | null>(null);
@@ -127,14 +131,28 @@ const CreditBalancePage = () => {
           failure_redirect_url: `${window.location.origin}/checkout?payment=failed`,
         },
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      // Redirect to Xendit payment page
-      window.location.href = data.invoice_url;
+
+      const result = data || {};
+      let backendError = result?.error;
+      if (!backendError && error) {
+        try {
+          const payload = typeof (error as any)?.context?.json === "function"
+            ? await (error as any).context.json()
+            : null;
+          backendError = payload?.error;
+        } catch { /* ignore */ }
+      }
+
+      if (backendError) throw new Error(backendError);
+      if (error) throw new Error("Gagal membuat pembayaran. Silakan coba lagi.");
+      if (!result.invoice_url) throw new Error("Invoice URL tidak ditemukan.");
+
+      window.location.href = result.invoice_url;
     } catch (err: any) {
-      toast.error("Failed to create payment: " + (err.message || "Unknown error"));
+      toast.error(err.message || "Gagal membuat pembayaran");
     } finally {
       setSubmitting(false);
+      setConfirmPkg(null);
     }
   };
 
@@ -309,7 +327,7 @@ const CreditBalancePage = () => {
                         <span className="text-sm text-muted-foreground">credits</span>
                         <span className="text-sm text-muted-foreground ml-auto">{formatCurrency(pkg.price_cents)}</span>
                       </div>
-                      <Button size="sm" className="w-full mt-1" disabled={submitting} onClick={() => purchaseCredit(pkg)}>
+                      <Button size="sm" className="w-full mt-1" disabled={submitting} onClick={() => setConfirmPkg(pkg)}>
                         Buy Now
                       </Button>
                     </div>
@@ -470,6 +488,50 @@ const CreditBalancePage = () => {
           </div>
         )}
       </div>
+
+      {/* Checkout Confirmation Dialog */}
+      <Dialog open={!!confirmPkg} onOpenChange={(open) => !open && setConfirmPkg(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Konfirmasi Pembelian</DialogTitle>
+            <DialogDescription>
+              Anda akan membeli paket kredit berikut:
+            </DialogDescription>
+          </DialogHeader>
+          {confirmPkg && (
+            <div className="space-y-4 py-2">
+              <div className="bg-muted rounded-xl p-4 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Paket</span>
+                  <span className="font-semibold text-foreground">{confirmPkg.name}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Jumlah Credit</span>
+                  <span className="font-semibold text-foreground">{confirmPkg.credits} credits</span>
+                </div>
+                <div className="flex justify-between items-center border-t border-border pt-2">
+                  <span className="text-sm font-medium text-foreground">Total</span>
+                  <span className="text-lg font-bold text-foreground">{formatCurrency(confirmPkg.price_cents)}</span>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                Anda akan diarahkan ke halaman pembayaran Xendit untuk menyelesaikan transaksi.
+              </p>
+            </div>
+          )}
+          <DialogFooter className="flex gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setConfirmPkg(null)} disabled={submitting}>
+              Batal
+            </Button>
+            <Button
+              onClick={() => confirmPkg && purchaseCredit(confirmPkg)}
+              disabled={submitting}
+            >
+              {submitting ? "Memproses..." : "Bayar Sekarang"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
