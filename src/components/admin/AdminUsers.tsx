@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Shield, User, MoreVertical, Trash2, UserX, ArrowUpDown, ArrowUp, ArrowDown, CalendarDays, ChevronLeft, ChevronRight, FileUp, Download } from "lucide-react";
-import { renderCvToPdf, ensureHtml2Pdf } from "@/lib/cv-pdf-helper";
+import { renderCvToPdf } from "@/lib/cv-pdf-helper";
 import InviteUsersDialog from "./InviteUsersDialog";
 import AdminBulkCV from "./AdminBulkCV";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -228,7 +228,7 @@ const AdminUsers = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { toast.error("Session expired"); return; }
 
-      await ensureHtml2Pdf();
+      // html2pdf no longer needed — preview opens in new tab
 
       let successCount = 0;
       for (const userId of selectedUsers) {
@@ -252,7 +252,7 @@ const AdminUsers = () => {
           const userName = nameMatch?.[1]?.replace(/[^a-zA-Z0-9]/g, "_") || userId.slice(0, 8);
           const contactLabel = includeContact ? "with_contact" : "without_contact";
 
-          const ok = await renderCvToPdf({
+          const ok = renderCvToPdf({
             html,
             fileName: `CV_${userName}_${contactLabel}.pdf`,
           });

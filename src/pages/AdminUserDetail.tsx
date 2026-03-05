@@ -9,7 +9,7 @@ import {
   Calendar, Shield, Star, GraduationCap, Clock, Pencil, Save, X, Camera,
   Award, Heart, CreditCard, Building2, Users, Download, Loader2,
 } from "lucide-react";
-import { renderCvToPdf, ensureHtml2Pdf } from "@/lib/cv-pdf-helper";
+import { renderCvToPdf } from "@/lib/cv-pdf-helper";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -371,11 +371,11 @@ const AdminUserDetail = () => {
       const userName = profile?.full_name?.replace(/[^a-zA-Z0-9]/g, "_") || "CV";
       const contactLabel = includeContact ? "with_contact" : "without_contact";
 
-      const ok = await renderCvToPdf({
+      const ok = renderCvToPdf({
         html,
         fileName: `CV_${userName}_${contactLabel}.pdf`,
       });
-      if (!ok) throw new Error("PDF generation failed");
+      if (!ok) throw new Error("Pop-up diblokir atau gagal membuka preview");
     } catch (err: any) {
       toast.error(err.message || "Gagal download CV");
     } finally {
