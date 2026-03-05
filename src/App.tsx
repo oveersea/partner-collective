@@ -23,6 +23,7 @@ import AdminProgramEdit from "./pages/AdminProgramEdit";
 import AdminAssessmentDetail from "./pages/AdminAssessmentDetail";
 import AdminOpportunityDetail from "./pages/AdminOpportunityDetail";
 import AdminCompanyDetail from "./pages/AdminCompanyDetail";
+import AdminCompanyCreate from "./pages/AdminCompanyCreate";
 import AdminCreditDetail from "./pages/AdminCreditDetail";
 import AdminHiringDetail from "./pages/AdminHiringDetail";
 import NotFound from "./pages/NotFound";
@@ -69,6 +70,7 @@ const App = () => (
             <Route path="/admin/program/:oveercode" element={<AdminProgramEdit />} />
             <Route path="/admin/assessment/:oveercode" element={<AdminAssessmentDetail />} />
             <Route path="/admin/opportunity/:oveercode" element={<AdminOpportunityDetail />} />
+            <Route path="/admin/company/create" element={<AdminCompanyCreate />} />
             <Route path="/admin/company/:oveercode" element={<AdminCompanyDetail />} />
             <Route path="/admin/credit/:id" element={<AdminCreditDetail />} />
             <Route path="/admin/hiring/:oveercode" element={<AdminHiringDetail />} />
