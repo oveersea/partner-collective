@@ -335,7 +335,7 @@ const PublicProfile = () => {
                   </div>
                 )}
                 <p className="text-xs text-muted-foreground/70 pt-1 flex items-center gap-1">
-                  <Lock className="w-3 h-3" /> Hubungi melalui Oveersea untuk membuka kontak
+                  <Lock className="w-3 h-3" /> Buka kontak senilai 2 credit
                 </p>
               </CardContent>
             </Card>
