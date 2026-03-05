@@ -49,6 +49,10 @@ Deno.serve(async (req) => {
       currency,
       program_id,
       program_title,
+      program_slug,
+      program_category,
+      package_type,
+      package_label,
     } = body;
 
     if (!checkout_type || !amount) {
@@ -155,8 +159,14 @@ Deno.serve(async (req) => {
     } else if (checkout_type === "program_order") {
       const { error } = await adminClient.from("program_orders").insert({
         user_id: userId,
-        program_id: program_id || null,
         program_title: program_title || "Program",
+        program_slug: program_slug || "",
+        program_category: program_category || "online",
+        package_type: package_type || "regular",
+        package_label: package_label || "Reguler",
+        full_name: profile?.full_name || "User",
+        email: userEmail,
+        phone: profile?.phone || "",
         amount: normalizedAmount,
         currency: currency || "IDR",
         status: "pending",

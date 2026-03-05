@@ -111,6 +111,8 @@ const LearningDetail = () => {
       currency: program.currency || "IDR",
     });
     if (program.oveercode) params.set("oveercode", program.oveercode);
+    if (program.slug) params.set("slug", program.slug);
+    if (program.category) params.set("category", program.category);
     if (program.thumbnail_url) params.set("thumbnail", program.thumbnail_url);
     if (program.duration) params.set("duration", program.duration);
     navigate(`/checkout?${params.toString()}`);
