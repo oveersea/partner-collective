@@ -272,7 +272,18 @@ const AdminCompanyDetail = () => {
                 </div>
                 <div>
                   <Label>Tipe Bisnis</Label>
-                  <Input value={data.business_type} onChange={(e) => update("business_type", e.target.value)} />
+                  <Select value={data.business_type} onValueChange={(v) => update("business_type", v)}>
+                    <SelectTrigger><SelectValue placeholder="Pilih tipe bisnis" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sole_proprietorship">Sole Proprietorship</SelectItem>
+                      <SelectItem value="partnership">Partnership</SelectItem>
+                      <SelectItem value="llc">LLC</SelectItem>
+                      <SelectItem value="corporation">Corporation</SelectItem>
+                      <SelectItem value="go_public">Go Public</SelectItem>
+                      <SelectItem value="company">Company</SelectItem>
+                      <SelectItem value="vendor">Vendor</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="md:col-span-2">
                   <Label>Deskripsi</Label>
