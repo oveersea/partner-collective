@@ -49,7 +49,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
 
     const apiKeyPrefix = normalizedApiKey.slice(0, 12);
     const normalizedBytes = new TextEncoder().encode(normalizedApiKey);
