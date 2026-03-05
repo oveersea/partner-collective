@@ -106,18 +106,20 @@ const HiringCandidatePanel = ({ hiringRequestId, requiredSkills }: Props) => {
   useEffect(() => { fetchMatched(); }, [fetchMatched]);
 
   const searchCandidates = async (query: string) => {
-    if (query.length < 2) { setSearchResults([]); return; }
     setSearching(true);
 
     const existingProfileIds = matched.filter(m => m.profile_user_id).map(m => m.profile_user_id);
     const existingArchiveIds = matched.filter(m => m.candidate_archive_id).map(m => m.candidate_archive_id);
 
     if (activeSearchTab === "profile") {
-      const { data } = await supabase
+      let qb = supabase
         .from("profiles")
         .select("user_id, full_name, skills, current_title, oveercode")
-        .ilike("full_name", `%${query}%`)
-        .limit(20);
+        .order("full_name");
+      if (query.length >= 2) {
+        qb = qb.or(`full_name.ilike.%${query}%,oveercode.ilike.%${query}%`);
+      }
+      const { data } = await qb.limit(50);
 
       setSearchResults(
         (data || [])
@@ -133,11 +135,14 @@ const HiringCandidatePanel = ({ hiringRequestId, requiredSkills }: Props) => {
           }))
       );
     } else {
-      const { data } = await supabase
+      let qb = supabase
         .from("candidates_archive")
         .select("id, full_name, skills, current_title, oveercode, email")
-        .ilike("full_name", `%${query}%`)
-        .limit(20);
+        .order("full_name");
+      if (query.length >= 2) {
+        qb = qb.or(`full_name.ilike.%${query}%,oveercode.ilike.%${query}%`);
+      }
+      const { data } = await qb.limit(50);
 
       setSearchResults(
         (data || [])
@@ -157,9 +162,10 @@ const HiringCandidatePanel = ({ hiringRequestId, requiredSkills }: Props) => {
   };
 
   useEffect(() => {
+    if (!addDialogOpen) return;
     const timer = setTimeout(() => searchCandidates(searchQuery), 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, activeSearchTab]);
+  }, [searchQuery, activeSearchTab, addDialogOpen]);
 
   const addCandidate = async (candidate: CandidateOption) => {
     if (!user) return;
@@ -343,7 +349,7 @@ const HiringCandidatePanel = ({ hiringRequestId, requiredSkills }: Props) => {
             {searching && (
               <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
             )}
-            {!searching && searchQuery.length >= 2 && searchResults.length === 0 && (
+            {!searching && searchResults.length === 0 && (
               <p className="text-center text-sm text-muted-foreground py-4">Tidak ditemukan</p>
             )}
             {searchResults.map((c) => {
