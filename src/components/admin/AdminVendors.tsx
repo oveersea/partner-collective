@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { CountrySelect } from "@/components/ui/country-select";
-import { CitySelect } from "@/components/ui/city-select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import {
-  Search, Building2, MapPin, Globe, ChevronLeft, ChevronRight, ExternalLink,
+  Search, MapPin, Globe, ChevronLeft, ChevronRight, ExternalLink,
   MoreVertical, Shield, ShieldCheck, ShieldX, Users, UserPlus, Crown, Trash2,
   Loader2, X, Briefcase, Plus,
 } from "lucide-react";
@@ -50,6 +49,7 @@ interface VendorMember {
 const PAGE_SIZE = 20;
 
 const AdminVendors = () => {
+  const navigate = useNavigate();
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -72,17 +72,6 @@ const AdminVendors = () => {
   const [newMemberRole, setNewMemberRole] = useState("member");
   const [addingMember, setAddingMember] = useState(false);
 
-  // Create vendor dialog
-  const [createOpen, setCreateOpen] = useState(false);
-  const [newVendorName, setNewVendorName] = useState("");
-  const [newVendorIndustry, setNewVendorIndustry] = useState("");
-  const [newVendorCity, setNewVendorCity] = useState("");
-  const [newVendorCountry, setNewVendorCountry] = useState("Indonesia");
-  const [ownerSearch, setOwnerSearch] = useState("");
-  const [ownerResults, setOwnerResults] = useState<{ user_id: string; full_name: string }[]>([]);
-  const [selectedOwnerId, setSelectedOwnerId] = useState("");
-  const [searchingOwner, setSearchingOwner] = useState(false);
-  const [creatingVendor, setCreatingVendor] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -251,80 +240,6 @@ const AdminVendors = () => {
     setAddingMember(false);
   };
 
-  // ── Create Vendor ──
-  const searchOwner = async (q: string) => {
-    setOwnerSearch(q);
-    if (q.length < 2) { setOwnerResults([]); return; }
-    setSearchingOwner(true);
-    const { data } = await supabase
-      .from("profiles")
-      .select("user_id, full_name")
-      .ilike("full_name", `%${q}%`)
-      .limit(10);
-    setOwnerResults(data || []);
-    setSearchingOwner(false);
-  };
-
-  const generateSlug = (name: string) =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-
-  const generateOveercode = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let code = "VND-";
-    for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-    return code;
-  };
-
-  const createVendor = async () => {
-    if (!newVendorName.trim()) { toast.error("Nama vendor wajib diisi"); return; }
-    if (!selectedOwnerId) { toast.error("Pilih owner untuk vendor"); return; }
-    setCreatingVendor(true);
-
-    const slug = generateSlug(newVendorName);
-    const oveercode = generateOveercode();
-
-    const { data: bp, error: bpErr } = await supabase
-      .from("business_profiles")
-      .insert({
-        name: newVendorName.trim(),
-        slug,
-        oveercode,
-        business_type: "vendor",
-        industry: newVendorIndustry.trim() || null,
-        city: newVendorCity.trim() || null,
-        country: newVendorCountry.trim() || null,
-        created_by: selectedOwnerId,
-        kyc_status: "unverified",
-      })
-      .select("id")
-      .single();
-
-    if (bpErr || !bp) {
-      toast.error("Gagal membuat vendor: " + (bpErr?.message || "Unknown error"));
-      setCreatingVendor(false);
-      return;
-    }
-
-    // Add owner as member
-    await supabase.from("business_members").insert({
-      business_id: bp.id,
-      user_id: selectedOwnerId,
-      role: "owner",
-      status: "active",
-    });
-
-    toast.success("Vendor berhasil dibuat");
-    setCreateOpen(false);
-    setNewVendorName("");
-    setNewVendorIndustry("");
-    setNewVendorCity("");
-    setNewVendorCountry("Indonesia");
-    setOwnerSearch("");
-    setOwnerResults([]);
-    setSelectedOwnerId("");
-    fetchData();
-    setCreatingVendor(false);
-  };
 
   // ── Filters ──
   const filtered = vendors.filter(
@@ -372,7 +287,7 @@ const AdminVendors = () => {
           <p className="text-sm text-muted-foreground">Vendors are job receivers / service providers</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button onClick={() => setCreateOpen(true)} className="gap-1.5">
+          <Button onClick={() => navigate("/admin/vendor/create")} className="gap-1.5">
             <Plus className="w-4 h-4" /> Tambah Vendor
           </Button>
           <div className="relative w-72">
@@ -738,75 +653,6 @@ const AdminVendors = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Create Vendor Dialog */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Tambah Vendor Baru</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Nama Vendor *</Label>
-              <Input value={newVendorName} onChange={(e) => setNewVendorName(e.target.value)} placeholder="PT Vendor Indonesia" />
-            </div>
-            <div className="space-y-2">
-              <Label>Industry</Label>
-              <Select value={newVendorIndustry} onValueChange={setNewVendorIndustry}>
-                <SelectTrigger><SelectValue placeholder="Pilih industri" /></SelectTrigger>
-                <SelectContent>
-                  {["Technology","Finance & Banking","Healthcare","Education","E-Commerce","Manufacturing","Real Estate","Media & Entertainment","Government","Logistics","F&B","Professional Services","Construction","Trading","Retail","Hospitality","Agriculture","Energy","Telecommunications","Automotive"].map(i => (
-                    <SelectItem key={i} value={i}>{i}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Kota</Label>
-                <CitySelect value={newVendorCity} onChange={setNewVendorCity} />
-              </div>
-              <div className="space-y-2">
-                <Label>Negara</Label>
-                <CountrySelect value={newVendorCountry} onChange={setNewVendorCountry} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Owner *</Label>
-              <Input value={ownerSearch} onChange={(e) => searchOwner(e.target.value)} placeholder="Cari nama user..." />
-              {searchingOwner && <p className="text-xs text-muted-foreground">Mencari...</p>}
-              {ownerResults.length > 0 && !selectedOwnerId && (
-                <div className="border border-border rounded-lg max-h-40 overflow-y-auto divide-y divide-border">
-                  {ownerResults.map((u) => (
-                    <button
-                      key={u.user_id}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
-                      onClick={() => { setSelectedOwnerId(u.user_id); setOwnerSearch(u.full_name || ""); setOwnerResults([]); }}
-                    >
-                      {u.full_name || "—"}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {selectedOwnerId && (
-                <div className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm">
-                  <Crown className="w-4 h-4 text-amber-500" />
-                  <span className="flex-1">{ownerSearch}</span>
-                  <button onClick={() => { setSelectedOwnerId(""); setOwnerSearch(""); }} className="text-muted-foreground hover:text-foreground">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Batal</Button>
-            <Button onClick={createVendor} disabled={creatingVendor || !newVendorName.trim() || !selectedOwnerId}>
-              {creatingVendor ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-              Buat Vendor
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
