@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -374,7 +375,14 @@ const AdminCaseStudies = () => {
                 </div>
                 <div className="space-y-1.5">
                   <Label>Industri</Label>
-                  <Input value={form.industry || ""} onChange={(e) => updateField("industry", e.target.value)} />
+                  <Select value={form.industry || ""} onValueChange={(v) => updateField("industry", v)}>
+                    <SelectTrigger><SelectValue placeholder="Pilih industri" /></SelectTrigger>
+                    <SelectContent>
+                      {["Technology","Finance & Banking","Healthcare","Education","E-Commerce","Manufacturing","Real Estate","Media & Entertainment","Government","Logistics","F&B","Professional Services","Construction","Trading","Retail","Hospitality","Agriculture","Energy","Telecommunications","Automotive"].map(i => (
+                        <SelectItem key={i} value={i}>{i}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
