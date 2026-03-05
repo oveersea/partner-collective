@@ -24,6 +24,7 @@ import AdminAssessmentDetail from "./pages/AdminAssessmentDetail";
 import AdminOpportunityDetail from "./pages/AdminOpportunityDetail";
 import AdminCompanyDetail from "./pages/AdminCompanyDetail";
 import AdminCompanyCreate from "./pages/AdminCompanyCreate";
+import AdminVendorCreate from "./pages/AdminVendorCreate";
 import AdminCreditDetail from "./pages/AdminCreditDetail";
 import AdminHiringDetail from "./pages/AdminHiringDetail";
 import NotFound from "./pages/NotFound";
@@ -72,6 +73,7 @@ const App = () => (
             <Route path="/admin/opportunity/:oveercode" element={<AdminOpportunityDetail />} />
             <Route path="/admin/company/create" element={<AdminCompanyCreate />} />
             <Route path="/admin/company/:oveercode" element={<AdminCompanyDetail />} />
+            <Route path="/admin/vendor/create" element={<AdminVendorCreate />} />
             <Route path="/admin/credit/:id" element={<AdminCreditDetail />} />
             <Route path="/admin/hiring/:oveercode" element={<AdminHiringDetail />} />
             <Route path="/learning" element={<Learning />} />
