@@ -76,7 +76,7 @@ const Companies = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardNav />
-      <div className="container mx-auto px-4 py-8 max-w-3xl pb-24 md:pb-8">
+      <div className="w-full px-4 md:px-8 lg:px-16 py-8 pb-24 md:pb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground">My Companies</h1>
@@ -96,32 +96,57 @@ const Companies = () => {
             <p className="text-muted-foreground">You're not a member of any company yet.</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {companies.map((c) => (
-              <Link
-                key={c.id}
-                to={`/company/${c.business.oveercode}`}
-                className="flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors group"
-              >
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
-                  {c.business.logo_url ? (
-                    <img src={c.business.logo_url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <Building2 className="w-6 h-6 text-primary" />
-                  )}
+          <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-6">
+            <div className="space-y-3">
+              {companies.map((c) => (
+                <Link
+                  key={c.id}
+                  to={`/company/${c.business.oveercode}`}
+                  className="flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors group"
+                >
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
+                    {c.business.logo_url ? (
+                      <img src={c.business.logo_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <Building2 className="w-6 h-6 text-primary" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground truncate">{c.business.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {[c.business.industry, c.business.city].filter(Boolean).join(" · ") || "No details"}
+                    </p>
+                  </div>
+                  <Badge variant="outline" className={`text-[10px] shrink-0 ${roleBadge(c.role)}`}>
+                    {c.role}
+                  </Badge>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+                </Link>
+              ))}
+            </div>
+            <div className="hidden lg:block">
+              <div className="bg-card rounded-xl border border-border p-6 sticky top-24">
+                <h3 className="font-semibold text-foreground mb-2">Summary</h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Companies</span>
+                    <span className="font-medium text-foreground">{companies.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">As Owner</span>
+                    <span className="font-medium text-foreground">{companies.filter(c => c.role === "owner").length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">As Admin</span>
+                    <span className="font-medium text-foreground">{companies.filter(c => c.role === "admin").length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">As Member</span>
+                    <span className="font-medium text-foreground">{companies.filter(c => c.role === "member").length}</span>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-foreground truncate">{c.business.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {[c.business.industry, c.business.city].filter(Boolean).join(" · ") || "No details"}
-                  </p>
-                </div>
-                <Badge variant="outline" className={`text-[10px] shrink-0 ${roleBadge(c.role)}`}>
-                  {c.role}
-                </Badge>
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
-              </Link>
-            ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
