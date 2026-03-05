@@ -6,11 +6,22 @@ import { motion } from "framer-motion";
 import {
   Briefcase, UserSearch, Clock, Zap, ChevronLeft, ChevronRight,
   Calendar, Users, CreditCard, AlertCircle, CheckCircle2,
-  Loader2, FileText, ArrowUpRight, LayoutList,
+  Loader2, FileText, ArrowUpRight, LayoutList, Star, Archive,
 } from "lucide-react";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
 import { Button } from "@/components/ui/button";
+
+interface MatchedCandidateDisplay {
+  id: string;
+  name: string;
+  title: string | null;
+  skills: string[];
+  match_score: number;
+  status: string;
+  source_type: string;
+  oveercode: string | null;
+}
 
 interface HiringRequest {
   id: string;
@@ -88,6 +99,8 @@ const MyRequests = () => {
 
   // Detail expand
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [candidatesMap, setCandidatesMap] = useState<Record<string, MatchedCandidateDisplay[]>>({});
+  const [loadingCandidates, setLoadingCandidates] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -138,6 +151,65 @@ const MyRequests = () => {
   const isOverdue = (deadline: string | null) => {
     if (!deadline) return false;
     return new Date(deadline) < new Date();
+  };
+
+  const fetchCandidates = async (hiringRequestId: string) => {
+    if (candidatesMap[hiringRequestId]) return;
+    setLoadingCandidates(hiringRequestId);
+    const { data } = await supabase
+      .from("hiring_matched_candidates")
+      .select("*")
+      .eq("hiring_request_id", hiringRequestId)
+      .order("created_at", { ascending: false });
+
+    if (!data || data.length === 0) {
+      setCandidatesMap(prev => ({ ...prev, [hiringRequestId]: [] }));
+      setLoadingCandidates(null);
+      return;
+    }
+
+    const profileIds = data.filter(d => d.profile_user_id).map(d => d.profile_user_id!);
+    const archiveIds = data.filter(d => d.candidate_archive_id).map(d => d.candidate_archive_id!);
+
+    const [profilesRes, archivesRes] = await Promise.all([
+      profileIds.length > 0
+        ? supabase.from("profiles").select("user_id, full_name, skills, headline, oveercode").in("user_id", profileIds)
+        : Promise.resolve({ data: [] }),
+      archiveIds.length > 0
+        ? supabase.from("candidates_archive").select("id, full_name, skills, current_title, oveercode").in("id", archiveIds)
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.user_id, p]));
+    const archiveMap = new Map((archivesRes.data || []).map((a: any) => [a.id, a]));
+
+    const resolved: MatchedCandidateDisplay[] = data.map((d: any) => {
+      if (d.source_type === "profile" && d.profile_user_id) {
+        const p = profileMap.get(d.profile_user_id);
+        return { id: d.id, name: p?.full_name || "Unknown", title: p?.headline, skills: p?.skills || [], match_score: d.match_score, status: d.status, source_type: d.source_type, oveercode: p?.oveercode };
+      }
+      const a = archiveMap.get(d.candidate_archive_id);
+      return { id: d.id, name: a?.full_name || "Unknown", title: a?.current_title, skills: a?.skills || [], match_score: d.match_score, status: d.status, source_type: d.source_type, oveercode: a?.oveercode };
+    });
+
+    setCandidatesMap(prev => ({ ...prev, [hiringRequestId]: resolved }));
+    setLoadingCandidates(null);
+  };
+
+  const handleExpand = (id: string) => {
+    const newId = expandedId === id ? null : id;
+    setExpandedId(newId);
+    if (newId) fetchCandidates(newId);
+  };
+
+  const candidateStatusBadge = (status: string) => {
+    const colors: Record<string, string> = {
+      shortlisted: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+      submitted: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+      accepted: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+      rejected: "bg-destructive/10 text-destructive border-destructive/20",
+    };
+    return colors[status] || "bg-muted text-muted-foreground border-border";
   };
 
   const pagedHiring = hiringRequests.slice((hiringPage - 1) * PAGE_SIZE, hiringPage * PAGE_SIZE);
@@ -250,7 +322,7 @@ const MyRequests = () => {
                   >
                     <div
                       className="p-5 cursor-pointer"
-                      onClick={() => setExpandedId(expandedId === h.id ? null : h.id)}
+                      onClick={() => handleExpand(h.id)}
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
@@ -336,6 +408,64 @@ const MyRequests = () => {
                             </div>
                           </div>
                         )}
+
+                        {/* Matched Candidates */}
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
+                            <Users className="w-3.5 h-3.5" />
+                            Kandidat yang Diajukan
+                            {candidatesMap[h.id] && (
+                              <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{candidatesMap[h.id].length}</span>
+                            )}
+                          </p>
+                          {loadingCandidates === h.id ? (
+                            <div className="flex items-center justify-center py-4">
+                              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                            </div>
+                          ) : !candidatesMap[h.id] || candidatesMap[h.id].length === 0 ? (
+                            <p className="text-sm text-muted-foreground py-3 text-center">Belum ada kandidat yang diajukan admin</p>
+                          ) : (
+                            <div className="space-y-2">
+                              {candidatesMap[h.id].map((c) => (
+                                <div key={c.id} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg border border-border">
+                                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                    {c.source_type === "profile" ? (
+                                      <Users className="w-3.5 h-3.5 text-primary" />
+                                    ) : (
+                                      <Archive className="w-3.5 h-3.5 text-amber-500" />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="text-sm font-medium text-foreground">{c.name}</span>
+                                      {c.oveercode && <span className="text-[10px] text-muted-foreground">#{c.oveercode}</span>}
+                                      <span className={`inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full border ${candidateStatusBadge(c.status)}`}>
+                                        {c.status}
+                                      </span>
+                                      {c.match_score > 0 && (
+                                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${c.match_score >= 70 ? "bg-emerald-500/10 text-emerald-600" : c.match_score >= 40 ? "bg-amber-500/10 text-amber-600" : "bg-muted text-muted-foreground"}`}>
+                                          <Star className="w-2.5 h-2.5 inline mr-0.5" />{c.match_score}%
+                                        </span>
+                                      )}
+                                    </div>
+                                    {c.title && <p className="text-xs text-muted-foreground mt-0.5">{c.title}</p>}
+                                    {c.skills.length > 0 && (
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {c.skills.slice(0, 6).map(s => {
+                                          const isMatch = h.required_skills?.some(rs => rs.toLowerCase() === s.toLowerCase());
+                                          return (
+                                            <span key={s} className={`text-[10px] px-1.5 py-0.5 rounded ${isMatch ? "bg-emerald-500/10 text-emerald-600 font-medium" : "bg-muted text-muted-foreground"}`}>{s}</span>
+                                          );
+                                        })}
+                                        {c.skills.length > 6 && <span className="text-[10px] text-muted-foreground">+{c.skills.length - 6}</span>}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </motion.div>
                     )}
                   </motion.div>
