@@ -164,7 +164,7 @@ const PublicProfile = () => {
 
         {/* Profile header card */}
         <Card className="mb-6 overflow-hidden">
-          <CardContent className="pt-24 p-6 md:px-8 md:pb-8">
+          <CardContent className="p-6 md:px-8 md:pb-8" style={{ paddingTop: '80px' }}>
             <div className="text-center sm:text-left">
               <div className="flex items-center gap-2 justify-center sm:justify-start">
                 <h1 className="text-2xl font-bold text-foreground">{profile.full_name}</h1>
