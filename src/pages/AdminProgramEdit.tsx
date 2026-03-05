@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Save, Calendar, Users, Star, MapPin, Award, X, Plus, Building2, Upload, Trash2, BookOpen, ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
+import { ArrowLeft, Save, Calendar, Users, Star, MapPin, Award, X, Plus, Building2, Upload, Trash2, BookOpen, ChevronDown, ChevronUp, HelpCircle, Sparkles, Loader2 } from "lucide-react";
 
 const STATUS_OPTIONS = ["draft", "pending", "approved", "rejected", "archived"];
 const LEVEL_OPTIONS = ["beginner", "intermediate", "advanced"];
@@ -87,6 +87,7 @@ const AdminProgramEdit = () => {
   const [newAudience, setNewAudience] = useState("");
   const [newPrereq, setNewPrereq] = useState("");
   const [uploadingThumb, setUploadingThumb] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -302,6 +303,50 @@ const AdminProgramEdit = () => {
     setSaving(false);
   };
 
+  const handleGenerateDetails = async () => {
+    if (!data || !data.title.trim()) {
+      toast.error("Judul program wajib diisi terlebih dahulu");
+      return;
+    }
+    setGenerating(true);
+    try {
+      const { data: result, error } = await supabase.functions.invoke("generate-program-details", {
+        body: {
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          level: data.level,
+          existing: {
+            learning_outcomes: data.learning_outcomes,
+            target_audience: data.target_audience,
+            prerequisites: data.prerequisites,
+            syllabus: data.syllabus,
+            faq: data.faq,
+          },
+        },
+      });
+      if (error) throw error;
+      if (result?.error) {
+        toast.error(result.error);
+        return;
+      }
+      const gen = result.generated;
+      const updated = { ...data };
+      if (gen.description) updated.description = gen.description;
+      if (gen.learning_outcomes) updated.learning_outcomes = gen.learning_outcomes;
+      if (gen.target_audience) updated.target_audience = gen.target_audience;
+      if (gen.prerequisites) updated.prerequisites = gen.prerequisites;
+      if (gen.syllabus) updated.syllabus = gen.syllabus;
+      if (gen.faq) updated.faq = gen.faq;
+      setData(updated);
+      toast.success(`${(result.fields as string[]).length} bagian konten berhasil di-generate!`);
+    } catch (e: any) {
+      toast.error("Gagal generate: " + (e.message || "Unknown error"));
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const addToArray = (field: "learning_outcomes" | "target_audience" | "prerequisites", value: string, setter: (v: string) => void) => {
     if (!value.trim() || !data) return;
     const current = (data[field] as string[] | null) || [];
@@ -356,10 +401,18 @@ const AdminProgramEdit = () => {
               )}
             </div>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="gap-2">
-            <Save className="w-4 h-4" />
-            {saving ? "Menyimpan..." : isCreateMode ? "Buat Program" : "Simpan"}
-          </Button>
+          <div className="flex items-center gap-2">
+            {!isCreateMode && (
+              <Button variant="outline" onClick={handleGenerateDetails} disabled={generating} className="gap-2">
+                {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {generating ? "Generating..." : "Generate Details"}
+              </Button>
+            )}
+            <Button onClick={handleSave} disabled={saving} className="gap-2">
+              <Save className="w-4 h-4" />
+              {saving ? "Menyimpan..." : isCreateMode ? "Buat Program" : "Simpan"}
+            </Button>
+          </div>
         </div>
       </header>
 
