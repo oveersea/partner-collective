@@ -10,10 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import {
-  Building2, Users, FileText, Shield, FolderKanban, CreditCard,
+  Building2, Users, FileText, Shield, FolderKanban, CreditCard, Briefcase,
   ArrowLeft, User, UserPlus, Trash2, MapPin, Globe, Mail, Phone,
   ShieldCheck, ShieldX, Clock, Loader2,
 } from "lucide-react";
+import CompanyJobsTab from "@/components/dashboard/CompanyJobsTab";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -251,8 +252,8 @@ const CompanyDashboard = () => {
               { value: "overview", icon: Building2, label: "Overview" },
               { value: "members", icon: Users, label: "Members", count: members.length },
               { value: "documents", icon: FileText, label: "Documents", count: documents.length },
+              { value: "jobs", icon: Briefcase, label: "Jobs" },
               { value: "kyc", icon: Shield, label: "KYC" },
-              { value: "projects", icon: FolderKanban, label: "Projects" },
               { value: "credits", icon: CreditCard, label: "Credits" },
             ].map((tab) => (
               <TabsTrigger
@@ -446,6 +447,11 @@ const CompanyDashboard = () => {
                 <p className="text-sm text-muted-foreground">KYC submission form coming soon. Contact admin for manual verification.</p>
               )}
             </div>
+          </TabsContent>
+
+          {/* Jobs Tab */}
+          <TabsContent value="jobs">
+            <CompanyJobsTab businessId={company.id} companyName={company.name} isAdmin={isAdmin} />
           </TabsContent>
 
           {/* Projects Tab */}
