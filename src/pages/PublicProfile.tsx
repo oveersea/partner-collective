@@ -244,7 +244,7 @@ const PublicProfile = () => {
       {/* Top banner */}
       <div className="bg-[#D71920] h-36 md:h-44" />
 
-      <div className="max-w-6xl mx-auto px-4 -mt-20 pb-16">
+      <div className="w-full mx-auto px-4 md:px-8 lg:px-16 -mt-20 pb-16">
         {/* Avatar floating above card */}
         <div className="flex justify-center sm:justify-start sm:pl-8 mb-[-64px] relative z-10">
           <div className="w-32 h-32 rounded-2xl border-4 border-card bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
