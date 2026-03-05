@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import {
-  Search, Users, ChevronLeft, ChevronRight,
+  Search, Users, ChevronLeft, ChevronRight, Plus,
   MoreVertical, UserPlus, Crown, Trash2,
   Loader2, X, UsersRound, CheckCircle, XCircle, Clock,
 } from "lucide-react";
@@ -19,6 +19,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+
 
 interface Team {
   id: string;
@@ -79,6 +80,18 @@ const AdminTeams = () => {
   const [suggestTeamResults, setSuggestTeamResults] = useState<Team[]>([]);
   const [suggestTeamId, setSuggestTeamId] = useState<string | null>(null);
   const [submittingApproval, setSubmittingApproval] = useState(false);
+
+  // Create team
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newTeamName, setNewTeamName] = useState("");
+  const [newTeamDesc, setNewTeamDesc] = useState("");
+  const [newTeamSkills, setNewTeamSkills] = useState("");
+  const [newTeamMaxMembers, setNewTeamMaxMembers] = useState("10");
+  const [leaderSearch, setLeaderSearch] = useState("");
+  const [leaderResults, setLeaderResults] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [selectedLeaderId, setSelectedLeaderId] = useState("");
+  const [searchingLeader, setSearchingLeader] = useState(false);
+  const [creatingTeam, setCreatingTeam] = useState(false);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -294,6 +307,61 @@ const AdminTeams = () => {
     setSubmittingApproval(false);
   };
 
+  // ── Create Team ──
+  const searchLeaderFn = async (q: string) => {
+    setLeaderSearch(q);
+    if (q.length < 2) { setLeaderResults([]); return; }
+    setSearchingLeader(true);
+    const { data } = await supabase.from("profiles").select("user_id, full_name").ilike("full_name", `%${q}%`).limit(10);
+    setLeaderResults(data || []);
+    setSearchingLeader(false);
+  };
+
+  const createTeam = async () => {
+    if (!newTeamName.trim()) { toast.error("Nama team wajib diisi"); return; }
+    if (!selectedLeaderId) { toast.error("Pilih leader untuk team"); return; }
+    setCreatingTeam(true);
+
+    const skillsArr = newTeamSkills.split(",").map(s => s.trim()).filter(Boolean);
+
+    const slug = newTeamName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+    const { data: team, error: teamErr } = await supabase
+      .from("partner_teams")
+      .insert({
+        name: newTeamName.trim(),
+        slug,
+        description: newTeamDesc.trim() || null,
+        skills: skillsArr.length > 0 ? skillsArr : null,
+        max_members: parseInt(newTeamMaxMembers) || 10,
+        created_by: selectedLeaderId,
+        status: "active",
+        approval_status: "approved",
+      })
+      .select("id")
+      .single();
+
+    if (teamErr || !team) {
+      toast.error("Gagal membuat team: " + (teamErr?.message || ""));
+      setCreatingTeam(false);
+      return;
+    }
+
+    await supabase.from("partner_team_members").insert({
+      team_id: team.id,
+      user_id: selectedLeaderId,
+      role: "leader",
+      status: "active",
+    });
+
+    toast.success("Team berhasil dibuat");
+    setCreateOpen(false);
+    setNewTeamName(""); setNewTeamDesc(""); setNewTeamSkills(""); setNewTeamMaxMembers("10");
+    setLeaderSearch(""); setLeaderResults([]); setSelectedLeaderId("");
+    fetchData();
+    setCreatingTeam(false);
+  };
+
   // ── Filters ──
   const filtered = teams.filter(
     (t) =>
@@ -343,14 +411,19 @@ const AdminTeams = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-foreground">Team Management</h2>
-        <div className="relative w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            className="pl-9"
-            placeholder="Search name, description, skill..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        <div className="flex items-center gap-3">
+          <Button onClick={() => setCreateOpen(true)} className="gap-1.5">
+            <Plus className="w-4 h-4" /> Tambah Team
+          </Button>
+          <div className="relative w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              className="pl-9"
+              placeholder="Search name, description, skill..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 
@@ -761,6 +834,61 @@ const AdminTeams = () => {
             <Button onClick={handleApproval} disabled={submittingApproval} variant={approvalAction === "approve" ? "default" : "destructive"}>
               {submittingApproval ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               {approvalAction === "approve" ? "Approve" : "Reject"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Create Team Dialog ── */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tambah Team Baru</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nama Team *</Label>
+              <Input value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)} placeholder="Frontend Squad" />
+            </div>
+            <div className="space-y-2">
+              <Label>Deskripsi</Label>
+              <Input value={newTeamDesc} onChange={(e) => setNewTeamDesc(e.target.value)} placeholder="Deskripsi singkat team..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Skills (pisahkan dengan koma)</Label>
+              <Input value={newTeamSkills} onChange={(e) => setNewTeamSkills(e.target.value)} placeholder="React, TypeScript, Node.js" />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Members</Label>
+              <Input type="number" value={newTeamMaxMembers} onChange={(e) => setNewTeamMaxMembers(e.target.value)} placeholder="10" />
+            </div>
+            <div className="space-y-2">
+              <Label>Leader *</Label>
+              <Input value={leaderSearch} onChange={(e) => searchLeaderFn(e.target.value)} placeholder="Cari nama user..." />
+              {searchingLeader && <p className="text-xs text-muted-foreground">Mencari...</p>}
+              {leaderResults.length > 0 && !selectedLeaderId && (
+                <div className="border border-border rounded-lg max-h-40 overflow-y-auto divide-y divide-border">
+                  {leaderResults.map((u) => (
+                    <button key={u.user_id} className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => { setSelectedLeaderId(u.user_id); setLeaderSearch(u.full_name || ""); setLeaderResults([]); }}>
+                      {u.full_name || "—"}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {selectedLeaderId && (
+                <div className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm">
+                  <Crown className="w-4 h-4 text-amber-500" />
+                  <span className="flex-1">{leaderSearch}</span>
+                  <button onClick={() => { setSelectedLeaderId(""); setLeaderSearch(""); }} className="text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateOpen(false)}>Batal</Button>
+            <Button onClick={createTeam} disabled={creatingTeam || !newTeamName.trim() || !selectedLeaderId}>
+              {creatingTeam ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+              Buat Team
             </Button>
           </DialogFooter>
         </DialogContent>
