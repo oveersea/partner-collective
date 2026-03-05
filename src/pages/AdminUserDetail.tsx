@@ -59,9 +59,9 @@ interface Profile {
   last_online: string | null;
 }
 
-const calcProfileCompleteness = (p: Profile): number => {
+const calcProfileCompleteness = (p: Profile, expCount: number, eduCount: number): number => {
   let score = 0;
-  const total = 10;
+  const total = 14;
   if (p.full_name) score++;
   if (p.avatar_url) score++;
   if (p.phone_number) score++;
@@ -70,8 +70,12 @@ const calcProfileCompleteness = (p: Profile): number => {
   if (p.highest_education) score++;
   if (p.bio || p.professional_summary) score++;
   if (p.city || p.country) score++;
-  if (p.linkedin_url) score++;
+  if (p.linkedin_url || p.website_url) score++;
   if (p.kyc_status === 'approved' || p.kyc_status === 'verified') score++;
+  if ((p as any).date_of_birth) score++;
+  if ((p as any).nationality) score++;
+  if (expCount > 0) score++;
+  if (eduCount > 0) score++;
   return Math.round((score / total) * 100);
 };
 
@@ -242,7 +246,7 @@ const AdminUserDetail = () => {
     const [profileRes, rolesRes] = await Promise.all([
       supabase
         .from("profiles")
-        .select("user_id, full_name, headline, bio, avatar_url, address, city, district, subdistrict, province, country, postal_code, latitude, longitude, formatted_address, phone_number, skills, soft_skills, technical_skills, kyc_status, account_type, oveercode, years_of_experience, daily_rate, linkedin_url, website_url, opportunity_availability, professional_summary, highest_education, created_at, last_online")
+        .select("user_id, full_name, headline, bio, avatar_url, address, city, district, subdistrict, province, country, postal_code, latitude, longitude, formatted_address, phone_number, skills, soft_skills, technical_skills, kyc_status, account_type, oveercode, years_of_experience, daily_rate, linkedin_url, website_url, opportunity_availability, professional_summary, highest_education, created_at, last_online, date_of_birth, nationality")
         .eq("user_id", userId)
         .single(),
       supabase
@@ -536,7 +540,7 @@ const AdminUserDetail = () => {
                             KYC: {profile.kyc_status}
                           </span>
                           {(() => {
-                            const pScore = calcProfileCompleteness(profile);
+                            const pScore = calcProfileCompleteness(profile, experiences.length, education.length);
                             const scoreColor = pScore >= 70 ? "text-primary bg-primary/10" : pScore >= 40 ? "text-amber-600 bg-amber-500/10" : "text-destructive bg-destructive/10";
                             return (
                               <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${scoreColor}`}>
