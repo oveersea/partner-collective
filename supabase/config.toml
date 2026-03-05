@@ -30,3 +30,5 @@ verify_jwt = false
 [functions.verify-login-token]
 verify_jwt = false
 
+[functions.unlock-profile-contact]
+verify_jwt = false
