@@ -567,7 +567,10 @@ const LearningDetail = () => {
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
                 >
-                  <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow">
+                  <Card
+                    className={`h-full overflow-hidden hover:shadow-lg transition-shadow ${instr.oveercode ? "cursor-pointer" : ""}`}
+                    onClick={() => instr.oveercode && navigate(`/p/${instr.oveercode}`)}
+                  >
                     <CardContent className="p-0">
                       {/* Avatar area */}
                       <div className="relative bg-gradient-to-br from-primary/10 to-accent/10 p-6 pb-4 flex flex-col items-center text-center">
@@ -578,13 +581,7 @@ const LearningDetail = () => {
                             <User className="w-10 h-10 text-primary" />
                           </div>
                         )}
-                        {instr.oveercode ? (
-                          <Link to={`/p/${instr.oveercode}`} className="font-semibold text-foreground mt-3 hover:text-primary transition-colors hover:underline">
-                            {instr.name}
-                          </Link>
-                        ) : (
-                          <h3 className="font-semibold text-foreground mt-3">{instr.name}</h3>
-                        )}
+                        <h3 className="font-semibold text-foreground mt-3">{instr.name}</h3>
                         {instr.profile?.title && (
                           <p className="text-sm text-muted-foreground">{instr.profile.title}</p>
                         )}
