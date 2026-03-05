@@ -161,11 +161,11 @@ const megaMenus: MegaMenuData[] = [
         description: "Test competency & earn credentials",
         icon: ClipboardCheck,
         subItems: [
-          { icon: ClipboardCheck, title: "Start Assessment", description: "Take competency tests & skill scoring", href: "/learning" },
-          { icon: Award, title: "My Certificates", description: "View all earned certificates", href: "/learning" },
-          { icon: BarChart3, title: "Skill Score", description: "View your skill scores & analysis", href: "/learning" },
-          { icon: FileText, title: "Test History", description: "Review previous assessment results", href: "/learning" },
-          { icon: BadgeCheck, title: "Competency Evidence", description: "Upload portfolio as skill proof", href: "/learning" },
+          { icon: ClipboardCheck, title: "Start Assessment", description: "Take competency tests & skill scoring", href: "/learning?tab=assessments" },
+          { icon: Award, title: "My Certificates", description: "View all earned certificates", href: "/learning?tab=certificates" },
+          { icon: BarChart3, title: "Skill Score", description: "View your skill scores & analysis", href: "/learning?tab=skill-score" },
+          { icon: FileText, title: "Test History", description: "Review previous assessment results", href: "/learning?tab=test-history" },
+          { icon: BadgeCheck, title: "Competency Evidence", description: "Upload portfolio as skill proof", href: "/learning?tab=evidence" },
         ],
       },
       {
