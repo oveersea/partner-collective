@@ -735,11 +735,11 @@ const LearningDetail = () => {
             <div className="sticky top-24">
               <section id="jadwal" ref={(el) => { sectionRefs.current["jadwal"] = el; }}>
                 <Card className="overflow-hidden border-primary/20 shadow-lg">
-                  <div className="bg-gradient-to-r from-primary to-primary/80 p-5 text-primary-foreground">
+                  <div className="bg-gradient-to-r from-primary to-primary/80 px-6 py-5 text-primary-foreground">
                     <p className="text-xs font-medium opacity-90 mb-1">{program.category}</p>
                     <h3 className="text-lg font-bold">{program.title}</h3>
                   </div>
-                  <CardContent className="p-5 space-y-5">
+                  <CardContent className="px-6 py-6 space-y-5">
                     {/* Price */}
                     <div>
                       <span className="text-3xl font-bold text-foreground">
