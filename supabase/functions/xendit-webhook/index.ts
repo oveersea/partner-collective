@@ -31,8 +31,14 @@ Deno.serve(async (req) => {
 
     const { id, external_id, status, paid_at, metadata } = body;
 
-    if (!external_id || !status) {
-      return jsonResponse({ error: "Invalid payload" }, 400);
+    // Handle Xendit test/verification pings (no external_id or status)
+    if (!external_id && !status) {
+      console.log("Test ping received, responding OK");
+      return jsonResponse({ success: true, action: "test_ping" });
+    }
+
+    if (!status) {
+      return jsonResponse({ error: "Invalid payload: missing status" }, 400);
     }
 
     const serviceRoleKey =
@@ -48,15 +54,56 @@ Deno.serve(async (req) => {
       serviceRoleKey
     );
 
-    const checkoutType = metadata?.checkout_type || String(external_id).split("_")[0];
-    const userId = metadata?.user_id;
-    const amount = Number(metadata?.amount || 0);
-    const currency = metadata?.currency || "IDR";
-    const description = metadata?.description;
-    const paidAt = paid_at || new Date().toISOString();
-    const normalizedStatus = String(status).toLowerCase();
     const isPaid = status === "PAID" || status === "SETTLED";
+    const normalizedStatus = String(status).toLowerCase();
+    const paidAt = paid_at || new Date().toISOString();
 
+    // Determine checkout type and user from metadata or by looking up the order in DB
+    let checkoutType = metadata?.checkout_type;
+    let userId = metadata?.user_id;
+
+    // If metadata is missing, try to find the order by xendit_invoice_id
+    if (!checkoutType || !userId) {
+      console.log("Metadata missing, looking up order by invoice id:", id);
+
+      // Try credit_orders first
+      const { data: creditOrder } = await adminClient
+        .from("credit_orders")
+        .select("user_id")
+        .eq("xendit_invoice_id", id)
+        .maybeSingle();
+
+      if (creditOrder) {
+        checkoutType = "credit_order";
+        userId = creditOrder.user_id;
+      } else {
+        // Try wallet_deposits
+        const { data: walletDeposit } = await adminClient
+          .from("wallet_deposits")
+          .select("user_id")
+          .eq("xendit_invoice_id", id)
+          .maybeSingle();
+
+        if (walletDeposit) {
+          checkoutType = "wallet_deposit";
+          userId = walletDeposit.user_id;
+        } else {
+          // Try program_orders
+          const { data: programOrder } = await adminClient
+            .from("program_orders")
+            .select("user_id")
+            .eq("xendit_invoice_id", id)
+            .maybeSingle();
+
+          if (programOrder) {
+            checkoutType = "program_order";
+            userId = programOrder.user_id;
+          }
+        }
+      }
+    }
+
+    // For non-paid statuses, update if we can find the record
     if (!isPaid) {
       if (checkoutType === "credit_order") {
         await adminClient
@@ -78,117 +125,58 @@ Deno.serve(async (req) => {
           .neq("status", "paid");
       }
 
-      console.log(`Invoice ${id} status: ${status} - updated non-paid status`);
+      console.log(`Invoice ${id} status: ${status} - updated`);
       return jsonResponse({ success: true, action: "status_updated" });
     }
 
+    // For paid status, we need checkout type and user
     if (!checkoutType || !userId) {
-      console.error("Missing metadata in webhook:", metadata);
-      return jsonResponse({ error: "Missing metadata" }, 400);
+      console.error("Could not determine order for invoice:", id);
+      return jsonResponse({ error: "Order not found for this invoice" }, 404);
     }
 
     if (checkoutType === "credit_order") {
-      const { data: updated, error: updateError } = await adminClient
+      const { error: updateError } = await adminClient
         .from("credit_orders")
         .update({ status: "paid", xendit_paid_at: paidAt })
         .eq("xendit_invoice_id", id)
-        .select("id")
-        .maybeSingle();
+        .neq("status", "paid");
 
       if (updateError) {
         console.error("Failed to update credit_order:", updateError);
         return jsonResponse({ error: "Failed to update credit order: " + updateError.message }, 500);
       }
 
-      if (!updated) {
-        const { error: insertError } = await adminClient.from("credit_orders").insert({
-          user_id: userId,
-          package_id: metadata?.package_id || null,
-          credits: Number(metadata?.credits || 0),
-          amount_cents: amount,
-          currency,
-          status: "paid",
-          buyer_type: "personal",
-          description: description || "Credit purchase",
-          xendit_invoice_id: id,
-          xendit_checkout_url: null,
-          xendit_paid_at: paidAt,
-        });
-
-        if (insertError) {
-          console.error("Failed to create credit_order:", insertError);
-          return jsonResponse({ error: "Failed to create credit order: " + insertError.message }, 500);
-        }
-      }
-
-      console.log("Credit order synced for user:", userId);
+      console.log("Credit order paid for user:", userId);
     } else if (checkoutType === "wallet_deposit") {
-      const { data: updated, error: updateError } = await adminClient
+      const { error: updateError } = await adminClient
         .from("wallet_deposits")
         .update({ status: "paid", xendit_paid_at: paidAt })
         .eq("xendit_invoice_id", id)
-        .select("id")
-        .maybeSingle();
+        .neq("status", "paid");
 
       if (updateError) {
         console.error("Failed to update wallet_deposit:", updateError);
         return jsonResponse({ error: "Failed to update wallet deposit: " + updateError.message }, 500);
       }
 
-      if (!updated) {
-        const { error: insertError } = await adminClient.from("wallet_deposits").insert({
-          user_id: userId,
-          amount,
-          currency,
-          method: "xendit",
-          status: "paid",
-          xendit_invoice_id: id,
-          xendit_checkout_url: null,
-          xendit_paid_at: paidAt,
-        });
-
-        if (insertError) {
-          console.error("Failed to create wallet_deposit:", insertError);
-          return jsonResponse({ error: "Failed to create wallet deposit: " + insertError.message }, 500);
-        }
-      }
-
-      console.log("Wallet deposit synced for user:", userId);
+      console.log("Wallet deposit paid for user:", userId);
     } else if (checkoutType === "program_order") {
-      const { data: updated, error: updateError } = await adminClient
+      const { error: updateError } = await adminClient
         .from("program_orders")
         .update({ status: "paid" })
         .eq("xendit_invoice_id", id)
-        .select("id")
-        .maybeSingle();
+        .neq("status", "paid");
 
       if (updateError) {
         console.error("Failed to update program_order:", updateError);
         return jsonResponse({ error: "Failed to update program order: " + updateError.message }, 500);
       }
 
-      if (!updated) {
-        const { error: insertError } = await adminClient.from("program_orders").insert({
-          user_id: userId,
-          program_id: metadata?.program_id || null,
-          program_title: metadata?.program_title || "Program",
-          amount,
-          currency,
-          status: "paid",
-          xendit_invoice_id: id,
-          xendit_invoice_url: null,
-        });
-
-        if (insertError) {
-          console.error("Failed to create program_order:", insertError);
-          return jsonResponse({ error: "Failed to create program order: " + insertError.message }, 500);
-        }
-      }
-
-      console.log("Program order synced for user:", userId);
+      console.log("Program order paid for user:", userId);
     }
 
-    return jsonResponse({ success: true, action: "record_synced" });
+    return jsonResponse({ success: true, action: "record_paid" });
   } catch (err) {
     console.error("Webhook error:", err);
     return jsonResponse({ error: err.message }, 500);
