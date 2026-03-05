@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import case1 from "@/assets/case-1.jpg";
 import case2 from "@/assets/case-2.jpg";
@@ -13,15 +14,16 @@ import case6 from "@/assets/case-6.jpg";
 const fallbackImages = [case1, case2, case3, case4, case5, case6];
 
 const placeholderCases: CaseStudy[] = [
-  { id: "1", title: "Digital Transformation for a Logistics Company", description: "Built an end-to-end platform that improved operational efficiency by 40%.", company_name: "LogiTech Indonesia", industry: "Logistics", image_url: null, cta_label: "View Details", cta_url: "/case-studies", is_featured: true },
-  { id: "2", title: "Rebranding & Digital Marketing for F&B Chain", description: "A new brand strategy that increased awareness 3x in 6 months.", company_name: "Warung Nusantara", industry: "F&B", image_url: null, cta_label: "View Details", cta_url: "/case-studies", is_featured: true },
-  { id: "3", title: "Integrated HR System for a Fintech Startup", description: "Automated recruitment and onboarding processes, saving 60% of HR time.", company_name: "PayEase", industry: "Fintech", image_url: null, cta_label: "View Details", cta_url: "/case-studies", is_featured: false },
-  { id: "4", title: "E-Commerce Platform for a Local Fashion Brand", description: "A custom platform that increased online sales conversion by 250%.", company_name: "Batik Moderna", industry: "Fashion", image_url: null, cta_label: "View Details", cta_url: "/case-studies", is_featured: false },
+  { id: "1", title: "Digital Transformation for a Logistics Company", slug: "digital-transformation-logistics", description: "Built an end-to-end platform that improved operational efficiency by 40%.", company_name: "LogiTech Indonesia", industry: "Logistics", image_url: null, cta_label: "Baca cerita", cta_url: null, is_featured: true },
+  { id: "2", title: "Rebranding & Digital Marketing for F&B Chain", slug: "rebranding-fnb-chain", description: "A new brand strategy that increased awareness 3x in 6 months.", company_name: "Warung Nusantara", industry: "F&B", image_url: null, cta_label: "Baca cerita", cta_url: null, is_featured: true },
+  { id: "3", title: "Integrated HR System for a Fintech Startup", slug: "integrated-hr-fintech", description: "Automated recruitment and onboarding processes, saving 60% of HR time.", company_name: "PayEase", industry: "Fintech", image_url: null, cta_label: "Baca cerita", cta_url: null, is_featured: false },
+  { id: "4", title: "E-Commerce Platform for a Local Fashion Brand", slug: "ecommerce-fashion-brand", description: "A custom platform that increased online sales conversion by 250%.", company_name: "Batik Moderna", industry: "Fashion", image_url: null, cta_label: "Baca cerita", cta_url: null, is_featured: false },
 ];
 
 interface CaseStudy {
   id: string;
   title: string;
+  slug: string;
   description: string | null;
   company_name: string;
   industry: string | null;
@@ -39,7 +41,7 @@ const CaseStudiesSection = () => {
     const fetchCases = async () => {
       const { data } = await supabase
         .from("case_studies")
-        .select("id, title, description, company_name, industry, image_url, cta_label, cta_url, is_featured")
+        .select("id, title, slug, description, company_name, industry, image_url, cta_label, cta_url, is_featured")
         .eq("is_active", true)
         .order("sort_order", { ascending: true })
         .limit(4);
@@ -108,15 +110,13 @@ const CaseStudiesSection = () => {
                     {item.description}
                   </p>
                 )}
-                {item.cta_label && (
-                  <a
-                    href={item.cta_url || "#"}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground border-b-2 border-primary/60 hover:border-primary pb-0.5 w-fit mt-auto transition-colors"
-                  >
-                    {item.cta_label}
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
-                )}
+                <Link
+                  to={`/case-studies/${item.slug}`}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground border-b-2 border-primary/60 hover:border-primary pb-0.5 w-fit mt-auto transition-colors"
+                >
+                  {item.cta_label || "Baca cerita"}
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
             </motion.div>
           ))}
