@@ -98,14 +98,16 @@ const PublicProfile = () => {
       const { data, error } = await supabase.functions.invoke("unlock-profile-contact", {
         body: { profile_user_id: userId },
       });
-      if (error) throw error;
-      if (data?.error) {
-        if (data.error === "Insufficient credits") {
-          throw new Error(`Credit tidak cukup. Saldo: ${data.balance}, dibutuhkan: ${data.required}`);
+      // supabase.functions.invoke puts non-2xx responses in error or data
+      const result = data || (error as any);
+      if (error || result?.error) {
+        const msg = result?.error || error?.message || "Gagal membuka kontak";
+        if (msg === "Insufficient credits" || result?.error === "Insufficient credits") {
+          throw new Error(`Credit tidak cukup. Saldo: ${result?.balance ?? 0}, dibutuhkan: ${result?.required ?? 2}`);
         }
-        throw new Error(data.error);
+        throw new Error(msg);
       }
-      return data;
+      return result;
     },
     onSuccess: () => {
       toast.success("Kontak berhasil dibuka!");
