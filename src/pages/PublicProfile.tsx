@@ -98,34 +98,42 @@ const PublicProfile = () => {
       const { data, error } = await supabase.functions.invoke("unlock-profile-contact", {
         body: { profile_user_id: userId },
       });
-      // supabase.functions.invoke puts non-2xx responses in error or data
-      const result = data || (error as any);
-      if (error || result?.error) {
-        const msg = result?.error || error?.message || "Gagal membuka kontak";
-        if (msg === "Insufficient credits" || result?.error === "Insufficient credits") {
-          throw new Error("INSUFFICIENT_CREDITS");
-        }
-        throw new Error(msg);
+
+      const result = (data || (error as any) || {}) as {
+        error?: string;
+        balance?: number;
+        required?: number;
+      };
+
+      // Treat 402 (insufficient credits) as expected business response, not runtime error
+      if (result.error === "Insufficient credits") {
+        return { ok: false as const, reason: "insufficient_credits" as const };
       }
-      return result;
+
+      if (error || result.error) {
+        throw new Error(result.error || error?.message || "Gagal membuka kontak");
+      }
+
+      return { ok: true as const };
     },
-    onSuccess: () => {
-      toast.success("Kontak berhasil dibuka!");
-      queryClient.invalidateQueries({ queryKey: ["profile-unlock", user?.id, userId] });
-    },
-    onError: (err: Error) => {
-      if (err.message === "INSUFFICIENT_CREDITS") {
+    onSuccess: (result) => {
+      if (!result.ok && result.reason === "insufficient_credits") {
         toast.error("Kredit tidak cukup", {
-          description: "Silakan top up kredit terlebih dahulu.",
+          description: "Silakan topup kredit terlebih dahulu.",
           action: {
             label: "Top Up",
             onClick: () => navigate("/credit-balance"),
           },
           duration: 6000,
         });
-      } else {
-        toast.error(err.message);
+        return;
       }
+
+      toast.success("Kontak berhasil dibuka!");
+      queryClient.invalidateQueries({ queryKey: ["profile-unlock", user?.id, userId] });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
     },
   });
 
