@@ -48,7 +48,7 @@ const AdminApiKeys = () => {
   };
 
   const generateApiKey = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
     let key = "ovr_";
     for (let i = 0; i < 48; i++) {
       key += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -204,7 +204,7 @@ const AdminApiKeys = () => {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="rounded-lg bg-muted p-4 font-mono text-xs space-y-2 overflow-x-auto">
-            <p className="text-muted-foreground">// 1. Generate login token dari mobile app</p>
+            <p className="text-muted-foreground">// 1. Generate login token dari mobile app (pakai FULL key, bukan prefix)</p>
             <p>{`POST /functions/v1/generate-login-token`}</p>
             <p>{`Content-Type: application/json`}</p>
             <p>{`{`}</p>
