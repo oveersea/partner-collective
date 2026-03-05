@@ -16,6 +16,75 @@ import TeamsTab from "@/components/dashboard/TeamsTab";
 import ServicesTab from "@/components/dashboard/ServicesTab";
 import CompanyTab from "@/components/dashboard/CompanyTab";
 
+const CTA_ITEMS = [
+  {
+    icon: Building2,
+    title: "Daftarkan Bisnis Anda sebagai Vendor",
+    desc: "Bergabung sebagai vendor untuk menerima proyek, mengelola tim, dan mengembangkan bisnis Anda di platform kami.",
+    label: "Daftar Vendor",
+    href: "/vendor-registration",
+  },
+  {
+    icon: Users,
+    title: "Bentuk Tim Profesional Anda",
+    desc: "Kumpulkan talenta terbaik dalam satu tim untuk mengerjakan proyek bersama dan tingkatkan peluang Anda.",
+    label: "Buat Tim",
+    href: "/dashboard?tab=teams",
+  },
+  {
+    icon: Briefcase,
+    title: "Buat Profil Perusahaan",
+    desc: "Daftarkan perusahaan Anda untuk memposting lowongan kerja, mencari talenta, dan mengelola proses rekrutmen.",
+    label: "Buat Perusahaan",
+    href: "/dashboard?tab=company",
+  },
+];
+
+const RotatingCtaBanner = () => {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % CTA_ITEMS.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const item = CTA_ITEMS[index];
+  const Icon = item.icon;
+
+  return (
+    <div className="mt-8 md:mt-12">
+      <Link to={item.href}>
+        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 md:p-8 flex flex-col md:flex-row items-center gap-4 md:gap-6 hover:bg-primary/10 transition-colors">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Icon className="w-7 h-7 text-primary" />
+          </div>
+          <div className="flex-1 text-center md:text-left transition-opacity duration-300">
+            <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
+            <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
+          </div>
+          <div className="shrink-0">
+            <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium">
+              {item.label}
+            </span>
+          </div>
+        </div>
+      </Link>
+      {/* Dots indicator */}
+      <div className="flex items-center justify-center gap-1.5 mt-3">
+        {CTA_ITEMS.map((_, i) => (
+          <button
+            key={i}
+            onClick={(e) => { e.preventDefault(); setIndex(i); }}
+            className={`w-1.5 h-1.5 rounded-full transition-all ${i === index ? "bg-primary w-4" : "bg-muted-foreground/30"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 interface Profile {
   full_name: string | null;
   headline: string | null;
@@ -252,25 +321,8 @@ const Dashboard = () => {
         {activeTab === "services" && <ServicesTab />}
         {activeTab === "company" && <CompanyTab />}
 
-        {/* Vendor CTA */}
-        <div className="mt-8 md:mt-12">
-          <Link to="/vendor-registration">
-            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 md:p-8 flex flex-col md:flex-row items-center gap-4 md:gap-6 hover:bg-primary/10 transition-colors">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                <Building2 className="w-7 h-7 text-primary" />
-              </div>
-              <div className="flex-1 text-center md:text-left">
-                <h3 className="text-lg font-semibold text-foreground">Daftarkan Bisnis Anda sebagai Vendor</h3>
-                <p className="text-sm text-muted-foreground mt-1">Bergabung sebagai vendor untuk menerima proyek, mengelola tim, dan mengembangkan bisnis Anda di platform kami.</p>
-              </div>
-              <div className="shrink-0">
-                <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium">
-                  Daftar Vendor
-                </span>
-              </div>
-            </div>
-          </Link>
-        </div>
+        {/* Rotating CTA Banner */}
+        <RotatingCtaBanner />
       </div>
     </div>
   );
