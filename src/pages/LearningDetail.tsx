@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/hooks/use-toast";
+
 import { supabase } from "@/integrations/supabase/client";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import { Badge } from "@/components/ui/badge";
@@ -93,44 +93,27 @@ const LearningDetail = () => {
   const [additionalInstructors, setAdditionalInstructors] = useState<InstructorWithProfile[]>([]);
   const [institution, setInstitution] = useState<InstitutionData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [enrolling, setEnrolling] = useState(false);
+  const enrolling = false;
   const [activeSection, setActiveSection] = useState("program");
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
-  const handleEnroll = async () => {
+  const handleEnroll = () => {
     if (!user) {
       navigate("/auth");
       return;
     }
     if (!program) return;
-    setEnrolling(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-xendit-invoice", {
-        body: {
-          checkout_type: "program_order",
-          amount: program.price_cents,
-          currency: program.currency || "IDR",
-          description: `Pendaftaran program: ${program.title}`,
-          program_id: program.id,
-          program_title: program.title,
-          success_redirect_url: `${window.location.origin}/checkout?payment=success&type=program`,
-          failure_redirect_url: `${window.location.origin}/checkout?payment=failed`,
-        },
-      });
-
-      const result = data || {};
-      if (error || result?.error) {
-        toast({ title: "Gagal", description: result?.error || "Tidak dapat membuat invoice.", variant: "destructive" });
-        return;
-      }
-      if (result.invoice_url) {
-        window.location.href = result.invoice_url;
-      }
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message || "Terjadi kesalahan.", variant: "destructive" });
-    } finally {
-      setEnrolling(false);
-    }
+    const params = new URLSearchParams({
+      type: "program_order",
+      program_id: program.id,
+      title: program.title,
+      amount: String(program.price_cents),
+      currency: program.currency || "IDR",
+    });
+    if (program.oveercode) params.set("oveercode", program.oveercode);
+    if (program.thumbnail_url) params.set("thumbnail", program.thumbnail_url);
+    if (program.duration) params.set("duration", program.duration);
+    navigate(`/checkout?${params.toString()}`);
   };
 
   useEffect(() => {
