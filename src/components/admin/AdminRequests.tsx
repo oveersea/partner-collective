@@ -27,7 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 
-type RequestType = "project" | "service";
+type RequestType = "project" | "service" | "hiring";
 
 interface UnifiedRequest {
   id: string;
@@ -121,21 +121,39 @@ const AdminRequests = () => {
   const fetchRequests = async () => {
     setLoading(true);
 
-    const { data: projects } = await supabase
-      .from("opportunities")
-      .select("id, title, description, status, sla_type, sla_deadline, assigned_to, assigned_vendor_id, admin_notes, created_at, user_id, category, skills_required, budget_min, budget_max")
-      .eq("job_type", "project")
-      .order("created_at", { ascending: false });
+    const [projectsRes, ordersRes, hiringRes] = await Promise.all([
+      supabase
+        .from("opportunities")
+        .select("id, title, description, status, sla_type, sla_deadline, assigned_to, assigned_vendor_id, admin_notes, created_at, user_id, category, skills_required, budget_min, budget_max")
+        .eq("job_type", "project")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("orders")
+        .select("id, order_number, service_slug, items, status, sla_type, sla_deadline, assigned_to, assigned_vendor_id, admin_notes, created_at, user_id")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("hiring_requests")
+        .select("id, title, description, hiring_type, status, positions_count, required_skills, credit_cost, sla_deadline, oveercode, created_at, client_id, business_id, admin_notes, assigned_to, assigned_vendor_id, business_profiles(name)")
+        .order("created_at", { ascending: false }),
+    ]);
 
-    const { data: orders } = await supabase
-      .from("orders")
-      .select("id, order_number, service_slug, items, status, sla_type, sla_deadline, assigned_to, assigned_vendor_id, admin_notes, created_at, user_id")
-      .order("created_at", { ascending: false });
+    const projects = projectsRes.data || [];
+    const orders = ordersRes.data || [];
+    const hiringData = hiringRes.data || [];
+
+    // Resolve client_id → user_id for hiring requests
+    const clientIds = hiringData.map((h: any) => h.client_id).filter(Boolean);
+    const uniqueClientIds = [...new Set(clientIds)];
+    const { data: clientProfiles } = uniqueClientIds.length > 0
+      ? await supabase.from("client_profiles").select("id, user_id").in("id", uniqueClientIds)
+      : { data: [] };
+    const clientToUser = new Map((clientProfiles || []).map((c: any) => [c.id, c.user_id]));
 
     const userIds = [
-      ...(projects || []).map((p) => p.user_id),
-      ...(orders || []).map((o) => o.user_id),
-    ].filter(Boolean);
+      ...projects.map((p: any) => p.user_id),
+      ...orders.map((o: any) => o.user_id),
+      ...hiringData.map((h: any) => clientToUser.get(h.client_id)).filter(Boolean),
+    ];
 
     const uniqueUserIds = [...new Set(userIds)];
     const { data: profiles } = await supabase
@@ -143,10 +161,10 @@ const AdminRequests = () => {
       .select("user_id, full_name")
       .in("user_id", uniqueUserIds.length > 0 ? uniqueUserIds : ["00000000-0000-0000-0000-000000000000"]);
 
-    const profileMap = new Map((profiles || []).map((p) => [p.user_id, p.full_name]));
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p.full_name]));
 
     const unified: UnifiedRequest[] = [
-      ...(projects || []).map((p) => ({
+      ...projects.map((p: any) => ({
         id: p.id,
         type: "project" as RequestType,
         title: p.title,
@@ -165,7 +183,7 @@ const AdminRequests = () => {
         budget_min: p.budget_min,
         budget_max: p.budget_max,
       })),
-      ...(orders || []).map((o) => ({
+      ...orders.map((o: any) => ({
         id: o.id,
         type: "service" as RequestType,
         title: (o.items as any)?.project_title || o.service_slug || "Service Order",
@@ -183,6 +201,27 @@ const AdminRequests = () => {
         service_slug: o.service_slug,
         items: o.items,
       })),
+      ...hiringData.map((h: any) => {
+        const resolvedUserId = clientToUser.get(h.client_id) || "";
+        return {
+          id: h.id,
+          type: "hiring" as RequestType,
+          title: h.title,
+          description: h.description,
+          status: h.status,
+          sla_type: h.hiring_type === "fast" ? "urgent" : "normal",
+          sla_deadline: h.sla_deadline,
+          assigned_to: h.assigned_to || null,
+          assigned_vendor_id: h.assigned_vendor_id || null,
+          admin_notes: h.admin_notes || null,
+          created_at: h.created_at,
+          user_id: resolvedUserId,
+          user_name: profileMap.get(resolvedUserId) || ((h.business_profiles as any)?.name) || "—",
+          category: h.hiring_type,
+          skills_required: h.required_skills || [],
+          order_number: h.oveercode,
+        };
+      }),
     ];
 
     setRequests(unified);
@@ -199,11 +238,12 @@ const AdminRequests = () => {
     const completed = requests.filter(r => r.status === "completed");
     const projectCount = requests.filter(r => r.type === "project").length;
     const serviceCount = requests.filter(r => r.type === "service").length;
+    const hiringCount = requests.filter(r => r.type === "hiring").length;
 
     // SLA health: percentage of active that are NOT overdue
     const slaHealth = active.length > 0 ? Math.round(((active.length - overdue.length) / active.length) * 100) : 100;
 
-    return { total: requests.length, pending: pending.length, assigned: assigned.length, overdue: overdue.length, urgent: urgent.length, completed: completed.length, projectCount, serviceCount, slaHealth, activeCount: active.length };
+    return { total: requests.length, pending: pending.length, assigned: assigned.length, overdue: overdue.length, urgent: urgent.length, completed: completed.length, projectCount, serviceCount, hiringCount, slaHealth, activeCount: active.length };
   }, [requests]);
 
   // Tab filtering
@@ -286,13 +326,9 @@ const AdminRequests = () => {
       if (assignType === "user" && assignTo) { updates.assigned_to = assignTo; updates.assigned_vendor_id = null; }
       else if (assignType === "vendor" && assignTo) { updates.assigned_vendor_id = assignTo; updates.assigned_to = null; }
 
-      if (selectedRequest.type === "project") {
-        const { error } = await supabase.from("opportunities").update(updates).eq("id", selectedRequest.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("orders").update(updates).eq("id", selectedRequest.id);
-        if (error) throw error;
-      }
+      const table = selectedRequest.type === "project" ? "opportunities" : selectedRequest.type === "hiring" ? "hiring_requests" : "orders";
+      const { error } = await supabase.from(table).update(updates).eq("id", selectedRequest.id);
+      if (error) throw error;
       toast.success("Request updated successfully!");
       setAssignDialog(false);
       fetchRequests();
@@ -305,7 +341,7 @@ const AdminRequests = () => {
 
   const handleQuickStatusChange = async (req: UnifiedRequest, newStatus: string) => {
     try {
-      const table = req.type === "project" ? "opportunities" : "orders";
+      const table = req.type === "project" ? "opportunities" : req.type === "hiring" ? "hiring_requests" : "orders";
       const { error } = await supabase.from(table).update({ status: newStatus }).eq("id", req.id);
       if (error) throw error;
       toast.success(`Status changed to ${newStatus}`);
@@ -319,7 +355,7 @@ const AdminRequests = () => {
     if (!deleteTarget || !isSuperadmin) return;
     setDeleting(true);
     try {
-      const table = deleteTarget.type === "project" ? "opportunities" : "orders";
+      const table = deleteTarget.type === "project" ? "opportunities" : deleteTarget.type === "hiring" ? "hiring_requests" : "orders";
       const { error } = await supabase.from(table).delete().eq("id", deleteTarget.id);
       if (error) throw error;
       toast.success("Request deleted successfully");
@@ -382,9 +418,10 @@ const AdminRequests = () => {
             <FolderKanban className="w-4 h-4 text-primary" />
           </div>
           <p className="text-3xl font-bold text-foreground">{stats.activeCount}</p>
-          <div className="flex gap-3 mt-2 text-xs text-muted-foreground">
+          <div className="flex gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
             <span className="flex items-center gap-1"><FolderKanban className="w-3 h-3" /> {stats.projectCount} project</span>
             <span className="flex items-center gap-1"><ShoppingCart className="w-3 h-3" /> {stats.serviceCount} service</span>
+            <span className="flex items-center gap-1"><User className="w-3 h-3" /> {stats.hiringCount} hiring</span>
           </div>
         </motion.div>
 
@@ -465,6 +502,7 @@ const AdminRequests = () => {
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="project">Project Request</SelectItem>
             <SelectItem value="service">Service Order</SelectItem>
+            <SelectItem value="hiring">Hiring Request</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="outline" size="sm" onClick={() => setSortField(f => f === "sla_deadline" ? "created_at" : "sla_deadline")} className="gap-1.5">
@@ -500,8 +538,8 @@ const AdminRequests = () => {
                 className="p-4 flex items-start gap-4 cursor-pointer hover:bg-muted/30 transition-colors"
                 onClick={() => setExpandedId(isExpanded ? null : req.id)}
               >
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${req.type === "project" ? "bg-blue-500/10" : "bg-primary/10"}`}>
-                  {req.type === "project" ? <FolderKanban className="w-4 h-4 text-blue-500" /> : <ShoppingCart className="w-4 h-4 text-primary" />}
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${req.type === "project" ? "bg-blue-500/10" : req.type === "hiring" ? "bg-amber-500/10" : "bg-primary/10"}`}>
+                  {req.type === "project" ? <FolderKanban className="w-4 h-4 text-blue-500" /> : req.type === "hiring" ? <User className="w-4 h-4 text-amber-500" /> : <ShoppingCart className="w-4 h-4 text-primary" />}
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -657,7 +695,7 @@ const AdminRequests = () => {
               <div className="bg-muted/50 rounded-lg p-3">
                 <p className="text-sm font-medium text-foreground">{selectedRequest.title}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {selectedRequest.type === "project" ? "Project Request" : "Service Order"} • by {selectedRequest.user_name}
+                  {selectedRequest.type === "project" ? "Project Request" : selectedRequest.type === "hiring" ? "Hiring Request" : "Service Order"} • by {selectedRequest.user_name}
                 </p>
               </div>
               <div className="space-y-2">
