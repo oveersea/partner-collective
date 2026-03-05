@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
     const skills = Array.isArray(profile.skills) ? profile.skills : [];
     const summary = profile.professional_summary || profile.bio || "";
     const oveercode = profile.oveercode || "";
-    const validationUrl = `https://partner-collective.lovable.app/p/${encodeURIComponent(oveercode)}`;
+    const validationUrl = `https://oveersea.com/p/${encodeURIComponent(oveercode)}`;
 
     // Generate QR code as SVG (high contrast for print)
     let qrSvg = "";
@@ -481,7 +481,7 @@ Deno.serve(async (req) => {
 
   <div class="cv-footer">
     <div class="cv-footer-left">
-      <img src="https://partner-collective.lovable.app/oveersea-logo-dark-cv.png" alt="Oveersea" class="cv-footer-logo" />
+      <img src="https://oveersea.com/oveersea-logo-dark-cv.png" alt="Oveersea" class="cv-footer-logo" />
       <span>Generated ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
     </div>
     <div class="cv-footer-right">

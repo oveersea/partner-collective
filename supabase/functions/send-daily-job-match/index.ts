@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
     const eduCountMap: Record<string, number> = {};
     for (const r of (eduRows || [])) { eduCountMap[r.user_id] = (eduCountMap[r.user_id] || 0) + 1; }
 
-    const appUrl = "https://partner-collective.lovable.app";
+    const appUrl = "https://oveersea.com";
     const today = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
 
     let sentCount = 0;
