@@ -797,7 +797,7 @@ const LearningDetail = () => {
                     </Button>
 
                     {program.oveercode && (
-                      <p className="text-xs text-center text-muted-foreground font-mono">
+                      <p className="text-sm text-center text-muted-foreground font-mono">
                         Kode Program: {program.oveercode}
                       </p>
                     )}
