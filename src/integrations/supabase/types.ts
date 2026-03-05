@@ -8428,6 +8428,7 @@ export type Database = {
           amount: number
           created_at: string
           currency: string
+          discount_amount: number | null
           email: string
           full_name: string
           id: string
@@ -8443,6 +8444,7 @@ export type Database = {
           updated_at: string
           user_id: string | null
           voucher_code: string | null
+          voucher_codes: string[] | null
           voucher_discount_amount: number
           xendit_invoice_id: string | null
           xendit_invoice_url: string | null
@@ -8453,6 +8455,7 @@ export type Database = {
           amount: number
           created_at?: string
           currency?: string
+          discount_amount?: number | null
           email: string
           full_name: string
           id?: string
@@ -8468,6 +8471,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           voucher_code?: string | null
+          voucher_codes?: string[] | null
           voucher_discount_amount?: number
           xendit_invoice_id?: string | null
           xendit_invoice_url?: string | null
@@ -8478,6 +8482,7 @@ export type Database = {
           amount?: number
           created_at?: string
           currency?: string
+          discount_amount?: number | null
           email?: string
           full_name?: string
           id?: string
@@ -8493,6 +8498,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           voucher_code?: string | null
+          voucher_codes?: string[] | null
           voucher_discount_amount?: number
           xendit_invoice_id?: string | null
           xendit_invoice_url?: string | null
