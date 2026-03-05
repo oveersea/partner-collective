@@ -80,7 +80,7 @@ const HiringCandidatePanel = ({ hiringRequestId, requiredSkills }: Props) => {
 
     const [profilesRes, archivesRes] = await Promise.all([
       profileIds.length > 0
-        ? supabase.from("profiles").select("user_id, full_name, skills, current_title, oveercode").in("user_id", profileIds)
+        ? supabase.from("profiles").select("user_id, full_name, skills, headline, oveercode").in("user_id", profileIds)
         : { data: [] },
       archiveIds.length > 0
         ? supabase.from("candidates_archive").select("id, full_name, skills, current_title, oveercode, email").in("id", archiveIds)
@@ -93,7 +93,7 @@ const HiringCandidatePanel = ({ hiringRequestId, requiredSkills }: Props) => {
     const resolved: MatchedCandidate[] = data.map((d: any) => {
       if (d.source_type === "profile" && d.profile_user_id) {
         const p = profileMap.get(d.profile_user_id);
-        return { ...d, name: p?.full_name || "Unknown", email: null, skills: p?.skills || [], title: p?.current_title, oveercode: p?.oveercode };
+        return { ...d, name: p?.full_name || "Unknown", email: null, skills: p?.skills || [], title: p?.headline, oveercode: p?.oveercode };
       }
       const a = archiveMap.get(d.candidate_archive_id);
       return { ...d, name: a?.full_name || "Unknown", email: a?.email, skills: a?.skills || [], title: a?.current_title, oveercode: a?.oveercode };
