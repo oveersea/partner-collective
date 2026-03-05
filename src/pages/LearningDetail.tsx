@@ -475,62 +475,70 @@ const LearningDetail = () => {
         <Separator />
 
         {/* KURIKULUM SECTION */}
-        {syllabus.length > 0 && (
-          <section id="kurikulum" ref={(el) => { sectionRefs.current["kurikulum"] = el; }} className="py-16">
-            <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">KURIKULUM</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
-              Kurikulum Teruji Industri
-            </h2>
-            <p className="text-muted-foreground mb-8 max-w-2xl">
-              {syllabus.length} modul dirancang untuk memberikan pemahaman menyeluruh dari dasar hingga mahir.
-            </p>
-
-            <div className="space-y-3">
-              {syllabus.map((mod, i) => (
-                <Collapsible key={i}>
-                  <Card className="overflow-hidden">
-                    <CollapsibleTrigger className="w-full">
-                      <CardContent className="p-0">
-                        <div className="flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors">
-                          <div className="w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center shrink-0">
-                            <span className="text-[10px] font-semibold text-primary uppercase">Modul</span>
-                            <span className="text-lg font-bold text-primary leading-none">{i + 1}</span>
+        <section id="kurikulum" ref={(el) => { sectionRefs.current["kurikulum"] = el; }} className="py-16">
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">KURIKULUM</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+            Kurikulum Teruji Industri
+          </h2>
+          {syllabus.length > 0 ? (
+            <>
+              <p className="text-muted-foreground mb-8 max-w-2xl">
+                {syllabus.length} modul dirancang untuk memberikan pemahaman menyeluruh dari dasar hingga mahir.
+              </p>
+              <div className="space-y-3">
+                {syllabus.map((mod, i) => (
+                  <Collapsible key={i}>
+                    <Card className="overflow-hidden">
+                      <CollapsibleTrigger className="w-full">
+                        <CardContent className="p-0">
+                          <div className="flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors">
+                            <div className="w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center shrink-0">
+                              <span className="text-[10px] font-semibold text-primary uppercase">Modul</span>
+                              <span className="text-lg font-bold text-primary leading-none">{i + 1}</span>
+                            </div>
+                            <div className="flex-1 text-left min-w-0">
+                              <h3 className="font-semibold text-foreground text-sm sm:text-base">{mod.title}</h3>
+                              {mod.topics && (
+                                <p className="text-xs text-muted-foreground mt-0.5">{mod.topics.length} topik</p>
+                              )}
+                            </div>
+                            <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0 transition-transform" />
                           </div>
-                          <div className="flex-1 text-left min-w-0">
-                            <h3 className="font-semibold text-foreground text-sm sm:text-base">{mod.title}</h3>
-                            {mod.topics && (
-                              <p className="text-xs text-muted-foreground mt-0.5">{mod.topics.length} topik</p>
-                            )}
-                          </div>
-                          <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0 transition-transform" />
+                        </CardContent>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="px-5 pb-5 pl-[4.75rem] space-y-3 border-t border-border pt-4">
+                          {mod.description && (
+                            <p className="text-sm text-muted-foreground leading-relaxed">{mod.description}</p>
+                          )}
+                          {mod.topics && mod.topics.length > 0 && (
+                            <ul className="space-y-1.5">
+                              {mod.topics.map((t, j) => (
+                                <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                  <Play className="w-3 h-3 text-primary mt-1 shrink-0 fill-primary" />
+                                  {t}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </div>
-                      </CardContent>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="px-5 pb-5 pl-[4.75rem] space-y-3 border-t border-border pt-4">
-                        {mod.description && (
-                          <p className="text-sm text-muted-foreground leading-relaxed">{mod.description}</p>
-                        )}
-                        {mod.topics && mod.topics.length > 0 && (
-                          <ul className="space-y-1.5">
-                            {mod.topics.map((t, j) => (
-                              <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
-                                <Play className="w-3 h-3 text-primary mt-1 shrink-0 fill-primary" />
-                                {t}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    </CollapsibleContent>
-                  </Card>
-                </Collapsible>
-              ))}
+                      </CollapsibleContent>
+                    </Card>
+                  </Collapsible>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
+                <BookOpen className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground text-sm">Kurikulum untuk program ini belum tersedia.</p>
             </div>
-          </section>
-        )}
+          )}
+        </section>
 
-        {syllabus.length > 0 && <Separator />}
+        <Separator />
 
         {/* INSTRUKTUR SECTION */}
         {allInstructors.length > 0 && (
