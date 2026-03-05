@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
+import { CountrySelect } from "@/components/ui/country-select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -107,7 +108,7 @@ const ProfileEditForm = ({ editData, onChange, onSave, onCancel }: ProfileEditFo
         </div>
         <div>
           <Label className="text-card-foreground">Country</Label>
-          <Input className="mt-1.5" value={editData.country || ""} onChange={(e) => set("country", e.target.value)} />
+          <CountrySelect className="mt-1.5" value={editData.country || ""} onChange={(v) => set("country", v)} />
         </div>
         <div>
           <Label className="text-card-foreground">Postal Code</Label>

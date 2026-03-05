@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CountrySelect } from "@/components/ui/country-select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -301,7 +302,7 @@ const AdminCompanyDetail = () => {
                 </div>
                 <div>
                   <Label>Negara</Label>
-                  <Input value={data.country || ""} onChange={(e) => update("country", e.target.value)} />
+                  <CountrySelect value={data.country || ""} onChange={(v) => update("country", v)} />
                 </div>
                 <div className="md:col-span-2">
                   <Label>Alamat</Label>
