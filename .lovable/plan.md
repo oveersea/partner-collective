@@ -1,58 +1,25 @@
 
 
-## Problem
+## Plan: Merge "Hiring & Matching" into "Request & Order"
 
-The profile completion percentage (`calcProfileScore` in `AdminUsers.tsx` and `calcProfileCompleteness` in `AdminUserDetail.tsx`) currently checks only 10 basic profile fields from the `profiles` table. It does not verify whether the user actually has:
+### What changes
 
-- **Experience records** (from `user_experiences` table)
-- **Education records** (from `user_education` table)
-- **Certifications** (from `user_certifications` table)
+1. **Remove "Hiring & Matching" from sidebar** -- Delete the `hiring` entry from `adminSections` in `AdminSidebar.tsx` and remove the `Briefcase` icon import.
 
-This means a user who fills in basic text fields like `full_name`, `phone_number`, `city`, `bio`, `skills`, `highest_education` can already reach 60%+ without any real experience or education data.
+2. **Remove hiring case from AdminDashboard** -- Remove the `import AdminHiring` and the `case "hiring"` from the `renderContent()` switch in `AdminDashboard.tsx`.
 
-Additionally, the `send-daily-job-match` edge function has its own simpler 5-field completion check that also ignores these records.
+3. **Add Shortage Alerts tab to AdminRequests** -- The unique feature in `AdminHiring` that is NOT already in `AdminRequests` is the **Talent Shortage Alerts** tab (fetching from `talent_shortage_alerts`). This will be integrated into `AdminRequests.tsx` as an additional tab alongside the existing "All / Urgent / Pending / In Progress / Overdue / Completed" tabs. Specifically:
+   - Add a new tab "Shortage Alerts" with an `AlertTriangle` icon and badge count.
+   - Fetch `talent_shortage_alerts` data inside `fetchRequests()`.
+   - Render the alerts table (skills, shortage count, SLA type, status, date) when the tab is active.
 
-## Plan
+4. **Keep AdminHiringDetail route** -- The `/admin/hiring/:oveercode` detail page remains intact since hiring requests in the unified view can still navigate to it.
 
-### 1. Update profile completion logic in `AdminUsers.tsx`
-
-Modify `calcProfileScore` to include 14 criteria (instead of 10):
-
-| # | Field | Check |
-|---|-------|-------|
-| 1 | full_name | non-empty |
-| 2 | avatar_url | non-empty |
-| 3 | phone_number | non-empty |
-| 4 | skills | length > 0 |
-| 5 | years_of_experience | > 0 |
-| 6 | highest_education | non-empty |
-| 7 | bio / professional_summary | non-empty |
-| 8 | city or country | non-empty |
-| 9 | linkedin_url or website_url | non-empty |
-| 10 | kyc_status | verified/approved |
-| 11 | date_of_birth | non-empty |
-| 12 | nationality | non-empty |
-| 13 | has experience records | count > 0 (from fetched data) |
-| 14 | has education records | count > 0 (from fetched data) |
-
-Since the AdminUsers list page needs experience/education counts per user, we'll fetch aggregate counts. Two approaches:
-
-- **Option A**: Fetch `user_experiences` and `user_education` counts in bulk alongside the users query (two additional queries, group by user_id).
-- **Option B**: Add `experience_count` and `education_count` as computed/stored fields on profiles (requires migration).
-
-**Option A** is simpler and avoids schema changes. We'll fetch counts for all displayed users and pass them to the score function.
-
-### 2. Update the same logic in `AdminUserDetail.tsx`
-
-The `calcProfileCompleteness` function will be updated with the same 14 criteria. This page already fetches experience and education data, so we just need to pass the counts.
-
-### 3. Update `send-daily-job-match` edge function
-
-Update the completion calculation to use the expanded criteria (or at minimum add experience check since it already checks `years_of_experience`).
+5. **Optionally delete `AdminHiring.tsx`** -- Since it will no longer be referenced anywhere.
 
 ### Files to modify
-
-- `src/components/admin/AdminUsers.tsx` — update `calcProfileScore`, add experience/education count queries
-- `src/pages/AdminUserDetail.tsx` — update `calcProfileCompleteness` to include experience/education counts
-- `supabase/functions/send-daily-job-match/index.ts` — update completion calculation
+- `src/components/admin/AdminSidebar.tsx` -- Remove `hiring` from `adminSections`
+- `src/pages/AdminDashboard.tsx` -- Remove `AdminHiring` import and case
+- `src/components/admin/AdminRequests.tsx` -- Add shortage alerts fetch + tab + table
+- `src/components/admin/AdminHiring.tsx` -- Delete file (no longer used)
 
