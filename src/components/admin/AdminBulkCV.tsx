@@ -15,7 +15,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Upload, FileText, RefreshCw, CheckCircle2, XCircle, Loader2, Trash2 } from "lucide-react";
+import { Upload, FileText, RefreshCw, CheckCircle2, XCircle, Loader2, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 type CvUpload = {
@@ -33,6 +33,7 @@ type CvUpload = {
 
 const MAX_FILES = 20;
 const MAX_CONCURRENT = 5;
+const ARCHIVE_PAGE_SIZE = 25;
 const ACCEPTED_TYPES = [
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -40,6 +41,10 @@ const ACCEPTED_TYPES = [
 
 const AdminBulkCV = () => {
   const [uploads, setUploads] = useState<CvUpload[]>([]);
+  const [archivedAll, setArchivedAll] = useState<CvUpload[]>([]);
+  const [archiveTotal, setArchiveTotal] = useState(0);
+  const [archivePage, setArchivePage] = useState(0);
+  const [archiveLoading, setArchiveLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -49,15 +54,46 @@ const AdminBulkCV = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const invitedIdsRef = useRef<Set<string>>(new Set());
 
-  const fetchUploads = useCallback(async () => {
+  const fetchActiveUploads = useCallback(async () => {
     const { data, error } = await supabase
       .from("cv_uploads")
       .select("*")
-      .order("created_at", { ascending: false })
-      .limit(100);
-
+      .neq("parsing_status", "completed")
+      .order("created_at", { ascending: false });
     if (!error && data) setUploads(data as CvUpload[]);
     setLoading(false);
+  }, []);
+
+  const fetchArchiveCount = useCallback(async () => {
+    const { count } = await supabase
+      .from("cv_uploads")
+      .select("*", { count: "exact", head: true })
+      .eq("parsing_status", "completed");
+    setArchiveTotal(count || 0);
+  }, []);
+
+  const fetchArchivePage = useCallback(async (page: number) => {
+    setArchiveLoading(true);
+    const from = page * ARCHIVE_PAGE_SIZE;
+    const to = from + ARCHIVE_PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from("cv_uploads")
+      .select("*")
+      .eq("parsing_status", "completed")
+      .order("created_at", { ascending: false })
+      .range(from, to);
+    if (!error && data) setArchivedAll(data as CvUpload[]);
+    setArchiveLoading(false);
+  }, []);
+
+  const fetchUploads = useCallback(async () => {
+    await Promise.all([fetchActiveUploads(), fetchArchiveCount(), fetchArchivePage(archivePage)]);
+  }, [fetchActiveUploads, fetchArchiveCount, fetchArchivePage, archivePage]);
+
+  useEffect(() => {
+    fetchActiveUploads();
+    fetchArchiveCount();
+    fetchArchivePage(0);
   }, []);
 
   useEffect(() => {
@@ -110,8 +146,8 @@ const AdminBulkCV = () => {
       const { data } = await supabase
         .from("cv_uploads")
         .select("*")
-        .order("created_at", { ascending: false })
-        .limit(100);
+        .neq("parsing_status", "completed")
+        .order("created_at", { ascending: false });
 
       if (data) {
         const newUploads = data as CvUpload[];
@@ -122,10 +158,12 @@ const AdminBulkCV = () => {
           }
         }
         setUploads(newUploads);
+        // Refresh archive count when items move to completed
+        fetchArchiveCount();
       }
     }, 3000);
     return () => clearInterval(interval);
-  }, [uploads, autoInviteCandidate]);
+  }, [uploads, autoInviteCandidate, fetchArchiveCount]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -253,6 +291,10 @@ const AdminBulkCV = () => {
       if (error) throw error;
 
       setUploads(prev => prev.filter(u => u.id !== upload.id));
+      setArchivedAll(prev => prev.filter(u => u.id !== upload.id));
+      if (upload.parsing_status === "completed") {
+        setArchiveTotal(prev => Math.max(0, prev - 1));
+      }
       setDeleteTarget(null);
       toast.success(`"${upload.file_name}" berhasil dihapus`);
     } catch (err: any) {
@@ -280,11 +322,15 @@ const AdminBulkCV = () => {
     return (bytes / 1048576).toFixed(1) + " MB";
   };
 
-  const completedCount = uploads.filter(u => u.parsing_status === "completed").length;
   const failedCount = uploads.filter(u => u.parsing_status === "failed").length;
   const processingCount = uploads.filter(u => u.parsing_status === "processing" || u.parsing_status === "pending").length;
-  const activeUploads = uploads.filter(u => u.parsing_status !== "completed");
-  const archivedUploads = uploads.filter(u => u.parsing_status === "completed");
+  const activeUploads = uploads;
+  const totalPages = Math.ceil(archiveTotal / ARCHIVE_PAGE_SIZE);
+
+  const goToArchivePage = (page: number) => {
+    setArchivePage(page);
+    fetchArchivePage(page);
+  };
 
   const renderTable = (items: CvUpload[], emptyMsg: string) => {
     if (items.length === 0) {
@@ -380,13 +426,13 @@ const AdminBulkCV = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-4 pb-4">
-            <div className="text-2xl font-bold text-foreground">{uploads.length}</div>
+            <div className="text-2xl font-bold text-foreground">{uploads.length + archiveTotal}</div>
             <div className="text-sm text-muted-foreground">Total Upload</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 pb-4">
-            <div className="text-2xl font-bold text-green-600">{completedCount}</div>
+            <div className="text-2xl font-bold text-green-600">{archiveTotal}</div>
             <div className="text-sm text-muted-foreground">Berhasil Diparse</div>
           </CardContent>
         </Card>
@@ -410,8 +456,8 @@ const AdminBulkCV = () => {
           <TabsTrigger value="active">
             Aktif {activeUploads.length > 0 && <Badge variant="secondary" className="ml-2 text-xs">{activeUploads.length}</Badge>}
           </TabsTrigger>
-          <TabsTrigger value="archive">
-            Arsip {archivedUploads.length > 0 && <Badge variant="secondary" className="ml-2 text-xs">{archivedUploads.length}</Badge>}
+          <TabsTrigger value="archive" onClick={() => { if (archivedAll.length === 0) fetchArchivePage(0); }}>
+            Arsip {archiveTotal > 0 && <Badge variant="secondary" className="ml-2 text-xs">{archiveTotal}</Badge>}
           </TabsTrigger>
         </TabsList>
 
@@ -425,7 +471,7 @@ const AdminBulkCV = () => {
                 <div className="flex justify-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                 </div>
-              ) : activeUploads.length === 0 && uploads.length === 0 ? (
+              ) : activeUploads.length === 0 && archiveTotal === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
                   <p>Belum ada CV yang diupload</p>
@@ -443,15 +489,69 @@ const AdminBulkCV = () => {
         <TabsContent value="archive">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Arsip — Berhasil Diparse</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Arsip — Berhasil Diparse</CardTitle>
+                {archiveTotal > 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    {archivePage * ARCHIVE_PAGE_SIZE + 1}–{Math.min((archivePage + 1) * ARCHIVE_PAGE_SIZE, archiveTotal)} dari {archiveTotal}
+                  </span>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
-              {loading ? (
+              {archiveLoading ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                 </div>
               ) : (
-                renderTable(archivedUploads, "Belum ada CV yang selesai diparse")
+                <>
+                  {renderTable(archivedAll, "Belum ada CV yang selesai diparse")}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-4 border-t border-border mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={archivePage === 0}
+                        onClick={() => goToArchivePage(archivePage - 1)}
+                      >
+                        <ChevronLeft className="w-4 h-4 mr-1" /> Sebelumnya
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                          let page: number;
+                          if (totalPages <= 7) {
+                            page = i;
+                          } else if (archivePage < 4) {
+                            page = i;
+                          } else if (archivePage > totalPages - 5) {
+                            page = totalPages - 7 + i;
+                          } else {
+                            page = archivePage - 3 + i;
+                          }
+                          return (
+                            <Button
+                              key={page}
+                              variant={page === archivePage ? "default" : "ghost"}
+                              size="sm"
+                              className="w-8 h-8 p-0"
+                              onClick={() => goToArchivePage(page)}
+                            >
+                              {page + 1}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={archivePage >= totalPages - 1}
+                        onClick={() => goToArchivePage(archivePage + 1)}
+                      >
+                        Selanjutnya <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
