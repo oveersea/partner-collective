@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import { Badge } from "@/components/ui/badge";
@@ -84,13 +86,52 @@ const NAV_ITEMS = [
 
 const LearningDetail = () => {
   const { oveercode } = useParams<{ oveercode: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [program, setProgram] = useState<ProgramDetail | null>(null);
   const [instructor, setInstructor] = useState<InstructorWithProfile | null>(null);
   const [additionalInstructors, setAdditionalInstructors] = useState<InstructorWithProfile[]>([]);
   const [institution, setInstitution] = useState<InstitutionData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [enrolling, setEnrolling] = useState(false);
   const [activeSection, setActiveSection] = useState("program");
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+
+  const handleEnroll = async () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    if (!program) return;
+    setEnrolling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-xendit-invoice", {
+        body: {
+          checkout_type: "program_order",
+          amount: program.price_cents,
+          currency: program.currency || "IDR",
+          description: `Pendaftaran program: ${program.title}`,
+          program_id: program.id,
+          program_title: program.title,
+          success_redirect_url: `${window.location.origin}/checkout?payment=success&type=program`,
+          failure_redirect_url: `${window.location.origin}/checkout?payment=failed`,
+        },
+      });
+
+      const result = data || {};
+      if (error || result?.error) {
+        toast({ title: "Gagal", description: result?.error || "Tidak dapat membuat invoice.", variant: "destructive" });
+        return;
+      }
+      if (result.invoice_url) {
+        window.location.href = result.invoice_url;
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Terjadi kesalahan.", variant: "destructive" });
+    } finally {
+      setEnrolling(false);
+    }
+  };
 
   useEffect(() => {
     if (!oveercode) return;
@@ -371,7 +412,9 @@ const LearningDetail = () => {
               </button>
             ))}
             <div className="ml-auto flex items-center gap-2 py-2">
-              <Button size="sm" onClick={() => scrollToSection("jadwal")}>Daftar Sekarang</Button>
+              <Button size="sm" onClick={handleEnroll} disabled={enrolling}>
+                {enrolling ? "Memproses..." : "Daftar Sekarang"}
+              </Button>
             </div>
           </div>
         </div>
@@ -732,8 +775,8 @@ const LearningDetail = () => {
                   )}
                 </div>
 
-                <Button className="w-full" size="lg">
-                  <GraduationCap className="w-4 h-4 mr-2" /> Daftar Sekarang
+                <Button className="w-full" size="lg" onClick={handleEnroll} disabled={enrolling}>
+                  <GraduationCap className="w-4 h-4 mr-2" /> {enrolling ? "Memproses..." : "Daftar Sekarang"}
                 </Button>
 
                 {program.oveercode && (
