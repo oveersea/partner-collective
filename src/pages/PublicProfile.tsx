@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -241,6 +241,15 @@ const PublicProfile = () => {
 
   return (
     <div className="min-h-screen bg-muted/30">
+      {/* Breadcrumb */}
+      <div className="bg-background border-b">
+        <div className="w-full px-4 md:px-8 lg:px-16 py-3 flex items-center gap-2 text-sm text-muted-foreground">
+          <Link to="/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link>
+          <span>/</span>
+          <span className="text-foreground font-medium truncate">{profile.full_name || "Profile"}</span>
+        </div>
+      </div>
+
       {/* Top banner */}
       <div className="bg-[#D71920] h-36 md:h-44" />
 
