@@ -40,6 +40,7 @@ import Checkout from "./pages/Checkout";
 import RequestQuote from "./pages/RequestQuote";
 import Verification from "./pages/Verification";
 import PublicProfile from "./pages/PublicProfile";
+import MyRequests from "./pages/MyRequests";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ const App = () => (
             <Route path="/request-quote" element={<RequestQuote />} />
             <Route path="/verification" element={<Verification />} />
             <Route path="/p/:oveercode" element={<PublicProfile />} />
+            <Route path="/my-requests" element={<MyRequests />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
