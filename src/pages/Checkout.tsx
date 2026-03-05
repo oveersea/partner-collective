@@ -125,7 +125,7 @@ const Checkout = () => {
     return (
       <div className="min-h-screen bg-background">
         <DashboardNav />
-        <div className="max-w-2xl mx-auto px-4 py-10">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-10">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1 as any)} className="mb-6">
             <ArrowLeft className="w-4 h-4 mr-2" /> Kembali
           </Button>
@@ -134,72 +134,81 @@ const Checkout = () => {
             <h1 className="text-2xl font-bold text-foreground mb-1">Konfirmasi Pendaftaran</h1>
             <p className="text-muted-foreground mb-8">Periksa detail program sebelum melanjutkan pembayaran.</p>
 
-            <Card>
-              <CardContent className="p-6 space-y-5">
-                {/* Program info */}
-                <div className="flex gap-4">
-                  {thumbnail ? (
-                    <img src={thumbnail} alt={title} className="w-20 h-20 rounded-lg object-cover shrink-0" />
-                  ) : (
-                    <div className="w-20 h-20 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <GraduationCap className="w-8 h-8 text-primary" />
+            <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-6">
+              {/* Main column - 70% */}
+              <Card>
+                <CardContent className="p-6 space-y-5">
+                  {/* Program info */}
+                  <div className="flex gap-4">
+                    {thumbnail ? (
+                      <img src={thumbnail} alt={title} className="w-24 h-24 rounded-lg object-cover shrink-0" />
+                    ) : (
+                      <div className="w-24 h-24 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <GraduationCap className="w-10 h-10 text-primary" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <h2 className="font-semibold text-foreground text-lg leading-tight">{title}</h2>
+                      {oveercode && (
+                        <p className="text-xs text-muted-foreground font-mono mt-1">Kode: {oveercode}</p>
+                      )}
+                      {duration && (
+                        <p className="text-sm text-muted-foreground flex items-center gap-1 mt-2">
+                          <Clock className="w-3.5 h-3.5" /> {duration}
+                        </p>
+                      )}
                     </div>
-                  )}
-                  <div className="min-w-0">
-                    <h2 className="font-semibold text-foreground text-lg leading-tight">{title}</h2>
-                    {oveercode && (
-                      <p className="text-xs text-muted-foreground font-mono mt-1">Kode: {oveercode}</p>
-                    )}
-                    {duration && (
-                      <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                        <Clock className="w-3.5 h-3.5" /> {duration}
-                      </p>
-                    )}
                   </div>
-                </div>
 
-                <Separator />
-
-                {/* Price breakdown */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Biaya Program</span>
-                    <span className="text-foreground font-medium">{formatRupiah(amount)}</span>
-                  </div>
                   <Separator />
-                  <div className="flex justify-between text-base font-semibold">
-                    <span className="text-foreground">Total Pembayaran</span>
-                    <span className="text-primary">{formatRupiah(amount)}</span>
-                  </div>
-                </div>
 
-                <Separator />
-
-                {/* Payment info */}
-                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                  <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <CreditCard className="w-4 h-4 mt-0.5 shrink-0" />
-                    <span>Anda akan diarahkan ke halaman pembayaran Xendit untuk menyelesaikan transaksi.</span>
+                  {/* Price breakdown */}
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-foreground text-sm">Rincian Biaya</h3>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Biaya Program</span>
+                      <span className="text-foreground font-medium">{formatRupiah(amount)}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between text-base font-semibold">
+                      <span className="text-foreground">Total Pembayaran</span>
+                      <span className="text-primary">{formatRupiah(amount)}</span>
+                    </div>
                   </div>
-                  <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <Shield className="w-4 h-4 mt-0.5 shrink-0" />
-                    <span>Pembayaran diproses secara aman. Data Anda terlindungi.</span>
-                  </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                <Button className="w-full" size="lg" onClick={handlePayment} disabled={submitting}>
-                  {submitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Memproses...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="w-4 h-4 mr-2" /> Bayar {formatRupiah(amount)}
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
+              {/* Sidebar column - 30% */}
+              <div className="space-y-4">
+                <Card>
+                  <CardContent className="p-5 space-y-4">
+                    <h3 className="font-semibold text-foreground text-sm">Metode Pembayaran</h3>
+                    <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                      <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CreditCard className="w-4 h-4 mt-0.5 shrink-0" />
+                        <span>Anda akan diarahkan ke halaman pembayaran Xendit untuk menyelesaikan transaksi.</span>
+                      </div>
+                      <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Shield className="w-4 h-4 mt-0.5 shrink-0" />
+                        <span>Pembayaran diproses secara aman. Data Anda terlindungi.</span>
+                      </div>
+                    </div>
+
+                    <Button className="w-full" size="lg" onClick={handlePayment} disabled={submitting}>
+                      {submitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Memproses...
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="w-4 h-4 mr-2" /> Bayar {formatRupiah(amount)}
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </motion.div>
         </div>
       </div>
