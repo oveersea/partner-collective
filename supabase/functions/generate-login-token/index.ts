@@ -37,11 +37,13 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SB_SERVICE_ROLE_KEY");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SB_ANON_KEY");
 
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("Missing Supabase env for admin client", {
+    if (!supabaseUrl || !supabaseServiceKey || !supabaseAnonKey) {
+      console.error("Missing Supabase env vars", {
         hasUrl: Boolean(supabaseUrl),
         hasServiceKey: Boolean(supabaseServiceKey),
+        hasAnonKey: Boolean(supabaseAnonKey),
       });
       return new Response(JSON.stringify({ error: "Server misconfiguration" }), {
         status: 500,
@@ -49,7 +51,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+    // Separate clients to prevent auth context leak
+    const supabaseService = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
@@ -60,7 +66,7 @@ Deno.serve(async (req) => {
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    const { data: activeKeysByPrefix, error: keyLookupErr } = await supabaseAdmin
+    const { data: activeKeysByPrefix, error: keyLookupErr } = await supabaseService
       .from("api_keys")
       .select("id, is_active, expires_at, scopes, key_prefix, key_hash")
       .eq("key_prefix", apiKeyPrefix)
@@ -103,8 +109,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Validate password by attempting sign-in
-    const { data: signInData, error: signInErr } = await supabaseAdmin.auth.signInWithPassword({
+    // Validate password using ANON client (prevents auth context leak on service client)
+    const { data: signInData, error: signInErr } = await supabaseAuth.auth.signInWithPassword({
       email,
       password,
     });
@@ -124,7 +130,7 @@ Deno.serve(async (req) => {
     const tokenHashBuffer = await crypto.subtle.digest("SHA-256", tokenBytes);
     const tokenHash = Array.from(new Uint8Array(tokenHashBuffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
 
-    const { error: insertErr } = await supabaseAdmin.from("login_tokens").insert({
+    const { error: insertErr } = await supabaseService.from("login_tokens").insert({
       token_hash: tokenHash,
       user_id: userId,
       api_key_id: apiKey.id,
@@ -132,15 +138,15 @@ Deno.serve(async (req) => {
     });
 
     if (insertErr) {
-      console.error("Insert token error:", insertErr);
+      console.error("Insert token error:", JSON.stringify({ code: insertErr.code, message: insertErr.message, details: insertErr.details }));
       return new Response(JSON.stringify({ error: "Failed to create login token" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Update last_used_at on API key
-    await supabaseAdmin
+    // Update last_used_at on API key (service client)
+    await supabaseService
       .from("api_keys")
       .update({ last_used_at: new Date().toISOString() })
       .eq("id", apiKey.id);
