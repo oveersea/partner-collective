@@ -38,6 +38,9 @@ interface UserProfile {
   professional_summary: string | null;
   avatar_url: string | null;
   linkedin_url: string | null;
+  website_url: string | null;
+  date_of_birth: string | null;
+  nationality: string | null;
 }
 
 interface LoginActivity {
@@ -51,9 +54,9 @@ const PAGE_SIZE = 25;
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const calcProfileScore = (u: UserProfile): number => {
+const calcProfileScore = (u: UserProfile, expCount: number, eduCount: number): number => {
   let score = 0;
-  const total = 10;
+  const total = 14;
   if (u.full_name) score++;
   if (u.avatar_url) score++;
   if (u.phone_number) score++;
@@ -62,8 +65,12 @@ const calcProfileScore = (u: UserProfile): number => {
   if (u.highest_education) score++;
   if (u.bio || u.professional_summary) score++;
   if (u.city || u.country) score++;
-  if (u.linkedin_url) score++;
+  if (u.linkedin_url || u.website_url) score++;
   if (u.kyc_status === 'approved' || u.kyc_status === 'verified') score++;
+  if (u.date_of_birth) score++;
+  if (u.nationality) score++;
+  if (expCount > 0) score++;
+  if (eduCount > 0) score++;
   return Math.round((score / total) * 100);
 };
 
@@ -95,10 +102,13 @@ const AdminUsers = () => {
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; type: "deactivate" | "delete"; userId: string; name: string }>({ open: false, type: "deactivate", userId: "", name: "" });
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [bulkDownloading, setBulkDownloading] = useState(false);
+  const [expCounts, setExpCounts] = useState<Record<string, number>>({});
+  const [eduCounts, setEduCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchUsers();
     fetchLoginActivity();
+    fetchExpEduCounts();
   }, []);
 
   const fetchUsers = async () => {
@@ -110,7 +120,7 @@ const AdminUsers = () => {
     while (hasMore) {
       const { data, error } = await supabase
         .from("profiles")
-        .select("user_id, full_name, oveercode, account_type, kyc_status, city, country, created_at, last_online, skills, years_of_experience, highest_education, phone_number, bio, professional_summary, avatar_url, linkedin_url")
+        .select("user_id, full_name, oveercode, account_type, kyc_status, city, country, created_at, last_online, skills, years_of_experience, highest_education, phone_number, bio, professional_summary, avatar_url, linkedin_url, website_url, date_of_birth, nationality")
         .order("created_at", { ascending: false })
         .range(from, from + batchSize - 1);
 
@@ -129,6 +139,29 @@ const AdminUsers = () => {
 
     setUsers(allData);
     setLoading(false);
+  };
+
+  const fetchExpEduCounts = async () => {
+    const [expRes, eduRes] = await Promise.all([
+      supabase.from("user_experiences").select("user_id"),
+      supabase.from("user_education").select("user_id"),
+    ]);
+
+    const expMap: Record<string, number> = {};
+    if (expRes.data) {
+      for (const r of expRes.data) {
+        expMap[r.user_id] = (expMap[r.user_id] || 0) + 1;
+      }
+    }
+    setExpCounts(expMap);
+
+    const eduMap: Record<string, number> = {};
+    if (eduRes.data) {
+      for (const r of eduRes.data) {
+        eduMap[r.user_id] = (eduMap[r.user_id] || 0) + 1;
+      }
+    }
+    setEduCounts(eduMap);
   };
 
   const fetchLoginActivity = async () => {
@@ -286,8 +319,8 @@ const AdminUsers = () => {
         let va: number, vb: number;
         switch (sortKey) {
           case "profile":
-            va = calcProfileScore(a);
-            vb = calcProfileScore(b);
+            va = calcProfileScore(a, expCounts[a.user_id] || 0, eduCounts[a.user_id] || 0);
+            vb = calcProfileScore(b, expCounts[b.user_id] || 0, eduCounts[b.user_id] || 0);
             break;
           case "activity":
             va = activityMap[a.user_id]?.total_logins || 0;
@@ -314,7 +347,7 @@ const AdminUsers = () => {
       });
     }
     return list;
-  }, [users, search, sortKey, sortDir, activityMap]);
+  }, [users, search, sortKey, sortDir, activityMap, expCounts, eduCounts]);
 
   useEffect(() => { setPage(1); setSelectedUsers(new Set()); }, [search]);
 
@@ -414,7 +447,7 @@ const AdminUsers = () => {
                 <tr><td colSpan={11} className="px-4 py-8 text-center text-muted-foreground">No data found</td></tr>
               ) : (
                 pagedUsers.map((u) => {
-                  const pScore = calcProfileScore(u);
+                  const pScore = calcProfileScore(u, expCounts[u.user_id] || 0, eduCounts[u.user_id] || 0);
                   const scoreColor = pScore >= 70 ? "text-primary bg-primary/10" : pScore >= 40 ? "text-amber-600 bg-amber-500/10" : "text-destructive bg-destructive/10";
                   const activity = activityMap[u.user_id];
                   const totalLogins = activity?.total_logins || 0;

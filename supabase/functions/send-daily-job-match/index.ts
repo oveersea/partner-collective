@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     // 3. Get all users with profiles (who have email)
     const { data: profiles, error: profErr } = await supabase
       .from("profiles")
-      .select("user_id, full_name, skills, years_of_experience, city, headline, avatar_url")
+      .select("user_id, full_name, skills, years_of_experience, city, headline, avatar_url, phone_number, bio, professional_summary, highest_education, country, linkedin_url, website_url, date_of_birth, nationality, kyc_status")
       .not("user_id", "is", null);
 
     if (profErr) throw new Error("Failed to fetch profiles: " + profErr.message);
@@ -68,6 +68,14 @@ Deno.serve(async (req) => {
       .from("blacklisted_emails")
       .select("email");
     const blacklistedSet = new Set((blacklisted || []).map((b) => b.email.toLowerCase()));
+
+    // 3b. Fetch experience and education counts per user
+    const { data: expRows } = await supabase.from("user_experiences").select("user_id");
+    const { data: eduRows } = await supabase.from("user_education").select("user_id");
+    const expCountMap: Record<string, number> = {};
+    for (const r of (expRows || [])) { expCountMap[r.user_id] = (expCountMap[r.user_id] || 0) + 1; }
+    const eduCountMap: Record<string, number> = {};
+    for (const r of (eduRows || [])) { eduCountMap[r.user_id] = (eduCountMap[r.user_id] || 0) + 1; }
 
     const appUrl = "https://partner-collective.lovable.app";
     const today = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
@@ -111,13 +119,25 @@ Deno.serve(async (req) => {
       const topMatches = matches.slice(0, 5);
 
       const hasMatches = topMatches.length > 0;
-      // Estimate profile completeness based on available fields
-      const hasAvatar = !!profile.avatar_url;
-      const hasHeadline = !!profile.headline;
-      const hasCity = !!profile.city;
-      const hasExp = (profile.years_of_experience || 0) > 0;
-      const filledFields = [hasAvatar, hasHeadline, hasCity, hasExp, userSkills.length > 0].filter(Boolean).length;
-      const profileCompletion = Math.round((filledFields / 5) * 100);
+      // Estimate profile completeness based on 14 criteria
+      const checks = [
+        !!profile.full_name,
+        !!profile.avatar_url,
+        !!profile.phone_number,
+        userSkills.length > 0,
+        (profile.years_of_experience || 0) > 0,
+        !!profile.highest_education,
+        !!(profile.bio || profile.professional_summary),
+        !!(profile.city || profile.country),
+        !!(profile.linkedin_url || profile.website_url),
+        profile.kyc_status === 'approved' || profile.kyc_status === 'verified',
+        !!profile.date_of_birth,
+        !!profile.nationality,
+        (expCountMap[profile.user_id] || 0) > 0,
+        (eduCountMap[profile.user_id] || 0) > 0,
+      ];
+      const filledFields = checks.filter(Boolean).length;
+      const profileCompletion = Math.round((filledFields / 14) * 100);
       const isProfileIncomplete = profileCompletion < 80 || userSkills.length === 0;
 
       // Build email HTML
