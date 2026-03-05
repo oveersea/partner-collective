@@ -35,60 +35,58 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SB_SERVICE_ROLE_KEY");
 
-    // Validate password by attempting sign-in
-    const { data: signInData, error: signInErr } = await supabaseAdmin.auth.signInWithPassword({
-      email,
-      password,
-    });
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("Missing Supabase env for admin client", {
+        hasUrl: Boolean(supabaseUrl),
+        hasServiceKey: Boolean(supabaseServiceKey),
+      });
+      return new Response(JSON.stringify({ error: "Server misconfiguration" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    if (signInErr || !signInData?.user) {
-      return new Response(JSON.stringify({ error: "Invalid email or password" }), {
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    const apiKeyPrefix = normalizedApiKey.slice(0, 12);
+    const normalizedBytes = new TextEncoder().encode(normalizedApiKey);
+    const normalizedHashBuffer = await crypto.subtle.digest("SHA-256", normalizedBytes);
+    const normalizedHash = Array.from(new Uint8Array(normalizedHashBuffer))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    const { data: activeKeysByPrefix, error: keyLookupErr } = await supabaseAdmin
+      .from("api_keys")
+      .select("id, is_active, expires_at, scopes, key_prefix, key_hash")
+      .eq("key_prefix", apiKeyPrefix)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (keyLookupErr) {
+      console.error("API key lookup error:", keyLookupErr);
+      return new Response(JSON.stringify({ error: "Failed to validate API key" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!activeKeysByPrefix || activeKeysByPrefix.length === 0) {
+      return new Response(JSON.stringify({ error: "Invalid or inactive API key" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const apiKeyCandidates = Array.from(
-      new Set([normalizedApiKey, normalizedApiKey.toLowerCase(), normalizedApiKey.toUpperCase()]),
-    );
+    const apiKey = activeKeysByPrefix.find((k) => k.key_hash === normalizedHash);
 
-    const keyHashes = await Promise.all(
-      apiKeyCandidates.map(async (candidate) => {
-        const candidateBytes = new TextEncoder().encode(candidate);
-        const candidateHashBuffer = await crypto.subtle.digest("SHA-256", candidateBytes);
-        return Array.from(new Uint8Array(candidateHashBuffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
-      }),
-    );
-
-    // Validate API key
-    const { data: apiKeys, error: keyErr } = await supabaseAdmin
-      .from("api_keys")
-      .select("id, is_active, expires_at, scopes, key_prefix")
-      .in("key_hash", keyHashes)
-      .eq("is_active", true)
-      .order("created_at", { ascending: false })
-      .limit(1);
-
-    const apiKey = apiKeys?.[0];
-
-    if (keyErr || !apiKey) {
-      const maybePrefix = normalizedApiKey.slice(0, 12);
-      const { data: prefixHit } = await supabaseAdmin
-        .from("api_keys")
-        .select("id")
-        .eq("key_prefix", maybePrefix)
-        .eq("is_active", true)
-        .limit(1);
-
-      const prefixOnlyDetected = normalizedApiKey.length <= 12 || (prefixHit?.length ?? 0) > 0;
-      const errorMessage = prefixOnlyDetected
+    if (!apiKey) {
+      const errorMessage = normalizedApiKey.length <= 12
         ? "API key looks incomplete. Use full API key, not key prefix."
-        : "Invalid or inactive API key";
+        : "API key mismatch. Please copy the full key again.";
 
       return new Response(JSON.stringify({ error: errorMessage }), {
         status: 401,
@@ -98,6 +96,19 @@ Deno.serve(async (req) => {
 
     if (apiKey.expires_at && new Date(apiKey.expires_at) < new Date()) {
       return new Response(JSON.stringify({ error: "API key expired" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate password by attempting sign-in
+    const { data: signInData, error: signInErr } = await supabaseAdmin.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInErr || !signInData?.user) {
+      return new Response(JSON.stringify({ error: "Invalid email or password" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
