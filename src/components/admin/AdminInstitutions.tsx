@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CountrySelect } from "@/components/ui/country-select";
+import { CitySelect } from "@/components/ui/city-select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -297,13 +298,20 @@ const AdminInstitutions = () => {
               </div>
               <div>
                 <Label>Tahun Berdiri</Label>
-                <Input type="number" value={form.founded_year} onChange={(e) => setForm({ ...form, founded_year: e.target.value })} placeholder="e.g. 2005" />
+                <Select value={form.founded_year} onValueChange={(v) => setForm({ ...form, founded_year: v })}>
+                  <SelectTrigger><SelectValue placeholder="Pilih tahun" /></SelectTrigger>
+                  <SelectContent className="max-h-[240px]">
+                    {Array.from({ length: 80 }, (_, i) => (new Date().getFullYear() - i).toString()).map(y => (
+                      <SelectItem key={y} value={y}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Kota</Label>
-                <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Jakarta" />
+                <CitySelect value={form.city} onChange={(v) => setForm({ ...form, city: v })} />
               </div>
               <div>
                 <Label>Negara</Label>
