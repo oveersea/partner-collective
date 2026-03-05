@@ -1,13 +1,16 @@
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  MapPin, Briefcase, GraduationCap, Award, Mail, Globe, Linkedin,
-  CheckCircle2, Phone, Calendar, User, Lock, Languages, Heart
+  MapPin, Briefcase, GraduationCap, Award, Globe, Linkedin,
+  CheckCircle2, Phone, Calendar, User, Lock, Languages, Heart, Unlock
 } from "lucide-react";
+import { toast } from "sonner";
 
 /* ── helpers ── */
 const fmtDate = (d: string | null) => {
@@ -22,7 +25,7 @@ const fmtRange = (start: string | null, end: string | null, isCurrent: boolean) 
   return `${s} — ${e}`;
 };
 
-const maskEmail = (email: string | null) => {
+const _maskEmail = (email: string | null) => {
   if (!email) return null;
   const [user, domain] = email.split("@");
   if (!domain) return "••••@••••";
@@ -52,6 +55,9 @@ const availabilityLabel: Record<string, string> = { available: "Available", open
 /* ── component ── */
 const PublicProfile = () => {
   const { oveercode } = useParams<{ oveercode: string }>();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ["public-profile", oveercode],
@@ -68,6 +74,56 @@ const PublicProfile = () => {
   });
 
   const userId = profile?.user_id;
+
+  // Check if current user has unlocked this profile's contact
+  const { data: isUnlocked } = useQuery({
+    queryKey: ["profile-unlock", user?.id, userId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profile_unlocks")
+        .select("id")
+        .eq("unlocked_by", user!.id)
+        .eq("profile_user_id", userId!)
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user && !!userId && user.id !== userId,
+  });
+
+  // If it's the user's own profile, always show contact
+  const showContact = user?.id === userId || isUnlocked === true;
+
+  const unlockMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("unlock-profile-contact", {
+        body: { profile_user_id: userId },
+      });
+      if (error) throw error;
+      if (data?.error) {
+        if (data.error === "Insufficient credits") {
+          throw new Error(`Credit tidak cukup. Saldo: ${data.balance}, dibutuhkan: ${data.required}`);
+        }
+        throw new Error(data.error);
+      }
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Kontak berhasil dibuka!");
+      queryClient.invalidateQueries({ queryKey: ["profile-unlock", user?.id, userId] });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
+
+  const handleUnlock = () => {
+    if (!user) {
+      toast.error("Silakan login terlebih dahulu");
+      navigate("/auth");
+      return;
+    }
+    unlockMutation.mutate();
+  };
 
   const { data: experiences } = useQuery({
     queryKey: ["public-exp", userId],
@@ -307,36 +363,81 @@ const PublicProfile = () => {
 
           {/* ── Sidebar (30%) ── */}
           <div className="space-y-6">
-            {/* Contact — masked */}
+            {/* Contact */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-muted-foreground" /> Kontak
+                  {showContact ? (
+                    <Unlock className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <Lock className="w-4 h-4 text-muted-foreground" />
+                  )}
+                  Kontak
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {/* Email not available on public profiles */}
-                {profile.phone_number && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <span className="text-muted-foreground">{maskPhone(profile.phone_number)}</span>
-                  </div>
+                {showContact ? (
+                  <>
+                    {profile.phone_number && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <a href={`tel:${profile.phone_number}`} className="text-foreground hover:underline">
+                          {profile.phone_number}
+                        </a>
+                      </div>
+                    )}
+                    {profile.linkedin_url && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Linkedin className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-foreground hover:underline truncate">
+                          {profile.linkedin_url}
+                        </a>
+                      </div>
+                    )}
+                    {profile.website_url && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Globe className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <a href={profile.website_url} target="_blank" rel="noopener noreferrer" className="text-foreground hover:underline truncate">
+                          {profile.website_url}
+                        </a>
+                      </div>
+                    )}
+                    {!profile.phone_number && !profile.linkedin_url && !profile.website_url && (
+                      <p className="text-sm text-muted-foreground">Belum ada informasi kontak.</p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {profile.phone_number && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <span className="text-muted-foreground">{maskPhone(profile.phone_number)}</span>
+                      </div>
+                    )}
+                    {profile.linkedin_url && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Linkedin className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <span className="text-muted-foreground">{maskUrl(profile.linkedin_url)}</span>
+                      </div>
+                    )}
+                    {profile.website_url && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Globe className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <span className="text-muted-foreground">{maskUrl(profile.website_url)}</span>
+                      </div>
+                    )}
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="w-full mt-2"
+                      onClick={handleUnlock}
+                      disabled={unlockMutation.isPending}
+                    >
+                      <Unlock className="w-4 h-4 mr-2" />
+                      {unlockMutation.isPending ? "Membuka..." : "Buka Kontak — 2 Credit"}
+                    </Button>
+                  </>
                 )}
-                {profile.linkedin_url && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Linkedin className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <span className="text-muted-foreground">{maskUrl(profile.linkedin_url)}</span>
-                  </div>
-                )}
-                {profile.website_url && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Globe className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <span className="text-muted-foreground">{maskUrl(profile.website_url)}</span>
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground/70 pt-1 flex items-center gap-1">
-                  <Lock className="w-3 h-3" /> Buka kontak senilai 2 credit
-                </p>
               </CardContent>
             </Card>
 
