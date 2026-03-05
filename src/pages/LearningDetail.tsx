@@ -37,7 +37,12 @@ const LearningDetail = () => {
     if (!oveercode) return;
     const fetch = async () => {
       setLoading(true);
-      const { data } = await supabase.from("programs").select("*").eq("oveercode", oveercode).eq("status", "approved").maybeSingle();
+      // Try oveercode first, then fallback to slug
+      let { data } = await supabase.from("programs").select("*").eq("oveercode", oveercode).eq("status", "approved").maybeSingle();
+      if (!data) {
+        const fallback = await supabase.from("programs").select("*").eq("slug", oveercode).eq("status", "approved").maybeSingle();
+        data = fallback.data;
+      }
       if (data) {
         setProgram({
           ...data,
