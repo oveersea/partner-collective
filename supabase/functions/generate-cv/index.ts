@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
       qrSvg = await QRCode.toString(validationUrl, {
         type: "svg",
         width: 240,
-        margin: 2,
+        margin: 1,
         color: { dark: "#000000", light: "#ffffff" },
         errorCorrectionLevel: "M",
       });
@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CV – ${esc(profile.full_name) || "User"}</title>
 <style>
-  @page { margin: 12mm 16mm; size: A4; }
+  @page { margin: 0; size: A4; }
   *, *::before, *::after { box-sizing: border-box; }
 
   body {
@@ -383,6 +383,7 @@ Deno.serve(async (req) => {
     width: 78px;
     height: 78px;
     flex-shrink: 0;
+    background: #fff;
   }
   .qr-wrapper svg {
     width: 78px;
@@ -390,9 +391,15 @@ Deno.serve(async (req) => {
     display: block;
     background: #fff;
   }
-  .qr-wrapper svg path,
-  .qr-wrapper svg rect {
+  .qr-wrapper svg path[fill="#000000"],
+  .qr-wrapper svg path:not([fill]),
+  .qr-wrapper svg rect[fill="#000000"] {
     fill: #000 !important;
+  }
+  .qr-wrapper svg path[fill="#ffffff"],
+  .qr-wrapper svg rect[fill="#ffffff"],
+  .qr-wrapper svg rect:not([fill]) {
+    fill: #fff !important;
   }
   .qr-label {
     font-size: 6.5pt;
@@ -420,9 +427,15 @@ Deno.serve(async (req) => {
   .btn-print:hover { background: #f3f4f6; }
 
   @media print {
-    body { background: #fff; }
+    body { background: #fff !important; margin: 0; padding: 0; }
     .print-bar { display: none !important; }
-    .page { width: 100%; min-height: auto; margin: 0; padding: 0; }
+    .page {
+      width: 100%;
+      min-height: auto;
+      margin: 0 !important;
+      padding: 12mm 14mm !important;
+      box-shadow: none;
+    }
     .section { break-inside: avoid; }
     .entry { break-inside: avoid; }
   }
