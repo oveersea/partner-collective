@@ -347,7 +347,7 @@ const LearningDetail = () => {
 
             {/* Right: Thumbnail */}
             <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
-              <div className="rounded-2xl overflow-hidden bg-muted aspect-video shadow-xl">
+              <div className="rounded-2xl overflow-hidden bg-muted aspect-[4/5] shadow-xl">
                 {program.thumbnail_url ? (
                   <img src={program.thumbnail_url} alt={program.title} className="w-full h-full object-contain" />
                 ) : (
