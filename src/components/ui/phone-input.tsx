@@ -110,7 +110,7 @@ const PhoneInput = ({ value, onChange, placeholder = "812 3456 7890", className,
   };
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const num = e.target.value.replace(/[^\\d\\s\\-]/g, "");
+    const num = e.target.value.replace(/[^\d\s-]/g, "");
     onChange(num ? `${parsed.dialCode} ${num}` : "");
   };
 
