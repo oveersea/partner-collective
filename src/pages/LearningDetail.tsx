@@ -812,9 +812,24 @@ const LearningDetail = () => {
                       )}
                     </div>
 
-                    <Button className="w-full" size="lg" onClick={handleEnroll} disabled={enrolling}>
-                      <GraduationCap className="w-4 h-4 mr-2" /> {enrolling ? "Memproses..." : "Daftar Sekarang"}
-                    </Button>
+                    {/* User's enrollment barcode */}
+                    {userOrder && userOrder.status === "paid" ? (
+                      <OrderBarcode
+                        orderNumber={userOrder.order_number}
+                        title={program.title}
+                        checkedIn={!!userOrder.checked_in_at}
+                        checkedInAt={userOrder.checked_in_at}
+                        compact
+                      />
+                    ) : userOrder && userOrder.status === "pending" ? (
+                      <div className="text-center text-xs text-muted-foreground p-3 rounded-xl bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
+                        ⏳ Menunggu pembayaran...
+                      </div>
+                    ) : (
+                      <Button className="w-full" size="lg" onClick={handleEnroll} disabled={enrolling}>
+                        <GraduationCap className="w-4 h-4 mr-2" /> {enrolling ? "Memproses..." : "Daftar Sekarang"}
+                      </Button>
+                    )}
 
                     {program.oveercode && (
                       <p className="text-sm text-center text-muted-foreground font-mono">
