@@ -88,11 +88,16 @@ const Checkout = () => {
           <p className="text-muted-foreground mb-8">
             {checkoutType === "program" || checkoutType === "program_order"
               ? "Pendaftaran program Anda telah diproses. Anda akan mendapat akses setelah verifikasi selesai."
+              : checkoutType === "event_ticket"
+              ? "Tiket event Anda telah berhasil dibeli. Cek email untuk detail tiket."
               : "Pembayaran Anda telah diproses. Saldo akan diperbarui dalam beberapa saat."}
           </p>
           <div className="flex gap-3 justify-center">
             {(checkoutType === "program" || checkoutType === "program_order") && (
               <Button onClick={() => navigate("/learning")}>Ke Halaman Learning</Button>
+            )}
+            {checkoutType === "event_ticket" && (
+              <Button onClick={() => navigate("/events")}>Ke Halaman Events</Button>
             )}
             <Button variant="outline" onClick={() => navigate("/dashboard")}>
               Ke Dashboard
