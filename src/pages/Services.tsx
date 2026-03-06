@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Users, CheckCircle2, Megaphone, Code, Palette, Briefcase, FileText, Calculator } from "lucide-react";
+import { ArrowLeft, Users, CheckCircle2, Megaphone, Code, Palette, Briefcase, FileText, Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const iconMap: Record<string, React.ElementType> = {
   Megaphone, Code, Palette, Briefcase, FileText, Calculator,
