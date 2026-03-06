@@ -81,13 +81,6 @@ const KYCVerification = () => {
       .eq("user_id", user!.id)
       .single();
 
-    if (profile) {
-      setKycStatus(profile.kyc_status as KycStatus);
-      if (profile.full_name) setFullName(profile.full_name);
-      if (profile.city) setCity(profile.city);
-      if (profile.phone_number) setPhone(profile.phone_number);
-    }
-
     const { data: sub } = await supabase
       .from("kyc_submissions")
       .select("id, status, primary_doc_type, primary_doc_file_name, rejection_reason, admin_notes, created_at")
@@ -97,6 +90,26 @@ const KYCVerification = () => {
       .maybeSingle();
 
     if (sub) setSubmission(sub as KycSubmission);
+
+    if (profile) {
+      let effectiveStatus = profile.kyc_status as KycStatus;
+
+      // If profile says "pending" but no submission exists, treat as unverified
+      if (effectiveStatus === "pending" && !sub) {
+        effectiveStatus = "unverified";
+        // Also fix the profile status in DB
+        await supabase
+          .from("profiles")
+          .update({ kyc_status: "unverified" })
+          .eq("user_id", user!.id);
+      }
+
+      setKycStatus(effectiveStatus);
+      if (profile.full_name) setFullName(profile.full_name);
+      if (profile.city) setCity(profile.city);
+      if (profile.phone_number) setPhone(profile.phone_number);
+    }
+
     setLoading(false);
   };
 
