@@ -403,6 +403,25 @@ const AdminRequests = () => {
     return { pct, hoursLeft, isOverdue: hoursLeft < 0 };
   };
 
+  const formatSlaRemaining = (hoursRaw: number) => {
+    const abs = Math.abs(hoursRaw);
+    const totalSeconds = abs * 3600;
+    const months = Math.floor(abs / (24 * 30));
+    const weeks = Math.floor((abs % (24 * 30)) / (24 * 7));
+    const days = Math.floor((abs % (24 * 7)) / 24);
+    const hours = Math.floor(abs % 24);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+    const parts: string[] = [];
+    if (months > 0) parts.push(`${months}mo`);
+    if (weeks > 0) parts.push(`${weeks}w`);
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    if (parts.length === 0) parts.push(`${minutes}m`);
+    // Show max 2 most significant units
+    return parts.slice(0, 2).join(" ");
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -641,7 +660,7 @@ const AdminRequests = () => {
                         />
                       </div>
                       <span className={`text-[10px] font-medium ${sla.isOverdue ? "text-destructive" : sla.hoursLeft < 24 ? "text-amber-500" : "text-muted-foreground"}`}>
-                        {sla.isOverdue ? `${Math.abs(sla.hoursLeft)}h overdue` : `${sla.hoursLeft}h left`}
+                        {sla.isOverdue ? `${formatSlaRemaining(sla.hoursLeft)} overdue` : `${formatSlaRemaining(sla.hoursLeft)} left`}
                       </span>
                     </div>
                   )}
