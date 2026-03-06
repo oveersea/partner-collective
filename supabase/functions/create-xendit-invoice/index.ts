@@ -198,6 +198,8 @@ Deno.serve(async (req) => {
     } else if (checkout_type === "program_order") {
       metadata.program_id = program_id;
       metadata.program_title = program_title;
+    } else if (checkout_type === "event_ticket") {
+      metadata.event_id = body.event_id;
     }
 
     const xenditRes = await fetch("https://api.xendit.co/v2/invoices", {
