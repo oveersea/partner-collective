@@ -69,6 +69,7 @@ const statusColor = (s: string) => {
 
 const AdminEnrollments = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [tab, setTab] = useState("programs");
   const [programOrders, setProgramOrders] = useState<ProgramEnrollment[]>([]);
   const [eventOrders, setEventOrders] = useState<EventEnrollment[]>([]);
