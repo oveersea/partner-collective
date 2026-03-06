@@ -387,7 +387,7 @@ const AdminEnrollments = () => {
                     <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
                   ) : (
                     (paged as EventEnrollment[]).map(e => (
-                      <tr key={e.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                      <tr key={e.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/enrollment/${e.id}?type=event`)}>
                         <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{e.order_number}</td>
                         <td className="px-4 py-3">
                           <div className="text-foreground text-xs font-medium">{e.full_name}</div>
