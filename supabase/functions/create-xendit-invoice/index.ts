@@ -288,6 +288,23 @@ Deno.serve(async (req) => {
         ...voucherMeta,
       });
       insertError = error;
+    } else if (checkout_type === "event_ticket") {
+      const { error } = await adminClient.from("event_orders").insert({
+        event_id: body.event_id,
+        user_id: userId,
+        full_name: profile?.full_name || "User",
+        email: userEmail,
+        phone: profile?.phone || "",
+        amount: finalAmount,
+        currency: currency || "IDR",
+        status: "pending",
+        xendit_invoice_id: invoice.id,
+        xendit_invoice_url: invoice.invoice_url,
+        voucher_codes: voucherCodes.length > 0 ? voucherCodes : null,
+        discount_amount: verifiedDiscount > 0 ? verifiedDiscount : 0,
+        original_amount: baseAmount,
+      });
+      insertError = error;
     }
 
     if (insertError) {
