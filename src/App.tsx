@@ -45,7 +45,8 @@ import PublicProfile from "./pages/PublicProfile";
 import MyRequests from "./pages/MyRequests";
 import AssessmentDetail from "./pages/AssessmentDetail";
 import CareerPathPage from "./pages/CareerPath";
-
+import Events from "./pages/Events";
+import EventDetail from "./pages/EventDetail";
 const queryClient = new QueryClient();
 
 const App = () => (
