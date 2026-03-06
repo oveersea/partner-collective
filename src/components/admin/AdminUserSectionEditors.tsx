@@ -368,5 +368,120 @@ export const AwardEditor = ({ userId, items, setItems }: { userId: string; items
   );
 };
 
+// ─── CREDIT SCORES ──────────────────────────
+export const CreditScoreEditor = ({ userId, items, setItems }: { userId: string; items: any[]; setItems: (v: any[]) => void }) => {
+  const { editingId, form, saving, deleting, startAdd, startEdit, cancel, set, save, remove } = useInlineEditor(
+    "user_credit_scores", userId, items, setItems,
+    { provider_name: "", score_type: "credit_score", score_value: null, score_grade: "", report_date: "", notes: "", admin_notes: "" }
+  );
+
+  const handleSave = () => save(["provider_name"]);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-end">
+        {!editingId && <Button size="sm" variant="outline" onClick={startAdd}><Plus className="w-3.5 h-3.5 mr-1" /> Tambah</Button>}
+      </div>
+      {editingId && (
+        <div className="border border-border rounded-xl p-4 space-y-3 bg-muted/30">
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div><Label className="text-xs">Provider *</Label><Input className="mt-1" value={form.provider_name || ""} onChange={e => set("provider_name", e.target.value)} placeholder="e.g. SLIK OJK" /></div>
+            <div>
+              <Label className="text-xs">Tipe Score</Label>
+              <Select value={form.score_type || "credit_score"} onValueChange={v => set("score_type", v)}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="credit_score">Credit Score</SelectItem>
+                  <SelectItem value="slik">SLIK</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label className="text-xs">Nilai Score</Label><Input className="mt-1" type="number" value={form.score_value ?? ""} onChange={e => set("score_value", e.target.value ? Number(e.target.value) : null)} /></div>
+            <div><Label className="text-xs">Grade</Label><Input className="mt-1" value={form.score_grade || ""} onChange={e => set("score_grade", e.target.value)} placeholder="e.g. A, B, C" /></div>
+            <div><Label className="text-xs">Tanggal Laporan</Label><Input className="mt-1" type="date" value={form.report_date || ""} onChange={e => set("report_date", e.target.value)} /></div>
+          </div>
+          <div><Label className="text-xs">Catatan</Label><Textarea className="mt-1" rows={2} value={form.notes || ""} onChange={e => set("notes", e.target.value)} /></div>
+          <div><Label className="text-xs">Admin Notes</Label><Textarea className="mt-1" rows={2} value={form.admin_notes || ""} onChange={e => set("admin_notes", e.target.value)} /></div>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={handleSave} disabled={saving}>{saving && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />}<Check className="w-3.5 h-3.5 mr-1" /> Simpan</Button>
+            <Button size="sm" variant="ghost" onClick={cancel}><X className="w-3.5 h-3.5 mr-1" /> Batal</Button>
+          </div>
+        </div>
+      )}
+      {items.map(c => (
+        <div key={c.id} className="flex items-start justify-between gap-2 border border-border rounded-xl p-3">
+          <div>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium text-card-foreground">{c.provider_name}</p>
+              {c.score_value != null && <span className="text-lg font-bold text-primary">{c.score_value}</span>}
+            </div>
+            <p className="text-xs text-muted-foreground">{c.score_type}{c.score_grade ? ` • Grade: ${c.score_grade}` : ""}</p>
+            {c.report_date && <p className="text-xs text-muted-foreground">{fmtDate(c.report_date)}</p>}
+          </div>
+          <ItemActions onEdit={() => startEdit(c)} onDelete={() => remove(c.id)} deleting={deleting === c.id} />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ─── MEDICAL RECORDS ──────────────────────────
+export const MedicalRecordEditor = ({ userId, items, setItems }: { userId: string; items: any[]; setItems: (v: any[]) => void }) => {
+  const { editingId, form, saving, deleting, startAdd, startEdit, cancel, set, save, remove } = useInlineEditor(
+    "user_medical_records", userId, items, setItems,
+    { title: "", record_type: "general", provider: "", record_date: "", description: "", admin_notes: "" }
+  );
+
+  const handleSave = () => save(["title"]);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-end">
+        {!editingId && <Button size="sm" variant="outline" onClick={startAdd}><Plus className="w-3.5 h-3.5 mr-1" /> Tambah</Button>}
+      </div>
+      {editingId && (
+        <div className="border border-border rounded-xl p-4 space-y-3 bg-muted/30">
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div><Label className="text-xs">Judul *</Label><Input className="mt-1" value={form.title || ""} onChange={e => set("title", e.target.value)} /></div>
+            <div>
+              <Label className="text-xs">Tipe Record</Label>
+              <Select value={form.record_type || "general"} onValueChange={v => set("record_type", v)}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General</SelectItem>
+                  <SelectItem value="checkup">Checkup</SelectItem>
+                  <SelectItem value="vaccination">Vaccination</SelectItem>
+                  <SelectItem value="lab_result">Lab Result</SelectItem>
+                  <SelectItem value="specialist">Specialist</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label className="text-xs">Provider</Label><Input className="mt-1" value={form.provider || ""} onChange={e => set("provider", e.target.value)} placeholder="e.g. RS Pondok Indah" /></div>
+            <div><Label className="text-xs">Tanggal</Label><Input className="mt-1" type="date" value={form.record_date || ""} onChange={e => set("record_date", e.target.value)} /></div>
+          </div>
+          <div><Label className="text-xs">Deskripsi</Label><Textarea className="mt-1" rows={2} value={form.description || ""} onChange={e => set("description", e.target.value)} /></div>
+          <div><Label className="text-xs">Admin Notes</Label><Textarea className="mt-1" rows={2} value={form.admin_notes || ""} onChange={e => set("admin_notes", e.target.value)} /></div>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={handleSave} disabled={saving}>{saving && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />}<Check className="w-3.5 h-3.5 mr-1" /> Simpan</Button>
+            <Button size="sm" variant="ghost" onClick={cancel}><X className="w-3.5 h-3.5 mr-1" /> Batal</Button>
+          </div>
+        </div>
+      )}
+      {items.map(m => (
+        <div key={m.id} className="flex items-start justify-between gap-2 border border-border rounded-xl p-3">
+          <div>
+            <p className="text-sm font-medium text-card-foreground">{m.title}</p>
+            <p className="text-xs text-muted-foreground">{m.record_type}{m.provider ? ` • ${m.provider}` : ""}</p>
+            {m.record_date && <p className="text-xs text-muted-foreground">{fmtDate(m.record_date)}</p>}
+          </div>
+          <ItemActions onEdit={() => startEdit(m)} onDelete={() => remove(m.id)} deleting={deleting === m.id} />
+        </div>
+      ))}
+    </div>
+  );
+};
+
 // Helper
 const fmtDate = (d: string | null) => d ? new Date(d).toLocaleDateString("id-ID", { month: "short", year: "numeric" }) : "";
