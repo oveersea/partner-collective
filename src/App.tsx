@@ -27,6 +27,7 @@ import AdminCompanyCreate from "./pages/AdminCompanyCreate";
 import AdminVendorCreate from "./pages/AdminVendorCreate";
 import AdminCreditDetail from "./pages/AdminCreditDetail";
 import AdminHiringDetail from "./pages/AdminHiringDetail";
+import AdminEnrollmentDetail from "./pages/AdminEnrollmentDetail";
 import NotFound from "./pages/NotFound";
 import MobileBottomNav from "./components/MobileBottomNav";
 import ServiceDetail from "./pages/ServiceDetail";
