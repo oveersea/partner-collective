@@ -219,6 +219,94 @@ const MyRequests = () => {
     return colors[status] || "bg-muted text-muted-foreground border-border";
   };
 
+  const handleIgnoreCandidate = async (candidateId: string, hiringRequestId: string) => {
+    setIgnoringId(candidateId);
+    const { error } = await supabase
+      .from("hiring_matched_candidates")
+      .update({ status: "rejected" })
+      .eq("id", candidateId);
+    if (error) {
+      toast.error("Gagal mengabaikan kandidat");
+    } else {
+      toast.success("Kandidat diabaikan");
+      setCandidatesMap(prev => ({
+        ...prev,
+        [hiringRequestId]: prev[hiringRequestId].map(c =>
+          c.id === candidateId ? { ...c, status: "rejected" } : c
+        ),
+      }));
+    }
+    setIgnoringId(null);
+  };
+
+  const handleDownloadCandidateCV = async (candidate: MatchedCandidateDisplay) => {
+    if (!user) return;
+    const targetUserId = candidate.profile_user_id;
+    if (!targetUserId) {
+      toast.error("CV hanya tersedia untuk kandidat dari profil terdaftar");
+      return;
+    }
+
+    setDownloadingCvId(candidate.id);
+    try {
+      // Debit 2 credits
+      const { data: balance } = await supabase
+        .from("credit_balances")
+        .select("balance")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!balance || balance.balance < 2) {
+        toast.error("Saldo kredit tidak cukup (butuh 2 kredit)", {
+          action: { label: "Top Up", onClick: () => navigate("/credit-balance") },
+        });
+        setDownloadingCvId(null);
+        return;
+      }
+
+      // Deduct credits
+      await supabase
+        .from("credit_balances")
+        .update({
+          balance: balance.balance - 2,
+          total_used: (balance as any).total_used ? (balance as any).total_used + 2 : 2,
+        })
+        .eq("user_id", user.id);
+
+      // Generate CV
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast.error("Sesi kadaluarsa"); setDownloadingCvId(null); return; }
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-cv`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ user_id: targetUserId, include_contact: false }),
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Gagal generate CV" }));
+        throw new Error(err.error || "Gagal generate CV");
+      }
+
+      const html = await res.text();
+      const userName = candidate.name.replace(/[^a-zA-Z0-9]/g, "_") || "CV";
+      const ok = renderCvToPdf({ html, fileName: `CV_${userName}.pdf` });
+      if (!ok) throw new Error("Pop-up diblokir atau gagal membuka preview");
+
+      toast.success("CV berhasil di-download (2 kredit didebit)");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal download CV");
+    } finally {
+      setDownloadingCvId(null);
+    }
+  };
+
   const pagedHiring = hiringRequests.slice((hiringPage - 1) * PAGE_SIZE, hiringPage * PAGE_SIZE);
   const hiringTotalPages = Math.max(1, Math.ceil(hiringRequests.length / PAGE_SIZE));
   const pagedProjects = projectRequests.slice((projectPage - 1) * PAGE_SIZE, projectPage * PAGE_SIZE);
