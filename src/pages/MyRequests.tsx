@@ -24,6 +24,8 @@ interface MatchedCandidateDisplay {
   status: string;
   source_type: string;
   oveercode: string | null;
+  profile_user_id: string | null;
+  candidate_archive_id: string | null;
 }
 
 interface HiringRequest {
