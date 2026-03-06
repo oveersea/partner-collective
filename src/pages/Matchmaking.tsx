@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, MapPin, Clock, Briefcase, Zap, Filter,
   ChevronDown, Star, Send, X, DollarSign, Users, Globe,
-  Building2, TrendingUp, CheckCircle2, Eye, ShoppingBag, Package,
+  Building2, TrendingUp, CheckCircle2, ShoppingBag, Package,
   HandCoins, UserCircle, Loader2,
 } from "lucide-react";
 import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
@@ -445,7 +445,7 @@ const Matchmaking = () => {
 
         {/* ── OPPORTUNITIES TAB ───────────────────── */}
         {activeTab === "opportunities" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {(paginated as Opportunity[]).map((opp, idx) => {
               const score = calcMatchScore(opp);
               const applied = appliedIds.has(opp.id);
@@ -453,60 +453,63 @@ const Matchmaking = () => {
               const matchedSkills = opp.skills_required?.filter((s) => profile?.skills?.some((ps) => ps.toLowerCase() === s.toLowerCase())) || [];
 
               return (
-                <motion.div key={opp.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-lg transition-shadow flex flex-col cursor-pointer" onClick={() => navigate(`/job/${opp.oveercode || opp.slug}`)}>
-                  <div className="flex items-start justify-between gap-4">
+                <motion.div key={opp.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.03 }} className="bg-card rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col cursor-pointer" onClick={() => navigate(`/job/${opp.oveercode || opp.slug}`)}>
+                  <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{opp.category}</span>
+                      <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{opp.category}</span>
                         {opp.demand_type && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-accent text-accent-foreground flex items-center gap-1">
-                            {opp.demand_type === "team" ? <Users className="w-3 h-3" /> : <Briefcase className="w-3 h-3" />}
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent text-accent-foreground flex items-center gap-1">
+                            {opp.demand_type === "team" ? <Users className="w-2.5 h-2.5" /> : <Briefcase className="w-2.5 h-2.5" />}
                             {opp.demand_type === "team" ? "Team" : "Partner"}
                           </span>
                         )}
                         {opp.is_remote && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary flex items-center gap-1"><Globe className="w-3 h-3" /> Remote</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary flex items-center gap-1"><Globe className="w-2.5 h-2.5" /> Remote</span>
                         )}
                       </div>
-                      <h3 className="text-lg font-semibold text-card-foreground truncate">{opp.title}</h3>
-                      {opp.company_name && <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5"><Building2 className="w-3.5 h-3.5" /> {opp.company_name}</p>}
-                      {opp.description && <div className="text-sm text-muted-foreground mt-2 line-clamp-2 [&_p]:m-0 [&_strong]:font-semibold" dangerouslySetInnerHTML={{ __html: opp.description }} />}
+                      <h3 className="text-sm font-semibold text-card-foreground truncate">{opp.title}</h3>
+                      {opp.company_name && <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><Building2 className="w-3 h-3" /> {opp.company_name}</p>}
                     </div>
-                    <div className={`shrink-0 w-16 h-16 rounded-2xl border flex flex-col items-center justify-center ${getScoreColor(score)}`}>
-                      <TrendingUp className="w-3.5 h-3.5 mb-0.5" />
-                      <span className="text-lg font-semibold leading-none">{score}%</span>
+                    <div className={`shrink-0 w-12 h-12 rounded-xl border flex flex-col items-center justify-center ${getScoreColor(score)}`}>
+                      <TrendingUp className="w-3 h-3 mb-0.5" />
+                      <span className="text-sm font-semibold leading-none">{score}%</span>
                     </div>
                   </div>
 
+                  {opp.description && <div className="text-xs text-muted-foreground mt-2 line-clamp-2 [&_p]:m-0 [&_strong]:font-semibold" dangerouslySetInnerHTML={{ __html: opp.description }} />}
+
                   {opp.skills_required && opp.skills_required.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      {opp.skills_required.map((skill) => {
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {opp.skills_required.slice(0, 4).map((skill) => {
                         const isMatched = matchedSkills.some((ms) => ms.toLowerCase() === skill.toLowerCase());
                         return (
-                          <span key={skill} className={`text-xs px-2 py-0.5 rounded-full ${isMatched ? "bg-primary/15 text-primary font-medium" : "bg-muted text-muted-foreground"}`}>
+                          <span key={skill} className={`text-[10px] px-2 py-0.5 rounded-full ${isMatched ? "bg-primary/15 text-primary font-medium" : "bg-muted text-muted-foreground"}`}>
                             {isMatched && <span className="mr-0.5">✓</span>}{skill}
                           </span>
                         );
                       })}
+                      {opp.skills_required.length > 4 && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">+{opp.skills_required.length - 4}</span>
+                      )}
                     </div>
                   )}
 
-                  <div className="flex flex-wrap items-center gap-4 mt-4 text-xs text-muted-foreground">
-                    {budget && <span className="flex items-center gap-1"><DollarSign className="w-3.5 h-3.5" /> {budget}</span>}
-                    {opp.location && !opp.is_remote && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {opp.location}</span>}
-                    {opp.project_duration && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {opp.project_duration}</span>}
-                    {opp.min_experience_years != null && <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5" /> Min {opp.min_experience_years} yrs</span>}
+                  <div className="flex flex-wrap items-center gap-3 mt-3 text-[10px] text-muted-foreground">
+                    {budget && <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" /> {budget}</span>}
+                    {opp.location && !opp.is_remote && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {opp.location}</span>}
+                    {opp.project_duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {opp.project_duration}</span>}
+                    {opp.min_experience_years != null && <span className="flex items-center gap-1"><Star className="w-3 h-3" /> Min {opp.min_experience_years} yrs</span>}
                   </div>
 
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-                    <span className="text-xs text-muted-foreground">{new Date(opp.created_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+                    <span className="text-[10px] text-muted-foreground">{new Date(opp.created_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}</span>
                     <div className="flex items-center gap-2">
                       {applied ? (
-                        <span className="flex items-center gap-1.5 text-sm text-primary font-medium"><CheckCircle2 className="w-4 h-4" /> Applied</span>
+                        <span className="flex items-center gap-1 text-xs text-primary font-medium"><CheckCircle2 className="w-3.5 h-3.5" /> Applied</span>
                       ) : (
-                        <Button size="sm" onClick={(e) => { e.stopPropagation(); setApplyModal(opp); }}><Send className="w-3.5 h-3.5" /> Apply</Button>
+                        <Button size="sm" className="h-8 text-xs" onClick={(e) => { e.stopPropagation(); setApplyModal(opp); }}><Send className="w-3 h-3" /> Apply</Button>
                       )}
-                      <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); navigate(`/job/${opp.oveercode || opp.slug}`); }}><Eye className="w-3.5 h-3.5" /> Detail</Button>
                     </div>
                   </div>
                 </motion.div>
@@ -516,8 +519,8 @@ const Matchmaking = () => {
             {filtered.length === 0 && (
               <div className="text-center py-16 col-span-full">
                 <Search className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="text-lg font-semibold text-foreground mb-1">No opportunities found</h3>
-                <p className="text-sm text-muted-foreground">Try changing your filters or searching with different keywords</p>
+                <h3 className="text-sm font-semibold text-foreground mb-1">No opportunities found</h3>
+                <p className="text-xs text-muted-foreground">Try changing your filters or searching with different keywords</p>
               </div>
             )}
           </div>
@@ -535,7 +538,7 @@ const Matchmaking = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {(paginated as OpenItem[]).map((item, idx) => {
                 const claimed = claimedIds.has(item.id);
                 const isHiring = item.source_type === "hiring_request";
@@ -543,58 +546,54 @@ const Matchmaking = () => {
                 const order = !isHiring ? (item as OpenOrder) : null;
 
                 return (
-                  <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-lg transition-shadow flex flex-col">
-                    {/* Badge */}
-                    <div className="flex items-center gap-2 mb-3 flex-wrap">
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1 ${isHiring ? "bg-violet-500/10 text-violet-600" : "bg-primary/10 text-primary"}`}>
-                        {isHiring ? <><Users className="w-3 h-3" /> Hiring Request</> : <><Package className="w-3 h-3" /> Service Order</>}
+                  <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.03 }} className="bg-card rounded-xl border border-border p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+                    <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1 ${isHiring ? "bg-violet-500/10 text-violet-600" : "bg-primary/10 text-primary"}`}>
+                        {isHiring ? <><Users className="w-2.5 h-2.5" /> Hiring</> : <><Package className="w-2.5 h-2.5" /> Order</>}
                       </span>
                       {order && (() => {
                         const sla = slaLabel(order.sla_type);
-                        return <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${sla.color}`}>{sla.text}</span>;
+                        return <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${sla.color}`}>{sla.text}</span>;
                       })()}
                     </div>
 
-                    {/* Title */}
-                    <h3 className="text-lg font-semibold text-card-foreground mb-1">
+                    <h3 className="text-sm font-semibold text-card-foreground mb-1 truncate">
                       {isHiring ? hiring!.title : `${order!.service_slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`}
                     </h3>
-                    {order && <p className="text-sm text-muted-foreground mb-1">#{order.order_number}</p>}
+                    {order && <p className="text-[10px] text-muted-foreground mb-1">#{order.order_number}</p>}
 
-                    {/* Description */}
-                    {isHiring && hiring?.description && <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{hiring.description}</p>}
-                    {order?.notes && <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{order.notes}</p>}
+                    {isHiring && hiring?.description && <p className="text-xs text-muted-foreground line-clamp-2">{hiring.description}</p>}
+                    {order?.notes && <p className="text-xs text-muted-foreground line-clamp-2">{order.notes}</p>}
 
-                    {/* Skills for hiring */}
                     {isHiring && hiring?.required_skills && hiring.required_skills.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-3">
-                        {hiring.required_skills.map((skill) => {
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {hiring.required_skills.slice(0, 4).map((skill) => {
                           const isMatched = profile?.skills?.some((ps) => ps.toLowerCase() === skill.toLowerCase());
                           return (
-                            <span key={skill} className={`text-xs px-2 py-0.5 rounded-full ${isMatched ? "bg-primary/15 text-primary font-medium" : "bg-muted text-muted-foreground"}`}>
+                            <span key={skill} className={`text-[10px] px-2 py-0.5 rounded-full ${isMatched ? "bg-primary/15 text-primary font-medium" : "bg-muted text-muted-foreground"}`}>
                               {isMatched && <span className="mr-0.5">✓</span>}{skill}
                             </span>
                           );
                         })}
+                        {hiring.required_skills.length > 4 && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">+{hiring.required_skills.length - 4}</span>
+                        )}
                       </div>
                     )}
 
-                    {/* Meta */}
-                    <div className="flex flex-wrap items-center gap-3 mt-auto pt-4 text-xs text-muted-foreground">
-                      {order && <span className="flex items-center gap-1 font-semibold text-foreground"><DollarSign className="w-3.5 h-3.5" /> {formatCurrency(order.total_cents, order.currency)}</span>}
-                      {isHiring && hiring?.positions_count && <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {hiring.positions_count} positions</span>}
-                      {isHiring && hiring?.experience_min != null && <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5" /> {hiring.experience_min}{hiring.experience_max ? `-${hiring.experience_max}` : "+"} yrs</span>}
-                      {order?.sla_deadline && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {new Date(order.sla_deadline).toLocaleDateString("en-US", { day: "numeric", month: "short" })}</span>}
-                      <span className="flex items-center gap-1">{new Date(item.created_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}</span>
+                    <div className="flex flex-wrap items-center gap-2 mt-auto pt-3 text-[10px] text-muted-foreground">
+                      {order && <span className="flex items-center gap-1 font-semibold text-foreground text-xs"><DollarSign className="w-3 h-3" /> {formatCurrency(order.total_cents, order.currency)}</span>}
+                      {isHiring && hiring?.positions_count && <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {hiring.positions_count} pos</span>}
+                      {isHiring && hiring?.experience_min != null && <span className="flex items-center gap-1"><Star className="w-3 h-3" /> {hiring.experience_min}{hiring.experience_max ? `-${hiring.experience_max}` : "+"} yrs</span>}
+                      {order?.sla_deadline && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(order.sla_deadline).toLocaleDateString("en-US", { day: "numeric", month: "short" })}</span>}
                     </div>
 
-                    {/* Action */}
-                    <div className="mt-4 pt-4 border-t border-border">
+                    <div className="mt-3 pt-3 border-t border-border">
                       {claimed ? (
-                        <span className="flex items-center gap-1.5 text-sm text-primary font-medium"><CheckCircle2 className="w-4 h-4" /> Claimed</span>
+                        <span className="flex items-center gap-1 text-xs text-primary font-medium"><CheckCircle2 className="w-3.5 h-3.5" /> Claimed</span>
                       ) : (
-                        <Button className="w-full gap-2" onClick={() => { setClaimModal(item); setClaimAs("personal"); }}>
-                          <HandCoins className="w-4 h-4" /> Claim Order
+                        <Button className="w-full gap-2 h-8 text-xs" onClick={() => { setClaimModal(item); setClaimAs("personal"); }}>
+                          <HandCoins className="w-3.5 h-3.5" /> Claim
                         </Button>
                       )}
                     </div>
@@ -605,8 +604,8 @@ const Matchmaking = () => {
               {filteredOpen.length === 0 && (
                 <div className="text-center py-16 col-span-full">
                   <ShoppingBag className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                   <h3 className="text-lg font-semibold text-foreground mb-1">No orders available yet</h3>
-                   <p className="text-sm text-muted-foreground">New orders will appear here when clients need help</p>
+                   <h3 className="text-sm font-semibold text-foreground mb-1">No orders available yet</h3>
+                   <p className="text-xs text-muted-foreground">New orders will appear here when clients need help</p>
                 </div>
               )}
             </div>

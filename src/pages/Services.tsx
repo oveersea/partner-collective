@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Users, CheckCircle2, Megaphone, Code, Palette, Briefcase, FileText, Calculator } from "lucide-react";
+import { ArrowLeft, Users, CheckCircle2, Megaphone, Code, Palette, Briefcase, FileText, Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const iconMap: Record<string, React.ElementType> = {
   Megaphone, Code, Palette, Briefcase, FileText, Calculator,
@@ -110,11 +112,11 @@ const Services = () => {
             <ArrowLeft className="w-4 h-4" /> Back to Home
           </Link>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
-            <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-semibold text-foreground mb-2">
               Service <span className="text-gradient-accent">Catalog</span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
+            <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl">
               Discover professional services from verified talents to help your business grow.
             </p>
           </motion.div>
@@ -133,17 +135,10 @@ const Services = () => {
             })}
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="p-8 rounded-2xl border border-border bg-card animate-pulse">
-                  <div className="h-5 bg-muted rounded w-2/3 mb-3" />
-                  <div className="h-4 bg-muted rounded w-full mb-4" />
-                  <div className="flex gap-2">
-                    <div className="h-6 bg-muted rounded-full w-16" />
-                    <div className="h-6 bg-muted rounded-full w-20" />
-                  </div>
-                </div>
+                <Card key={i}><CardContent className="p-5 space-y-3"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-full" /><div className="flex gap-2"><Skeleton className="h-6 w-16 rounded-full" /><Skeleton className="h-6 w-20 rounded-full" /></div></CardContent></Card>
               ))
             ) : services.length === 0 ? (
               <div className="col-span-full text-center py-12 text-muted-foreground">
@@ -151,45 +146,41 @@ const Services = () => {
               </div>
             ) : (
               services.map((service, i) => (
-                <Link key={service.id} to={`/services/${service.slug}`}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="group p-8 rounded-2xl border border-border bg-card hover:shadow-card-hover hover:border-primary/30 transition-all h-full cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <h2 className="text-xl font-semibold text-card-foreground group-hover:text-primary transition-colors">
-                        {service.name}
-                      </h2>
-                      {service.provider_count > 0 && (
-                        <span className="flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full shrink-0">
-                          <Users className="w-3 h-3" />
-                          {service.provider_count}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-muted-foreground text-sm leading-relaxed mb-5 line-clamp-2">
-                      {service.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {service.required_skills.slice(0, 4).map(skill => (
-                        <span key={skill} className="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-primary/10 text-primary font-medium">
-                          <CheckCircle2 className="w-3 h-3" />
-                          {skill}
-                        </span>
-                      ))}
-                      {service.required_skills.length > 4 && (
-                        <span className="text-xs px-3 py-1 rounded-full bg-muted text-muted-foreground">
-                          +{service.required_skills.length - 4}
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-4 flex items-center gap-1 text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                      View details <ArrowRight className="w-4 h-4" />
-                    </div>
-                  </motion.div>
-                </Link>
+                <motion.div key={service.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
+                  <Link to={`/services/${service.slug}`}>
+                    <Card className="group hover:shadow-md transition-all h-full cursor-pointer">
+                      <CardContent className="p-5 space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <h2 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                            {service.name}
+                          </h2>
+                          {service.provider_count > 0 && (
+                            <span className="flex items-center gap-1 text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full shrink-0">
+                              <Users className="w-3 h-3" />
+                              {service.provider_count}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2">
+                          {service.description}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {service.required_skills.slice(0, 3).map(skill => (
+                            <span key={skill} className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                              <CheckCircle2 className="w-2.5 h-2.5" />
+                              {skill}
+                            </span>
+                          ))}
+                          {service.required_skills.length > 3 && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                              +{service.required_skills.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
               ))
             )}
           </div>
