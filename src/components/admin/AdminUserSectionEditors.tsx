@@ -41,15 +41,15 @@ function useInlineEditor<T extends Record<string, any>>(
     delete payload.created_at;
     delete payload.updated_at;
 
-    let error;
+    let error: any;
     if (editingId === "new") {
-      const res = await (supabase.from(tableName) as any).insert(payload).select().single();
+      const res = await (supabase.from(tableName as any) as any).insert(payload).select().single();
       error = res.error;
       if (!error && res.data) setItems([res.data, ...items]);
     } else {
-      const res = await (supabase.from(tableName) as any).update(payload).eq("id", editingId).select().single();
+      const res = await (supabase.from(tableName as any) as any).update(payload).eq("id", editingId).select().single();
       error = res.error;
-      if (!error && res.data) setItems(items.map(i => i.id === editingId ? res.data : i));
+      if (!error && res.data) setItems(items.map((i: any) => i.id === editingId ? res.data : i));
     }
 
     if (error) toast.error("Gagal menyimpan: " + error.message);
