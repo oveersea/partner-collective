@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Search, ChevronLeft, ChevronRight, ScanBarcode, CheckCircle2,
-  XCircle, User, Calendar, Ticket, GraduationCap, QrCode, Hash,
+  XCircle, User, Ticket, GraduationCap, Hash,
   Clock, Loader2,
 } from "lucide-react";
 
