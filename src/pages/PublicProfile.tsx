@@ -176,6 +176,7 @@ const PublicProfile = () => {
         .from("user_experiences")
         .select("*")
         .eq("user_id", userId!)
+        .eq("status", "approved")
         .order("start_date", { ascending: false });
       return data || [];
     },
@@ -189,6 +190,7 @@ const PublicProfile = () => {
         .from("user_education")
         .select("*")
         .eq("user_id", userId!)
+        .eq("status", "approved")
         .order("start_date", { ascending: false });
       return data || [];
     },
