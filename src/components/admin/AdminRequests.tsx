@@ -660,7 +660,7 @@ const AdminRequests = () => {
                         />
                       </div>
                       <span className={`text-[10px] font-medium ${sla.isOverdue ? "text-destructive" : sla.hoursLeft < 24 ? "text-amber-500" : "text-muted-foreground"}`}>
-                        {sla.isOverdue ? `${Math.abs(sla.hoursLeft)}h overdue` : `${sla.hoursLeft}h left`}
+                        {sla.isOverdue ? `${formatSlaRemaining(sla.hoursLeft)} overdue` : `${formatSlaRemaining(sla.hoursLeft)} left`}
                       </span>
                     </div>
                   )}
