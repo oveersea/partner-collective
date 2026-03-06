@@ -10,6 +10,10 @@ import {
   Award, Heart, CreditCard, Building2, Users, Download, Loader2,
 } from "lucide-react";
 import { renderCvToPdf } from "@/lib/cv-pdf-helper";
+import {
+  EducationEditor, ExperienceEditor, OrganizationEditor,
+  CertificationEditor, TrainingEditor, AwardEditor,
+} from "@/components/admin/AdminUserSectionEditors";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -657,7 +661,9 @@ const AdminUserDetail = () => {
                 <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
                   <GraduationCap className="w-4 h-4" /> Education Background
                 </h2>
-                {education.length === 0 ? (
+                {isSuperadmin ? (
+                  <EducationEditor userId={profile.user_id} items={education} setItems={setEducation} />
+                ) : education.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Belum ada data</p>
                 ) : (
                   <div className="space-y-4">
@@ -671,6 +677,23 @@ const AdminUserDetail = () => {
                     ))}
                   </div>
                 )}
+                <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" /> Experience
+                </h2>
+                {experiences.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Belum ada data</p>
+                ) : (
+                  <div className="space-y-4">
+                    {experiences.map((e) => (
+                      <div key={e.id} className="border-l-2 border-primary/30 pl-4">
+                        <p className="text-sm font-medium text-card-foreground">{e.position}</p>
+                        <p className="text-xs text-muted-foreground">{e.company}{e.location ? ` • ${e.location}` : ""}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(e.start_date)} – {e.is_current ? "Sekarang" : formatDate(e.end_date)}</p>
+                        {e.description && <p className="text-xs text-muted-foreground mt-1">{e.description}</p>}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Work Experience */}
@@ -678,7 +701,9 @@ const AdminUserDetail = () => {
                 <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
                   <Briefcase className="w-4 h-4" /> Experience
                 </h2>
-                {experiences.length === 0 ? (
+                {isSuperadmin ? (
+                  <ExperienceEditor userId={profile.user_id} items={experiences} setItems={setExperiences} />
+                ) : experiences.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Belum ada data</p>
                 ) : (
                   <div className="space-y-4">
@@ -699,7 +724,9 @@ const AdminUserDetail = () => {
                 <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
                   <Users className="w-4 h-4" /> Organization Experience
                 </h2>
-                {organizations.length === 0 ? (
+                {isSuperadmin ? (
+                  <OrganizationEditor userId={profile.user_id} items={organizations} setItems={setOrganizations} />
+                ) : organizations.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Belum ada data</p>
                 ) : (
                   <div className="space-y-4">
@@ -720,7 +747,9 @@ const AdminUserDetail = () => {
                   <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
                     <Shield className="w-4 h-4" /> Certifications
                   </h2>
-                  {certifications.length === 0 ? (
+                  {isSuperadmin ? (
+                    <CertificationEditor userId={profile.user_id} items={certifications} setItems={setCertifications} />
+                  ) : certifications.length === 0 ? (
                     <p className="text-sm text-muted-foreground">Belum ada data</p>
                   ) : (
                     <div className="space-y-3">
@@ -740,7 +769,9 @@ const AdminUserDetail = () => {
                   <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
                     <Star className="w-4 h-4" /> Training & Workshop
                   </h2>
-                  {trainings.length === 0 ? (
+                  {isSuperadmin ? (
+                    <TrainingEditor userId={profile.user_id} items={trainings} setItems={setTrainings} />
+                  ) : trainings.length === 0 ? (
                     <p className="text-sm text-muted-foreground">Belum ada data</p>
                   ) : (
                     <div className="space-y-3">
@@ -762,7 +793,9 @@ const AdminUserDetail = () => {
                 <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
                   <Award className="w-4 h-4" /> Awards
                 </h2>
-                {awards.length === 0 ? (
+                {isSuperadmin ? (
+                  <AwardEditor userId={profile.user_id} items={awards} setItems={setAwards} />
+                ) : awards.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Belum ada data</p>
                 ) : (
                   <div className="grid md:grid-cols-2 gap-3">
