@@ -191,10 +191,10 @@ const MyRequests = () => {
     const resolved: MatchedCandidateDisplay[] = data.map((d: any) => {
       if (d.source_type === "profile" && d.profile_user_id) {
         const p = profileMap.get(d.profile_user_id);
-        return { id: d.id, name: p?.full_name || "Unknown", title: p?.headline, skills: p?.skills || [], match_score: d.match_score, status: d.status, source_type: d.source_type, oveercode: p?.oveercode };
+        return { id: d.id, name: p?.full_name || "Unknown", title: p?.headline, skills: p?.skills || [], match_score: d.match_score, status: d.status, source_type: d.source_type, oveercode: p?.oveercode, profile_user_id: d.profile_user_id, candidate_archive_id: null };
       }
       const a = archiveMap.get(d.candidate_archive_id);
-      return { id: d.id, name: a?.full_name || "Unknown", title: a?.current_title, skills: a?.skills || [], match_score: d.match_score, status: d.status, source_type: d.source_type, oveercode: a?.oveercode };
+      return { id: d.id, name: a?.full_name || "Unknown", title: a?.current_title, skills: a?.skills || [], match_score: d.match_score, status: d.status, source_type: d.source_type, oveercode: a?.oveercode, profile_user_id: null, candidate_archive_id: d.candidate_archive_id };
     });
 
     setCandidatesMap(prev => ({ ...prev, [hiringRequestId]: resolved }));
