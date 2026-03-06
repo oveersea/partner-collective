@@ -96,6 +96,8 @@ const App = () => (
             <Route path="/my-requests" element={<MyRequests />} />
             <Route path="/assessment/:oveercode" element={<AssessmentDetail />} />
             <Route path="/career-path" element={<CareerPathPage />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/events/:oveercode" element={<EventDetail />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
