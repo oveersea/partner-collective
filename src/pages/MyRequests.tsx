@@ -106,6 +106,8 @@ const MyRequests = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [candidatesMap, setCandidatesMap] = useState<Record<string, MatchedCandidateDisplay[]>>({});
   const [loadingCandidates, setLoadingCandidates] = useState<string | null>(null);
+  const [downloadingCvId, setDownloadingCvId] = useState<string | null>(null);
+  const [ignoringId, setIgnoringId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
