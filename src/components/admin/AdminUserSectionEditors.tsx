@@ -78,15 +78,6 @@ const ItemActions = ({ onEdit, onDelete, deleting }: { onEdit: () => void; onDel
   </div>
 );
 
-const FormActions = ({ saving, onCancel }: { saving: boolean; onCancel: () => void }) => (
-  <div className="flex gap-2 pt-2">
-    <Button size="sm" type="button" onClick={undefined as any} disabled={saving}>
-      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />}
-      <Check className="w-3.5 h-3.5 mr-1" /> Simpan
-    </Button>
-    <Button size="sm" variant="ghost" onClick={onCancel}><X className="w-3.5 h-3.5 mr-1" /> Batal</Button>
-  </div>
-);
 
 // ─── EDUCATION ──────────────────────────
 export const EducationEditor = ({ userId, items, setItems }: { userId: string; items: any[]; setItems: (v: any[]) => void }) => {
