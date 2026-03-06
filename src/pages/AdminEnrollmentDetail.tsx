@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, User, Mail, Phone, CreditCard, Calendar, CheckCircle2,
   Clock, Hash, Loader2, Trash2, GraduationCap, Ticket, ExternalLink,
-  Receipt, Tag,
+  Receipt, Tag, RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -117,6 +117,26 @@ const AdminEnrollmentDetail = () => {
     setCheckingIn(false);
   };
 
+  const handleRedoCheckIn = async () => {
+    setCheckingIn(true);
+    const table = type === "program" ? "program_orders" : "event_orders";
+    const { error } = await (supabase.from(table) as any)
+      .update({
+        checked_in_at: null,
+        check_in_method: null,
+        checked_in_by: null,
+      })
+      .eq("id", id!);
+
+    if (error) {
+      toast.error("Gagal reset check-in");
+    } else {
+      toast.success("Check-in berhasil di-reset");
+      fetchOrder();
+    }
+    setCheckingIn(false);
+  };
+
   const handleDelete = async () => {
     setDeleting(true);
     const table = type === "program" ? "program_orders" : "event_orders";
@@ -165,6 +185,12 @@ const AdminEnrollmentDetail = () => {
               <Button size="sm" className="gap-1.5" onClick={handleCheckIn} disabled={checkingIn}>
                 {checkingIn ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                 Check-in
+              </Button>
+            )}
+            {order.checked_in_at && (isSuperadmin) && (
+              <Button size="sm" variant="outline" className="gap-1.5" onClick={handleRedoCheckIn} disabled={checkingIn}>
+                {checkingIn ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
+                Redo Check-in
               </Button>
             )}
             {isSuperadmin && (

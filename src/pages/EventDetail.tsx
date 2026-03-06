@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardNav from "@/components/dashboard/DashboardNav";
+import OrderBarcode from "@/components/OrderBarcode";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,9 +12,8 @@ import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   ArrowLeft, Clock, Users, MapPin, Calendar, Ticket, Globe,
-  ChevronDown, User, Building2, DollarSign, ExternalLink, CheckCircle2, Tag,
+  ChevronDown, User, Building2, ExternalLink, CheckCircle2, Tag,
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 interface Speaker {
   name: string;
@@ -75,6 +75,7 @@ const EventDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("event");
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [userOrder, setUserOrder] = useState<{ order_number: string; checked_in_at: string | null; status: string } | null>(null);
 
   const handleBuyTicket = () => {
     if (!user) { navigate("/auth"); return; }
@@ -131,6 +132,23 @@ const EventDetail = () => {
     };
     fetchEvent();
   }, [oveercode]);
+
+  // Fetch user's order for this event
+  useEffect(() => {
+    if (!user || !event) return;
+    const fetchUserOrder = async () => {
+      const { data } = await (supabase.from("event_orders") as any)
+        .select("order_number, checked_in_at, status")
+        .eq("user_id", user.id)
+        .eq("event_id", event.id)
+        .in("status", ["paid", "pending"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setUserOrder(data || null);
+    };
+    fetchUserOrder();
+  }, [user, event]);
 
   // Scroll spy
   useEffect(() => {
@@ -438,15 +456,33 @@ const EventDetail = () => {
                   )}
                 </div>
 
-                <Button
-                  className="w-full"
-                  size="lg"
-                  onClick={handleBuyTicket}
-                  disabled={isFull || isPast || deadlinePassed}
-                >
-                  <Ticket className="w-4 h-4 mr-2" />
-                  {isPast ? "Event Telah Berakhir" : isFull ? "Sold Out" : deadlinePassed ? "Registrasi Ditutup" : isFree ? "Register (Free)" : `Buy Ticket — ${formatRupiah(currentPrice)}`}
-                </Button>
+                {/* User's ticket barcode */}
+                {userOrder && userOrder.status === "paid" && (
+                  <OrderBarcode
+                    orderNumber={userOrder.order_number}
+                    title={event.title}
+                    checkedIn={!!userOrder.checked_in_at}
+                    checkedInAt={userOrder.checked_in_at}
+                    compact
+                  />
+                )}
+
+                {!userOrder && (
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={handleBuyTicket}
+                    disabled={isFull || isPast || deadlinePassed}
+                  >
+                    <Ticket className="w-4 h-4 mr-2" />
+                    {isPast ? "Event Telah Berakhir" : isFull ? "Sold Out" : deadlinePassed ? "Registrasi Ditutup" : isFree ? "Register (Free)" : `Buy Ticket — ${formatRupiah(currentPrice)}`}
+                  </Button>
+                )}
+                {userOrder && userOrder.status === "pending" && (
+                  <div className="text-center text-xs text-muted-foreground p-3 rounded-xl bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
+                    ⏳ Menunggu pembayaran...
+                  </div>
+                )}
 
                 {event.oveercode && (
                   <p className="text-center text-xs text-muted-foreground font-mono">{event.oveercode}</p>

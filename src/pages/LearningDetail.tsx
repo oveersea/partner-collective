@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import OrderBarcode from "@/components/OrderBarcode";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -96,6 +97,7 @@ const LearningDetail = () => {
   const enrolling = false;
   const [activeSection, setActiveSection] = useState("program");
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [userOrder, setUserOrder] = useState<{ order_number: string; checked_in_at: string | null; status: string } | null>(null);
 
   const handleEnroll = () => {
     if (!user) {
@@ -187,6 +189,24 @@ const LearningDetail = () => {
     };
     fetchAll();
   }, [oveercode]);
+
+  // Fetch user's program order
+  useEffect(() => {
+    if (!user || !program) return;
+    const fetchUserOrder = async () => {
+      const { data } = await supabase
+        .from("program_orders")
+        .select("order_number, checked_in_at, status")
+        .eq("user_id", user.id)
+        .eq("program_slug", program.slug)
+        .in("status", ["paid", "pending"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setUserOrder(data || null);
+    };
+    fetchUserOrder();
+  }, [user, program]);
 
   // Intersection observer for sticky nav
   useEffect(() => {
@@ -792,9 +812,24 @@ const LearningDetail = () => {
                       )}
                     </div>
 
-                    <Button className="w-full" size="lg" onClick={handleEnroll} disabled={enrolling}>
-                      <GraduationCap className="w-4 h-4 mr-2" /> {enrolling ? "Memproses..." : "Daftar Sekarang"}
-                    </Button>
+                    {/* User's enrollment barcode */}
+                    {userOrder && userOrder.status === "paid" ? (
+                      <OrderBarcode
+                        orderNumber={userOrder.order_number}
+                        title={program.title}
+                        checkedIn={!!userOrder.checked_in_at}
+                        checkedInAt={userOrder.checked_in_at}
+                        compact
+                      />
+                    ) : userOrder && userOrder.status === "pending" ? (
+                      <div className="text-center text-xs text-muted-foreground p-3 rounded-xl bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
+                        ⏳ Menunggu pembayaran...
+                      </div>
+                    ) : (
+                      <Button className="w-full" size="lg" onClick={handleEnroll} disabled={enrolling}>
+                        <GraduationCap className="w-4 h-4 mr-2" /> {enrolling ? "Memproses..." : "Daftar Sekarang"}
+                      </Button>
+                    )}
 
                     {program.oveercode && (
                       <p className="text-sm text-center text-muted-foreground font-mono">
@@ -845,9 +880,23 @@ const LearningDetail = () => {
                       </div>
                     )}
                   </div>
-                  <Button className="w-full" size="lg" onClick={handleEnroll} disabled={enrolling}>
-                    <GraduationCap className="w-4 h-4 mr-2" /> {enrolling ? "Memproses..." : "Daftar Sekarang"}
-                  </Button>
+                  {userOrder && userOrder.status === "paid" ? (
+                    <OrderBarcode
+                      orderNumber={userOrder.order_number}
+                      title={program.title}
+                      checkedIn={!!userOrder.checked_in_at}
+                      checkedInAt={userOrder.checked_in_at}
+                      compact
+                    />
+                  ) : userOrder && userOrder.status === "pending" ? (
+                    <div className="text-center text-xs text-muted-foreground p-3 rounded-xl bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
+                      ⏳ Menunggu pembayaran...
+                    </div>
+                  ) : (
+                    <Button className="w-full" size="lg" onClick={handleEnroll} disabled={enrolling}>
+                      <GraduationCap className="w-4 h-4 mr-2" /> {enrolling ? "Memproses..." : "Daftar Sekarang"}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </section>
