@@ -661,7 +661,9 @@ const AdminUserDetail = () => {
                 <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
                   <GraduationCap className="w-4 h-4" /> Education Background
                 </h2>
-                {education.length === 0 ? (
+                {isSuperadmin ? (
+                  <EducationEditor userId={profile.user_id} items={education} setItems={setEducation} />
+                ) : education.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Belum ada data</p>
                 ) : (
                   <div className="space-y-4">
@@ -675,10 +677,6 @@ const AdminUserDetail = () => {
                     ))}
                   </div>
                 )}
-              </div>
-
-              {/* Work Experience */}
-              <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
                 <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
                   <Briefcase className="w-4 h-4" /> Experience
                 </h2>
