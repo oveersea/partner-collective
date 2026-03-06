@@ -7,10 +7,13 @@ import {
   Briefcase, UserSearch, Clock, Zap, ChevronLeft, ChevronRight,
   Calendar, Users, CreditCard, AlertCircle, CheckCircle2,
   Loader2, FileText, ArrowUpRight, LayoutList, Star, Archive,
+  XCircle, Download,
 } from "lucide-react";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { renderCvToPdf } from "@/lib/cv-pdf-helper";
 
 interface MatchedCandidateDisplay {
   id: string;
