@@ -10,6 +10,10 @@ import {
   Award, Heart, CreditCard, Building2, Users, Download, Loader2,
 } from "lucide-react";
 import { renderCvToPdf } from "@/lib/cv-pdf-helper";
+import {
+  EducationEditor, ExperienceEditor, OrganizationEditor,
+  CertificationEditor, TrainingEditor, AwardEditor,
+} from "@/components/admin/AdminUserSectionEditors";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
