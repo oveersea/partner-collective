@@ -330,7 +330,7 @@ const AdminEnrollments = () => {
                           )}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(p.created_at).toLocaleDateString("id-ID")}</td>
-                        <td className="px-4 py-3">
+                          <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                           {p.status === "paid" && !p.checked_in_at ? (
                             <Button size="sm" variant="outline" className="text-xs h-7 gap-1" onClick={() => handleManualCheckIn("program", p.id)}>
                               <CheckCircle2 className="w-3 h-3" /> Check-in
