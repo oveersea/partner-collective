@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, User, Mail, Phone, CreditCard, Calendar, CheckCircle2,
   Clock, Hash, Loader2, Trash2, GraduationCap, Ticket, ExternalLink,
-  Receipt, Tag,
+  Receipt, Tag, RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
