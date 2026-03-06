@@ -146,6 +146,11 @@ const SkillRadarEditor = ({ skills, onChange }: { skills: SkillScore[]; onChange
   const remove = (name: string) => onChange(skills.filter((s) => s.name !== name));
   const updateScore = (name: string, score: number) =>
     onChange(skills.map((s) => (s.name === name ? { ...s, score: Math.min(100, Math.max(0, score)) } : s)));
+  const updateName = (oldName: string, newName: string) => {
+    const trimmed = newName.trim();
+    if (!trimmed || (trimmed !== oldName && skills.some((s) => s.name === trimmed))) return;
+    onChange(skills.map((s) => (s.name === oldName ? { ...s, name: trimmed } : s)));
+  };
 
   return (
     <div className="space-y-3">
@@ -162,7 +167,12 @@ const SkillRadarEditor = ({ skills, onChange }: { skills: SkillScore[]; onChange
       <div className="space-y-2 max-h-48 overflow-y-auto">
         {skills.map((s) => (
           <div key={s.name} className="flex items-center gap-2">
-            <span className="text-sm text-foreground flex-1 truncate">{s.name}</span>
+            <Input
+              className="flex-1 h-8 text-sm"
+              defaultValue={s.name}
+              onBlur={(e) => updateName(s.name, e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLInputElement).blur(); } }}
+            />
             <Input
               type="number"
               min={0}
