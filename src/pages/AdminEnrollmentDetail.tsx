@@ -117,6 +117,26 @@ const AdminEnrollmentDetail = () => {
     setCheckingIn(false);
   };
 
+  const handleRedoCheckIn = async () => {
+    setCheckingIn(true);
+    const table = type === "program" ? "program_orders" : "event_orders";
+    const { error } = await (supabase.from(table) as any)
+      .update({
+        checked_in_at: null,
+        check_in_method: null,
+        checked_in_by: null,
+      })
+      .eq("id", id!);
+
+    if (error) {
+      toast.error("Gagal reset check-in");
+    } else {
+      toast.success("Check-in berhasil di-reset");
+      fetchOrder();
+    }
+    setCheckingIn(false);
+  };
+
   const handleDelete = async () => {
     setDeleting(true);
     const table = type === "program" ? "program_orders" : "event_orders";
