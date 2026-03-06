@@ -11,6 +11,35 @@ import {
   CheckCircle2, Phone, Calendar, User, Lock, Languages, Heart, Unlock
 } from "lucide-react";
 import { toast } from "sonner";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
+
+interface SkillScore { name: string; score: number; }
+
+const SkillRadarView = ({ skills, color, fillColor, label }: { skills: SkillScore[]; color: string; fillColor: string; label: string }) => {
+  if (skills.length === 0) return null;
+  const sorted = [...skills].sort((a, b) => b.score - a.score);
+  const radarData = sorted.slice(0, 6);
+  return (
+    <div>
+      <p className="text-sm font-medium text-foreground mb-2">{label}</p>
+      <ResponsiveContainer width="100%" height={250}>
+        <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="75%">
+          <PolarGrid stroke="hsl(var(--border))" />
+          <PolarAngleAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+          <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+          <Radar dataKey="score" stroke={color} fill={fillColor} fillOpacity={0.6} />
+        </RadarChart>
+      </ResponsiveContainer>
+      <div className="flex flex-wrap gap-1.5 mt-2">
+        {sorted.map((s) => (
+          <Badge key={s.name} variant="outline" className="text-xs gap-1">
+            {s.name} <span className="text-muted-foreground">{s.score}</span>
+          </Badge>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 /* ── helpers ── */
 const fmtDate = (d: string | null) => {
@@ -239,6 +268,8 @@ const PublicProfile = () => {
   const locationParts = [profile.city, profile.province, profile.country].filter(Boolean);
   const location = locationParts.join(", ");
   const skills = Array.isArray(profile.skills) ? (profile.skills as string[]) : [];
+  const softSkills: SkillScore[] = Array.isArray((profile as any).soft_skills) ? (profile as any).soft_skills : [];
+  const technicalSkills: SkillScore[] = Array.isArray((profile as any).technical_skills) ? (profile as any).technical_skills : [];
   const summary = (profile.professional_summary || profile.bio || "") as string;
 
   return (
@@ -317,17 +348,31 @@ const PublicProfile = () => {
             )}
 
             {/* Skills */}
-            {skills.length > 0 && (
+            {(skills.length > 0 || softSkills.length > 0 || technicalSkills.length > 0) && (
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">Keahlian</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {skills.map((s, i) => (
-                      <Badge key={i} variant="secondary" className="text-xs">{s}</Badge>
-                    ))}
-                  </div>
+                <CardContent className="space-y-6">
+                  {/* Radar charts */}
+                  {(technicalSkills.length > 0 || softSkills.length > 0) && (
+                    <div className="grid sm:grid-cols-2 gap-6">
+                      {technicalSkills.length > 0 && (
+                        <SkillRadarView skills={technicalSkills} color="hsl(var(--primary))" fillColor="hsl(var(--primary) / 0.3)" label="Technical Skills" />
+                      )}
+                      {softSkills.length > 0 && (
+                        <SkillRadarView skills={softSkills} color="hsl(var(--chart-2))" fillColor="hsl(var(--chart-2) / 0.3)" label="Soft Skills" />
+                      )}
+                    </div>
+                  )}
+                  {/* Skill tags */}
+                  {skills.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {skills.map((s, i) => (
+                        <Badge key={i} variant="secondary" className="text-xs">{s}</Badge>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
