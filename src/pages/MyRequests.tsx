@@ -7,10 +7,13 @@ import {
   Briefcase, UserSearch, Clock, Zap, ChevronLeft, ChevronRight,
   Calendar, Users, CreditCard, AlertCircle, CheckCircle2,
   Loader2, FileText, ArrowUpRight, LayoutList, Star, Archive,
+  XCircle, Download,
 } from "lucide-react";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { renderCvToPdf } from "@/lib/cv-pdf-helper";
 
 interface MatchedCandidateDisplay {
   id: string;
@@ -21,6 +24,8 @@ interface MatchedCandidateDisplay {
   status: string;
   source_type: string;
   oveercode: string | null;
+  profile_user_id: string | null;
+  candidate_archive_id: string | null;
 }
 
 interface HiringRequest {
@@ -101,6 +106,8 @@ const MyRequests = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [candidatesMap, setCandidatesMap] = useState<Record<string, MatchedCandidateDisplay[]>>({});
   const [loadingCandidates, setLoadingCandidates] = useState<string | null>(null);
+  const [downloadingCvId, setDownloadingCvId] = useState<string | null>(null);
+  const [ignoringId, setIgnoringId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -186,10 +193,10 @@ const MyRequests = () => {
     const resolved: MatchedCandidateDisplay[] = data.map((d: any) => {
       if (d.source_type === "profile" && d.profile_user_id) {
         const p = profileMap.get(d.profile_user_id);
-        return { id: d.id, name: p?.full_name || "Unknown", title: p?.headline, skills: p?.skills || [], match_score: d.match_score, status: d.status, source_type: d.source_type, oveercode: p?.oveercode };
+        return { id: d.id, name: p?.full_name || "Unknown", title: p?.headline, skills: p?.skills || [], match_score: d.match_score, status: d.status, source_type: d.source_type, oveercode: p?.oveercode, profile_user_id: d.profile_user_id, candidate_archive_id: null };
       }
       const a = archiveMap.get(d.candidate_archive_id);
-      return { id: d.id, name: a?.full_name || "Unknown", title: a?.current_title, skills: a?.skills || [], match_score: d.match_score, status: d.status, source_type: d.source_type, oveercode: a?.oveercode };
+      return { id: d.id, name: a?.full_name || "Unknown", title: a?.current_title, skills: a?.skills || [], match_score: d.match_score, status: d.status, source_type: d.source_type, oveercode: a?.oveercode, profile_user_id: null, candidate_archive_id: d.candidate_archive_id };
     });
 
     setCandidatesMap(prev => ({ ...prev, [hiringRequestId]: resolved }));
@@ -210,6 +217,94 @@ const MyRequests = () => {
       rejected: "bg-destructive/10 text-destructive border-destructive/20",
     };
     return colors[status] || "bg-muted text-muted-foreground border-border";
+  };
+
+  const handleIgnoreCandidate = async (candidateId: string, hiringRequestId: string) => {
+    setIgnoringId(candidateId);
+    const { error } = await supabase
+      .from("hiring_matched_candidates")
+      .update({ status: "rejected" })
+      .eq("id", candidateId);
+    if (error) {
+      toast.error("Gagal mengabaikan kandidat");
+    } else {
+      toast.success("Kandidat diabaikan");
+      setCandidatesMap(prev => ({
+        ...prev,
+        [hiringRequestId]: prev[hiringRequestId].map(c =>
+          c.id === candidateId ? { ...c, status: "rejected" } : c
+        ),
+      }));
+    }
+    setIgnoringId(null);
+  };
+
+  const handleDownloadCandidateCV = async (candidate: MatchedCandidateDisplay) => {
+    if (!user) return;
+    const targetUserId = candidate.profile_user_id;
+    if (!targetUserId) {
+      toast.error("CV hanya tersedia untuk kandidat dari profil terdaftar");
+      return;
+    }
+
+    setDownloadingCvId(candidate.id);
+    try {
+      // Debit 2 credits
+      const { data: balance } = await supabase
+        .from("credit_balances")
+        .select("balance")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!balance || balance.balance < 2) {
+        toast.error("Saldo kredit tidak cukup (butuh 2 kredit)", {
+          action: { label: "Top Up", onClick: () => navigate("/credit-balance") },
+        });
+        setDownloadingCvId(null);
+        return;
+      }
+
+      // Deduct credits
+      await supabase
+        .from("credit_balances")
+        .update({
+          balance: balance.balance - 2,
+          total_used: (balance as any).total_used ? (balance as any).total_used + 2 : 2,
+        })
+        .eq("user_id", user.id);
+
+      // Generate CV
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast.error("Sesi kadaluarsa"); setDownloadingCvId(null); return; }
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-cv`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ user_id: targetUserId, include_contact: false }),
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Gagal generate CV" }));
+        throw new Error(err.error || "Gagal generate CV");
+      }
+
+      const html = await res.text();
+      const userName = candidate.name.replace(/[^a-zA-Z0-9]/g, "_") || "CV";
+      const ok = renderCvToPdf({ html, fileName: `CV_${userName}.pdf` });
+      if (!ok) throw new Error("Pop-up diblokir atau gagal membuka preview");
+
+      toast.success("CV berhasil di-download (2 kredit didebit)");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal download CV");
+    } finally {
+      setDownloadingCvId(null);
+    }
   };
 
   const pagedHiring = hiringRequests.slice((hiringPage - 1) * PAGE_SIZE, hiringPage * PAGE_SIZE);
@@ -426,13 +521,16 @@ const MyRequests = () => {
                             <p className="text-sm text-muted-foreground py-3 text-center">Belum ada kandidat yang diajukan admin</p>
                           ) : (
                             <div className="space-y-2">
-                              {candidatesMap[h.id].map((c) => (
+                              {candidatesMap[h.id].filter(c => c.status !== "rejected").length === 0 ? (
+                                <p className="text-sm text-muted-foreground py-3 text-center">Semua kandidat telah diabaikan</p>
+                              ) : candidatesMap[h.id].map((c) => {
+                                if (c.status === "rejected") return null;
+                                return (
                                 <div
                                   key={c.id}
-                                  className={`flex items-start gap-3 p-3 bg-muted/30 rounded-lg border border-border ${c.oveercode ? "cursor-pointer hover:bg-muted/60 transition-colors" : ""}`}
-                                  onClick={() => c.oveercode && navigate(`/p/${c.oveercode}`)}
+                                  className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg border border-border"
                                 >
-                                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 cursor-pointer" onClick={() => c.oveercode && navigate(`/p/${c.oveercode}`)}>
                                     {c.source_type === "profile" ? (
                                       <Users className="w-3.5 h-3.5 text-primary" />
                                     ) : (
@@ -441,7 +539,7 @@ const MyRequests = () => {
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap">
-                                      <span className="text-sm font-medium text-foreground">{c.name}</span>
+                                      <span className="text-sm font-medium text-foreground cursor-pointer hover:text-primary transition-colors" onClick={() => c.oveercode && navigate(`/p/${c.oveercode}`)}>{c.name}</span>
                                       {c.oveercode && <span className="text-[10px] text-muted-foreground">#{c.oveercode}</span>}
                                       <span className={`inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full border ${candidateStatusBadge(c.status)}`}>
                                         {c.status}
@@ -464,9 +562,44 @@ const MyRequests = () => {
                                         {c.skills.length > 6 && <span className="text-[10px] text-muted-foreground">+{c.skills.length - 6}</span>}
                                       </div>
                                     )}
+
+                                    {/* Action buttons */}
+                                    <div className="flex items-center gap-2 mt-2">
+                                      {c.profile_user_id && (
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className="text-[10px] h-6 gap-1 px-2"
+                                          disabled={downloadingCvId === c.id}
+                                          onClick={(e) => { e.stopPropagation(); handleDownloadCandidateCV(c); }}
+                                        >
+                                          {downloadingCvId === c.id ? (
+                                            <Loader2 className="w-3 h-3 animate-spin" />
+                                          ) : (
+                                            <Download className="w-3 h-3" />
+                                          )}
+                                          Download CV (2 Kredit)
+                                        </Button>
+                                      )}
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="text-[10px] h-6 gap-1 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        disabled={ignoringId === c.id}
+                                        onClick={(e) => { e.stopPropagation(); handleIgnoreCandidate(c.id, h.id); }}
+                                      >
+                                        {ignoringId === c.id ? (
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                        ) : (
+                                          <XCircle className="w-3 h-3" />
+                                        )}
+                                        Ignore
+                                      </Button>
+                                    </div>
                                   </div>
                                 </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           )}
                         </div>
