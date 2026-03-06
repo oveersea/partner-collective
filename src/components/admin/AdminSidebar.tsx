@@ -26,6 +26,7 @@ export const adminSections = [
   { id: "content", label: "Opportunities & Jobs", icon: FileText },
   { id: "case_studies", label: "Case Studies", icon: ImageIcon },
   { id: "learning", label: "Learning Programs", icon: GraduationCap },
+  { id: "enrollments", label: "Enrollment & Check-in", icon: ScanBarcode },
   { id: "institutions", label: "Institutions", icon: Landmark },
   { id: "assessment", label: "Assessment", icon: ClipboardCheck },
   { id: "insights", label: "Insights & Survey", icon: BarChart3 },

@@ -92,6 +92,7 @@ const AdminDashboard = () => {
       case "content": return <AdminContent />;
       case "case_studies": return <AdminCaseStudies />;
       case "learning": return <AdminLearning />;
+      case "enrollments": return <AdminEnrollments />;
       case "institutions": return <AdminInstitutions />;
       case "assessment": return <AdminAssessment />;
       case "insights": return <AdminInsights />;
