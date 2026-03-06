@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -68,6 +69,7 @@ const statusColor = (s: string) => {
 
 const AdminEnrollments = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [tab, setTab] = useState("programs");
   const [programOrders, setProgramOrders] = useState<ProgramEnrollment[]>([]);
   const [eventOrders, setEventOrders] = useState<EventEnrollment[]>([]);
@@ -305,7 +307,7 @@ const AdminEnrollments = () => {
                     <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
                   ) : (
                     (paged as ProgramEnrollment[]).map(p => (
-                      <tr key={p.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                      <tr key={p.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/enrollment/${p.id}?type=program`)}>
                         <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{p.order_number}</td>
                         <td className="px-4 py-3">
                           <div className="text-foreground text-xs font-medium">{p.full_name}</div>
@@ -328,7 +330,7 @@ const AdminEnrollments = () => {
                           )}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(p.created_at).toLocaleDateString("id-ID")}</td>
-                        <td className="px-4 py-3">
+                          <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                           {p.status === "paid" && !p.checked_in_at ? (
                             <Button size="sm" variant="outline" className="text-xs h-7 gap-1" onClick={() => handleManualCheckIn("program", p.id)}>
                               <CheckCircle2 className="w-3 h-3" /> Check-in
@@ -385,7 +387,7 @@ const AdminEnrollments = () => {
                     <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">Tidak ada data</td></tr>
                   ) : (
                     (paged as EventEnrollment[]).map(e => (
-                      <tr key={e.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                      <tr key={e.id} className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/admin/enrollment/${e.id}?type=event`)}>
                         <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{e.order_number}</td>
                         <td className="px-4 py-3">
                           <div className="text-foreground text-xs font-medium">{e.full_name}</div>
@@ -408,7 +410,7 @@ const AdminEnrollments = () => {
                           )}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(e.created_at).toLocaleDateString("id-ID")}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3" onClick={e2 => e2.stopPropagation()}>
                           {e.status === "paid" && !e.checked_in_at ? (
                             <Button size="sm" variant="outline" className="text-xs h-7 gap-1" onClick={() => handleManualCheckIn("event", e.id)}>
                               <CheckCircle2 className="w-3 h-3" /> Check-in
