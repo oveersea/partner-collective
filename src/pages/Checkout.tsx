@@ -72,6 +72,33 @@ const Checkout = () => {
   const paymentStatus = searchParams.get("payment");
   const checkoutType = searchParams.get("type");
 
+  // Fetch latest order for barcode display
+  const [latestOrder, setLatestOrder] = useState<{ order_number: string; title: string } | null>(null);
+  useEffect(() => {
+    if (paymentStatus !== "success" || !user) return;
+    const fetchLatest = async () => {
+      if (checkoutType === "program" || checkoutType === "program_order") {
+        const { data } = await supabase
+          .from("program_orders")
+          .select("order_number, program_title")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (data) setLatestOrder({ order_number: data.order_number, title: data.program_title });
+      } else if (checkoutType === "event_ticket") {
+        const { data } = await (supabase.from("event_orders") as any)
+          .select("order_number, events(title)")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (data) setLatestOrder({ order_number: data.order_number, title: data.events?.title || "Event" });
+      }
+    };
+    fetchLatest();
+  }, [paymentStatus, user, checkoutType]);
+
   // === SUCCESS STATE ===
   if (paymentStatus === "success") {
     return (
@@ -85,13 +112,24 @@ const Checkout = () => {
             <CheckCircle2 className="w-10 h-10 text-primary" />
           </div>
           <h2 className="text-2xl font-semibold text-foreground mb-2">Pembayaran Berhasil!</h2>
-          <p className="text-muted-foreground mb-8">
+          <p className="text-muted-foreground mb-4">
             {checkoutType === "program" || checkoutType === "program_order"
-              ? "Pendaftaran program Anda telah diproses. Anda akan mendapat akses setelah verifikasi selesai."
+              ? "Pendaftaran program Anda telah diproses."
               : checkoutType === "event_ticket"
-              ? "Tiket event Anda telah berhasil dibeli. Cek email untuk detail tiket."
+              ? "Tiket event Anda telah berhasil dibeli."
               : "Pembayaran Anda telah diproses. Saldo akan diperbarui dalam beberapa saat."}
           </p>
+
+          {/* Barcode ticket */}
+          {latestOrder && (checkoutType === "program" || checkoutType === "program_order" || checkoutType === "event_ticket") && (
+            <div className="max-w-xs mx-auto mb-6">
+              <OrderBarcode
+                orderNumber={latestOrder.order_number}
+                title={latestOrder.title}
+              />
+            </div>
+          )}
+
           <div className="flex gap-3 justify-center">
             {(checkoutType === "program" || checkoutType === "program_order") && (
               <Button onClick={() => navigate("/learning")}>Ke Halaman Learning</Button>
