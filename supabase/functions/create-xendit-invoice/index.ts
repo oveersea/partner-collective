@@ -143,6 +143,26 @@ Deno.serve(async (req) => {
           discount_amount: verifiedDiscount,
           original_amount: baseAmount,
         });
+      } else if (checkout_type === "event_ticket") {
+        const { data: profile } = await adminClient
+          .from("profiles")
+          .select("full_name, phone")
+          .eq("user_id", userId)
+          .single();
+
+        await adminClient.from("event_orders").insert({
+          event_id: body.event_id,
+          user_id: userId,
+          full_name: profile?.full_name || "User",
+          email: userEmail,
+          phone: profile?.phone || "",
+          amount: 0,
+          currency: currency || "IDR",
+          status: "paid",
+          voucher_codes: voucherCodes,
+          discount_amount: verifiedDiscount,
+          original_amount: baseAmount,
+        });
       }
 
       return jsonResponse({
