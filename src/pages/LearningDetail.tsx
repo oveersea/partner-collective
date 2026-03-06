@@ -190,6 +190,24 @@ const LearningDetail = () => {
     fetchAll();
   }, [oveercode]);
 
+  // Fetch user's program order
+  useEffect(() => {
+    if (!user || !program) return;
+    const fetchUserOrder = async () => {
+      const { data } = await supabase
+        .from("program_orders")
+        .select("order_number, checked_in_at, status")
+        .eq("user_id", user.id)
+        .eq("program_slug", program.slug)
+        .in("status", ["paid", "pending"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setUserOrder(data || null);
+    };
+    fetchUserOrder();
+  }, [user, program]);
+
   // Intersection observer for sticky nav
   useEffect(() => {
     const observer = new IntersectionObserver(
