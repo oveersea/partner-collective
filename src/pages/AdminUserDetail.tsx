@@ -817,7 +817,9 @@ const AdminUserDetail = () => {
                   <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
                     <CreditCard className="w-4 h-4" /> Credit Score
                   </h2>
-                  {creditScores.length === 0 ? (
+                  {isSuperadmin ? (
+                    <CreditScoreEditor userId={profile.user_id} items={creditScores} setItems={setCreditScores} />
+                  ) : creditScores.length === 0 ? (
                     <p className="text-sm text-muted-foreground">Belum ada data</p>
                   ) : (
                     <div className="space-y-3">
@@ -842,7 +844,9 @@ const AdminUserDetail = () => {
                   <h2 className="text-sm font-semibold text-card-foreground mb-4 flex items-center gap-2">
                     <Heart className="w-4 h-4" /> Medical History
                   </h2>
-                  {medicalRecords.length === 0 ? (
+                  {isSuperadmin ? (
+                    <MedicalRecordEditor userId={profile.user_id} items={medicalRecords} setItems={setMedicalRecords} />
+                  ) : medicalRecords.length === 0 ? (
                     <p className="text-sm text-muted-foreground">Belum ada data</p>
                   ) : (
                     <div className="space-y-3">
