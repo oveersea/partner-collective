@@ -1,5 +1,5 @@
 import Barcode from "react-barcode";
-import { Ticket, CheckCircle2, QrCode } from "lucide-react";
+import { CheckCircle2, QrCode } from "lucide-react";
 
 interface OrderBarcodeProps {
   orderNumber: string;
