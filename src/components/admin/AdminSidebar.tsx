@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, Shield, CreditCard, FileText, Building2,
   GraduationCap, ClipboardCheck, BarChart3, Landmark, FolderKanban, UserCheck, UsersRound, Store,
-  Image as ImageIcon, Zap, Mail, KeyRound,
+  Image as ImageIcon, Zap, Mail, KeyRound, ScanBarcode,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
