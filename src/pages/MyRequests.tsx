@@ -521,13 +521,16 @@ const MyRequests = () => {
                             <p className="text-sm text-muted-foreground py-3 text-center">Belum ada kandidat yang diajukan admin</p>
                           ) : (
                             <div className="space-y-2">
-                              {candidatesMap[h.id].map((c) => (
+                              {candidatesMap[h.id].filter(c => c.status !== "rejected").length === 0 ? (
+                                <p className="text-sm text-muted-foreground py-3 text-center">Semua kandidat telah diabaikan</p>
+                              ) : candidatesMap[h.id].map((c) => {
+                                if (c.status === "rejected") return null;
+                                return (
                                 <div
                                   key={c.id}
-                                  className={`flex items-start gap-3 p-3 bg-muted/30 rounded-lg border border-border ${c.oveercode ? "cursor-pointer hover:bg-muted/60 transition-colors" : ""}`}
-                                  onClick={() => c.oveercode && navigate(`/p/${c.oveercode}`)}
+                                  className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg border border-border"
                                 >
-                                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 cursor-pointer" onClick={() => c.oveercode && navigate(`/p/${c.oveercode}`)}>
                                     {c.source_type === "profile" ? (
                                       <Users className="w-3.5 h-3.5 text-primary" />
                                     ) : (
@@ -536,7 +539,7 @@ const MyRequests = () => {
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap">
-                                      <span className="text-sm font-medium text-foreground">{c.name}</span>
+                                      <span className="text-sm font-medium text-foreground cursor-pointer hover:text-primary transition-colors" onClick={() => c.oveercode && navigate(`/p/${c.oveercode}`)}>{c.name}</span>
                                       {c.oveercode && <span className="text-[10px] text-muted-foreground">#{c.oveercode}</span>}
                                       <span className={`inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full border ${candidateStatusBadge(c.status)}`}>
                                         {c.status}
@@ -559,9 +562,44 @@ const MyRequests = () => {
                                         {c.skills.length > 6 && <span className="text-[10px] text-muted-foreground">+{c.skills.length - 6}</span>}
                                       </div>
                                     )}
+
+                                    {/* Action buttons */}
+                                    <div className="flex items-center gap-2 mt-2">
+                                      {c.profile_user_id && (
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className="text-[10px] h-6 gap-1 px-2"
+                                          disabled={downloadingCvId === c.id}
+                                          onClick={(e) => { e.stopPropagation(); handleDownloadCandidateCV(c); }}
+                                        >
+                                          {downloadingCvId === c.id ? (
+                                            <Loader2 className="w-3 h-3 animate-spin" />
+                                          ) : (
+                                            <Download className="w-3 h-3" />
+                                          )}
+                                          Download CV (2 Kredit)
+                                        </Button>
+                                      )}
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="text-[10px] h-6 gap-1 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        disabled={ignoringId === c.id}
+                                        onClick={(e) => { e.stopPropagation(); handleIgnoreCandidate(c.id, h.id); }}
+                                      >
+                                        {ignoringId === c.id ? (
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                        ) : (
+                                          <XCircle className="w-3 h-3" />
+                                        )}
+                                        Ignore
+                                      </Button>
+                                    </div>
                                   </div>
                                 </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           )}
                         </div>
