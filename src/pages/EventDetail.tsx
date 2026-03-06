@@ -456,15 +456,33 @@ const EventDetail = () => {
                   )}
                 </div>
 
-                <Button
-                  className="w-full"
-                  size="lg"
-                  onClick={handleBuyTicket}
-                  disabled={isFull || isPast || deadlinePassed}
-                >
-                  <Ticket className="w-4 h-4 mr-2" />
-                  {isPast ? "Event Telah Berakhir" : isFull ? "Sold Out" : deadlinePassed ? "Registrasi Ditutup" : isFree ? "Register (Free)" : `Buy Ticket — ${formatRupiah(currentPrice)}`}
-                </Button>
+                {/* User's ticket barcode */}
+                {userOrder && userOrder.status === "paid" && (
+                  <OrderBarcode
+                    orderNumber={userOrder.order_number}
+                    title={event.title}
+                    checkedIn={!!userOrder.checked_in_at}
+                    checkedInAt={userOrder.checked_in_at}
+                    compact
+                  />
+                )}
+
+                {!userOrder && (
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={handleBuyTicket}
+                    disabled={isFull || isPast || deadlinePassed}
+                  >
+                    <Ticket className="w-4 h-4 mr-2" />
+                    {isPast ? "Event Telah Berakhir" : isFull ? "Sold Out" : deadlinePassed ? "Registrasi Ditutup" : isFree ? "Register (Free)" : `Buy Ticket — ${formatRupiah(currentPrice)}`}
+                  </Button>
+                )}
+                {userOrder && userOrder.status === "pending" && (
+                  <div className="text-center text-xs text-muted-foreground p-3 rounded-xl bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
+                    ⏳ Menunggu pembayaran...
+                  </div>
+                )}
 
                 {event.oveercode && (
                   <p className="text-center text-xs text-muted-foreground font-mono">{event.oveercode}</p>
