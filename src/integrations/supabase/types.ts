@@ -3639,6 +3639,9 @@ export type Database = {
       }
       enrollments: {
         Row: {
+          check_in_method: string | null
+          checked_in_at: string | null
+          checked_in_by: string | null
           completed_at: string | null
           completion_notes: string | null
           created_at: string
@@ -3659,6 +3662,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          check_in_method?: string | null
+          checked_in_at?: string | null
+          checked_in_by?: string | null
           completed_at?: string | null
           completion_notes?: string | null
           created_at?: string
@@ -3679,6 +3685,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          check_in_method?: string | null
+          checked_in_at?: string | null
+          checked_in_by?: string | null
           completed_at?: string | null
           completion_notes?: string | null
           created_at?: string
@@ -3760,6 +3769,9 @@ export type Database = {
       event_orders: {
         Row: {
           amount: number
+          check_in_method: string | null
+          checked_in_at: string | null
+          checked_in_by: string | null
           created_at: string
           currency: string
           discount_amount: number | null
@@ -3782,6 +3794,9 @@ export type Database = {
         }
         Insert: {
           amount: number
+          check_in_method?: string | null
+          checked_in_at?: string | null
+          checked_in_by?: string | null
           created_at?: string
           currency?: string
           discount_amount?: number | null
@@ -3804,6 +3819,9 @@ export type Database = {
         }
         Update: {
           amount?: number
+          check_in_method?: string | null
+          checked_in_at?: string | null
+          checked_in_by?: string | null
           created_at?: string
           currency?: string
           discount_amount?: number | null
@@ -8647,6 +8665,9 @@ export type Database = {
       program_orders: {
         Row: {
           amount: number
+          check_in_method: string | null
+          checked_in_at: string | null
+          checked_in_by: string | null
           created_at: string
           currency: string
           discount_amount: number | null
@@ -8674,6 +8695,9 @@ export type Database = {
         }
         Insert: {
           amount: number
+          check_in_method?: string | null
+          checked_in_at?: string | null
+          checked_in_by?: string | null
           created_at?: string
           currency?: string
           discount_amount?: number | null
@@ -8701,6 +8725,9 @@ export type Database = {
         }
         Update: {
           amount?: number
+          check_in_method?: string | null
+          checked_in_at?: string | null
+          checked_in_by?: string | null
           created_at?: string
           currency?: string
           discount_amount?: number | null
