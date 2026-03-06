@@ -59,7 +59,7 @@ function useInlineEditor<T extends Record<string, any>>(
 
   const remove = async (id: string) => {
     setDeleting(id);
-    const { error } = await (supabase.from(tableName) as any).delete().eq("id", id);
+    const { error } = await (supabase.from(tableName as any) as any).delete().eq("id", id);
     if (error) toast.error("Gagal menghapus");
     else { setItems(items.filter(i => i.id !== id)); toast.success("Berhasil dihapus"); }
     setDeleting(null);
