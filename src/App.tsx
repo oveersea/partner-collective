@@ -78,6 +78,7 @@ const App = () => (
             <Route path="/admin/vendor/create" element={<AdminVendorCreate />} />
             <Route path="/admin/credit/:id" element={<AdminCreditDetail />} />
             <Route path="/admin/hiring/:oveercode" element={<AdminHiringDetail />} />
+            <Route path="/admin/enrollment/:id" element={<AdminEnrollmentDetail />} />
             <Route path="/learning" element={<Learning />} />
             <Route path="/learning/:oveercode" element={<LearningDetail />} />
             <Route path="/credit-balance" element={<CreditBalance />} />
