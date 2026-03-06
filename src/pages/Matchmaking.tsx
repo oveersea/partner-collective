@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, MapPin, Clock, Briefcase, Zap, Filter,
   ChevronDown, Star, Send, X, DollarSign, Users, Globe,
-  Building2, TrendingUp, CheckCircle2, Eye, ShoppingBag, Package,
+  Building2, TrendingUp, CheckCircle2, ShoppingBag, Package,
   HandCoins, UserCircle, Loader2,
 } from "lucide-react";
 import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";

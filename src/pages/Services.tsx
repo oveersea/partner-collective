@@ -112,11 +112,11 @@ const Services = () => {
             <ArrowLeft className="w-4 h-4" /> Back to Home
           </Link>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
-            <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-semibold text-foreground mb-2">
               Service <span className="text-gradient-accent">Catalog</span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
+            <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl">
               Discover professional services from verified talents to help your business grow.
             </p>
           </motion.div>
