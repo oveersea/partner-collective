@@ -143,6 +143,26 @@ Deno.serve(async (req) => {
           discount_amount: verifiedDiscount,
           original_amount: baseAmount,
         });
+      } else if (checkout_type === "event_ticket") {
+        const { data: profile } = await adminClient
+          .from("profiles")
+          .select("full_name, phone")
+          .eq("user_id", userId)
+          .single();
+
+        await adminClient.from("event_orders").insert({
+          event_id: body.event_id,
+          user_id: userId,
+          full_name: profile?.full_name || "User",
+          email: userEmail,
+          phone: profile?.phone || "",
+          amount: 0,
+          currency: currency || "IDR",
+          status: "paid",
+          voucher_codes: voucherCodes,
+          discount_amount: verifiedDiscount,
+          original_amount: baseAmount,
+        });
       }
 
       return jsonResponse({
@@ -178,6 +198,8 @@ Deno.serve(async (req) => {
     } else if (checkout_type === "program_order") {
       metadata.program_id = program_id;
       metadata.program_title = program_title;
+    } else if (checkout_type === "event_ticket") {
+      metadata.event_id = body.event_id;
     }
 
     const xenditRes = await fetch("https://api.xendit.co/v2/invoices", {
@@ -264,6 +286,23 @@ Deno.serve(async (req) => {
         xendit_invoice_id: invoice.id,
         xendit_invoice_url: invoice.invoice_url,
         ...voucherMeta,
+      });
+      insertError = error;
+    } else if (checkout_type === "event_ticket") {
+      const { error } = await adminClient.from("event_orders").insert({
+        event_id: body.event_id,
+        user_id: userId,
+        full_name: profile?.full_name || "User",
+        email: userEmail,
+        phone: profile?.phone || "",
+        amount: finalAmount,
+        currency: currency || "IDR",
+        status: "pending",
+        xendit_invoice_id: invoice.id,
+        xendit_invoice_url: invoice.invoice_url,
+        voucher_codes: voucherCodes.length > 0 ? voucherCodes : null,
+        discount_amount: verifiedDiscount > 0 ? verifiedDiscount : 0,
+        original_amount: baseAmount,
       });
       insertError = error;
     }

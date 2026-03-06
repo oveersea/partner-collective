@@ -3757,6 +3757,227 @@ export type Database = {
           },
         ]
       }
+      event_orders: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          discount_amount: number | null
+          email: string
+          event_id: string
+          full_name: string
+          id: string
+          order_number: string
+          original_amount: number | null
+          phone: string
+          status: string
+          ticket_count: number
+          updated_at: string
+          user_id: string
+          voucher_codes: string[] | null
+          xendit_invoice_id: string | null
+          xendit_invoice_url: string | null
+          xendit_paid_at: string | null
+          xendit_payment_method: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          discount_amount?: number | null
+          email: string
+          event_id: string
+          full_name: string
+          id?: string
+          order_number: string
+          original_amount?: number | null
+          phone?: string
+          status?: string
+          ticket_count?: number
+          updated_at?: string
+          user_id: string
+          voucher_codes?: string[] | null
+          xendit_invoice_id?: string | null
+          xendit_invoice_url?: string | null
+          xendit_paid_at?: string | null
+          xendit_payment_method?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          discount_amount?: number | null
+          email?: string
+          event_id?: string
+          full_name?: string
+          id?: string
+          order_number?: string
+          original_amount?: number | null
+          phone?: string
+          status?: string
+          ticket_count?: number
+          updated_at?: string
+          user_id?: string
+          voucher_codes?: string[] | null
+          xendit_invoice_id?: string | null
+          xendit_invoice_url?: string | null
+          xendit_paid_at?: string | null
+          xendit_payment_method?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_orders_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          address: string | null
+          agenda: Json | null
+          badge: string | null
+          business_id: string | null
+          capacity: number | null
+          category: string
+          city: string | null
+          country: string | null
+          created_at: string
+          created_by: string
+          currency: string
+          description: string | null
+          early_bird_deadline: string | null
+          early_bird_price_cents: number | null
+          end_date: string | null
+          event_type: string
+          faq: Json | null
+          highlights: string[] | null
+          id: string
+          institution_id: string | null
+          latitude: number | null
+          level: string | null
+          location: string | null
+          longitude: number | null
+          online_url: string | null
+          organizer_logo_url: string | null
+          organizer_name: string | null
+          oveercode: string | null
+          price_cents: number
+          registered_count: number | null
+          registration_deadline: string | null
+          slug: string
+          speakers: Json | null
+          start_date: string | null
+          status: string
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          venue_name: string | null
+        }
+        Insert: {
+          address?: string | null
+          agenda?: Json | null
+          badge?: string | null
+          business_id?: string | null
+          capacity?: number | null
+          category?: string
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          created_by: string
+          currency?: string
+          description?: string | null
+          early_bird_deadline?: string | null
+          early_bird_price_cents?: number | null
+          end_date?: string | null
+          event_type?: string
+          faq?: Json | null
+          highlights?: string[] | null
+          id?: string
+          institution_id?: string | null
+          latitude?: number | null
+          level?: string | null
+          location?: string | null
+          longitude?: number | null
+          online_url?: string | null
+          organizer_logo_url?: string | null
+          organizer_name?: string | null
+          oveercode?: string | null
+          price_cents?: number
+          registered_count?: number | null
+          registration_deadline?: string | null
+          slug: string
+          speakers?: Json | null
+          start_date?: string | null
+          status?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          venue_name?: string | null
+        }
+        Update: {
+          address?: string | null
+          agenda?: Json | null
+          badge?: string | null
+          business_id?: string | null
+          capacity?: number | null
+          category?: string
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string
+          currency?: string
+          description?: string | null
+          early_bird_deadline?: string | null
+          early_bird_price_cents?: number | null
+          end_date?: string | null
+          event_type?: string
+          faq?: Json | null
+          highlights?: string[] | null
+          id?: string
+          institution_id?: string | null
+          latitude?: number | null
+          level?: string | null
+          location?: string | null
+          longitude?: number | null
+          online_url?: string | null
+          organizer_logo_url?: string | null
+          organizer_name?: string | null
+          oveercode?: string | null
+          price_cents?: number
+          registered_count?: number | null
+          registration_deadline?: string | null
+          slug?: string
+          speakers?: Json | null
+          start_date?: string | null
+          status?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          venue_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expertise_categories: {
         Row: {
           created_at: string
@@ -11688,6 +11909,7 @@ export type Database = {
       generate_certificate_serial: { Args: never; Returns: string }
       generate_credit_order_number: { Args: never; Returns: string }
       generate_deposit_number: { Args: never; Returns: string }
+      generate_event_order_number: { Args: never; Returns: string }
       generate_gig_deposit_number: { Args: never; Returns: string }
       generate_order_number: { Args: never; Returns: string }
       generate_oveercode: { Args: never; Returns: string }
