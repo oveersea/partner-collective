@@ -133,6 +133,23 @@ const EventDetail = () => {
     fetchEvent();
   }, [oveercode]);
 
+  // Fetch user's order for this event
+  useEffect(() => {
+    if (!user || !event) return;
+    const fetchUserOrder = async () => {
+      const { data } = await (supabase.from("event_orders") as any)
+        .select("order_number, checked_in_at, status")
+        .eq("user_id", user.id)
+        .eq("event_id", event.id)
+        .in("status", ["paid", "pending"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setUserOrder(data || null);
+    };
+    fetchUserOrder();
+  }, [user, event]);
+
   // Scroll spy
   useEffect(() => {
     const handler = () => {
