@@ -13,6 +13,7 @@ import { renderCvToPdf } from "@/lib/cv-pdf-helper";
 import {
   EducationEditor, ExperienceEditor, OrganizationEditor,
   CertificationEditor, TrainingEditor, AwardEditor,
+  CreditScoreEditor, MedicalRecordEditor,
 } from "@/components/admin/AdminUserSectionEditors";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
