@@ -272,9 +272,9 @@ Deno.serve(async (req) => {
       ""
     )).join("");
 
-    const section = (icon: string, title: string, content: string) => content ? `
+    const section = (title: string, content: string) => content ? `
       <div class="section">
-        <h2>${icon} ${title}</h2>
+        <h2>${title}</h2>
         ${content}
       </div>` : "";
 
