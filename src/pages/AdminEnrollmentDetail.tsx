@@ -187,6 +187,12 @@ const AdminEnrollmentDetail = () => {
                 Check-in
               </Button>
             )}
+            {order.checked_in_at && (isSuperadmin) && (
+              <Button size="sm" variant="outline" className="gap-1.5" onClick={handleRedoCheckIn} disabled={checkingIn}>
+                {checkingIn ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
+                Redo Check-in
+              </Button>
+            )}
             {isSuperadmin && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
