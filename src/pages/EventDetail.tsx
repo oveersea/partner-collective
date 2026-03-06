@@ -75,6 +75,7 @@ const EventDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("event");
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [userOrder, setUserOrder] = useState<{ order_number: string; checked_in_at: string | null; status: string } | null>(null);
 
   const handleBuyTicket = () => {
     if (!user) { navigate("/auth"); return; }

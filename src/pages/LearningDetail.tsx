@@ -96,6 +96,7 @@ const LearningDetail = () => {
   const enrolling = false;
   const [activeSection, setActiveSection] = useState("program");
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [userOrder, setUserOrder] = useState<{ order_number: string; checked_in_at: string | null; status: string } | null>(null);
 
   const handleEnroll = () => {
     if (!user) {
