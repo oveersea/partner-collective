@@ -135,7 +135,7 @@ const megaMenus: MegaMenuData[] = [
           { icon: Settings, title: "All Features", description: "Explore the full platform capabilities", href: "/services" },
           { icon: Bell, title: "Notifications", description: "Notification & alert center", href: "/services" },
           { icon: Compass, title: "User Guide", description: "Tutorials & how to use the platform", href: "/services" },
-          { icon: TrendingUp, title: "Insights & Analytics", description: "Performance data & activity statistics", href: "/services" },
+          { icon: TrendingUp, title: "Insights & Analytics", description: "Performance data & activity statistics", href: "/insights" },
         ],
       },
     ],
