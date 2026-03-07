@@ -231,10 +231,10 @@ const megaMenus: MegaMenuData[] = [
         description: "Current industry data & trends",
         icon: BarChart3,
         subItems: [
-          { icon: BarChart3, title: "Industry Insight", description: "Latest labor market trend reports", href: "/services" },
-          { icon: TrendingUp, title: "Salary Report", description: "Salary benchmark data by industry & role", href: "/services" },
-          { icon: BookOpen, title: "Blog & Articles", description: "Educational articles about HR & talent", href: "/services" },
-          { icon: Star, title: "Best Practices", description: "Tips & strategies for talent management", href: "/services" },
+          { icon: BarChart3, title: "Industry Insight", description: "Latest labor market trend reports", href: "/insights" },
+          { icon: TrendingUp, title: "Salary Report", description: "Salary benchmark data by industry & role", href: "/insights?tab=salary" },
+          { icon: BookOpen, title: "Blog & Articles", description: "Educational articles about HR & talent", href: "/insights?tab=articles" },
+          { icon: Star, title: "Best Practices", description: "Tips & strategies for talent management", href: "/insights?tab=best-practices" },
         ],
       },
       {
