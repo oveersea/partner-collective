@@ -224,7 +224,7 @@ const megaMenus: MegaMenuData[] = [
   {
     label: "Resources",
     tagline: "Insights, research, and tools for better business decisions",
-    cta: { label: "View all resources", href: "/services" },
+    cta: { label: "View all resources", href: "/resources" },
     masters: [
       {
         label: "Insights & Analysis",
