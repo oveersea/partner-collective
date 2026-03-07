@@ -48,6 +48,8 @@ import AssessmentDetail from "./pages/AssessmentDetail";
 import CareerPathPage from "./pages/CareerPath";
 import Events from "./pages/Events";
 import EventDetail from "./pages/EventDetail";
+import Resources from "./pages/Resources";
+import Insights from "./pages/Insights";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -100,6 +102,8 @@ const App = () => (
             <Route path="/career-path" element={<CareerPathPage />} />
             <Route path="/events" element={<Events />} />
             <Route path="/events/:oveercode" element={<EventDetail />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/insights" element={<Insights />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -135,7 +135,7 @@ const megaMenus: MegaMenuData[] = [
           { icon: Settings, title: "All Features", description: "Explore the full platform capabilities", href: "/services" },
           { icon: Bell, title: "Notifications", description: "Notification & alert center", href: "/services" },
           { icon: Compass, title: "User Guide", description: "Tutorials & how to use the platform", href: "/services" },
-          { icon: TrendingUp, title: "Insights & Analytics", description: "Performance data & activity statistics", href: "/services" },
+          { icon: TrendingUp, title: "Insights & Analytics", description: "Performance data & activity statistics", href: "/insights" },
         ],
       },
     ],
@@ -224,17 +224,17 @@ const megaMenus: MegaMenuData[] = [
   {
     label: "Resources",
     tagline: "Insights, research, and tools for better business decisions",
-    cta: { label: "View all resources", href: "/services" },
+    cta: { label: "View all resources", href: "/resources" },
     masters: [
       {
         label: "Insights & Analysis",
         description: "Current industry data & trends",
         icon: BarChart3,
         subItems: [
-          { icon: BarChart3, title: "Industry Insight", description: "Latest labor market trend reports", href: "/services" },
-          { icon: TrendingUp, title: "Salary Report", description: "Salary benchmark data by industry & role", href: "/services" },
-          { icon: BookOpen, title: "Blog & Articles", description: "Educational articles about HR & talent", href: "/services" },
-          { icon: Star, title: "Best Practices", description: "Tips & strategies for talent management", href: "/services" },
+          { icon: BarChart3, title: "Industry Insight", description: "Latest labor market trend reports", href: "/insights" },
+          { icon: TrendingUp, title: "Salary Report", description: "Salary benchmark data by industry & role", href: "/insights?tab=salary" },
+          { icon: BookOpen, title: "Blog & Articles", description: "Educational articles about HR & talent", href: "/insights?tab=articles" },
+          { icon: Star, title: "Best Practices", description: "Tips & strategies for talent management", href: "/insights?tab=best-practices" },
         ],
       },
       {
@@ -242,10 +242,10 @@ const megaMenus: MegaMenuData[] = [
         description: "Exclusive surveys & research",
         icon: ClipboardCheck,
         subItems: [
-          { icon: ClipboardCheck, title: "Talent Survey", description: "Talent satisfaction & trend survey", href: "/services" },
-          { icon: FileText, title: "Workforce Report", description: "Labor market research reports", href: "/services" },
-          { icon: BarChart3, title: "Skill Demand Index", description: "Most popular skill demand index", href: "/services" },
-          { icon: Globe, title: "Global Benchmark", description: "Comparison with international standards", href: "/services" },
+          { icon: ClipboardCheck, title: "Talent Survey", description: "Talent satisfaction & trend survey", href: "/insights?tab=surveys" },
+          { icon: FileText, title: "Workforce Report", description: "Labor market research reports", href: "/insights?tab=surveys" },
+          { icon: BarChart3, title: "Skill Demand Index", description: "Most popular skill demand index", href: "/insights?tab=surveys" },
+          { icon: Globe, title: "Global Benchmark", description: "Comparison with international standards", href: "/insights?tab=surveys" },
         ],
       },
       {
@@ -264,10 +264,10 @@ const megaMenus: MegaMenuData[] = [
         description: "Tools & templates for business",
         icon: ScrollText,
         subItems: [
-          { icon: ClipboardCheck, title: "Assessment Tools", description: "Ready-to-use competency test templates", href: "/services" },
-          { icon: ScrollText, title: "Document Templates", description: "Contract, NDA, & HR document templates", href: "/services" },
-          { icon: PackageCheck, title: "Compliance Checklist", description: "Labor compliance checklist", href: "/services" },
-          { icon: Shield, title: "Legal Resources", description: "Labor regulation guides", href: "/services" },
+          { icon: ClipboardCheck, title: "Assessment Tools", description: "Ready-to-use competency test templates", href: "/insights?tab=tools" },
+          { icon: ScrollText, title: "Document Templates", description: "Contract, NDA, & HR document templates", href: "/insights?tab=tools" },
+          { icon: PackageCheck, title: "Compliance Checklist", description: "Labor compliance checklist", href: "/insights?tab=tools" },
+          { icon: Shield, title: "Legal Resources", description: "Labor regulation guides", href: "/insights?tab=tools" },
         ],
       },
     ],
