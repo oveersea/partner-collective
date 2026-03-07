@@ -48,6 +48,8 @@ import AssessmentDetail from "./pages/AssessmentDetail";
 import CareerPathPage from "./pages/CareerPath";
 import Events from "./pages/Events";
 import EventDetail from "./pages/EventDetail";
+import Resources from "./pages/Resources";
+import Insights from "./pages/Insights";
 const queryClient = new QueryClient();
 
 const App = () => (
