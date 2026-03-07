@@ -242,10 +242,10 @@ const megaMenus: MegaMenuData[] = [
         description: "Exclusive surveys & research",
         icon: ClipboardCheck,
         subItems: [
-          { icon: ClipboardCheck, title: "Talent Survey", description: "Talent satisfaction & trend survey", href: "/services" },
-          { icon: FileText, title: "Workforce Report", description: "Labor market research reports", href: "/services" },
-          { icon: BarChart3, title: "Skill Demand Index", description: "Most popular skill demand index", href: "/services" },
-          { icon: Globe, title: "Global Benchmark", description: "Comparison with international standards", href: "/services" },
+          { icon: ClipboardCheck, title: "Talent Survey", description: "Talent satisfaction & trend survey", href: "/insights?tab=surveys" },
+          { icon: FileText, title: "Workforce Report", description: "Labor market research reports", href: "/insights?tab=surveys" },
+          { icon: BarChart3, title: "Skill Demand Index", description: "Most popular skill demand index", href: "/insights?tab=surveys" },
+          { icon: Globe, title: "Global Benchmark", description: "Comparison with international standards", href: "/insights?tab=surveys" },
         ],
       },
       {
