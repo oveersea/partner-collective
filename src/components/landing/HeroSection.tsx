@@ -269,10 +269,10 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(0 0% 5%), hsl(0 0% 8%), hsl(0 0% 6%))" }}>
-      <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px] opacity-15" style={{ background: "hsl(0 79% 47%)" }} />
+      <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full blur-[120px] opacity-15" style={{ background: "hsl(0 79% 47%)" }} />
 
-      <div className="relative container mx-auto px-6 pt-28 pb-16">
-        <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[calc(100vh-7rem)]">
+      <div className="relative container mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-10 sm:pb-16">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[calc(100vh-7rem)]">
           {/* Left: Content */}
           <div className="max-w-xl">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 mb-8">
