@@ -218,7 +218,7 @@ const AdminEmailNotifications = () => {
       if (error) toast.error("Gagal update: " + error.message);
       else toast.success("Template diperbarui");
     } else {
-      const { error } = await supabase.from("email_templates").insert(payload);
+      const { error } = await (supabase as any).from("email_templates").insert(payload);
       if (error) toast.error("Gagal simpan: " + error.message);
       else toast.success("Template dibuat");
     }
