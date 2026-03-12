@@ -229,7 +229,7 @@ const AdminEmailNotifications = () => {
 
   const deleteTemplate = async (id: string) => {
     if (!confirm("Hapus template ini?")) return;
-    await supabase.from("email_templates").delete().eq("id", id);
+    await (supabase as any).from("email_templates").delete().eq("id", id);
     toast.success("Template dihapus");
     fetchData();
   };
