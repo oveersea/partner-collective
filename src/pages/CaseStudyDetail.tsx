@@ -59,7 +59,7 @@ const CaseStudyDetail = () => {
 
     const fetch = async () => {
       // Fetch case study by slug
-      const { data: csData } = await supabase
+      const { data: csData } = await (supabase as any)
         .from("case_studies")
         .select("id, title, slug, description, content, company_name, industry, image_url, client_logo_url, challenge, solution, results, testimonial_quote, testimonial_author, testimonial_role")
         .eq("slug", slug)
