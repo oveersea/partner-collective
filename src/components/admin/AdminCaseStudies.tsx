@@ -133,7 +133,7 @@ const AdminCaseStudies = () => {
   };
 
   const fetchServices = async () => {
-    const { data } = await supabase.from("services").select("id, name").order("name");
+    const { data } = await (supabase as any).from("services").select("id, name").order("name");
     if (data) setAllServices(data as ServiceOption[]);
   };
 
