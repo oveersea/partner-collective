@@ -72,7 +72,7 @@ const ServiceDetailPage = () => {
     if (!slug) return;
     const fetchService = async () => {
       setLoading(true);
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("services")
         .select("id, name, slug, description, required_skills, min_match_pct, category_id")
         .eq("slug", slug)
