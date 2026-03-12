@@ -260,7 +260,7 @@ const AdminCaseStudies = () => {
           case_study_id: csId!,
           service_id: sid,
         }));
-        await supabase.from("case_study_services").insert(svcPayload);
+        await (supabase as any).from("case_study_services").insert(svcPayload);
       }
     }
 
