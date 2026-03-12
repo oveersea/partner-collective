@@ -32,7 +32,7 @@ const HowItWorksSection = () => {
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-semibold mt-2 sm:mt-3 mb-3 sm:mb-5 text-foreground">
             From Request to <span className="text-gradient-accent">Real Results</span>
           </h2>
-          <p className="text-lg max-w-2xl mx-auto text-muted-foreground">
+          <p className="text-sm sm:text-lg max-w-2xl mx-auto text-muted-foreground">
             A transparent and structured process to ensure quality at every stage.
           </p>
         </motion.div>
