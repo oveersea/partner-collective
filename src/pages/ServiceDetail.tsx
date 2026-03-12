@@ -84,7 +84,7 @@ const ServiceDetailPage = () => {
         return;
       }
 
-      const { data: cat } = await supabase
+      const { data: cat } = await (supabase as any)
         .from("service_categories")
         .select("name")
         .eq("id", data.category_id)
