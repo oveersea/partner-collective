@@ -59,7 +59,7 @@ const ServicesTab = () => {
       setUserServices(map);
     }
     if (profileRes.data?.skills) setUserSkills(profileRes.data.skills);
-    if (catRes.data && catRes.data.length > 0) setExpandedCat(catRes.data[0].id);
+    if (catRes.data && catRes.data.length > 0) setExpandedCat((catRes.data as any[])[0].id);
     setLoading(false);
   };
 
