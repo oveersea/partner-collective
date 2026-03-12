@@ -138,7 +138,7 @@ const AdminRequests = () => {
         .select("id, title, description, status, sla_type, sla_deadline, assigned_to, assigned_vendor_id, admin_notes, created_at, user_id, category, skills_required, budget_min, budget_max")
         .eq("job_type", "project")
         .order("created_at", { ascending: false }),
-      supabase
+      (supabase as any)
         .from("orders")
         .select("id, order_number, service_slug, items, status, sla_type, sla_deadline, assigned_to, assigned_vendor_id, admin_notes, created_at, user_id")
         .order("created_at", { ascending: false }),

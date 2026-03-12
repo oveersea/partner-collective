@@ -138,7 +138,7 @@ const AdminEmailNotifications = () => {
     } else {
       setReminderInterval(newInterval);
       // Update template description
-      await supabase.from("email_templates")
+      await (supabase as any).from("email_templates")
         .update({ description: `Automated reminder sent every ${days} days to users with profile completeness below 70%` })
         .eq("template_key", "profile_reminder");
       toast.success(`Interval reminder diubah ke setiap ${days} hari`);

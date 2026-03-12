@@ -152,7 +152,7 @@ const Matchmaking = () => {
       supabase.from("profiles").select("skills, years_of_experience, full_name, headline").eq("user_id", user.id).single(),
       supabase.from("opportunity_applications").select("opportunity_id").eq("user_id", user.id),
       // Open orders
-      supabase
+      (supabase as any)
         .from("orders")
         .select("id, order_number, expertise_slug, service_slug, items, total_cents, currency, sla_type, sla_deadline, notes, created_at")
         .eq("status", "pending")

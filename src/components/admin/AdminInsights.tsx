@@ -77,7 +77,7 @@ const AdminInsights = () => {
 
   const toggleSurveyStatus = async (id: string, current: string) => {
     const next = current === "active" ? "closed" : "active";
-    const { error } = await supabase.from("surveys").update({ status: next } as any).eq("id", id);
+    const { error } = await (supabase as any).from("surveys").update({ status: next }).eq("id", id);
     if (error) toast.error("Failed to update status");
     else { toast.success("Status updated"); fetchData(); }
   };
