@@ -169,11 +169,11 @@ const ServiceShowcaseSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-semibold text-primary uppercase tracking-widest">Service Catalog</span>
-          <h2 className="text-4xl md:text-5xl font-semibold mt-3 mb-5 text-foreground">
+          <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-widest">Service Catalog</span>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-semibold mt-2 sm:mt-3 mb-3 sm:mb-5 text-foreground">
             Services from <span className="text-gradient-accent">Verified Talent</span>
           </h2>
-          <p className="text-lg max-w-2xl mx-auto text-muted-foreground">
+          <p className="text-sm sm:text-lg max-w-2xl mx-auto text-muted-foreground">
             Find professional services from skill-verified talent. Minimum 70% skill match guaranteed.
           </p>
         </motion.div>
