@@ -75,12 +75,12 @@ const CaseStudyDetail = () => {
 
       // Fetch sections and related services in parallel
       const [secRes, svcRes] = await Promise.all([
-        supabase
+        (supabase as any)
           .from("case_study_sections")
           .select("id, section_type, title, body, image_url, sort_order")
           .eq("case_study_id", csData.id)
           .order("sort_order", { ascending: true }),
-        supabase
+        (supabase as any)
           .from("case_study_services")
           .select("service_id")
           .eq("case_study_id", csData.id),
