@@ -241,7 +241,7 @@ const AdminCaseStudies = () => {
     }
 
     if (csId) {
-      await supabase.from("case_study_sections").delete().eq("case_study_id", csId);
+      await (supabase as any).from("case_study_sections").delete().eq("case_study_id", csId);
       if (sections.length > 0) {
         const secPayload = sections.map((s, i) => ({
           case_study_id: csId!,
