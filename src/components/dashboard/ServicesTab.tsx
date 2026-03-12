@@ -45,13 +45,13 @@ const ServicesTab = () => {
   const fetchAll = async () => {
     setLoading(true);
     const [catRes, svcRes, userSvcRes, profileRes] = await Promise.all([
-      supabase.from("service_categories").select("*").eq("is_active", true).order("sort_order"),
-      supabase.from("services").select("*").eq("is_active", true).order("sort_order"),
-      supabase.from("user_services").select("service_id, match_score, is_active").eq("user_id", user!.id),
+      (supabase as any).from("service_categories").select("*").eq("is_active", true).order("sort_order"),
+      (supabase as any).from("services").select("*").eq("is_active", true).order("sort_order"),
+      (supabase as any).from("user_services").select("service_id, match_score, is_active").eq("user_id", user!.id),
       supabase.from("profiles").select("skills").eq("user_id", user!.id).single(),
     ]);
 
-    if (catRes.data) setCategories(catRes.data);
+    if (catRes.data) setCategories(catRes.data as ServiceCategory[]);
     if (svcRes.data) setServices(svcRes.data as Service[]);
     if (userSvcRes.data) {
       const map = new Map<string, UserService>();
