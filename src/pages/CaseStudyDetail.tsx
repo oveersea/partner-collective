@@ -91,11 +91,11 @@ const CaseStudyDetail = () => {
       // Fetch actual service data
       if (svcRes.data && svcRes.data.length > 0) {
         const serviceIds = svcRes.data.map((s: any) => s.service_id);
-        const { data: svcData } = await supabase
+        const { data: svcData } = await (supabase as any)
           .from("services")
           .select("id, name, slug, description, icon")
           .in("id", serviceIds);
-        setServices((svcData || []) as unknown as RelatedService[]);
+        setServices((svcData || []) as RelatedService[]);
       }
 
       setLoading(false);

@@ -39,7 +39,7 @@ const CaseStudiesSection = () => {
 
   useEffect(() => {
     const fetchCases = async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("case_studies")
         .select("id, title, slug, description, company_name, industry, image_url, cta_label, cta_url, is_featured")
         .eq("is_active", true)

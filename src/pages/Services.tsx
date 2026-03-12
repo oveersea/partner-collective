@@ -73,15 +73,15 @@ const Services = () => {
       const { data: servicesData } = await query;
 
       if (servicesData) {
-        const serviceIds = servicesData.map(s => s.id);
-        const { data: counts } = await supabase
+        const serviceIds = (servicesData as any[]).map((s: any) => s.id);
+        const { data: counts } = await (supabase as any)
           .from("user_services")
           .select("service_id")
           .in("service_id", serviceIds)
           .eq("is_active", true);
 
         const countMap: Record<string, number> = {};
-        counts?.forEach(c => {
+        (counts as any[])?.forEach((c: any) => {
           countMap[c.service_id] = (countMap[c.service_id] || 0) + 1;
         });
 

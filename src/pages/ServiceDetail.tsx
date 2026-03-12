@@ -157,7 +157,7 @@ const ServiceDetailPage = () => {
   useEffect(() => {
     if (!service) return;
     const fetchProviders = async () => {
-      const { data: providers } = await supabase
+      const { data: providers } = await (supabase as any)
         .from("user_services")
         .select("user_id, match_score")
         .eq("service_id", service.id)

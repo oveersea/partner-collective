@@ -102,7 +102,7 @@ const ServicesTab = () => {
       }
     } else {
       // Create new
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("user_services")
         .insert({ user_id: user.id, service_id: service.id, match_score: matchScore, is_active: true });
 

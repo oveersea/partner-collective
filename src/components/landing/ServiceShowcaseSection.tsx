@@ -145,11 +145,11 @@ const ServiceShowcaseSection = () => {
           .eq("is_active", true);
 
         const countMap: Record<string, number> = {};
-        counts?.forEach(c => {
+        (counts as any[])?.forEach((c: any) => {
           countMap[c.service_id] = (countMap[c.service_id] || 0) + 1;
         });
 
-        setServices(servicesData.map(s => ({
+        setServices((servicesData as any[]).map((s: any) => ({
           ...s,
           required_skills: s.required_skills || [],
           provider_count: countMap[s.id] || 0,
