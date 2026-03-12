@@ -287,7 +287,7 @@ const HeroSection = () => {
               The best partners & teams for your business
             </motion.h1>
 
-            <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="text-lg leading-relaxed mb-10" style={{ color: "hsl(0 0% 55%)" }}>
+            <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="text-base sm:text-lg leading-relaxed mb-6 sm:mb-10" style={{ color: "hsl(0 0% 55%)" }}>
               Find KYC-verified freelance partners & teams. From hiring requests to project requests — everything starts with quality.
             </motion.p>
 
