@@ -82,7 +82,7 @@ const ServiceOrder = () => {
     if (!slug) return;
     const fetchService = async () => {
       setLoading(true);
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("services")
         .select("id, name, slug, description, required_skills, min_match_pct, category_id")
         .eq("slug", slug)
@@ -91,18 +91,18 @@ const ServiceOrder = () => {
 
       if (!data) { setLoading(false); return; }
 
-      const { data: cat } = await supabase
+      const { data: cat } = await (supabase as any)
         .from("service_categories")
         .select("name")
-        .eq("id", data.category_id)
+        .eq("id", (data as any).category_id)
         .single();
 
-      setService({ ...data, required_skills: data.required_skills || [], category_name: cat?.name || null });
+      setService({ ...(data as any), required_skills: (data as any).required_skills || [], category_name: (cat as any)?.name || null });
 
-      const { count } = await supabase
+      const { count } = await (supabase as any)
         .from("user_services")
         .select("id", { count: "exact", head: true })
-        .eq("service_id", data.id)
+        .eq("service_id", (data as any).id)
         .eq("is_active", true);
       setProviderCount(count || 0);
       setLoading(false);
