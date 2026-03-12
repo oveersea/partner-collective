@@ -84,7 +84,7 @@ const ServicesTab = () => {
 
     if (existing) {
       // Toggle active
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("user_services")
         .update({ is_active: !existing.is_active, match_score: matchScore })
         .eq("user_id", user.id)
