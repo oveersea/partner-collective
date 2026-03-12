@@ -43,7 +43,7 @@ const AdminCredits = () => {
 
   const fetchData = async () => {
     // Fetch orders
-    const { data: ordData } = await supabase
+    const { data: ordData } = await (supabase as any)
       .from("credit_orders")
       .select("id, order_number, credits, amount_cents, currency, status, buyer_type, user_id, business_id, created_at")
       .order("created_at", { ascending: false })
