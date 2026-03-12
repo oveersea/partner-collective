@@ -83,7 +83,7 @@ const AdminInsights = () => {
   };
 
   const toggleCaseActive = async (id: string, current: boolean | null) => {
-    const { error } = await supabase.from("case_studies").update({ is_active: !current } as any).eq("id", id);
+    const { error } = await (supabase as any).from("case_studies").update({ is_active: !current }).eq("id", id);
     if (error) toast.error("Failed to update status");
     else { toast.success("Status updated"); fetchData(); }
   };
