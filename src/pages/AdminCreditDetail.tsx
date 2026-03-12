@@ -56,18 +56,18 @@ const AdminCreditDetail = () => {
         }
       }
     } else {
-      const { data: row } = await supabase
+      const { data: row } = await (supabase as any)
         .from("wallet_deposits")
         .select("*")
         .eq("id", id!)
         .single();
       if (row) {
         setData(row);
-        setAdminNotes(row.admin_notes || "");
-        const { data: p } = await supabase.from("profiles").select("full_name").eq("user_id", row.user_id).single();
+        setAdminNotes((row as any).admin_notes || "");
+        const { data: p } = await supabase.from("profiles").select("full_name").eq("user_id", (row as any).user_id).single();
         if (p) setUserName(p.full_name || "");
-        if (row.business_id) {
-          const { data: b } = await supabase.from("business_profiles").select("name").eq("id", row.business_id).single();
+        if ((row as any).business_id) {
+          const { data: b } = await supabase.from("business_profiles").select("name").eq("id", (row as any).business_id).single();
           if (b) setBusinessName(b.name || "");
         }
       }
