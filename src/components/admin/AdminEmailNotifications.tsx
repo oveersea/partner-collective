@@ -101,8 +101,8 @@ const AdminEmailNotifications = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     const [tplRes, sendsRes, profilesRes, settingsRes] = await Promise.all([
-      supabase.from("email_templates").select("*").order("created_at", { ascending: false }),
-      supabase.from("email_sends").select("id, subject, body_html, recipient_email, recipient_name, recipient_user_id, send_type, status, error_message, sent_at, created_at, template_id").order("created_at", { ascending: false }).limit(100),
+      (supabase as any).from("email_templates").select("*").order("created_at", { ascending: false }),
+      (supabase as any).from("email_sends").select("id, subject, body_html, recipient_email, recipient_name, recipient_user_id, send_type, status, error_message, sent_at, created_at, template_id").order("created_at", { ascending: false }).limit(100),
       supabase.from("profiles").select("user_id, full_name").limit(500),
       supabase.from("app_settings").select("key, value").eq("key", "profile_reminder_interval_days").maybeSingle(),
     ]);
