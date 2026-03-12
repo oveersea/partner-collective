@@ -21,12 +21,12 @@ const FeaturesSection = () => {
 
   useEffect(() => {
     const fetch = async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("service_categories")
         .select("id, name, slug, description, icon")
         .eq("is_active", true)
         .order("sort_order");
-      if (data) setCategories(data);
+      if (data) setCategories(data as ServiceCategory[]);
     };
     fetch();
   }, []);

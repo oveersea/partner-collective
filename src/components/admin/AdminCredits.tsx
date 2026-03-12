@@ -43,14 +43,14 @@ const AdminCredits = () => {
 
   const fetchData = async () => {
     // Fetch orders
-    const { data: ordData } = await supabase
+    const { data: ordData } = await (supabase as any)
       .from("credit_orders")
       .select("id, order_number, credits, amount_cents, currency, status, buyer_type, user_id, business_id, created_at")
       .order("created_at", { ascending: false })
       .limit(100);
 
     // Fetch deposits
-    const { data: depData } = await supabase
+    const { data: depData } = await (supabase as any)
       .from("wallet_deposits")
       .select("id, deposit_number, amount, method, status, user_id, created_at")
       .order("created_at", { ascending: false })
@@ -94,19 +94,19 @@ const AdminCredits = () => {
   };
 
   const approveOrder = async (id: string) => {
-    const { error } = await supabase.from("credit_orders").update({ status: "paid" }).eq("id", id);
+    const { error } = await (supabase as any).from("credit_orders").update({ status: "paid" }).eq("id", id);
     if (error) toast.error("Failed to approve order: " + error.message);
     else { toast.success("Order approved"); fetchData(); }
   };
 
   const rejectOrder = async (id: string) => {
-    const { error } = await supabase.from("credit_orders").update({ status: "rejected" }).eq("id", id);
+    const { error } = await (supabase as any).from("credit_orders").update({ status: "rejected" }).eq("id", id);
     if (error) toast.error("Failed to reject order");
     else { toast.success("Order rejected"); fetchData(); }
   };
 
   const approveDeposit = async (id: string) => {
-    const { error } = await supabase.from("wallet_deposits").update({ status: "paid" }).eq("id", id);
+    const { error } = await (supabase as any).from("wallet_deposits").update({ status: "paid" }).eq("id", id);
     if (error) toast.error("Failed to approve deposit: " + error.message);
     else { toast.success("Deposit approved"); fetchData(); }
   };

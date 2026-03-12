@@ -62,7 +62,7 @@ const Insights = () => {
           .select("id, title, slug, description, category, date, read_time, thumbnail_url, author, is_published, stat, stat_label, trend, trend_value")
           .eq("is_published", true)
           .order("date", { ascending: false }),
-        supabase
+        (supabase as any)
           .from("insight_services")
           .select("id, title, tagline, icon_name, is_active")
           .eq("is_active", true)

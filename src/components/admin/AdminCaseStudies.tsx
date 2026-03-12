@@ -124,7 +124,7 @@ const AdminCaseStudies = () => {
   }, [search]);
 
   const fetchItems = async () => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("case_studies")
       .select("*")
       .order("sort_order", { ascending: true });
@@ -133,7 +133,7 @@ const AdminCaseStudies = () => {
   };
 
   const fetchServices = async () => {
-    const { data } = await supabase.from("services").select("id, name").order("name");
+    const { data } = await (supabase as any).from("services").select("id, name").order("name");
     if (data) setAllServices(data as ServiceOption[]);
   };
 
@@ -153,12 +153,12 @@ const AdminCaseStudies = () => {
     setActiveTab("general");
 
     const [secRes, svcRes] = await Promise.all([
-      supabase
+      (supabase as any)
         .from("case_study_sections")
         .select("id, section_type, title, body, image_url, sort_order")
         .eq("case_study_id", cs.id)
         .order("sort_order"),
-      supabase
+      (supabase as any)
         .from("case_study_services")
         .select("id, service_id")
         .eq("case_study_id", cs.id),
@@ -224,14 +224,14 @@ const AdminCaseStudies = () => {
     let csId = editId;
 
     if (editId) {
-      const { error } = await supabase.from("case_studies").update(payload).eq("id", editId);
+      const { error } = await (supabase as any).from("case_studies").update(payload).eq("id", editId);
       if (error) {
         toast.error("Gagal update: " + error.message);
         setSaving(false);
         return;
       }
     } else {
-      const { data, error } = await supabase.from("case_studies").insert(payload).select("id").single();
+      const { data, error } = await (supabase as any).from("case_studies").insert(payload).select("id").single();
       if (error || !data) {
         toast.error("Gagal membuat: " + (error?.message || "Unknown error"));
         setSaving(false);
@@ -241,7 +241,7 @@ const AdminCaseStudies = () => {
     }
 
     if (csId) {
-      await supabase.from("case_study_sections").delete().eq("case_study_id", csId);
+      await (supabase as any).from("case_study_sections").delete().eq("case_study_id", csId);
       if (sections.length > 0) {
         const secPayload = sections.map((s, i) => ({
           case_study_id: csId!,
@@ -251,16 +251,16 @@ const AdminCaseStudies = () => {
           image_url: s.image_url || null,
           sort_order: i,
         }));
-        await supabase.from("case_study_sections").insert(secPayload);
+        await (supabase as any).from("case_study_sections").insert(secPayload);
       }
 
-      await supabase.from("case_study_services").delete().eq("case_study_id", csId);
+      await (supabase as any).from("case_study_services").delete().eq("case_study_id", csId);
       if (linkedServiceIds.length > 0) {
         const svcPayload = linkedServiceIds.map((sid) => ({
           case_study_id: csId!,
           service_id: sid,
         }));
-        await supabase.from("case_study_services").insert(svcPayload);
+        await (supabase as any).from("case_study_services").insert(svcPayload);
       }
     }
 
@@ -272,7 +272,7 @@ const AdminCaseStudies = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Hapus case study ini?")) return;
-    const { error } = await supabase.from("case_studies").delete().eq("id", id);
+    const { error } = await (supabase as any).from("case_studies").delete().eq("id", id);
     if (error) toast.error("Gagal menghapus");
     else {
       toast.success("Case study dihapus");
@@ -281,7 +281,7 @@ const AdminCaseStudies = () => {
   };
 
   const toggleActive = async (id: string, current: boolean) => {
-    await supabase.from("case_studies").update({ is_active: !current }).eq("id", id);
+    await (supabase as any).from("case_studies").update({ is_active: !current }).eq("id", id);
     fetchItems();
   };
 

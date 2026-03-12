@@ -40,10 +40,10 @@ const AdminOverview = () => {
       supabase.from("profiles").select("*", { count: "exact", head: true }).eq("kyc_status", "pending"),
       supabase.from("business_profiles").select("*", { count: "exact", head: true }),
       supabase.from("enrollments").select("*", { count: "exact", head: true }),
-      supabase.from("email_sends").select("*", { count: "exact", head: true }),
+      (supabase as any).from("email_sends").select("*", { count: "exact", head: true }),
       supabase.from("profiles").select("*", { count: "exact", head: true }).eq("kyc_status", "verified"),
-      supabase.from("wallet_deposits").select("*", { count: "exact", head: true }).eq("status", "paid"),
-      supabase.from("orders").select("*", { count: "exact", head: true }),
+      (supabase as any).from("wallet_deposits").select("*", { count: "exact", head: true }).eq("status", "paid"),
+      (supabase as any).from("orders").select("*", { count: "exact", head: true }),
       supabase.from("hiring_requests").select("*", { count: "exact", head: true }),
     ]);
 

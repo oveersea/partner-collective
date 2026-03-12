@@ -101,8 +101,8 @@ const AdminEmailNotifications = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     const [tplRes, sendsRes, profilesRes, settingsRes] = await Promise.all([
-      supabase.from("email_templates").select("*").order("created_at", { ascending: false }),
-      supabase.from("email_sends").select("id, subject, body_html, recipient_email, recipient_name, recipient_user_id, send_type, status, error_message, sent_at, created_at, template_id").order("created_at", { ascending: false }).limit(100),
+      (supabase as any).from("email_templates").select("*").order("created_at", { ascending: false }),
+      (supabase as any).from("email_sends").select("id, subject, body_html, recipient_email, recipient_name, recipient_user_id, send_type, status, error_message, sent_at, created_at, template_id").order("created_at", { ascending: false }).limit(100),
       supabase.from("profiles").select("user_id, full_name").limit(500),
       supabase.from("app_settings").select("key, value").eq("key", "profile_reminder_interval_days").maybeSingle(),
     ]);
@@ -138,7 +138,7 @@ const AdminEmailNotifications = () => {
     } else {
       setReminderInterval(newInterval);
       // Update template description
-      await supabase.from("email_templates")
+      await (supabase as any).from("email_templates")
         .update({ description: `Automated reminder sent every ${days} days to users with profile completeness below 70%` })
         .eq("template_key", "profile_reminder");
       toast.success(`Interval reminder diubah ke setiap ${days} hari`);
@@ -214,11 +214,11 @@ const AdminEmailNotifications = () => {
     };
 
     if (editingTemplate) {
-      const { error } = await supabase.from("email_templates").update(payload).eq("id", editingTemplate.id);
+      const { error } = await (supabase as any).from("email_templates").update(payload).eq("id", editingTemplate.id);
       if (error) toast.error("Gagal update: " + error.message);
       else toast.success("Template diperbarui");
     } else {
-      const { error } = await supabase.from("email_templates").insert(payload);
+      const { error } = await (supabase as any).from("email_templates").insert(payload);
       if (error) toast.error("Gagal simpan: " + error.message);
       else toast.success("Template dibuat");
     }
@@ -229,7 +229,7 @@ const AdminEmailNotifications = () => {
 
   const deleteTemplate = async (id: string) => {
     if (!confirm("Hapus template ini?")) return;
-    await supabase.from("email_templates").delete().eq("id", id);
+    await (supabase as any).from("email_templates").delete().eq("id", id);
     toast.success("Template dihapus");
     fetchData();
   };

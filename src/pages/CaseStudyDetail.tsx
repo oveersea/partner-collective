@@ -59,7 +59,7 @@ const CaseStudyDetail = () => {
 
     const fetch = async () => {
       // Fetch case study by slug
-      const { data: csData } = await supabase
+      const { data: csData } = await (supabase as any)
         .from("case_studies")
         .select("id, title, slug, description, content, company_name, industry, image_url, client_logo_url, challenge, solution, results, testimonial_quote, testimonial_author, testimonial_role")
         .eq("slug", slug)
@@ -71,31 +71,31 @@ const CaseStudyDetail = () => {
         return;
       }
 
-      setCs(csData as unknown as CaseStudyData);
+      setCs(csData as CaseStudyData);
 
       // Fetch sections and related services in parallel
       const [secRes, svcRes] = await Promise.all([
-        supabase
+        (supabase as any)
           .from("case_study_sections")
           .select("id, section_type, title, body, image_url, sort_order")
           .eq("case_study_id", csData.id)
           .order("sort_order", { ascending: true }),
-        supabase
+        (supabase as any)
           .from("case_study_services")
           .select("service_id")
           .eq("case_study_id", csData.id),
       ]);
 
-      setSections((secRes.data || []) as unknown as Section[]);
+      setSections((secRes.data || []) as Section[]);
 
       // Fetch actual service data
       if (svcRes.data && svcRes.data.length > 0) {
         const serviceIds = svcRes.data.map((s: any) => s.service_id);
-        const { data: svcData } = await supabase
+        const { data: svcData } = await (supabase as any)
           .from("services")
           .select("id, name, slug, description, icon")
           .in("id", serviceIds);
-        setServices((svcData || []) as unknown as RelatedService[]);
+        setServices((svcData || []) as RelatedService[]);
       }
 
       setLoading(false);

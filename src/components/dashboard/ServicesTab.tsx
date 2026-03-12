@@ -45,13 +45,13 @@ const ServicesTab = () => {
   const fetchAll = async () => {
     setLoading(true);
     const [catRes, svcRes, userSvcRes, profileRes] = await Promise.all([
-      supabase.from("service_categories").select("*").eq("is_active", true).order("sort_order"),
-      supabase.from("services").select("*").eq("is_active", true).order("sort_order"),
-      supabase.from("user_services").select("service_id, match_score, is_active").eq("user_id", user!.id),
+      (supabase as any).from("service_categories").select("*").eq("is_active", true).order("sort_order"),
+      (supabase as any).from("services").select("*").eq("is_active", true).order("sort_order"),
+      (supabase as any).from("user_services").select("service_id, match_score, is_active").eq("user_id", user!.id),
       supabase.from("profiles").select("skills").eq("user_id", user!.id).single(),
     ]);
 
-    if (catRes.data) setCategories(catRes.data);
+    if (catRes.data) setCategories(catRes.data as ServiceCategory[]);
     if (svcRes.data) setServices(svcRes.data as Service[]);
     if (userSvcRes.data) {
       const map = new Map<string, UserService>();
@@ -59,7 +59,7 @@ const ServicesTab = () => {
       setUserServices(map);
     }
     if (profileRes.data?.skills) setUserSkills(profileRes.data.skills);
-    if (catRes.data && catRes.data.length > 0) setExpandedCat(catRes.data[0].id);
+    if (catRes.data && catRes.data.length > 0) setExpandedCat((catRes.data as any[])[0].id);
     setLoading(false);
   };
 
@@ -84,7 +84,7 @@ const ServicesTab = () => {
 
     if (existing) {
       // Toggle active
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("user_services")
         .update({ is_active: !existing.is_active, match_score: matchScore })
         .eq("user_id", user.id)
@@ -102,7 +102,7 @@ const ServicesTab = () => {
       }
     } else {
       // Create new
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("user_services")
         .insert({ user_id: user.id, service_id: service.id, match_score: matchScore, is_active: true });
 

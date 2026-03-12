@@ -51,7 +51,7 @@ const CaseStudies = () => {
     const fetchAll = async () => {
       // Fetch case studies and portfolios in parallel
       const [csRes, pfRes] = await Promise.all([
-        supabase
+        (supabase as any)
           .from("case_studies")
           .select("id, title, slug, description, company_name, industry, image_url, cta_label, cta_url")
           .eq("is_active", true)

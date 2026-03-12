@@ -250,13 +250,13 @@ const MyRequests = () => {
     setDownloadingCvId(candidate.id);
     try {
       // Debit 2 credits
-      const { data: balance } = await supabase
+      const { data: balance } = await (supabase as any)
         .from("credit_balances")
         .select("balance")
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (!balance || balance.balance < 2) {
+      if (!balance || (balance as any).balance < 2) {
         toast.error("Saldo kredit tidak cukup (butuh 2 kredit)", {
           action: { label: "Top Up", onClick: () => navigate("/credit-balance") },
         });
@@ -265,10 +265,10 @@ const MyRequests = () => {
       }
 
       // Deduct credits
-      await supabase
+      await (supabase as any)
         .from("credit_balances")
         .update({
-          balance: balance.balance - 2,
+          balance: (balance as any).balance - 2,
           total_used: (balance as any).total_used ? (balance as any).total_used + 2 : 2,
         })
         .eq("user_id", user.id);

@@ -39,35 +39,35 @@ const AdminCreditDetail = () => {
     }
 
     if (type === "order") {
-      const { data: row } = await supabase
+      const { data: row } = await (supabase as any)
         .from("credit_orders")
         .select("*")
         .eq("id", id!)
         .single();
       if (row) {
         setData(row);
-        setAdminNotes(row.admin_notes || "");
+        setAdminNotes((row as any).admin_notes || "");
         // Fetch user name
-        const { data: p } = await supabase.from("profiles").select("full_name").eq("user_id", row.user_id).single();
+        const { data: p } = await supabase.from("profiles").select("full_name").eq("user_id", (row as any).user_id).single();
         if (p) setUserName(p.full_name || "");
-        if (row.business_id) {
-          const { data: b } = await supabase.from("business_profiles").select("name").eq("id", row.business_id).single();
+        if ((row as any).business_id) {
+          const { data: b } = await supabase.from("business_profiles").select("name").eq("id", (row as any).business_id).single();
           if (b) setBusinessName(b.name || "");
         }
       }
     } else {
-      const { data: row } = await supabase
+      const { data: row } = await (supabase as any)
         .from("wallet_deposits")
         .select("*")
         .eq("id", id!)
         .single();
       if (row) {
         setData(row);
-        setAdminNotes(row.admin_notes || "");
-        const { data: p } = await supabase.from("profiles").select("full_name").eq("user_id", row.user_id).single();
+        setAdminNotes((row as any).admin_notes || "");
+        const { data: p } = await supabase.from("profiles").select("full_name").eq("user_id", (row as any).user_id).single();
         if (p) setUserName(p.full_name || "");
-        if (row.business_id) {
-          const { data: b } = await supabase.from("business_profiles").select("name").eq("id", row.business_id).single();
+        if ((row as any).business_id) {
+          const { data: b } = await supabase.from("business_profiles").select("name").eq("id", (row as any).business_id).single();
           if (b) setBusinessName(b.name || "");
         }
       }
@@ -78,7 +78,7 @@ const AdminCreditDetail = () => {
   const handleApprove = async () => {
     setSaving(true);
     const table = type === "order" ? "credit_orders" : "wallet_deposits";
-    const { error } = await supabase.from(table).update({ status: "paid", admin_notes: adminNotes }).eq("id", id!);
+    const { error } = await (supabase as any).from(table).update({ status: "paid", admin_notes: adminNotes }).eq("id", id!);
     if (error) toast.error("Gagal approve: " + error.message);
     else { toast.success("Berhasil diapprove"); fetchDetail(); }
     setSaving(false);
@@ -87,7 +87,7 @@ const AdminCreditDetail = () => {
   const handleReject = async () => {
     setSaving(true);
     const table = type === "order" ? "credit_orders" : "wallet_deposits";
-    const { error } = await supabase.from(table).update({ status: "rejected", admin_notes: adminNotes }).eq("id", id!);
+    const { error } = await (supabase as any).from(table).update({ status: "rejected", admin_notes: adminNotes }).eq("id", id!);
     if (error) toast.error("Gagal reject: " + error.message);
     else { toast.success("Berhasil ditolak"); fetchDetail(); }
     setSaving(false);
@@ -97,7 +97,7 @@ const AdminCreditDetail = () => {
     if (!confirm("Yakin ingin menghapus data ini? Aksi ini tidak bisa dibatalkan.")) return;
     setSaving(true);
     const table = type === "order" ? "credit_orders" : "wallet_deposits";
-    const { error } = await supabase.from(table).delete().eq("id", id!);
+    const { error } = await (supabase as any).from(table).delete().eq("id", id!);
     if (error) toast.error("Gagal menghapus: " + error.message);
     else { toast.success("Data berhasil dihapus"); navigate("/admin?tab=credits"); }
     setSaving(false);
@@ -106,7 +106,7 @@ const AdminCreditDetail = () => {
   const handleSaveNotes = async () => {
     setSaving(true);
     const table = type === "order" ? "credit_orders" : "wallet_deposits";
-    const { error } = await supabase.from(table).update({ admin_notes: adminNotes }).eq("id", id!);
+    const { error } = await (supabase as any).from(table).update({ admin_notes: adminNotes }).eq("id", id!);
     if (error) toast.error("Gagal simpan catatan");
     else toast.success("Catatan disimpan");
     setSaving(false);

@@ -107,13 +107,13 @@ const ServiceShowcaseSection = () => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("service_categories")
         .select("id, name, slug, description, icon")
         .eq("is_active", true)
         .order("sort_order");
       if (data) {
-        setCategories(data);
+        setCategories(data as ServiceCategory[]);
       }
     };
     fetchCategories();
@@ -123,7 +123,7 @@ const ServiceShowcaseSection = () => {
   useEffect(() => {
     const fetchServices = async () => {
       setLoadingServices(true);
-      let query = supabase
+      let query = (supabase as any)
         .from("services")
         .select("id, name, slug, description, required_skills, category_id")
         .eq("is_active", true)
@@ -137,19 +137,19 @@ const ServiceShowcaseSection = () => {
 
       if (servicesData) {
         // Get provider counts
-        const serviceIds = servicesData.map(s => s.id);
-        const { data: counts } = await supabase
+        const serviceIds = (servicesData as any[]).map((s: any) => s.id);
+        const { data: counts } = await (supabase as any)
           .from("user_services")
           .select("service_id")
           .in("service_id", serviceIds)
           .eq("is_active", true);
 
         const countMap: Record<string, number> = {};
-        counts?.forEach(c => {
+        (counts as any[])?.forEach((c: any) => {
           countMap[c.service_id] = (countMap[c.service_id] || 0) + 1;
         });
 
-        setServices(servicesData.map(s => ({
+        setServices((servicesData as any[]).map((s: any) => ({
           ...s,
           required_skills: s.required_skills || [],
           provider_count: countMap[s.id] || 0,

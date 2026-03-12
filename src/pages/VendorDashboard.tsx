@@ -123,7 +123,7 @@ const VendorDashboard = () => {
         .select("id, document_type, document_label, file_name, file_url, created_at")
         .eq("business_id", data.id)
         .order("created_at", { ascending: false }),
-      supabase
+      (supabase as any)
         .from("company_credits")
         .select("balance")
         .eq("business_id", data.id)

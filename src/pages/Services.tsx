@@ -40,7 +40,7 @@ const Services = () => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("service_categories")
         .select("id, name, slug, description, icon")
         .eq("is_active", true)
@@ -60,7 +60,7 @@ const Services = () => {
         categoryId = found?.id || null;
       }
 
-      let query = supabase
+      let query = (supabase as any)
         .from("services")
         .select("id, name, slug, description, required_skills")
         .eq("is_active", true)
@@ -73,15 +73,15 @@ const Services = () => {
       const { data: servicesData } = await query;
 
       if (servicesData) {
-        const serviceIds = servicesData.map(s => s.id);
-        const { data: counts } = await supabase
+        const serviceIds = (servicesData as any[]).map((s: any) => s.id);
+        const { data: counts } = await (supabase as any)
           .from("user_services")
           .select("service_id")
           .in("service_id", serviceIds)
           .eq("is_active", true);
 
         const countMap: Record<string, number> = {};
-        counts?.forEach(c => {
+        (counts as any[])?.forEach((c: any) => {
           countMap[c.service_id] = (countMap[c.service_id] || 0) + 1;
         });
 

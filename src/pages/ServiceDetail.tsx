@@ -72,7 +72,7 @@ const ServiceDetailPage = () => {
     if (!slug) return;
     const fetchService = async () => {
       setLoading(true);
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("services")
         .select("id, name, slug, description, required_skills, min_match_pct, category_id")
         .eq("slug", slug)
@@ -84,7 +84,7 @@ const ServiceDetailPage = () => {
         return;
       }
 
-      const { data: cat } = await supabase
+      const { data: cat } = await (supabase as any)
         .from("service_categories")
         .select("name")
         .eq("id", data.category_id)
@@ -96,14 +96,14 @@ const ServiceDetailPage = () => {
         category_name: cat?.name || null,
       });
 
-      const { count } = await supabase
+      const { count } = await (supabase as any)
         .from("user_services")
         .select("id", { count: "exact", head: true })
         .eq("service_id", data.id)
         .eq("is_active", true);
       setProviderCount(count || 0);
 
-      const { data: related } = await supabase
+      const { data: related } = await (supabase as any)
         .from("services")
         .select("id, name, slug, description, required_skills")
         .eq("category_id", data.category_id)
@@ -112,7 +112,7 @@ const ServiceDetailPage = () => {
         .order("sort_order")
         .limit(4);
       setRelatedServices(
-        (related || []).map((s) => ({ ...s, required_skills: s.required_skills || [] }))
+        ((related || []) as any[]).map((s: any) => ({ ...s, required_skills: s.required_skills || [] }))
       );
 
       setLoading(false);
@@ -157,7 +157,7 @@ const ServiceDetailPage = () => {
   useEffect(() => {
     if (!service) return;
     const fetchProviders = async () => {
-      const { data: providers } = await supabase
+      const { data: providers } = await (supabase as any)
         .from("user_services")
         .select("user_id, match_score")
         .eq("service_id", service.id)
