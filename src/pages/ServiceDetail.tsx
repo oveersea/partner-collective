@@ -103,7 +103,7 @@ const ServiceDetailPage = () => {
         .eq("is_active", true);
       setProviderCount(count || 0);
 
-      const { data: related } = await supabase
+      const { data: related } = await (supabase as any)
         .from("services")
         .select("id, name, slug, description, required_skills")
         .eq("category_id", data.category_id)
