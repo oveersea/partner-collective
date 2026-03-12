@@ -87,7 +87,7 @@ const AdminCreditDetail = () => {
   const handleReject = async () => {
     setSaving(true);
     const table = type === "order" ? "credit_orders" : "wallet_deposits";
-    const { error } = await supabase.from(table).update({ status: "rejected", admin_notes: adminNotes }).eq("id", id!);
+    const { error } = await (supabase as any).from(table).update({ status: "rejected", admin_notes: adminNotes }).eq("id", id!);
     if (error) toast.error("Gagal reject: " + error.message);
     else { toast.success("Berhasil ditolak"); fetchDetail(); }
     setSaving(false);
