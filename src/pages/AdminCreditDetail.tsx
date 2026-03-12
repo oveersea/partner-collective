@@ -78,7 +78,7 @@ const AdminCreditDetail = () => {
   const handleApprove = async () => {
     setSaving(true);
     const table = type === "order" ? "credit_orders" : "wallet_deposits";
-    const { error } = await supabase.from(table).update({ status: "paid", admin_notes: adminNotes }).eq("id", id!);
+    const { error } = await (supabase as any).from(table).update({ status: "paid", admin_notes: adminNotes }).eq("id", id!);
     if (error) toast.error("Gagal approve: " + error.message);
     else { toast.success("Berhasil diapprove"); fetchDetail(); }
     setSaving(false);
