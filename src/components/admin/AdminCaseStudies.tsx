@@ -153,12 +153,12 @@ const AdminCaseStudies = () => {
     setActiveTab("general");
 
     const [secRes, svcRes] = await Promise.all([
-      supabase
+      (supabase as any)
         .from("case_study_sections")
         .select("id, section_type, title, body, image_url, sort_order")
         .eq("case_study_id", cs.id)
         .order("sort_order"),
-      supabase
+      (supabase as any)
         .from("case_study_services")
         .select("id, service_id")
         .eq("case_study_id", cs.id),
