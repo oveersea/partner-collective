@@ -214,7 +214,7 @@ const AdminEmailNotifications = () => {
     };
 
     if (editingTemplate) {
-      const { error } = await supabase.from("email_templates").update(payload).eq("id", editingTemplate.id);
+      const { error } = await (supabase as any).from("email_templates").update(payload).eq("id", editingTemplate.id);
       if (error) toast.error("Gagal update: " + error.message);
       else toast.success("Template diperbarui");
     } else {
