@@ -179,7 +179,7 @@ const ServiceShowcaseSection = () => {
         </motion.div>
 
         {/* Category pills */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12 p-1.5 bg-muted/50 border border-border w-fit mx-auto" style={{ borderRadius: '5px' }}>
+        <div className="flex flex-nowrap overflow-x-auto sm:flex-wrap sm:justify-center gap-2 sm:gap-3 mb-8 sm:mb-12 p-1.5 bg-muted/50 border border-border sm:w-fit mx-auto hide-scrollbar" style={{ borderRadius: '5px' }}>
           <button
             onClick={() => setActiveCategory("all")}
             className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all relative ${
