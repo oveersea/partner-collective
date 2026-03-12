@@ -60,7 +60,7 @@ const Services = () => {
         categoryId = found?.id || null;
       }
 
-      let query = supabase
+      let query = (supabase as any)
         .from("services")
         .select("id, name, slug, description, required_skills")
         .eq("is_active", true)
