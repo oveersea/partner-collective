@@ -161,25 +161,25 @@ const ServiceShowcaseSection = () => {
   }, [activeCategory]);
 
   return (
-    <section className="py-24 bg-background relative overflow-hidden">
-      <div className="container mx-auto px-6">
+    <section className="py-12 sm:py-24 bg-background relative overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-semibold text-primary uppercase tracking-widest">Service Catalog</span>
-          <h2 className="text-4xl md:text-5xl font-semibold mt-3 mb-5 text-foreground">
+          <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-widest">Service Catalog</span>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-semibold mt-2 sm:mt-3 mb-3 sm:mb-5 text-foreground">
             Services from <span className="text-gradient-accent">Verified Talent</span>
           </h2>
-          <p className="text-lg max-w-2xl mx-auto text-muted-foreground">
+          <p className="text-sm sm:text-lg max-w-2xl mx-auto text-muted-foreground">
             Find professional services from skill-verified talent. Minimum 70% skill match guaranteed.
           </p>
         </motion.div>
 
         {/* Category pills */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12 p-1.5 bg-muted/50 border border-border w-fit mx-auto" style={{ borderRadius: '5px' }}>
+        <div className="flex flex-nowrap overflow-x-auto sm:flex-wrap sm:justify-center gap-2 sm:gap-3 mb-8 sm:mb-12 p-1.5 bg-muted/50 border border-border sm:w-fit mx-auto hide-scrollbar" style={{ borderRadius: '5px' }}>
           <button
             onClick={() => setActiveCategory("all")}
             className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all relative ${
@@ -213,7 +213,7 @@ const ServiceShowcaseSection = () => {
         </div>
 
         {/* Services grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full">
           {loadingServices ? (
             Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="rounded-xl border border-border bg-card animate-pulse overflow-hidden">

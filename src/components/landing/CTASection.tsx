@@ -6,7 +6,7 @@ import ctaGlobe from "@/assets/cta-globe.png";
 const CTASection = () => {
   return (
     <section className="py-6 bg-background">
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

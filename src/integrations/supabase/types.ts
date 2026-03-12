@@ -1862,158 +1862,6 @@ export type Database = {
         }
         Relationships: []
       }
-      case_studies: {
-        Row: {
-          challenge: string | null
-          client_logo_url: string | null
-          company_name: string
-          content: string | null
-          created_at: string
-          cta_label: string | null
-          cta_url: string | null
-          description: string | null
-          id: string
-          image_url: string | null
-          industry: string | null
-          is_active: boolean | null
-          is_featured: boolean | null
-          results: string | null
-          slug: string
-          solution: string | null
-          sort_order: number | null
-          testimonial_author: string | null
-          testimonial_quote: string | null
-          testimonial_role: string | null
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          challenge?: string | null
-          client_logo_url?: string | null
-          company_name: string
-          content?: string | null
-          created_at?: string
-          cta_label?: string | null
-          cta_url?: string | null
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          industry?: string | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          results?: string | null
-          slug: string
-          solution?: string | null
-          sort_order?: number | null
-          testimonial_author?: string | null
-          testimonial_quote?: string | null
-          testimonial_role?: string | null
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          challenge?: string | null
-          client_logo_url?: string | null
-          company_name?: string
-          content?: string | null
-          created_at?: string
-          cta_label?: string | null
-          cta_url?: string | null
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          industry?: string | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          results?: string | null
-          slug?: string
-          solution?: string | null
-          sort_order?: number | null
-          testimonial_author?: string | null
-          testimonial_quote?: string | null
-          testimonial_role?: string | null
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      case_study_sections: {
-        Row: {
-          body: string | null
-          case_study_id: string
-          created_at: string
-          id: string
-          image_url: string | null
-          section_type: string
-          sort_order: number
-          title: string | null
-        }
-        Insert: {
-          body?: string | null
-          case_study_id: string
-          created_at?: string
-          id?: string
-          image_url?: string | null
-          section_type?: string
-          sort_order?: number
-          title?: string | null
-        }
-        Update: {
-          body?: string | null
-          case_study_id?: string
-          created_at?: string
-          id?: string
-          image_url?: string | null
-          section_type?: string
-          sort_order?: number
-          title?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "case_study_sections_case_study_id_fkey"
-            columns: ["case_study_id"]
-            isOneToOne: false
-            referencedRelation: "case_studies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      case_study_services: {
-        Row: {
-          case_study_id: string
-          created_at: string
-          id: string
-          service_id: string
-        }
-        Insert: {
-          case_study_id: string
-          created_at?: string
-          id?: string
-          service_id: string
-        }
-        Update: {
-          case_study_id?: string
-          created_at?: string
-          id?: string
-          service_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "case_study_services_case_study_id_fkey"
-            columns: ["case_study_id"]
-            isOneToOne: false
-            referencedRelation: "case_studies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "case_study_services_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       certificates: {
         Row: {
           certificate_url: string | null
@@ -2230,38 +2078,6 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
-      }
-      company_credits: {
-        Row: {
-          balance: number
-          business_id: string
-          created_at: string
-          id: string
-          updated_at: string
-        }
-        Insert: {
-          balance?: number
-          business_id: string
-          created_at?: string
-          id?: string
-          updated_at?: string
-        }
-        Update: {
-          balance?: number
-          business_id?: string
-          created_at?: string
-          id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_credits_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: true
-            referencedRelation: "business_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       company_holidays: {
         Row: {
@@ -2563,232 +2379,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      credit_balances: {
-        Row: {
-          balance: number
-          id: string
-          total_purchased: number
-          total_used: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          balance?: number
-          id?: string
-          total_purchased?: number
-          total_used?: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          balance?: number
-          id?: string
-          total_purchased?: number
-          total_used?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      credit_orders: {
-        Row: {
-          admin_notes: string | null
-          amount_cents: number
-          business_id: string | null
-          buyer_type: string
-          confirmed_at: string | null
-          confirmed_by: string | null
-          created_at: string
-          credits: number
-          currency: string
-          description: string | null
-          id: string
-          order_number: string
-          package_id: string | null
-          payment_proof_url: string | null
-          status: string
-          updated_at: string
-          user_id: string
-          xendit_checkout_url: string | null
-          xendit_invoice_id: string | null
-          xendit_paid_at: string | null
-        }
-        Insert: {
-          admin_notes?: string | null
-          amount_cents: number
-          business_id?: string | null
-          buyer_type?: string
-          confirmed_at?: string | null
-          confirmed_by?: string | null
-          created_at?: string
-          credits: number
-          currency?: string
-          description?: string | null
-          id?: string
-          order_number?: string
-          package_id?: string | null
-          payment_proof_url?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-          xendit_checkout_url?: string | null
-          xendit_invoice_id?: string | null
-          xendit_paid_at?: string | null
-        }
-        Update: {
-          admin_notes?: string | null
-          amount_cents?: number
-          business_id?: string | null
-          buyer_type?: string
-          confirmed_at?: string | null
-          confirmed_by?: string | null
-          created_at?: string
-          credits?: number
-          currency?: string
-          description?: string | null
-          id?: string
-          order_number?: string
-          package_id?: string | null
-          payment_proof_url?: string | null
-          status?: string
-          updated_at?: string
-          user_id?: string
-          xendit_checkout_url?: string | null
-          xendit_invoice_id?: string | null
-          xendit_paid_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "credit_orders_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: false
-            referencedRelation: "business_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "credit_orders_package_id_fkey"
-            columns: ["package_id"]
-            isOneToOne: false
-            referencedRelation: "credit_packages"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      credit_packages: {
-        Row: {
-          created_at: string
-          credits: number
-          currency: string
-          description: string | null
-          id: string
-          is_active: boolean
-          name: string
-          price_cents: number
-          sort_order: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          credits: number
-          currency?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean
-          name: string
-          price_cents?: number
-          sort_order?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          credits?: number
-          currency?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean
-          name?: string
-          price_cents?: number
-          sort_order?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      credit_transactions: {
-        Row: {
-          amount: number
-          balance_after: number
-          client_id: string
-          created_at: string | null
-          description: string | null
-          id: string
-          reference_id: string | null
-          type: string
-        }
-        Insert: {
-          amount: number
-          balance_after: number
-          client_id: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          reference_id?: string | null
-          type: string
-        }
-        Update: {
-          amount?: number
-          balance_after?: number
-          client_id?: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          reference_id?: string | null
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "credit_transactions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      credits: {
-        Row: {
-          balance: number | null
-          client_id: string
-          id: string
-          total_purchased: number | null
-          total_spent: number | null
-          updated_at: string | null
-        }
-        Insert: {
-          balance?: number | null
-          client_id: string
-          id?: string
-          total_purchased?: number | null
-          total_spent?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          balance?: number | null
-          client_id?: string
-          id?: string
-          total_purchased?: number | null
-          total_spent?: number | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "credits_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: true
-            referencedRelation: "client_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       crm_activities: {
         Row: {
@@ -3709,63 +3299,6 @@ export type Database = {
         }
         Relationships: []
       }
-      escrow_transactions: {
-        Row: {
-          amount: number
-          contract_id: string | null
-          created_at: string | null
-          description: string | null
-          fee_amount: number | null
-          from_user_id: string | null
-          id: string
-          milestone_id: string | null
-          status: string | null
-          to_user_id: string | null
-          type: string
-        }
-        Insert: {
-          amount?: number
-          contract_id?: string | null
-          created_at?: string | null
-          description?: string | null
-          fee_amount?: number | null
-          from_user_id?: string | null
-          id?: string
-          milestone_id?: string | null
-          status?: string | null
-          to_user_id?: string | null
-          type?: string
-        }
-        Update: {
-          amount?: number
-          contract_id?: string | null
-          created_at?: string | null
-          description?: string | null
-          fee_amount?: number | null
-          from_user_id?: string | null
-          id?: string
-          milestone_id?: string | null
-          status?: string | null
-          to_user_id?: string | null
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "escrow_transactions_contract_id_fkey"
-            columns: ["contract_id"]
-            isOneToOne: false
-            referencedRelation: "gig_contracts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "escrow_transactions_milestone_id_fkey"
-            columns: ["milestone_id"]
-            isOneToOne: false
-            referencedRelation: "gig_milestones"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       event_orders: {
         Row: {
           amount: number
@@ -3996,340 +3529,64 @@ export type Database = {
           },
         ]
       }
-      expertise_categories: {
+      hiring_deposits: {
         Row: {
+          admin_notes: string | null
+          amount: number
+          confirmed_at: string | null
+          confirmed_by: string | null
           created_at: string
-          description: string
+          currency: string
+          deposit_number: string
+          hiring_order_id: string
           id: string
-          label: string
-          slug: string
-          sort_order: number
+          payment_method: string | null
+          payment_proof_url: string | null
+          payment_reference: string | null
+          rejection_reason: string | null
+          status: string
           updated_at: string
         }
         Insert: {
+          admin_notes?: string | null
+          amount?: number
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
-          description: string
+          currency?: string
+          deposit_number: string
+          hiring_order_id: string
           id?: string
-          label: string
-          slug: string
-          sort_order?: number
+          payment_method?: string | null
+          payment_proof_url?: string | null
+          payment_reference?: string | null
+          rejection_reason?: string | null
+          status?: string
           updated_at?: string
         }
         Update: {
+          admin_notes?: string | null
+          amount?: number
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
-          description?: string
+          currency?: string
+          deposit_number?: string
+          hiring_order_id?: string
           id?: string
-          label?: string
-          slug?: string
-          sort_order?: number
+          payment_method?: string | null
+          payment_proof_url?: string | null
+          payment_reference?: string | null
+          rejection_reason?: string | null
+          status?: string
           updated_at?: string
         }
-        Relationships: []
-      }
-      expertise_items: {
-        Row: {
-          benefits: string[]
-          category_id: string
-          created_at: string
-          deliverables: string[]
-          description: string
-          icon_name: string
-          id: string
-          industries: string[]
-          is_active: boolean
-          long_description: string
-          process_steps: string[]
-          slug: string
-          sort_order: number
-          title: string
-          updated_at: string
-          use_cases: string[]
-        }
-        Insert: {
-          benefits?: string[]
-          category_id: string
-          created_at?: string
-          deliverables?: string[]
-          description: string
-          icon_name: string
-          id?: string
-          industries?: string[]
-          is_active?: boolean
-          long_description: string
-          process_steps?: string[]
-          slug: string
-          sort_order?: number
-          title: string
-          updated_at?: string
-          use_cases?: string[]
-        }
-        Update: {
-          benefits?: string[]
-          category_id?: string
-          created_at?: string
-          deliverables?: string[]
-          description?: string
-          icon_name?: string
-          id?: string
-          industries?: string[]
-          is_active?: boolean
-          long_description?: string
-          process_steps?: string[]
-          slug?: string
-          sort_order?: number
-          title?: string
-          updated_at?: string
-          use_cases?: string[]
-        }
         Relationships: [
           {
-            foreignKeyName: "expertise_items_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: "hiring_deposits_hiring_order_id_fkey"
+            columns: ["hiring_order_id"]
             isOneToOne: false
-            referencedRelation: "expertise_categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      expertise_sub_services: {
-        Row: {
-          created_at: string
-          description: string
-          id: string
-          item_id: string
-          sort_order: number
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          description: string
-          id?: string
-          item_id: string
-          sort_order?: number
-          title: string
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          id?: string
-          item_id?: string
-          sort_order?: number
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "expertise_sub_services_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "expertise_items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      gig_contracts: {
-        Row: {
-          company_id: string | null
-          completed_at: string | null
-          created_at: string | null
-          created_by: string | null
-          currency: string | null
-          deposit_method: string | null
-          deposit_paid_at: string | null
-          deposit_reference: string | null
-          deposit_status: string | null
-          description: string | null
-          id: string
-          is_published: boolean | null
-          job_id: string | null
-          management_fee: number | null
-          management_fee_pct: number | null
-          started_at: string | null
-          status: string | null
-          talent_payout: number | null
-          talent_user_id: string
-          title: string
-          total_amount: number
-          updated_at: string | null
-        }
-        Insert: {
-          company_id?: string | null
-          completed_at?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          currency?: string | null
-          deposit_method?: string | null
-          deposit_paid_at?: string | null
-          deposit_reference?: string | null
-          deposit_status?: string | null
-          description?: string | null
-          id?: string
-          is_published?: boolean | null
-          job_id?: string | null
-          management_fee?: number | null
-          management_fee_pct?: number | null
-          started_at?: string | null
-          status?: string | null
-          talent_payout?: number | null
-          talent_user_id: string
-          title: string
-          total_amount?: number
-          updated_at?: string | null
-        }
-        Update: {
-          company_id?: string | null
-          completed_at?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          currency?: string | null
-          deposit_method?: string | null
-          deposit_paid_at?: string | null
-          deposit_reference?: string | null
-          deposit_status?: string | null
-          description?: string | null
-          id?: string
-          is_published?: boolean | null
-          job_id?: string | null
-          management_fee?: number | null
-          management_fee_pct?: number | null
-          started_at?: string | null
-          status?: string | null
-          talent_payout?: number | null
-          talent_user_id?: string
-          title?: string
-          total_amount?: number
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "gig_contracts_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "business_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "gig_contracts_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "jobs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      gig_deposits: {
-        Row: {
-          amount: number
-          contract_id: string
-          created_at: string | null
-          deposit_number: string | null
-          id: string
-          method: string
-          paid_at: string | null
-          status: string | null
-          user_id: string
-          xendit_invoice_id: string | null
-          xendit_invoice_url: string | null
-        }
-        Insert: {
-          amount?: number
-          contract_id: string
-          created_at?: string | null
-          deposit_number?: string | null
-          id?: string
-          method: string
-          paid_at?: string | null
-          status?: string | null
-          user_id: string
-          xendit_invoice_id?: string | null
-          xendit_invoice_url?: string | null
-        }
-        Update: {
-          amount?: number
-          contract_id?: string
-          created_at?: string | null
-          deposit_number?: string | null
-          id?: string
-          method?: string
-          paid_at?: string | null
-          status?: string | null
-          user_id?: string
-          xendit_invoice_id?: string | null
-          xendit_invoice_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "gig_deposits_contract_id_fkey"
-            columns: ["contract_id"]
-            isOneToOne: false
-            referencedRelation: "gig_contracts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      gig_milestones: {
-        Row: {
-          amount: number
-          approved_at: string | null
-          contract_id: string
-          created_at: string | null
-          description: string | null
-          due_date: string | null
-          id: string
-          paid_at: string | null
-          release_status: string | null
-          released_at: string | null
-          released_by: string | null
-          review_note: string | null
-          sort_order: number | null
-          status: string | null
-          submission_note: string | null
-          submitted_at: string | null
-          title: string
-        }
-        Insert: {
-          amount?: number
-          approved_at?: string | null
-          contract_id: string
-          created_at?: string | null
-          description?: string | null
-          due_date?: string | null
-          id?: string
-          paid_at?: string | null
-          release_status?: string | null
-          released_at?: string | null
-          released_by?: string | null
-          review_note?: string | null
-          sort_order?: number | null
-          status?: string | null
-          submission_note?: string | null
-          submitted_at?: string | null
-          title: string
-        }
-        Update: {
-          amount?: number
-          approved_at?: string | null
-          contract_id?: string
-          created_at?: string | null
-          description?: string | null
-          due_date?: string | null
-          id?: string
-          paid_at?: string | null
-          release_status?: string | null
-          released_at?: string | null
-          released_by?: string | null
-          review_note?: string | null
-          sort_order?: number | null
-          status?: string | null
-          submission_note?: string | null
-          submitted_at?: string | null
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "gig_milestones_contract_id_fkey"
-            columns: ["contract_id"]
-            isOneToOne: false
-            referencedRelation: "gig_contracts"
+            referencedRelation: "hiring_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -4387,6 +3644,114 @@ export type Database = {
             columns: ["hiring_request_id"]
             isOneToOne: false
             referencedRelation: "hiring_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hiring_orders: {
+        Row: {
+          billing_address: string | null
+          billing_notes: string | null
+          business_id: string
+          contract_duration_months: number | null
+          created_at: string
+          created_by: string
+          currency: string
+          deposit_amount: number | null
+          direct_hire_fee_amount: number | null
+          direct_hire_fee_pct: number
+          expected_start_date: string | null
+          hiring_type: string
+          id: string
+          job_description: string | null
+          management_fee_amount: number | null
+          management_fee_pct: number
+          monthly_salary: number
+          opportunity_id: string | null
+          order_number: string
+          pic_email: string | null
+          pic_name: string | null
+          pic_phone: string | null
+          professional_user_id: string
+          special_terms: string | null
+          status: string
+          updated_at: string
+          work_location: string | null
+          work_mode: string | null
+        }
+        Insert: {
+          billing_address?: string | null
+          billing_notes?: string | null
+          business_id: string
+          contract_duration_months?: number | null
+          created_at?: string
+          created_by: string
+          currency?: string
+          deposit_amount?: number | null
+          direct_hire_fee_amount?: number | null
+          direct_hire_fee_pct?: number
+          expected_start_date?: string | null
+          hiring_type: string
+          id?: string
+          job_description?: string | null
+          management_fee_amount?: number | null
+          management_fee_pct?: number
+          monthly_salary?: number
+          opportunity_id?: string | null
+          order_number: string
+          pic_email?: string | null
+          pic_name?: string | null
+          pic_phone?: string | null
+          professional_user_id: string
+          special_terms?: string | null
+          status?: string
+          updated_at?: string
+          work_location?: string | null
+          work_mode?: string | null
+        }
+        Update: {
+          billing_address?: string | null
+          billing_notes?: string | null
+          business_id?: string
+          contract_duration_months?: number | null
+          created_at?: string
+          created_by?: string
+          currency?: string
+          deposit_amount?: number | null
+          direct_hire_fee_amount?: number | null
+          direct_hire_fee_pct?: number
+          expected_start_date?: string | null
+          hiring_type?: string
+          id?: string
+          job_description?: string | null
+          management_fee_amount?: number | null
+          management_fee_pct?: number
+          monthly_salary?: number
+          opportunity_id?: string | null
+          order_number?: string
+          pic_email?: string | null
+          pic_name?: string | null
+          pic_phone?: string | null
+          professional_user_id?: string
+          special_terms?: string | null
+          status?: string
+          updated_at?: string
+          work_location?: string | null
+          work_mode?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hiring_orders_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hiring_orders_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
             referencedColumns: ["id"]
           },
         ]
@@ -6027,6 +5392,57 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      inquiries: {
+        Row: {
+          company_name: string | null
+          company_size: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          experience_level: string | null
+          id: string
+          location_preference: string | null
+          role_title: string
+          skills: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          company_size?: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          experience_level?: string | null
+          id?: string
+          location_preference?: string | null
+          role_title: string
+          skills?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          company_size?: string | null
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          experience_level?: string | null
+          id?: string
+          location_preference?: string | null
+          role_title?: string
+          skills?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -8501,6 +7917,8 @@ export type Database = {
           postal_code: string | null
           professional_summary: string | null
           province: string | null
+          rate_reasoning: string | null
+          rate_source: string | null
           role: string | null
           skills: string[] | null
           soft_skills: Json | null
@@ -8511,6 +7929,7 @@ export type Database = {
           username: string | null
           verification_token: string | null
           verification_token_expires_at: string | null
+          video_intro_url: string | null
           website_url: string | null
           welcome_email_sent: boolean | null
           work_experience: Json | null
@@ -8557,6 +7976,8 @@ export type Database = {
           postal_code?: string | null
           professional_summary?: string | null
           province?: string | null
+          rate_reasoning?: string | null
+          rate_source?: string | null
           role?: string | null
           skills?: string[] | null
           soft_skills?: Json | null
@@ -8567,6 +7988,7 @@ export type Database = {
           username?: string | null
           verification_token?: string | null
           verification_token_expires_at?: string | null
+          video_intro_url?: string | null
           website_url?: string | null
           welcome_email_sent?: boolean | null
           work_experience?: Json | null
@@ -8613,6 +8035,8 @@ export type Database = {
           postal_code?: string | null
           professional_summary?: string | null
           province?: string | null
+          rate_reasoning?: string | null
+          rate_source?: string | null
           role?: string | null
           skills?: string[] | null
           soft_skills?: Json | null
@@ -8623,6 +8047,7 @@ export type Database = {
           username?: string | null
           verification_token?: string | null
           verification_token_expires_at?: string | null
+          video_intro_url?: string | null
           website_url?: string | null
           welcome_email_sent?: boolean | null
           work_experience?: Json | null
@@ -9489,164 +8914,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      service_categories: {
-        Row: {
-          created_at: string
-          description: string | null
-          icon: string | null
-          id: string
-          is_active: boolean | null
-          name: string
-          slug: string
-          sort_order: number | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          icon?: string | null
-          id?: string
-          is_active?: boolean | null
-          name: string
-          slug: string
-          sort_order?: number | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          icon?: string | null
-          id?: string
-          is_active?: boolean | null
-          name?: string
-          slug?: string
-          sort_order?: number | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      service_packages: {
-        Row: {
-          created_at: string
-          currency: string
-          description: string | null
-          expertise_slug: string
-          features: Json
-          id: string
-          is_active: boolean
-          package_name: string
-          price_cents: number
-          service_name: string
-          service_slug: string
-          sort_order: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          currency?: string
-          description?: string | null
-          expertise_slug: string
-          features?: Json
-          id?: string
-          is_active?: boolean
-          package_name: string
-          price_cents?: number
-          service_name: string
-          service_slug: string
-          sort_order?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          currency?: string
-          description?: string | null
-          expertise_slug?: string
-          features?: Json
-          id?: string
-          is_active?: boolean
-          package_name?: string
-          price_cents?: number
-          service_name?: string
-          service_slug?: string
-          sort_order?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      service_thumbnails: {
-        Row: {
-          generated_at: string
-          id: string
-          image_url: string
-          slug: string
-        }
-        Insert: {
-          generated_at?: string
-          id?: string
-          image_url: string
-          slug: string
-        }
-        Update: {
-          generated_at?: string
-          id?: string
-          image_url?: string
-          slug?: string
-        }
-        Relationships: []
-      }
-      services: {
-        Row: {
-          category_id: string
-          created_at: string
-          description: string | null
-          icon: string | null
-          id: string
-          is_active: boolean | null
-          min_match_pct: number
-          name: string
-          required_skills: string[]
-          slug: string
-          sort_order: number | null
-          updated_at: string
-        }
-        Insert: {
-          category_id: string
-          created_at?: string
-          description?: string | null
-          icon?: string | null
-          id?: string
-          is_active?: boolean | null
-          min_match_pct?: number
-          name: string
-          required_skills?: string[]
-          slug: string
-          sort_order?: number | null
-          updated_at?: string
-        }
-        Update: {
-          category_id?: string
-          created_at?: string
-          description?: string | null
-          icon?: string | null
-          id?: string
-          is_active?: boolean | null
-          min_match_pct?: number
-          name?: string
-          required_skills?: string[]
-          slug?: string
-          sort_order?: number | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "services_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "service_categories"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       site_settings: {
         Row: {
@@ -10587,6 +9854,51 @@ export type Database = {
           },
         ]
       }
+      testimonials: {
+        Row: {
+          avatar_url: string | null
+          company: string | null
+          content: string
+          created_at: string
+          id: string
+          is_published: boolean | null
+          name: string
+          rating: number | null
+          role: string
+          sort_order: number | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          company?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          name: string
+          rating?: number | null
+          role: string
+          sort_order?: number | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          company?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          name?: string
+          rating?: number | null
+          role?: string
+          sort_order?: number | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       training_programs: {
         Row: {
           capacity: number | null
@@ -11037,16 +10349,19 @@ export type Database = {
       }
       user_experiences: {
         Row: {
+          achievements: string | null
           business_id: string | null
           company: string
           created_at: string
           description: string | null
+          employment_type: string | null
           end_date: string | null
           evidence_url: string | null
           id: string
           is_current: boolean
           location: string | null
           position: string
+          responsibilities: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           start_date: string | null
@@ -11054,16 +10369,19 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          achievements?: string | null
           business_id?: string | null
           company: string
           created_at?: string
           description?: string | null
+          employment_type?: string | null
           end_date?: string | null
           evidence_url?: string | null
           id?: string
           is_current?: boolean
           location?: string | null
           position: string
+          responsibilities?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           start_date?: string | null
@@ -11071,16 +10389,19 @@ export type Database = {
           user_id: string
         }
         Update: {
+          achievements?: string | null
           business_id?: string | null
           company?: string
           created_at?: string
           description?: string | null
+          employment_type?: string | null
           end_date?: string | null
           evidence_url?: string | null
           id?: string
           is_current?: boolean
           location?: string | null
           position?: string
+          responsibilities?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           start_date?: string | null
@@ -11390,44 +10711,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_services: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean | null
-          match_score: number | null
-          service_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          match_score?: number | null
-          service_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          match_score?: number | null
-          service_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_services_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_skills: {
         Row: {
           created_at: string
@@ -11667,239 +10950,6 @@ export type Database = {
         }
         Relationships: []
       }
-      wallet_balances: {
-        Row: {
-          balance: number
-          business_id: string | null
-          id: string
-          total_deposited: number
-          total_withdrawn: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          balance?: number
-          business_id?: string | null
-          id?: string
-          total_deposited?: number
-          total_withdrawn?: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          balance?: number
-          business_id?: string | null
-          id?: string
-          total_deposited?: number
-          total_withdrawn?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "wallet_balances_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: false
-            referencedRelation: "business_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      wallet_deposits: {
-        Row: {
-          admin_notes: string | null
-          amount: number
-          business_id: string | null
-          created_at: string
-          created_by: string | null
-          currency: string
-          deposit_number: string
-          id: string
-          method: string
-          status: string
-          updated_at: string
-          user_id: string
-          xendit_checkout_url: string | null
-          xendit_invoice_id: string | null
-          xendit_paid_at: string | null
-        }
-        Insert: {
-          admin_notes?: string | null
-          amount?: number
-          business_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          currency?: string
-          deposit_number?: string
-          id?: string
-          method?: string
-          status?: string
-          updated_at?: string
-          user_id: string
-          xendit_checkout_url?: string | null
-          xendit_invoice_id?: string | null
-          xendit_paid_at?: string | null
-        }
-        Update: {
-          admin_notes?: string | null
-          amount?: number
-          business_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          currency?: string
-          deposit_number?: string
-          id?: string
-          method?: string
-          status?: string
-          updated_at?: string
-          user_id?: string
-          xendit_checkout_url?: string | null
-          xendit_invoice_id?: string | null
-          xendit_paid_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "wallet_deposits_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: false
-            referencedRelation: "business_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      wallet_transactions: {
-        Row: {
-          amount: number
-          balance_after: number
-          business_id: string | null
-          created_at: string
-          description: string | null
-          id: string
-          reference_id: string | null
-          type: string
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          balance_after?: number
-          business_id?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          reference_id?: string | null
-          type: string
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          balance_after?: number
-          business_id?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          reference_id?: string | null
-          type?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "wallet_transactions_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: false
-            referencedRelation: "business_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      wallets: {
-        Row: {
-          balance: number | null
-          created_at: string | null
-          currency: string | null
-          escrow_balance: number | null
-          id: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          balance?: number | null
-          created_at?: string | null
-          currency?: string | null
-          escrow_balance?: number | null
-          id?: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          balance?: number | null
-          created_at?: string | null
-          currency?: string | null
-          escrow_balance?: number | null
-          id?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      withdrawal_requests: {
-        Row: {
-          account_name: string | null
-          account_number: string | null
-          amount: number
-          bank_name: string | null
-          business_id: string | null
-          created_at: string
-          currency: string
-          id: string
-          notes: string | null
-          processed_at: string | null
-          processed_by: string | null
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          account_name?: string | null
-          account_number?: string | null
-          amount?: number
-          bank_name?: string | null
-          business_id?: string | null
-          created_at?: string
-          currency?: string
-          id?: string
-          notes?: string | null
-          processed_at?: string | null
-          processed_by?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          account_name?: string | null
-          account_number?: string | null
-          amount?: number
-          bank_name?: string | null
-          business_id?: string | null
-          created_at?: string
-          currency?: string
-          id?: string
-          notes?: string | null
-          processed_at?: string | null
-          processed_by?: string | null
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "withdrawal_requests_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: false
-            referencedRelation: "business_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -11938,6 +10988,8 @@ export type Database = {
       generate_deposit_number: { Args: never; Returns: string }
       generate_event_order_number: { Args: never; Returns: string }
       generate_gig_deposit_number: { Args: never; Returns: string }
+      generate_hiring_deposit_number: { Args: never; Returns: string }
+      generate_hiring_order_number: { Args: never; Returns: string }
       generate_order_number: { Args: never; Returns: string }
       generate_oveercode: { Args: never; Returns: string }
       generate_prefixed_oveercode: {

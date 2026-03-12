@@ -20,19 +20,19 @@ const steps = [
 
 const HowItWorksSection = () => {
   return (
-    <section className="py-24 bg-background relative overflow-hidden">
-      <div className="container mx-auto px-6">
+    <section className="py-12 sm:py-24 bg-background relative overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-20"
+          className="text-center mb-10 sm:mb-20"
         >
-          <span className="text-sm font-semibold text-primary uppercase tracking-widest">How It Works</span>
-          <h2 className="text-4xl md:text-5xl font-semibold mt-3 mb-5 text-foreground">
+          <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-widest">How It Works</span>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-semibold mt-2 sm:mt-3 mb-3 sm:mb-5 text-foreground">
             From Request to <span className="text-gradient-accent">Real Results</span>
           </h2>
-          <p className="text-lg max-w-2xl mx-auto text-muted-foreground">
+          <p className="text-sm sm:text-lg max-w-2xl mx-auto text-muted-foreground">
             A transparent and structured process to ensure quality at every stage.
           </p>
         </motion.div>
@@ -54,7 +54,7 @@ const HowItWorksSection = () => {
           </div>
 
           {/* Steps */}
-          <div className="grid md:grid-cols-3 gap-12 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 relative z-10">
             {steps.map((step, i) => (
               <motion.div
                 key={step.number}

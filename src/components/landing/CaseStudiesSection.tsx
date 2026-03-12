@@ -59,25 +59,25 @@ const CaseStudiesSection = () => {
   if (loading) return null;
 
   return (
-    <section className="py-24 bg-background">
-      <div className="container mx-auto px-6">
+    <section className="py-12 sm:py-24 bg-background">
+      <div className="container mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <span className="text-sm font-semibold text-primary uppercase tracking-widest">Case Studies</span>
-          <h2 className="text-4xl md:text-5xl font-semibold mt-3 mb-5 text-foreground">
+          <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-widest">Case Studies</span>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-semibold mt-2 sm:mt-3 mb-3 sm:mb-5 text-foreground">
             Trusted Across <span className="text-gradient-accent">Industries</span>
           </h2>
-          <p className="text-lg max-w-2xl mx-auto text-muted-foreground">
+          <p className="text-sm sm:text-lg max-w-2xl mx-auto text-muted-foreground">
             See how our clients found the best talent and completed their projects.
           </p>
         </motion.div>
 
         {/* Rippling-style card grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {cases.map((item, i) => (
             <motion.div
               key={item.id}

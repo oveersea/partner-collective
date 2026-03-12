@@ -269,10 +269,10 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(0 0% 5%), hsl(0 0% 8%), hsl(0 0% 6%))" }}>
-      <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px] opacity-15" style={{ background: "hsl(0 79% 47%)" }} />
+      <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full blur-[120px] opacity-15" style={{ background: "hsl(0 79% 47%)" }} />
 
-      <div className="relative container mx-auto px-6 pt-28 pb-16">
-        <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[calc(100vh-7rem)]">
+      <div className="relative container mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-10 sm:pb-16">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[calc(100vh-7rem)]">
           {/* Left: Content */}
           <div className="max-w-xl">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 mb-8">
@@ -283,17 +283,17 @@ const HeroSection = () => {
               <span className="text-sm" style={{ color: "hsl(0 0% 55%)" }}>13k+ reviews</span>
             </motion.div>
 
-            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.1] mb-6">
+            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.1] mb-4 sm:mb-6">
               The best partners & teams for your business
             </motion.h1>
 
-            <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="text-lg leading-relaxed mb-10" style={{ color: "hsl(0 0% 55%)" }}>
+            <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="text-base sm:text-lg leading-relaxed mb-6 sm:mb-10" style={{ color: "hsl(0 0% 55%)" }}>
               Find KYC-verified freelance partners & teams. From hiring requests to project requests — everything starts with quality.
             </motion.p>
 
             <motion.form initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} onSubmit={handleCTA} className="flex flex-col sm:flex-row gap-0 mb-4">
-              <Input type="email" placeholder="Your business email*" value={email} onChange={(e) => setEmail(e.target.value)} className="h-14 px-5 text-base bg-white/10 border-white/20 text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:border-white/40" style={{ borderRadius: "5px 0 0 5px" }} />
-              <Button type="submit" className="h-14 px-8 text-base font-semibold shrink-0" style={{ background: "hsl(0 79% 47%)", color: "white", borderRadius: "0 5px 5px 0" }}>
+              <Input type="email" placeholder="Your business email*" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 sm:h-14 px-4 sm:px-5 text-sm sm:text-base bg-white/10 border-white/20 text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:border-white/40 rounded-[5px] sm:rounded-none sm:rounded-l-[5px]" />
+              <Button type="submit" className="h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base font-semibold shrink-0 rounded-[5px] sm:rounded-none sm:rounded-r-[5px] mt-2 sm:mt-0" style={{ background: "hsl(0 79% 47%)", color: "white" }}>
                 Create free account
               </Button>
             </motion.form>
@@ -312,7 +312,7 @@ const HeroSection = () => {
               </Link>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.5 }} className="flex flex-wrap items-center gap-8 lg:gap-12">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.5 }} className="flex flex-wrap items-center gap-6 sm:gap-8 lg:gap-12">
               {socialProof.map((item, i) => (
                 <div key={i} className="text-center">
                   {item.stars > 0 ? (
