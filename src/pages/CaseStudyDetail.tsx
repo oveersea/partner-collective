@@ -71,7 +71,7 @@ const CaseStudyDetail = () => {
         return;
       }
 
-      setCs(csData as unknown as CaseStudyData);
+      setCs(csData as CaseStudyData);
 
       // Fetch sections and related services in parallel
       const [secRes, svcRes] = await Promise.all([
