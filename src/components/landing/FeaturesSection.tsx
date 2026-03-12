@@ -100,13 +100,13 @@ const CategoryCard = ({ cat, index }: { cat: ServiceCategory; index: number }) =
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.4, delay: index * 0.05 }}
-        className="p-8 group cursor-pointer hover:bg-muted/50 transition-colors h-full"
+        className="p-5 sm:p-8 group cursor-pointer hover:bg-muted/50 transition-colors h-full"
       >
-        <div className="w-14 h-14 rounded-xl border border-border bg-background flex items-center justify-center mb-5 group-hover:border-primary/30 transition-colors">
-          <Icon className="w-6 h-6 text-primary/70 group-hover:text-primary transition-colors" />
+        <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl border border-border bg-background flex items-center justify-center mb-3 sm:mb-5 group-hover:border-primary/30 transition-colors">
+          <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary/70 group-hover:text-primary transition-colors" />
         </div>
-        <h3 className="text-lg font-semibold text-card-foreground mb-2">{cat.name}</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">{cat.description}</p>
+        <h3 className="text-base sm:text-lg font-semibold text-card-foreground mb-1.5 sm:mb-2">{cat.name}</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{cat.description}</p>
         <span className="inline-flex items-center gap-1 text-primary text-sm font-medium mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
           View details <ArrowRight className="w-4 h-4" />
         </span>
