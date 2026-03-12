@@ -70,7 +70,7 @@ const AdminInsights = () => {
   };
 
   const toggleServiceActive = async (id: string, current: boolean | null) => {
-    const { error } = await supabase.from("insight_services").update({ is_active: !current } as any).eq("id", id);
+    const { error } = await (supabase as any).from("insight_services").update({ is_active: !current }).eq("id", id);
     if (error) toast.error("Failed to update status");
     else { toast.success("Status updated"); fetchData(); }
   };
