@@ -124,7 +124,7 @@ const AdminCaseStudies = () => {
   }, [search]);
 
   const fetchItems = async () => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("case_studies")
       .select("*")
       .order("sort_order", { ascending: true });
