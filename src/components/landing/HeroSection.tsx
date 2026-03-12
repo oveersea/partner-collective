@@ -292,8 +292,8 @@ const HeroSection = () => {
             </motion.p>
 
             <motion.form initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} onSubmit={handleCTA} className="flex flex-col sm:flex-row gap-0 mb-4">
-              <Input type="email" placeholder="Your business email*" value={email} onChange={(e) => setEmail(e.target.value)} className="h-14 px-5 text-base bg-white/10 border-white/20 text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:border-white/40" style={{ borderRadius: "5px 0 0 5px" }} />
-              <Button type="submit" className="h-14 px-8 text-base font-semibold shrink-0" style={{ background: "hsl(0 79% 47%)", color: "white", borderRadius: "0 5px 5px 0" }}>
+              <Input type="email" placeholder="Your business email*" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 sm:h-14 px-4 sm:px-5 text-sm sm:text-base bg-white/10 border-white/20 text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:border-white/40 rounded-[5px] sm:rounded-none sm:rounded-l-[5px]" />
+              <Button type="submit" className="h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base font-semibold shrink-0 rounded-[5px] sm:rounded-none sm:rounded-r-[5px] mt-2 sm:mt-0" style={{ background: "hsl(0 79% 47%)", color: "white" }}>
                 Create free account
               </Button>
             </motion.form>
