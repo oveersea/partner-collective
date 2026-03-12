@@ -39,19 +39,19 @@ const AdminCreditDetail = () => {
     }
 
     if (type === "order") {
-      const { data: row } = await supabase
+      const { data: row } = await (supabase as any)
         .from("credit_orders")
         .select("*")
         .eq("id", id!)
         .single();
       if (row) {
         setData(row);
-        setAdminNotes(row.admin_notes || "");
+        setAdminNotes((row as any).admin_notes || "");
         // Fetch user name
-        const { data: p } = await supabase.from("profiles").select("full_name").eq("user_id", row.user_id).single();
+        const { data: p } = await supabase.from("profiles").select("full_name").eq("user_id", (row as any).user_id).single();
         if (p) setUserName(p.full_name || "");
-        if (row.business_id) {
-          const { data: b } = await supabase.from("business_profiles").select("name").eq("id", row.business_id).single();
+        if ((row as any).business_id) {
+          const { data: b } = await supabase.from("business_profiles").select("name").eq("id", (row as any).business_id).single();
           if (b) setBusinessName(b.name || "");
         }
       }
