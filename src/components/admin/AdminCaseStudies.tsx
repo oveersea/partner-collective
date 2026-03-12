@@ -224,7 +224,7 @@ const AdminCaseStudies = () => {
     let csId = editId;
 
     if (editId) {
-      const { error } = await supabase.from("case_studies").update(payload).eq("id", editId);
+      const { error } = await (supabase as any).from("case_studies").update(payload).eq("id", editId);
       if (error) {
         toast.error("Gagal update: " + error.message);
         setSaving(false);
