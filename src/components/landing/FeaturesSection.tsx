@@ -64,7 +64,7 @@ const FeaturesSection = () => {
           <div className="border-t border-border" />
           <Link
             to="/services"
-            className="p-8 flex flex-col justify-center hover:bg-muted/50 transition-colors cursor-pointer"
+            className="p-5 sm:p-8 flex flex-col justify-center hover:bg-muted/50 transition-colors cursor-pointer"
             style={{ background: "hsl(var(--muted) / 0.3)" }}
           >
             <motion.div

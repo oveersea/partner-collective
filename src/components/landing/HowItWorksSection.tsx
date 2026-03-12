@@ -54,7 +54,7 @@ const HowItWorksSection = () => {
           </div>
 
           {/* Steps */}
-          <div className="grid md:grid-cols-3 gap-12 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 relative z-10">
             {steps.map((step, i) => (
               <motion.div
                 key={step.number}
