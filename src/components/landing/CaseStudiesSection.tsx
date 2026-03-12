@@ -67,11 +67,11 @@ const CaseStudiesSection = () => {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <span className="text-sm font-semibold text-primary uppercase tracking-widest">Case Studies</span>
-          <h2 className="text-4xl md:text-5xl font-semibold mt-3 mb-5 text-foreground">
+          <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-widest">Case Studies</span>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-semibold mt-2 sm:mt-3 mb-3 sm:mb-5 text-foreground">
             Trusted Across <span className="text-gradient-accent">Industries</span>
           </h2>
-          <p className="text-lg max-w-2xl mx-auto text-muted-foreground">
+          <p className="text-sm sm:text-lg max-w-2xl mx-auto text-muted-foreground">
             See how our clients found the best talent and completed their projects.
           </p>
         </motion.div>
