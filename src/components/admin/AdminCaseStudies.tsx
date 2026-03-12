@@ -251,7 +251,7 @@ const AdminCaseStudies = () => {
           image_url: s.image_url || null,
           sort_order: i,
         }));
-        await supabase.from("case_study_sections").insert(secPayload);
+        await (supabase as any).from("case_study_sections").insert(secPayload);
       }
 
       await supabase.from("case_study_services").delete().eq("case_study_id", csId);
