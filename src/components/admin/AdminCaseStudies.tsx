@@ -281,7 +281,7 @@ const AdminCaseStudies = () => {
   };
 
   const toggleActive = async (id: string, current: boolean) => {
-    await supabase.from("case_studies").update({ is_active: !current }).eq("id", id);
+    await (supabase as any).from("case_studies").update({ is_active: !current }).eq("id", id);
     fetchItems();
   };
 

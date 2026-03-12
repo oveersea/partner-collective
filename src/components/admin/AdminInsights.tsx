@@ -89,7 +89,7 @@ const AdminInsights = () => {
   };
 
   const toggleCaseFeatured = async (id: string, current: boolean | null) => {
-    const { error } = await supabase.from("case_studies").update({ is_featured: !current } as any).eq("id", id);
+    const { error } = await (supabase as any).from("case_studies").update({ is_featured: !current }).eq("id", id);
     if (error) toast.error("Failed to update featured");
     else { toast.success("Featured updated"); fetchData(); }
   };
