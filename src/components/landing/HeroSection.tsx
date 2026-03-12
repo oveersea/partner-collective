@@ -283,7 +283,7 @@ const HeroSection = () => {
               <span className="text-sm" style={{ color: "hsl(0 0% 55%)" }}>13k+ reviews</span>
             </motion.div>
 
-            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.1] mb-6">
+            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.1] mb-4 sm:mb-6">
               The best partners & teams for your business
             </motion.h1>
 
