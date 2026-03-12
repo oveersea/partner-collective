@@ -96,7 +96,7 @@ const ServiceDetailPage = () => {
         category_name: cat?.name || null,
       });
 
-      const { count } = await supabase
+      const { count } = await (supabase as any)
         .from("user_services")
         .select("id", { count: "exact", head: true })
         .eq("service_id", data.id)
