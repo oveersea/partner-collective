@@ -112,7 +112,7 @@ const ServiceDetailPage = () => {
         .order("sort_order")
         .limit(4);
       setRelatedServices(
-        (related || []).map((s) => ({ ...s, required_skills: s.required_skills || [] }))
+        ((related || []) as any[]).map((s: any) => ({ ...s, required_skills: s.required_skills || [] }))
       );
 
       setLoading(false);
