@@ -60,7 +60,7 @@ const AdminInsights = () => {
     const [svcRes, survRes, caseRes] = await Promise.all([
       supabase.from("insight_services").select("id, title, tagline, icon_name, sort_order, is_active, created_at").order("sort_order", { ascending: true }),
       supabase.from("surveys").select("id, title, category, status, total_responses, starts_at, ends_at, created_at").order("created_at", { ascending: false }),
-      supabase.from("case_studies").select("id, title, company_name, industry, description, cta_label, sort_order, is_active, is_featured, created_at").order("sort_order", { ascending: true }),
+      (supabase as any).from("case_studies").select("id, title, company_name, industry, description, cta_label, sort_order, is_active, is_featured, created_at").order("sort_order", { ascending: true }),
     ]);
 
     if (svcRes.data) setServices(svcRes.data as unknown as InsightService[]);
