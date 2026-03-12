@@ -254,7 +254,7 @@ const AdminCaseStudies = () => {
         await (supabase as any).from("case_study_sections").insert(secPayload);
       }
 
-      await supabase.from("case_study_services").delete().eq("case_study_id", csId);
+      await (supabase as any).from("case_study_services").delete().eq("case_study_id", csId);
       if (linkedServiceIds.length > 0) {
         const svcPayload = linkedServiceIds.map((sid) => ({
           case_study_id: csId!,
