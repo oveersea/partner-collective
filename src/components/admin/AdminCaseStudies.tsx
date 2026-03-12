@@ -272,7 +272,7 @@ const AdminCaseStudies = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Hapus case study ini?")) return;
-    const { error } = await supabase.from("case_studies").delete().eq("id", id);
+    const { error } = await (supabase as any).from("case_studies").delete().eq("id", id);
     if (error) toast.error("Gagal menghapus");
     else {
       toast.success("Case study dihapus");
