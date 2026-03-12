@@ -131,7 +131,7 @@ const ServiceOrder = () => {
         project_description: projectDesc.trim(), urgency, budget_range: budget, team_size: teamSize,
       };
       const slaType = urgency === "urgent" ? "urgent" : urgency === "priority" ? "priority" : "normal";
-      const { error } = await supabase.from("orders").insert({
+      const { error } = await (supabase as any).from("orders").insert({
         user_id: user.id, order_number: orderNum || "", expertise_slug: service.category_id,
         service_slug: service.slug, items: items as any, total_cents: 0, currency: "IDR",
         status: "pending", sla_type: slaType, notes: notes.trim() || null, created_by: user.id,

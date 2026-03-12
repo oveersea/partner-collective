@@ -99,12 +99,12 @@ const CreditBalancePage = () => {
 
   const fetchAll = async () => {
     const [credRes, pkgRes, ordRes, walRes, txRes, depRes] = await Promise.all([
-      supabase.from("credit_balances").select("balance, total_purchased, total_used").eq("user_id", user!.id).maybeSingle(),
-      supabase.from("credit_packages").select("id, name, credits, price_cents, currency, description").eq("is_active", true).order("sort_order"),
-      supabase.from("credit_orders").select("id, order_number, credits, amount_cents, currency, status, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }),
-      supabase.from("wallet_balances").select("balance, total_deposited, total_withdrawn").eq("user_id", user!.id).is("business_id", null).maybeSingle(),
-      supabase.from("wallet_transactions").select("id, type, amount, balance_after, description, created_at").eq("user_id", user!.id).is("business_id", null).order("created_at", { ascending: false }).limit(50),
-      supabase.from("wallet_deposits").select("id, deposit_number, amount, currency, method, status, created_at").eq("user_id", user!.id).is("business_id", null).order("created_at", { ascending: false }),
+      (supabase as any).from("credit_balances").select("balance, total_purchased, total_used").eq("user_id", user!.id).maybeSingle(),
+      (supabase as any).from("credit_packages").select("id, name, credits, price_cents, currency, description").eq("is_active", true).order("sort_order"),
+      (supabase as any).from("credit_orders").select("id, order_number, credits, amount_cents, currency, status, created_at").eq("user_id", user!.id).order("created_at", { ascending: false }),
+      (supabase as any).from("wallet_balances").select("balance, total_deposited, total_withdrawn").eq("user_id", user!.id).is("business_id", null).maybeSingle(),
+      (supabase as any).from("wallet_transactions").select("id, type, amount, balance_after, description, created_at").eq("user_id", user!.id).is("business_id", null).order("created_at", { ascending: false }).limit(50),
+      (supabase as any).from("wallet_deposits").select("id, deposit_number, amount, currency, method, status, created_at").eq("user_id", user!.id).is("business_id", null).order("created_at", { ascending: false }),
     ]);
 
     if (credRes.data) setCreditBal(credRes.data as CreditBalance);
