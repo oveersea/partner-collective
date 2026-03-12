@@ -86,7 +86,7 @@ const CaseStudyDetail = () => {
           .eq("case_study_id", csData.id),
       ]);
 
-      setSections((secRes.data || []) as unknown as Section[]);
+      setSections((secRes.data || []) as Section[]);
 
       // Fetch actual service data
       if (svcRes.data && svcRes.data.length > 0) {
