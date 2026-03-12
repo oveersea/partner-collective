@@ -231,7 +231,7 @@ const AdminCaseStudies = () => {
         return;
       }
     } else {
-      const { data, error } = await supabase.from("case_studies").insert(payload).select("id").single();
+      const { data, error } = await (supabase as any).from("case_studies").insert(payload).select("id").single();
       if (error || !data) {
         toast.error("Gagal membuat: " + (error?.message || "Unknown error"));
         setSaving(false);
