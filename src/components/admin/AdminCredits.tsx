@@ -50,7 +50,7 @@ const AdminCredits = () => {
       .limit(100);
 
     // Fetch deposits
-    const { data: depData } = await supabase
+    const { data: depData } = await (supabase as any)
       .from("wallet_deposits")
       .select("id, deposit_number, amount, method, status, user_id, created_at")
       .order("created_at", { ascending: false })
