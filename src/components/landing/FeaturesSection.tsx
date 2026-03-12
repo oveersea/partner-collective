@@ -37,8 +37,8 @@ const FeaturesSection = () => {
   const remaining = categories.slice(6);
 
   return (
-    <section className="py-24 bg-background relative">
-      <div className="container mx-auto px-6 max-w-full">
+    <section className="py-12 sm:py-24 bg-background relative">
+      <div className="container mx-auto px-4 sm:px-6 max-w-full">
         <div className="border border-border rounded-2xl overflow-hidden bg-card">
           {/* Row 1 */}
           {row1.length > 0 && (
