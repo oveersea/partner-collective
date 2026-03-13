@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Search, ArrowRight, SparklesIcon, Brush, HardHat, ShieldCheck, Camera, Megaphone,
-  TrendingUp, Scale, Calculator, UserCheck, Zap, Clock, Star, CheckCircle2
+  Search, Brush, HardHat, ShieldCheck, Camera, Megaphone,
+  TrendingUp, Scale, Calculator, UserCheck, Zap, CheckCircle2
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 

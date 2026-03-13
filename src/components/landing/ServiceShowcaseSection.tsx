@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import {
-  ArrowRight, Clock, ShieldCheck, CreditCard, Headphones,
-  Users, Star, BarChart3, Award
+  Clock, ShieldCheck, CreditCard, Headphones,
+  Users, Star, Award
 } from "lucide-react";
 
 const benefits = [
