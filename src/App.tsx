@@ -40,7 +40,7 @@ import TeamDashboard from "./pages/TeamDashboard";
 import CompanyDashboard from "./pages/CompanyDashboard";
 import Companies from "./pages/Companies";
 import Checkout from "./pages/Checkout";
-import RequestQuote from "./pages/RequestQuote";
+import Order from "./pages/Order";
 import Verification from "./pages/Verification";
 import PublicProfile from "./pages/PublicProfile";
 import MyRequests from "./pages/MyRequests";
