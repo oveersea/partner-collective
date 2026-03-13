@@ -1,56 +1,51 @@
 
-Masalahnya bukan duplicate data, jadi **truncate/kosongkan `login_tokens` tidak akan menyelesaikan**.
 
-### Temuan utama (dari code + DB + logs)
-1. Log terbaru `generate-login-token` menunjukkan error:
-   - `new row violates row-level security policy for table "login_tokens"` (code 42501).
-2. Tabel `public.login_tokens` saat ini sudah kosong:
-   - total rows = 0
-   - duplicate token_hash = 0
-3. Penyebab paling kuat ada di implementasi function:
-   - `supabaseAdmin` (service role client) dipakai juga untuk `auth.signInWithPassword`.
-   - Setelah sign-in, context auth client bisa berpindah ke JWT user (authenticated), sehingga query insert berikutnya **tidak lagi jalan sebagai service role**.
-   - Akibatnya insert ke `login_tokens` kena RLS.
+## Plan: Ubah `/request-quote` menjadi `/order` dengan konsep marketplace
 
-### Rencana perbaikan implementasi
-1. **Pisahkan client Supabase di edge function `generate-login-token`**
-   - `supabaseService` (pakai `SUPABASE_SERVICE_ROLE_KEY`) khusus untuk:
-     - validasi API key (`api_keys`)
-     - insert `login_tokens`
-     - update `api_keys.last_used_at`
-   - `supabaseAuth` (pakai `SUPABASE_ANON_KEY`) khusus untuk:
-     - `auth.signInWithPassword(email, password)`
+### Konsep
+Halaman `/order` berfungsi sebagai cart/checkout untuk layanan on-demand. User bisa menambahkan layanan dari `/services`, lalu checkout di `/order`. Jika cart kosong, redirect ke `/services`. Ada dua opsi: **Pesan Langsung** atau **Diskusi Dulu**.
 
-2. **Tambahkan guard env variable**
-   - Pastikan function fail-fast kalau `SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY`/`SUPABASE_URL` tidak tersedia.
-   - Return error config yang jelas (500) agar mudah trace.
+### Perubahan
 
-3. **Pertahankan schema/RLS saat ini (tanpa truncate)**
-   - Tidak perlu migration baru untuk truncate atau ubah struktur.
-   - Policy existing boleh tetap, tetapi fix utama adalah pemisahan auth context client.
+#### 1. Buat Cart System (localStorage-based)
+- Buat file `src/lib/cart.ts` — utility untuk manage cart di localStorage
+  - `getCart()`, `addToCart(item)`, `removeFromCart(index)`, `clearCart()`, `getCartCount()`
+  - Item shape: `{ categorySlug, categoryName, serviceName, description, tags[], quantity }`
 
-4. **Tambahkan logging diagnostik yang lebih spesifik**
-   - Saat insert gagal, log:
-     - code/message dari Postgres
-     - step mana yang gagal (insert token vs update api_key)
-   - Ini membantu bedakan error auth-context vs constraint lain.
+#### 2. Buat halaman `/order` (replace `RequestQuote.tsx`)
+- Rename/rewrite `src/pages/RequestQuote.tsx` → buat page baru `src/pages/Order.tsx`
+- Tampilkan daftar item dari cart dengan quantity control
+- Dua CTA button:
+  - **"Diskusi Dulu"** — buka form ringkas (nama, email, phone, catatan) lalu submit via edge function `request-quote` yang sudah ada
+  - **"Pesan Langsung"** — langsung submit order (juga pakai edge function existing)
+- Jika cart kosong → tampilkan empty state dengan tombol "Pilih Layanan" redirect ke `/services`
+- Form fields: nama, email, phone, lokasi, catatan tambahan, jadwal preferensi
+- Sidebar: ringkasan cart items
 
-### Rencana verifikasi setelah fix
-1. Generate API key baru dari admin (copy full key).
-2. Hit endpoint `generate-login-token` dengan email/password valid.
-3. Validasi response 200 berisi `verification_url`, `token`, `expires_in`.
-4. Cek table `login_tokens` bertambah 1 row.
-5. Lanjut panggil `verify-login-token` dan pastikan token bisa ditandai `used_at`.
-6. Cek edge logs untuk memastikan tidak ada lagi `42501`.
+#### 3. Update `/services` page
+- Ubah link sub-service dari `/request-quote` → `addToCart()` + toast notification
+- Tambahkan tombol "Tambah ke Keranjang" di setiap sub-service card
+- Tambah floating cart indicator (badge count) yang link ke `/order`
+- Update CTA card link dari `/request-quote` → `/order`
 
-### Detail teknis singkat
-```text
-Sebelum:
-1 client (service) -> signInWithPassword -> insert login_tokens (terkadang jadi role user) -> RLS fail
+#### 4. Update routing (`App.tsx`)
+- Ganti route `/request-quote` → `/order` dengan component `Order`
+- Keep `/checkout` untuk program/event payment yang sudah ada
 
-Sesudah:
-client auth (anon) -> validasi email/password
-client service (service role) -> insert login_tokens + update api_keys
-```
+#### 5. Update semua referensi `/request-quote`
+- `Navbar.tsx`, `Services.tsx`, `Footer.tsx`, landing sections — ubah semua link ke `/order`
 
-Dengan pendekatan ini, error “Failed to create login token” karena RLS harusnya hilang tanpa perlu mengosongkan tabel.
+#### 6. Update `FeaturesSection.tsx` (landing)
+- Service card click → navigate ke `/services?category={slug}` (sudah ada) atau tambah ke cart
+
+### Technical Details
+- Cart disimpan di `localStorage` key `"oveersea_cart"`
+- Tidak perlu migration DB — pakai edge function `request-quote` yang sudah ada untuk submit
+- Edge function tetap create user + opportunity di Supabase
+- Cart badge ditampilkan di Navbar menggunakan state dari localStorage + custom event listener untuk reactivity
+
+### Files to Create/Edit
+- **Create:** `src/lib/cart.ts`, `src/pages/Order.tsx`
+- **Edit:** `src/App.tsx`, `src/pages/Services.tsx`, `src/components/landing/Navbar.tsx`, `src/components/landing/Footer.tsx`, `src/components/landing/CTASection.tsx`, `src/components/landing/HeroSection.tsx`
+- **Delete:** `src/pages/RequestQuote.tsx` (replaced by Order.tsx)
+
