@@ -28,7 +28,7 @@ const CTASection = () => {
               </p>
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              <Link to="/request-quote">
+              <Link to="/order">
                 <Button
                   className="font-semibold px-6 py-5 rounded-lg text-sm"
                   style={{ background: "hsl(var(--primary))", color: "white" }}

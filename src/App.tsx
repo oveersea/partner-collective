@@ -94,7 +94,7 @@ const App = () => (
             <Route path="/companies" element={<Companies />} />
             <Route path="/company/:oveercode" element={<CompanyDashboard />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/request-quote" element={<RequestQuote />} />
+            <Route path="/order" element={<Order />} />
             <Route path="/verification" element={<Verification />} />
             <Route path="/p/:oveercode" element={<PublicProfile />} />
             <Route path="/my-requests" element={<MyRequests />} />

@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, ArrowRight, Search,
   Brush, HardHat, ShieldCheck, Camera, Megaphone, TrendingUp,
-  Scale, Calculator, UserCheck, Sparkles, CheckCircle2, Phone, Clock
+  Scale, Calculator, UserCheck, Sparkles, CheckCircle2, Phone, Clock,
+  ShoppingCart, Plus
 } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { addToCart, getCartCount } from "@/lib/cart";
+import { toast } from "sonner";
 
 interface ServiceCategory {
   slug: string;
@@ -149,6 +152,25 @@ const Services = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get("category") || "all";
   const [searchQuery, setSearchQuery] = useState("");
+  const [cartCount, setCartCount] = useState(getCartCount());
+
+  useEffect(() => {
+    const handler = () => setCartCount(getCartCount());
+    window.addEventListener("cart-updated", handler);
+    return () => window.removeEventListener("cart-updated", handler);
+  }, []);
+
+  const handleAddToCart = (category: ServiceCategory, sub: ServiceCategory["subServices"][0]) => {
+    addToCart({
+      categorySlug: category.slug,
+      categoryName: category.name,
+      serviceName: sub.name,
+      description: sub.description,
+      tags: sub.tags,
+      quantity: 1,
+    });
+    toast.success(`${sub.name} ditambahkan ke keranjang`);
+  };
 
   const activeCategory = categoryParam === "all" ? null : categories.find(c => c.slug === categoryParam);
 
@@ -165,9 +187,17 @@ const Services = () => {
       <Navbar />
       <main className="pt-24 pb-24">
         <div className="container mx-auto px-4 sm:px-6">
-          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-6 transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Kembali
-          </Link>
+          <div className="flex items-center justify-between mb-6">
+            <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors">
+              <ArrowLeft className="w-4 h-4" /> Kembali
+            </Link>
+            {cartCount > 0 && (
+              <Link to="/order" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+                <ShoppingCart className="w-4 h-4" />
+                Keranjang ({cartCount})
+              </Link>
+            )}
+          </div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <h1 className="text-2xl sm:text-3xl md:text-5xl font-semibold text-foreground mb-2">
@@ -237,26 +267,29 @@ const Services = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                   >
-                    <Link to="/request-quote">
-                      <div className="group p-5 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all h-full cursor-pointer">
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">{sub.name}</h3>
-                          <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full shrink-0">
-                            <Clock className="w-3 h-3" />
-                            {sub.availability}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed mb-3">{sub.description}</p>
-                        <div className="flex flex-wrap gap-1.5 mb-3">
-                          {sub.tags.map(tag => (
-                            <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">{tag}</span>
-                          ))}
-                        </div>
-                        <span className="inline-flex items-center gap-1 text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                          Pesan Sekarang <ArrowRight className="w-3.5 h-3.5" />
+                    <div className="group p-5 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all h-full">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">{sub.name}</h3>
+                        <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full shrink-0">
+                          <Clock className="w-3 h-3" />
+                          {sub.availability}
                         </span>
                       </div>
-                    </Link>
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-3">{sub.description}</p>
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {sub.tags.map(tag => (
+                          <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">{tag}</span>
+                        ))}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5 text-xs"
+                        onClick={() => handleAddToCart(activeCategory, sub)}
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Tambah ke Keranjang
+                      </Button>
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -300,7 +333,7 @@ const Services = () => {
 
               {/* CTA card */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: filteredCategories.length * 0.04 }}>
-                <Link to="/request-quote">
+                <Link to="/order">
                   <div className="p-5 sm:p-6 rounded-xl border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all h-full cursor-pointer flex flex-col justify-center">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
                       <Sparkles className="w-6 h-6 text-primary" />
@@ -337,7 +370,7 @@ const Services = () => {
                 <p className="text-sm text-muted-foreground">Tim kami siap membantu Anda menemukan solusi terbaik.</p>
               </div>
               <div className="flex items-center gap-3">
-                <Link to="/request-quote">
+                <Link to="/order">
                   <Button className="gap-2">
                     <Phone className="w-4 h-4" />
                     Hubungi Kami
