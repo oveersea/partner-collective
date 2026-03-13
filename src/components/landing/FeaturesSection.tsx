@@ -1,117 +1,156 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, Megaphone, Code, Palette, Briefcase, FileText, Calculator, Sparkles } from "lucide-react";
+import {
+  Brush, HardHat, ShieldCheck, Camera, Megaphone, TrendingUp,
+  Scale, Calculator, UserCheck, ArrowRight, Sparkles
+} from "lucide-react";
 
-const iconMap: Record<string, React.ElementType> = {
-  Megaphone, Code, Palette, Briefcase, FileText, Calculator,
-};
-
-interface ServiceCategory {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  icon: string | null;
-}
+const services = [
+  {
+    icon: Brush,
+    title: "Cleaning",
+    description: "Tenaga kebersihan profesional untuk rumah, kantor, dan area komersial. Tersedia harian atau kontrak.",
+    tags: ["Deep Clean", "Office", "Residential"],
+    color: "hsl(180 60% 45%)",
+  },
+  {
+    icon: HardHat,
+    title: "Civil (Tukang Bangunan)",
+    description: "Tukang bangunan, renovasi, perbaikan, dan konstruksi ringan dengan keahlian terverifikasi.",
+    tags: ["Renovasi", "Perbaikan", "Konstruksi"],
+    color: "hsl(30 70% 50%)",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Pengamanan (Guard)",
+    description: "Satpam dan petugas keamanan terlatih untuk acara, gedung, dan area komersial.",
+    tags: ["Satpam", "Event Security", "Patroli"],
+    color: "hsl(220 60% 50%)",
+  },
+  {
+    icon: Camera,
+    title: "Content Creator",
+    description: "Fotografer, videografer, dan kreator konten untuk kebutuhan sosial media & branding.",
+    tags: ["Foto", "Video", "Social Media"],
+    color: "hsl(330 60% 50%)",
+  },
+  {
+    icon: Megaphone,
+    title: "Digital Marketer",
+    description: "Ahli pemasaran digital: SEO, SEM, social media ads, dan strategi growth hacking.",
+    tags: ["SEO", "Ads", "Growth"],
+    color: "hsl(270 50% 55%)",
+  },
+  {
+    icon: TrendingUp,
+    title: "Sales",
+    description: "Tenaga penjualan temporary & permanent untuk B2B, B2C, retail, dan direct selling.",
+    tags: ["Temporary", "Permanent", "B2B"],
+    color: "hsl(150 55% 45%)",
+  },
+  {
+    icon: Scale,
+    title: "Legal & Lawyer",
+    description: "Konsultan hukum, pengacara, dan legal advisor untuk kebutuhan bisnis dan pribadi.",
+    tags: ["Kontrak", "Perizinan", "Litigasi"],
+    color: "hsl(200 50% 45%)",
+  },
+  {
+    icon: Calculator,
+    title: "Finance & Tax",
+    description: "Akuntan, konsultan pajak, dan perencana keuangan untuk individu maupun perusahaan.",
+    tags: ["Pajak", "Akuntansi", "Audit"],
+    color: "hsl(45 70% 50%)",
+  },
+  {
+    icon: UserCheck,
+    title: "Secretary",
+    description: "Sekretaris dan asisten profesional: penjadwalan, korespondensi, dan administrasi.",
+    tags: ["Admin", "Scheduling", "Virtual"],
+    color: "hsl(350 55% 50%)",
+  },
+];
 
 const FeaturesSection = () => {
-  const [categories, setCategories] = useState<ServiceCategory[]>([]);
-
-  useEffect(() => {
-    const fetch = async () => {
-      const { data } = await (supabase as any)
-        .from("service_categories")
-        .select("id, name, slug, description, icon")
-        .eq("is_active", true)
-        .order("sort_order");
-      if (data) setCategories(data as ServiceCategory[]);
-    };
-    fetch();
-  }, []);
-
-  // Split into rows: first 3, next 3, remainder
-  const row1 = categories.slice(0, 3);
-  const row2 = categories.slice(3, 6);
-  const remaining = categories.slice(6);
-
   return (
     <section className="py-12 sm:py-24 bg-background relative">
-      <div className="container mx-auto px-4 sm:px-6 max-w-full">
-        <div className="border border-border rounded-2xl overflow-hidden bg-card">
-          {/* Row 1 */}
-          {row1.length > 0 && (
-            <div className="grid md:grid-cols-3 divide-x divide-y md:divide-y-0 divide-border">
-              {row1.map((cat, i) => (
-                <CategoryCard key={cat.id} cat={cat} index={i} />
-              ))}
-            </div>
-          )}
+      <div className="container mx-auto px-4 sm:px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-10 sm:mb-16"
+        >
+          <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-widest">Layanan On-Demand</span>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-semibold mt-2 sm:mt-3 mb-3 sm:mb-5 text-foreground">
+            Semua Kebutuhan, <span className="text-gradient-accent">Satu Platform</span>
+          </h2>
+          <p className="text-sm sm:text-lg max-w-2xl mx-auto text-muted-foreground">
+            Dari tenaga fisik hingga profesional digital — pesan layanan berkualitas dengan jaminan verifikasi.
+          </p>
+        </motion.div>
 
-          {row2.length > 0 && (
-            <>
-              <div className="border-t border-border" />
-              <div className="grid md:grid-cols-3 divide-x divide-y md:divide-y-0 divide-border">
-                {row2.map((cat, i) => (
-                  <CategoryCard key={cat.id} cat={cat} index={i + 3} />
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Bottom row: CTA */}
-          <div className="border-t border-border" />
-          <Link
-            to="/services"
-            className="p-5 sm:p-8 flex flex-col justify-center hover:bg-muted/50 transition-colors cursor-pointer"
-            style={{ background: "hsl(var(--muted) / 0.3)" }}
-          >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {services.map((svc, i) => (
             <motion.div
+              key={svc.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.35 }}
+              transition={{ delay: i * 0.05 }}
             >
-              <div className="flex items-center gap-3 mb-2">
-                <Sparkles className="w-5 h-5 text-primary" />
-                <h3 className="text-xl font-semibold text-card-foreground">Plus Thousands of Other Skills</h3>
-              </div>
-              <p className="text-muted-foreground leading-relaxed">
-                Whatever skill or specialization your business needs, we have the best talent to fulfill it.
-              </p>
-              <span className="inline-flex items-center gap-1 text-primary text-sm font-medium mt-3">
-                View all services <ArrowRight className="w-4 h-4" />
-              </span>
+              <Link to="/services">
+                <div className="group p-5 sm:p-6 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all h-full cursor-pointer">
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                    style={{ background: `${svc.color}15` }}
+                  >
+                    <svc.icon className="w-5 h-5" style={{ color: svc.color }} />
+                  </div>
+                  <h3 className="text-base font-semibold text-foreground mb-1.5 group-hover:text-primary transition-colors">
+                    {svc.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                    {svc.description}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {svc.tags.map((tag) => (
+                      <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-primary text-sm font-medium mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Lihat detail <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </Link>
             </motion.div>
-          </Link>
+          ))}
         </div>
+
+        {/* Bottom CTA */}
+        <Link to="/services">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-4 p-5 sm:p-8 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h3 className="text-lg sm:text-xl font-semibold text-foreground">Dan Ribuan Layanan Lainnya</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Apapun kebutuhan tenaga kerja bisnis Anda, kami menyediakan profesional terbaik untuk memenuhinya.
+            </p>
+            <span className="inline-flex items-center gap-1 text-primary text-sm font-medium mt-3">
+              Lihat semua layanan <ArrowRight className="w-4 h-4" />
+            </span>
+          </motion.div>
+        </Link>
       </div>
     </section>
-  );
-};
-
-const CategoryCard = ({ cat, index }: { cat: ServiceCategory; index: number }) => {
-  const Icon = iconMap[cat.icon || ""] || Briefcase;
-  return (
-    <Link to={`/services?category=${cat.slug}`}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.4, delay: index * 0.05 }}
-        className="p-5 sm:p-8 group cursor-pointer hover:bg-muted/50 transition-colors h-full"
-      >
-        <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl border border-border bg-background flex items-center justify-center mb-3 sm:mb-5 group-hover:border-primary/30 transition-colors">
-          <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary/70 group-hover:text-primary transition-colors" />
-        </div>
-        <h3 className="text-base sm:text-lg font-semibold text-card-foreground mb-1.5 sm:mb-2">{cat.name}</h3>
-        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{cat.description}</p>
-        <span className="inline-flex items-center gap-1 text-primary text-sm font-medium mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-          View details <ArrowRight className="w-4 h-4" />
-        </span>
-      </motion.div>
-    </Link>
   );
 };
 
