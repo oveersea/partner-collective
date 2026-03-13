@@ -78,7 +78,7 @@ const megaMenus: MegaMenuData[] = [
           { icon: Building2, title: "Vendor Registration", description: "Daftar sebagai vendor terverifikasi", href: "/vendor-registration" },
           { icon: FolderOpen, title: "Project Request", description: "Post kebutuhan proyek", href: "/project-request" },
           { icon: Handshake, title: "Hiring Request", description: "Submit permintaan rekrutmen", href: "/hiring-request" },
-          { icon: PackageCheck, title: "Bulk Order", description: "Pemesanan tenaga kerja dalam jumlah besar", href: "/request-quote" },
+          { icon: PackageCheck, title: "Bulk Order", description: "Pemesanan tenaga kerja dalam jumlah besar", href: "/order" },
         ],
       },
     ],
