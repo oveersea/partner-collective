@@ -40,7 +40,7 @@ import TeamDashboard from "./pages/TeamDashboard";
 import CompanyDashboard from "./pages/CompanyDashboard";
 import Companies from "./pages/Companies";
 import Checkout from "./pages/Checkout";
-import RequestQuote from "./pages/RequestQuote";
+import Order from "./pages/Order";
 import Verification from "./pages/Verification";
 import PublicProfile from "./pages/PublicProfile";
 import MyRequests from "./pages/MyRequests";
@@ -94,7 +94,7 @@ const App = () => (
             <Route path="/companies" element={<Companies />} />
             <Route path="/company/:oveercode" element={<CompanyDashboard />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/request-quote" element={<RequestQuote />} />
+            <Route path="/order" element={<Order />} />
             <Route path="/verification" element={<Verification />} />
             <Route path="/p/:oveercode" element={<PublicProfile />} />
             <Route path="/my-requests" element={<MyRequests />} />

@@ -78,7 +78,7 @@ const megaMenus: MegaMenuData[] = [
           { icon: Building2, title: "Vendor Registration", description: "Daftar sebagai vendor terverifikasi", href: "/vendor-registration" },
           { icon: FolderOpen, title: "Project Request", description: "Post kebutuhan proyek", href: "/project-request" },
           { icon: Handshake, title: "Hiring Request", description: "Submit permintaan rekrutmen", href: "/hiring-request" },
-          { icon: PackageCheck, title: "Bulk Order", description: "Pemesanan tenaga kerja dalam jumlah besar", href: "/request-quote" },
+          { icon: PackageCheck, title: "Bulk Order", description: "Pemesanan tenaga kerja dalam jumlah besar", href: "/order" },
         ],
       },
     ],
@@ -316,9 +316,9 @@ const Navbar = () => {
               <Link to="/auth">
                 <span className="text-sm font-medium cursor-pointer transition-colors" style={{ color: "hsl(0 0% 60%)" }}>Login</span>
               </Link>
-              <Link to="/request-quote">
+              <Link to="/order">
                 <button className="px-5 py-2 text-sm font-semibold rounded-lg border transition-colors" style={{ borderColor: "hsl(0 0% 30%)", color: "white" }}>
-                  Request Quote
+                  Order
                 </button>
               </Link>
             </>
