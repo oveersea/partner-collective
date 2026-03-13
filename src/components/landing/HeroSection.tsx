@@ -1,399 +1,183 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Star, Play, Briefcase, GraduationCap, BarChart3, CreditCard, ShieldCheck, Search, LayoutDashboard, Layers, Users, Building2, Zap } from "lucide-react";
+import {
+  Search, ArrowRight, SparklesIcon, Brush, HardHat, ShieldCheck, Camera, Megaphone,
+  TrendingUp, Scale, Calculator, UserCheck, Zap, Clock, Star, CheckCircle2
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-const socialProof = [
-  { stars: 0, source: "2,000+", sub: "Registered Talent", icon: Users },
-  { stars: 0, source: "120+", sub: "Partner Companies", icon: Building2 },
-  { stars: 0, source: "80+", sub: "Active Jobs", icon: Zap },
+const serviceQuickLinks = [
+  { icon: Brush, label: "Cleaning", color: "hsl(180 60% 45%)" },
+  { icon: HardHat, label: "Civil", color: "hsl(30 70% 50%)" },
+  { icon: ShieldCheck, label: "Guard", color: "hsl(220 60% 50%)" },
+  { icon: Camera, label: "Content Creator", color: "hsl(330 60% 50%)" },
+  { icon: Megaphone, label: "Digital Marketer", color: "hsl(270 50% 55%)" },
+  { icon: TrendingUp, label: "Sales", color: "hsl(150 55% 45%)" },
+  { icon: Scale, label: "Legal", color: "hsl(200 50% 45%)" },
+  { icon: Calculator, label: "Finance & Tax", color: "hsl(45 70% 50%)" },
+  { icon: UserCheck, label: "Secretary", color: "hsl(350 55% 50%)" },
 ];
 
-const sidebarItems = [
-  { id: "talent", label: "Dashboard", icon: LayoutDashboard },
-  { id: "hiring", label: "Hiring", icon: Briefcase },
-  { id: "services", label: "Services", icon: Layers },
-  { id: "matchmaking", label: "Matchmaking", icon: Search },
-  { id: "learning", label: "Learning", icon: GraduationCap },
-  { id: "kyc", label: "KYC", icon: ShieldCheck },
-  { id: "credits", label: "Credits", icon: CreditCard },
-  { id: "analytics", label: "Analytics", icon: BarChart3 },
+const stats = [
+  { value: "10,000+", label: "Tenaga Kerja Siap" },
+  { value: "<24 Jam", label: "Rata-rata Matching" },
+  { value: "98%", label: "Tingkat Kepuasan" },
 ];
-
-const talentData = [
-  { name: "Rina Maharani", role: "Frontend Dev", score: 94, color: "hsl(var(--primary))" },
-  { name: "Budi Santoso", role: "Data Engineer", score: 91, color: "hsl(var(--primary))" },
-  { name: "Ayu Lestari", role: "UI Designer", score: 88, color: "hsl(38 90% 55%)" },
-  { name: "Dimas Pratama", role: "Backend Dev", score: 86, color: "hsl(38 90% 55%)" },
-];
-
-const hiringData = [
-  { title: "Senior React Developer", status: "In Review", candidates: 12, urgency: "High" },
-  { title: "Product Designer", status: "Matching", candidates: 8, urgency: "Medium" },
-  { title: "Data Analyst", status: "Open", candidates: 5, urgency: "Low" },
-];
-
-const analyticsData = { totalTalent: "2,547", available: "1,832", inProcess: "715" };
-
-const DashboardPanel = ({ activeTab }: { activeTab: string }) => {
-  if (activeTab === "talent") {
-    return (
-      <div>
-        <h3 className="text-sm font-semibold text-white mb-3">Dashboard Overview</h3>
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          {[
-            { label: "Total Talent", val: analyticsData.totalTalent },
-            { label: "Available", val: analyticsData.available },
-            { label: "In Process", val: analyticsData.inProcess },
-          ].map((s) => (
-            <div key={s.label} className="rounded-lg p-2.5 text-center" style={{ background: "hsl(0 0% 15%)" }}>
-              <p className="text-base font-semibold text-white">{s.val}</p>
-              <p className="text-[10px] text-white/50">{s.label}</p>
-            </div>
-          ))}
-        </div>
-        <div className="space-y-2">
-          {talentData.map((t) => (
-            <div key={t.name} className="flex items-center gap-3 rounded-lg p-2.5" style={{ background: "hsl(0 0% 15%)" }}>
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style={{ background: "hsl(0 0% 22%)" }}>
-                {t.name[0]}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-white truncate">{t.name}</p>
-                <p className="text-[10px] text-white/40">{t.role}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(0 0% 20%)" }}>
-                  <div className="h-full rounded-full" style={{ width: `${t.score}%`, background: t.color }} />
-                </div>
-                <span className="text-xs font-semibold text-white/70">{t.score}%</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (activeTab === "hiring") {
-    return (
-      <div>
-        <h3 className="text-sm font-semibold text-white mb-3">Hiring Requests</h3>
-        <div className="space-y-2">
-          {hiringData.map((h) => (
-            <div key={h.title} className="rounded-lg p-3" style={{ background: "hsl(0 0% 15%)" }}>
-              <div className="flex items-center justify-between mb-1.5">
-                <p className="text-xs font-medium text-white">{h.title}</p>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${h.urgency === "High" ? "bg-red-500/20 text-red-400" : h.urgency === "Medium" ? "bg-amber-500/20 text-amber-400" : "bg-emerald-500/20 text-emerald-400"}`}>{h.urgency}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-white/40">{h.status}</span>
-                <span className="text-[10px] text-white/50">{h.candidates} candidates</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (activeTab === "services") {
-    return (
-      <div>
-        <h3 className="text-sm font-semibold text-white mb-3">Service Catalog</h3>
-        <div className="space-y-2">
-          {[
-            { name: "Digital Marketing", category: "Marketing", providers: 24 },
-            { name: "Web Development", category: "Technology", providers: 38 },
-            { name: "UI/UX Design", category: "Design", providers: 19 },
-            { name: "Content Writing", category: "Content", providers: 15 },
-          ].map((s) => (
-            <div key={s.name} className="rounded-lg p-3 flex items-center justify-between" style={{ background: "hsl(0 0% 15%)" }}>
-              <div>
-                <p className="text-xs font-medium text-white">{s.name}</p>
-                <p className="text-[10px] text-white/40">{s.category}</p>
-              </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/60">{s.providers} talent</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (activeTab === "matchmaking") {
-    return (
-      <div>
-        <h3 className="text-sm font-semibold text-white mb-3">Job Matchmaking</h3>
-        <div className="space-y-2">
-          {[
-            { title: "Full Stack Developer", match: 96, location: "Remote" },
-            { title: "Product Manager", match: 91, location: "Jakarta" },
-            { title: "Data Scientist", match: 87, location: "Singapore" },
-          ].map((j) => (
-            <div key={j.title} className="rounded-lg p-3" style={{ background: "hsl(0 0% 15%)" }}>
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-medium text-white">{j.title}</p>
-                <span className="text-[10px] font-semibold text-emerald-400">{j.match}% match</span>
-              </div>
-              <p className="text-[10px] text-white/40">{j.location}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (activeTab === "learning") {
-    return (
-      <div>
-        <h3 className="text-sm font-semibold text-white mb-3">Learning Programs</h3>
-        <div className="space-y-2">
-          {[
-            { title: "React Advanced Patterns", progress: 75, provider: "Dicoding" },
-            { title: "Data Engineering", progress: 40, provider: "Coursera" },
-            { title: "UI Design Masterclass", progress: 90, provider: "Udemy" },
-          ].map((l) => (
-            <div key={l.title} className="rounded-lg p-3" style={{ background: "hsl(0 0% 15%)" }}>
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-medium text-white">{l.title}</p>
-                <span className="text-[10px] text-white/50">{l.provider}</span>
-              </div>
-              <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(0 0% 20%)" }}>
-                <div className="h-full rounded-full" style={{ width: `${l.progress}%`, background: "hsl(var(--primary))" }} />
-              </div>
-              <p className="text-[10px] text-white/40 mt-1">{l.progress}% completed</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (activeTab === "kyc") {
-    return (
-      <div>
-        <h3 className="text-sm font-semibold text-white mb-3">KYC Verification</h3>
-        <div className="space-y-2">
-          {[
-            { step: "Identity", status: "Verified", icon: "✓" },
-            { step: "Business Documents", status: "Verified", icon: "✓" },
-            { step: "Face Verification", status: "Pending", icon: "…" },
-          ].map((k) => (
-            <div key={k.step} className="rounded-lg p-3 flex items-center gap-3" style={{ background: "hsl(0 0% 15%)" }}>
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${k.status === "Verified" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
-                {k.icon}
-              </div>
-              <div className="flex-1">
-                <p className="text-xs font-medium text-white">{k.step}</p>
-                <p className="text-[10px] text-white/40">{k.status}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (activeTab === "credits") {
-    return (
-      <div>
-        <h3 className="text-sm font-semibold text-white mb-3">Credit Balance</h3>
-        <div className="rounded-lg p-4 text-center mb-4" style={{ background: "hsl(0 0% 15%)" }}>
-          <p className="text-2xl font-semibold text-white">1,250</p>
-          <p className="text-[10px] text-white/50">Credits available</p>
-        </div>
-        <div className="space-y-2">
-          {[
-            { desc: "Pro package purchase", amount: "+500", date: "28 Feb" },
-            { desc: "Candidate unlock", amount: "-50", date: "27 Feb" },
-            { desc: "Assessment order", amount: "-100", date: "25 Feb" },
-          ].map((t) => (
-            <div key={t.desc} className="rounded-lg p-3 flex items-center justify-between" style={{ background: "hsl(0 0% 15%)" }}>
-              <div>
-                <p className="text-xs font-medium text-white">{t.desc}</p>
-                <p className="text-[10px] text-white/40">{t.date}</p>
-              </div>
-              <span className={`text-xs font-semibold ${t.amount.startsWith("+") ? "text-emerald-400" : "text-red-400"}`}>{t.amount}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (activeTab === "analytics") {
-    return (
-      <div>
-        <h3 className="text-sm font-semibold text-white mb-3">Analytics Overview</h3>
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          {[
-            { label: "Match Rate", val: "98%" },
-            { label: "Avg. Time to Hire", val: "<3 days" },
-            { label: "Active Projects", val: "24" },
-            { label: "Completion Rate", val: "96%" },
-          ].map((s) => (
-            <div key={s.label} className="rounded-lg p-3 text-center" style={{ background: "hsl(0 0% 15%)" }}>
-              <p className="text-lg font-semibold text-white">{s.val}</p>
-              <p className="text-[10px] text-white/50">{s.label}</p>
-            </div>
-          ))}
-        </div>
-        <div className="flex items-end gap-1.5 h-20 px-2">
-          {[40, 65, 50, 80, 60, 90, 75, 85, 70, 95, 80, 88].map((h, i) => (
-            <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, background: i >= 10 ? "hsl(var(--primary))" : "hsl(0 0% 25%)" }} />
-          ))}
-        </div>
-        <div className="flex justify-between px-2 mt-1">
-          <span className="text-[9px] text-white/30">Jan</span>
-          <span className="text-[9px] text-white/30">Dec</span>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-};
 
 const HeroSection = () => {
-  const [email, setEmail] = useState("");
-  const [activeTab, setActiveTab] = useState("talent");
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
-  const handleCTA = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/auth");
+    navigate("/services");
   };
 
   return (
-    <section className="relative min-h-screen overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(0 0% 5%), hsl(0 0% 8%), hsl(0 0% 6%))" }}>
-      <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full blur-[120px] opacity-15" style={{ background: "hsl(0 79% 47%)" }} />
+    <section className="relative min-h-screen overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(0 0% 4%), hsl(0 0% 7%), hsl(0 0% 5%))" }}>
+      {/* Accent glow */}
+      <div className="absolute top-1/4 left-1/3 w-[400px] h-[400px] rounded-full blur-[150px] opacity-10" style={{ background: "hsl(var(--primary))" }} />
+      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] rounded-full blur-[120px] opacity-8" style={{ background: "hsl(38 90% 55%)" }} />
 
-      <div className="relative container mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-10 sm:pb-16">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[calc(100vh-7rem)]">
-          {/* Left: Content */}
-          <div className="max-w-xl">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 mb-8">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: "hsl(0 79% 47%)" }}>
-                <span className="text-xs font-semibold text-white">G</span>
-              </div>
-              <span className="text-sm font-semibold text-white">4.8 stars</span>
-              <span className="text-sm" style={{ color: "hsl(0 0% 55%)" }}>13k+ reviews</span>
-            </motion.div>
-
-            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.1] mb-4 sm:mb-6">
-              The best partners & teams for your business
-            </motion.h1>
-
-            <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="text-base sm:text-lg leading-relaxed mb-6 sm:mb-10" style={{ color: "hsl(0 0% 55%)" }}>
-              Find KYC-verified freelance partners & teams. From hiring requests to project requests — everything starts with quality.
-            </motion.p>
-
-            <motion.form initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} onSubmit={handleCTA} className="flex flex-col sm:flex-row gap-0 mb-4">
-              <Input type="email" placeholder="Your business email*" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 sm:h-14 px-4 sm:px-5 text-sm sm:text-base bg-white/10 border-white/20 text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:border-white/40 rounded-[5px] sm:rounded-none sm:rounded-l-[5px]" />
-              <Button type="submit" className="h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base font-semibold shrink-0 rounded-[5px] sm:rounded-none sm:rounded-r-[5px] mt-2 sm:mt-0" style={{ background: "hsl(0 79% 47%)", color: "white" }}>
-                Create free account
-              </Button>
-            </motion.form>
-
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-xs mb-8" style={{ color: "hsl(0 0% 45%)" }}>
-              We protect your privacy.{" "}
-              <a href="#" className="underline hover:text-white transition-colors">Learn more</a>.
-            </motion.p>
-
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="mb-12">
-              <Link to="/auth" className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors group">
-                <div className="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center group-hover:border-white/60 transition-colors">
-                  <Play className="w-3.5 h-3.5 fill-white/80" />
-                </div>
-                Watch platform demo
-              </Link>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.5 }} className="flex flex-wrap items-center gap-6 sm:gap-8 lg:gap-12">
-              {socialProof.map((item, i) => (
-                <div key={i} className="text-center">
-                  {item.stars > 0 ? (
-                    <div className="flex items-center justify-center gap-0.5 mb-1.5">
-                      {Array.from({ length: item.stars }).map((_, j) => (
-                        <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                  ) : item.icon ? (
-                    <div className="flex items-center justify-center mb-1.5">
-                      <item.icon className="w-5 h-5 text-amber-400" />
-                    </div>
-                  ) : null}
-                  <p className="text-sm font-semibold text-white">{item.source}</p>
-                  <p className="text-xs" style={{ color: "hsl(0 0% 45%)" }}>{item.sub}</p>
-                </div>
-              ))}
-            </motion.div>
+      <div className="relative container mx-auto px-4 sm:px-6 pt-24 sm:pt-32 pb-12 sm:pb-20">
+        {/* Badge */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border" style={{ borderColor: "hsl(0 0% 20%)", background: "hsl(0 0% 10%)" }}>
+            <Zap className="w-3.5 h-3.5 text-amber-400" />
+            <span className="text-xs font-medium" style={{ color: "hsl(0 0% 65%)" }}>Platform On-Demand Services #1 di Indonesia</span>
           </div>
+        </motion.div>
 
-          {/* Right: Interactive Mini Dashboard */}
-          <motion.div
-            initial={{ opacity: 0, x: 40, scale: 0.95 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="hidden lg:block"
+        {/* Heading */}
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-center text-3xl sm:text-5xl lg:text-7xl font-semibold tracking-tight text-white leading-[1.08] mb-4 sm:mb-6 max-w-4xl mx-auto"
+        >
+          Tenaga Profesional,{" "}
+          <span className="text-gradient-accent">Kapan Saja</span>{" "}
+          Anda Butuhkan
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-center text-sm sm:text-lg max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed"
+          style={{ color: "hsl(0 0% 50%)" }}
+        >
+          Dari cleaning, tukang bangunan, hingga digital marketer & lawyer —
+          temukan dan pesan tenaga profesional terverifikasi dalam hitungan menit.
+        </motion.p>
+
+        {/* Search bar */}
+        <motion.form
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          onSubmit={handleSearch}
+          className="max-w-xl mx-auto flex gap-0 mb-6"
+        >
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <Input
+              placeholder="Cari layanan... (cth: Cleaning, Legal, Sales)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-12 sm:h-14 pl-11 pr-4 text-sm bg-white/10 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/40 rounded-l-lg rounded-r-none"
+            />
+          </div>
+          <Button
+            type="submit"
+            className="h-12 sm:h-14 px-6 sm:px-8 text-sm font-semibold shrink-0 rounded-l-none rounded-r-lg"
+            style={{ background: "hsl(var(--primary))", color: "white" }}
           >
-            <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10" style={{ background: "hsl(0 0% 10%)" }}>
-              {/* Browser bar */}
-              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/10" style={{ background: "hsl(0 0% 8%)" }}>
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400" />
-                  <div className="w-3 h-3 rounded-full bg-amber-400" />
-                  <div className="w-3 h-3 rounded-full bg-emerald-400" />
-                </div>
-                <div className="flex-1 mx-4">
-                  <div className="h-5 rounded-md px-3 flex items-center text-[10px] text-white/30" style={{ background: "hsl(0 0% 14%)" }}>
-                    oveersea.app/dashboard
+            Cari
+          </Button>
+        </motion.form>
+
+        {/* Popular */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.35 }}
+          className="flex flex-wrap justify-center gap-2 mb-12 sm:mb-16 px-2"
+        >
+          <span className="text-xs" style={{ color: "hsl(0 0% 35%)" }}>Populer:</span>
+          {["Cleaning", "Security Guard", "Content Creator", "Sales"].map((tag) => (
+            <Link key={tag} to="/services" className="text-xs px-3 py-1 rounded-full border transition-colors hover:border-white/30" style={{ borderColor: "hsl(0 0% 18%)", color: "hsl(0 0% 55%)" }}>
+              {tag}
+            </Link>
+          ))}
+        </motion.div>
+
+        {/* Service category grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="max-w-4xl mx-auto mb-12 sm:mb-16"
+        >
+          <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3 sm:gap-4">
+            {serviceQuickLinks.map((svc, i) => (
+              <motion.div
+                key={svc.label}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.45 + i * 0.04 }}
+              >
+                <Link
+                  to="/services"
+                  className="flex flex-col items-center gap-2 p-3 sm:p-4 rounded-xl border transition-all hover:scale-105 hover:border-white/20 group"
+                  style={{ borderColor: "hsl(0 0% 14%)", background: "hsl(0 0% 8%)" }}
+                >
+                  <div
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
+                    style={{ background: `${svc.color}20` }}
+                  >
+                    <svc.icon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: svc.color }} />
                   </div>
-                </div>
-              </div>
+                  <span className="text-[10px] sm:text-xs font-medium text-white/70 text-center leading-tight group-hover:text-white transition-colors">
+                    {svc.label}
+                  </span>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
-              {/* Dashboard body */}
-              <div className="flex" style={{ minHeight: 360 }}>
-                {/* Sidebar */}
-                <div className="w-16 border-r border-white/10 py-3 flex flex-col items-center gap-1" style={{ background: "hsl(0 0% 8%)" }}>
-                  {sidebarItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all ${
-                        activeTab === item.id
-                          ? "text-white"
-                          : "text-white/30 hover:text-white/60"
-                      }`}
-                      style={activeTab === item.id ? { background: "hsl(0 0% 18%)" } : {}}
-                    >
-                      <item.icon className="w-4 h-4" />
-                      <span className="text-[8px] leading-none">{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 p-4">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={activeTab}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <DashboardPanel activeTab={activeTab} />
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </div>
+        {/* Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="flex flex-wrap justify-center gap-6 sm:gap-12"
+        >
+          {stats.map((stat) => (
+            <div key={stat.label} className="text-center">
+              <p className="text-xl sm:text-2xl font-semibold text-white">{stat.value}</p>
+              <p className="text-xs sm:text-sm" style={{ color: "hsl(0 0% 40%)" }}>{stat.label}</p>
             </div>
-          </motion.div>
-        </div>
+          ))}
+        </motion.div>
+
+        {/* Trust indicators */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+          className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-8"
+        >
+          {["KYC Verified", "Asuransi Kerja", "Garansi Hasil"].map((item) => (
+            <div key={item} className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-xs" style={{ color: "hsl(0 0% 45%)" }}>{item}</span>
+            </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
