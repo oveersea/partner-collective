@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, ArrowRight, Users, Search,
+  ArrowLeft, ArrowRight, Search,
   Brush, HardHat, ShieldCheck, Camera, Megaphone, TrendingUp,
-  Scale, Calculator, UserCheck, Sparkles, CheckCircle2, Phone, MapPin, Clock
+  Scale, Calculator, UserCheck, Sparkles, CheckCircle2, Phone, Clock
 } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
