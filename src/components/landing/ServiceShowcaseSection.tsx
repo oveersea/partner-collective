@@ -7,40 +7,40 @@ import {
 const benefits = [
   {
     icon: Clock,
-    title: "Response < 24 Jam",
-    description: "Tenaga kerja profesional siap dikirim dalam waktu kurang dari 24 jam setelah pemesanan.",
+    title: "Response < 24 Hours",
+    description: "Professional workforce ready to deploy within 24 hours of booking.",
   },
   {
     icon: ShieldCheck,
-    title: "Terverifikasi & Berasuransi",
-    description: "Seluruh pekerja sudah melalui KYC, background check, dan dilindungi asuransi kerja.",
+    title: "Verified & Insured",
+    description: "All workers have passed KYC, background checks, and are covered by work insurance.",
   },
   {
     icon: CreditCard,
-    title: "Bayar Setelah Puas",
-    description: "Sistem pembayaran aman — bayar hanya jika Anda puas dengan hasil pekerjaan.",
+    title: "Pay When Satisfied",
+    description: "Secure payment system — pay only when you're satisfied with the results.",
   },
   {
     icon: Headphones,
-    title: "Support 24/7",
-    description: "Tim support kami siap membantu kapan saja, dari pemesanan hingga selesai.",
+    title: "24/7 Support",
+    description: "Our support team is ready to help anytime, from booking to completion.",
   },
   {
     icon: Users,
     title: "Scalable Workforce",
-    description: "Butuh 1 orang atau 100 orang? Skalakan tenaga kerja sesuai kebutuhan bisnis.",
+    description: "Need 1 person or 100? Scale your workforce to match your business needs.",
   },
   {
     icon: Award,
-    title: "Garansi Penggantian",
-    description: "Jika pekerja tidak sesuai, kami ganti dengan yang baru tanpa biaya tambahan.",
+    title: "Replacement Guarantee",
+    description: "If a worker doesn't meet expectations, we replace them at no extra cost.",
   },
 ];
 
 const testimonials = [
-  { name: "Rina M.", role: "Ops Manager, PT ABC", text: "Dalam 3 jam sudah ada cleaning crew di kantor. Luar biasa cepat!", rating: 5 },
-  { name: "Budi S.", role: "Project Manager", text: "Tukang bangunan yang dikirim sangat profesional. Renovasi selesai tepat waktu.", rating: 5 },
-  { name: "Ayu L.", role: "Marketing Lead", text: "Content creator dari Oveersea sangat kreatif. Konten kami naik 3x engagement.", rating: 5 },
+  { name: "Rina M.", role: "Ops Manager, PT ABC", text: "Within 3 hours, a cleaning crew was already at our office. Incredibly fast!", rating: 5 },
+  { name: "Budi S.", role: "Project Manager", text: "The construction workers sent were very professional. Renovation completed on time.", rating: 5 },
+  { name: "Ayu L.", role: "Marketing Lead", text: "The content creator from Oveersea was so creative. Our content engagement increased 3x.", rating: 5 },
 ];
 
 const ServiceShowcaseSection = () => {
@@ -54,12 +54,12 @@ const ServiceShowcaseSection = () => {
           viewport={{ once: true }}
           className="text-center mb-10 sm:mb-16"
         >
-          <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-widest">Mengapa Oveersea</span>
+          <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-widest">Why Oveersea</span>
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-semibold mt-2 sm:mt-3 mb-3 sm:mb-5 text-foreground">
-            Keunggulan yang <span className="text-gradient-accent">Membedakan</span>
+            Advantages that <span className="text-gradient-accent">Set Us Apart</span>
           </h2>
           <p className="text-sm sm:text-lg max-w-2xl mx-auto text-muted-foreground">
-            Platform on-demand services terpercaya dengan standar kualitas tertinggi.
+            A trusted on-demand services platform with the highest quality standards.
           </p>
         </motion.div>
 
@@ -89,9 +89,9 @@ const ServiceShowcaseSection = () => {
           viewport={{ once: true }}
           className="text-center mb-10"
         >
-          <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-widest">Testimoni</span>
+          <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-widest">Testimonials</span>
           <h2 className="text-2xl sm:text-3xl font-semibold mt-2 mb-3 text-foreground">
-            Dipercaya Ribuan Klien
+            Trusted by Thousands of Clients
           </h2>
         </motion.div>
 

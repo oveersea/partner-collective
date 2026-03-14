@@ -3,18 +3,18 @@ import { motion } from "framer-motion";
 const steps = [
   {
     number: 1,
-    title: "Pilih Layanan",
-    description: "Pilih kategori layanan yang Anda butuhkan — dari cleaning hingga lawyer, semua tersedia.",
+    title: "Choose a Service",
+    description: "Select the service category you need — from cleaning to legal, everything is available.",
   },
   {
     number: 2,
-    title: "Kami Cocokkan",
-    description: "Dalam hitungan menit, kami mencocokkan Anda dengan tenaga profesional terverifikasi dan siap kerja.",
+    title: "We Match You",
+    description: "Within minutes, we match you with verified professionals who are ready to work.",
   },
   {
     number: 3,
-    title: "Pekerjaan Selesai",
-    description: "Bayar hanya jika puas. Garansi hasil kerja & asuransi untuk setiap penugasan.",
+    title: "Job Done",
+    description: "Pay only when satisfied. Work guarantee & insurance for every assignment.",
   },
 ];
 
@@ -28,12 +28,12 @@ const HowItWorksSection = () => {
           viewport={{ once: true }}
           className="text-center mb-10 sm:mb-20"
         >
-          <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-widest">Cara Kerja</span>
+          <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-widest">How It Works</span>
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-semibold mt-2 sm:mt-3 mb-3 sm:mb-5 text-foreground">
-            Semudah <span className="text-gradient-accent">1-2-3</span>
+            As Easy as <span className="text-gradient-accent">1-2-3</span>
           </h2>
           <p className="text-sm sm:text-lg max-w-2xl mx-auto text-muted-foreground">
-            Proses transparan dan terstruktur untuk memastikan kualitas di setiap tahap.
+            A transparent and structured process to ensure quality at every stage.
           </p>
         </motion.div>
 

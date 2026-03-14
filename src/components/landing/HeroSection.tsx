@@ -21,9 +21,9 @@ const serviceQuickLinks = [
 ];
 
 const stats = [
-  { value: "10,000+", label: "Tenaga Kerja Siap" },
-  { value: "<24 Jam", label: "Rata-rata Matching" },
-  { value: "98%", label: "Tingkat Kepuasan" },
+  { value: "10,000+", label: "Ready Workforce" },
+  { value: "<24 Hrs", label: "Average Matching" },
+  { value: "98%", label: "Satisfaction Rate" },
 ];
 
 const HeroSection = () => {
@@ -46,7 +46,7 @@ const HeroSection = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border" style={{ borderColor: "hsl(0 0% 20%)", background: "hsl(0 0% 10%)" }}>
             <Zap className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-xs font-medium" style={{ color: "hsl(0 0% 65%)" }}>Platform On-Demand Services #1 di Indonesia</span>
+            <span className="text-xs font-medium" style={{ color: "hsl(0 0% 65%)" }}>#1 On-Demand Services Platform in Indonesia</span>
           </div>
         </motion.div>
 
@@ -57,9 +57,9 @@ const HeroSection = () => {
           transition={{ delay: 0.1 }}
           className="text-center text-3xl sm:text-5xl lg:text-7xl font-semibold tracking-tight text-white leading-[1.08] mb-4 sm:mb-6 max-w-4xl mx-auto"
         >
-          Tenaga Profesional,{" "}
-          <span className="text-gradient-accent">Kapan Saja</span>{" "}
-          Anda Butuhkan
+          Professional Workforce,{" "}
+          <span className="text-gradient-accent">Whenever</span>{" "}
+          You Need
         </motion.h1>
 
         <motion.p
@@ -69,8 +69,8 @@ const HeroSection = () => {
           className="text-center text-sm sm:text-lg max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed"
           style={{ color: "hsl(0 0% 50%)" }}
         >
-          Dari cleaning, tukang bangunan, hingga digital marketer & lawyer —
-          temukan dan pesan tenaga profesional terverifikasi dalam hitungan menit.
+          From cleaning, construction workers, to digital marketers & lawyers —
+          find and book verified professionals in minutes.
         </motion.p>
 
         {/* Search bar */}
@@ -84,7 +84,7 @@ const HeroSection = () => {
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
             <Input
-              placeholder="Cari layanan... (cth: Cleaning, Legal, Sales)"
+              placeholder="Search services... (e.g. Cleaning, Legal, Sales)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-12 sm:h-14 pl-11 pr-4 text-sm bg-white/10 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:border-white/40 rounded-l-lg rounded-r-none"
@@ -95,7 +95,7 @@ const HeroSection = () => {
             className="h-12 sm:h-14 px-6 sm:px-8 text-sm font-semibold shrink-0 rounded-l-none rounded-r-lg"
             style={{ background: "hsl(var(--primary))", color: "white" }}
           >
-            Cari
+            Search
           </Button>
         </motion.form>
 
@@ -106,7 +106,7 @@ const HeroSection = () => {
           transition={{ delay: 0.35 }}
           className="flex flex-wrap justify-center gap-2 mb-12 sm:mb-16 px-2"
         >
-          <span className="text-xs" style={{ color: "hsl(0 0% 35%)" }}>Populer:</span>
+          <span className="text-xs" style={{ color: "hsl(0 0% 35%)" }}>Popular:</span>
           {["Cleaning", "Security Guard", "Content Creator", "Sales"].map((tag) => (
             <Link key={tag} to="/services" className="text-xs px-3 py-1 rounded-full border transition-colors hover:border-white/30" style={{ borderColor: "hsl(0 0% 18%)", color: "hsl(0 0% 55%)" }}>
               {tag}
@@ -171,7 +171,7 @@ const HeroSection = () => {
           transition={{ delay: 0.7 }}
           className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-8"
         >
-          {["KYC Verified", "Asuransi Kerja", "Garansi Hasil"].map((item) => (
+          {["KYC Verified", "Work Insurance", "Result Guarantee"].map((item) => (
             <div key={item} className="flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
               <span className="text-xs" style={{ color: "hsl(0 0% 45%)" }}>{item}</span>
