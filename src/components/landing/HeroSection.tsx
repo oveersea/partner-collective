@@ -104,11 +104,11 @@ const HeroSection = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.35 }}
-          className="flex flex-wrap justify-center gap-2 mb-12 sm:mb-16 px-2"
+          className="flex flex-wrap justify-center items-center gap-2 mb-12 sm:mb-16 px-2"
         >
-          <span className="text-xs" style={{ color: "hsl(0 0% 35%)" }}>Popular:</span>
+          <span className="text-xs text-white">Popular:</span>
           {["Cleaning", "Security Guard", "Content Creator", "Sales"].map((tag) => (
-            <Link key={tag} to="/services" className="text-xs px-3 py-1 rounded-full border transition-colors hover:border-white/30" style={{ borderColor: "hsl(0 0% 18%)", color: "hsl(0 0% 55%)" }}>
+            <Link key={tag} to="/services" className="text-xs px-3 py-1 rounded-full border border-white/40 transition-colors hover:border-white/70" style={{ color: "hsl(0 0% 55%)" }}>
               {tag}
             </Link>
           ))}
