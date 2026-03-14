@@ -21,10 +21,10 @@ const CTASection = () => {
             </div>
             <div className="flex-1 text-center md:text-left">
               <h3 className="text-xl md:text-2xl font-semibold text-white mb-2">
-                Butuh tenaga kerja sekarang?
+                Need workforce right now?
               </h3>
               <p className="text-sm md:text-base max-w-xl" style={{ color: "hsl(0 0% 50%)" }}>
-                Posting kebutuhan Anda dan dapatkan tenaga profesional terverifikasi dalam hitungan jam, bukan minggu.
+                Post your requirements and get verified professionals in hours, not weeks.
               </p>
             </div>
             <div className="flex items-center gap-3 shrink-0">
@@ -33,7 +33,7 @@ const CTASection = () => {
                   className="font-semibold px-6 py-5 rounded-lg text-sm"
                   style={{ background: "hsl(var(--primary))", color: "white" }}
                 >
-                  Pesan Sekarang
+                  Order Now
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
@@ -42,7 +42,7 @@ const CTASection = () => {
                   variant="outline"
                   className="font-semibold px-6 py-5 rounded-lg text-sm border-white/20 text-primary hover:bg-white/10"
                 >
-                  Lihat Layanan
+                  View Services
                 </Button>
               </Link>
             </div>
