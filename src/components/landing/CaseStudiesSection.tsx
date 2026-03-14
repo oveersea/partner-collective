@@ -14,10 +14,10 @@ import case6 from "@/assets/case-6.jpg";
 const fallbackImages = [case1, case2, case3, case4, case5, case6];
 
 const placeholderCases: CaseStudy[] = [
-  { id: "1", title: "Digital Transformation for a Logistics Company", slug: "digital-transformation-logistics", description: "Built an end-to-end platform that improved operational efficiency by 40%.", company_name: "LogiTech Indonesia", industry: "Logistics", image_url: null, cta_label: "Baca cerita", cta_url: null, is_featured: true },
-  { id: "2", title: "Rebranding & Digital Marketing for F&B Chain", slug: "rebranding-fnb-chain", description: "A new brand strategy that increased awareness 3x in 6 months.", company_name: "Warung Nusantara", industry: "F&B", image_url: null, cta_label: "Baca cerita", cta_url: null, is_featured: true },
-  { id: "3", title: "Integrated HR System for a Fintech Startup", slug: "integrated-hr-fintech", description: "Automated recruitment and onboarding processes, saving 60% of HR time.", company_name: "PayEase", industry: "Fintech", image_url: null, cta_label: "Baca cerita", cta_url: null, is_featured: false },
-  { id: "4", title: "E-Commerce Platform for a Local Fashion Brand", slug: "ecommerce-fashion-brand", description: "A custom platform that increased online sales conversion by 250%.", company_name: "Batik Moderna", industry: "Fashion", image_url: null, cta_label: "Baca cerita", cta_url: null, is_featured: false },
+  { id: "1", title: "Digital Transformation for a Logistics Company", slug: "digital-transformation-logistics", description: "Built an end-to-end platform that improved operational efficiency by 40%.", company_name: "LogiTech Indonesia", industry: "Logistics", image_url: null, cta_label: "Read story", cta_url: null, is_featured: true },
+  { id: "2", title: "Rebranding & Digital Marketing for F&B Chain", slug: "rebranding-fnb-chain", description: "A new brand strategy that increased awareness 3x in 6 months.", company_name: "Warung Nusantara", industry: "F&B", image_url: null, cta_label: "Read story", cta_url: null, is_featured: true },
+  { id: "3", title: "Integrated HR System for a Fintech Startup", slug: "integrated-hr-fintech", description: "Automated recruitment and onboarding processes, saving 60% of HR time.", company_name: "PayEase", industry: "Fintech", image_url: null, cta_label: "Read story", cta_url: null, is_featured: false },
+  { id: "4", title: "E-Commerce Platform for a Local Fashion Brand", slug: "ecommerce-fashion-brand", description: "A custom platform that increased online sales conversion by 250%.", company_name: "Batik Moderna", industry: "Fashion", image_url: null, cta_label: "Read story", cta_url: null, is_featured: false },
 ];
 
 interface CaseStudy {
