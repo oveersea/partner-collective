@@ -114,7 +114,7 @@ const CaseStudiesSection = () => {
                   to={`/case-studies/${item.slug}`}
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground border-b-2 border-primary/60 hover:border-primary pb-0.5 w-fit mt-auto transition-colors"
                 >
-                  {item.cta_label || "Baca cerita"}
+                  {item.cta_label || "Read story"}
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
