@@ -40,7 +40,7 @@ const CTASection = () => {
               <Link to="/services">
                 <Button
                   variant="outline"
-                  className="font-semibold px-6 py-5 rounded-lg text-sm border-white/20 text-white hover:bg-white/10"
+                  className="font-semibold px-6 py-5 rounded-lg text-sm border-white/20 text-primary hover:bg-white/10"
                 >
                   Lihat Layanan
                 </Button>
