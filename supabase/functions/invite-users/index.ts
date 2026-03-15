@@ -61,6 +61,22 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Check global email kill switch
+    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    const { data: emailToggle } = await adminClient
+      .from("app_settings")
+      .select("value")
+      .eq("key", "email_sending_enabled")
+      .single();
+    if (emailToggle?.value !== "true") {
+      return new Response(JSON.stringify({ error: "Email sending is globally disabled" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { invites } = await req.json() as { invites: InviteEntry[] };
 
     if (!invites || !Array.isArray(invites) || invites.length === 0) {
