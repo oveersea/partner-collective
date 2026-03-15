@@ -7144,6 +7144,123 @@ export type Database = {
           },
         ]
       }
+      partner_applications: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          experience_summary: string | null
+          id: string
+          motivation: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          skills: string[] | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          experience_summary?: string | null
+          id?: string
+          motivation?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          skills?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          experience_summary?: string | null
+          id?: string
+          motivation?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          skills?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      partner_available_orders: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string
+          order_number: string
+          service_name: string
+          status: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id: string
+          order_number: string
+          service_name: string
+          status?: string
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string
+          order_number?: string
+          service_name?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      partner_order_assignments: {
+        Row: {
+          accepted_at: string | null
+          assigned_by: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          order_id: string
+          partner_user_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          assigned_by?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id: string
+          partner_user_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          assigned_by?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id?: string
+          partner_user_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       partner_team_members: {
         Row: {
           id: string
@@ -7913,6 +8030,7 @@ export type Database = {
           nationality: string | null
           opportunity_availability: string | null
           oveercode: string
+          partner_status: string | null
           phone_number: string | null
           postal_code: string | null
           professional_summary: string | null
@@ -7972,6 +8090,7 @@ export type Database = {
           nationality?: string | null
           opportunity_availability?: string | null
           oveercode: string
+          partner_status?: string | null
           phone_number?: string | null
           postal_code?: string | null
           professional_summary?: string | null
@@ -8031,6 +8150,7 @@ export type Database = {
           nationality?: string | null
           opportunity_availability?: string | null
           oveercode?: string
+          partner_status?: string | null
           phone_number?: string | null
           postal_code?: string | null
           professional_summary?: string | null
@@ -8914,6 +9034,232 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      service_categories: {
+        Row: {
+          category_group: string | null
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category_group?: string | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category_group?: string | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      service_items: {
+        Row: {
+          category_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          min_order: number | null
+          name: string
+          price: number
+          unit: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          min_order?: number | null
+          name: string
+          price?: number
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          min_order?: number | null
+          name?: string
+          price?: number
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_order_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          order_id: string
+          quantity: number
+          service_item_id: string
+          service_name: string
+          subtotal: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          order_id: string
+          quantity?: number
+          service_item_id: string
+          service_name: string
+          subtotal: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          order_id?: string
+          quantity?: number
+          service_item_id?: string
+          service_name?: string
+          subtotal?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_items_service_item_id_fkey"
+            columns: ["service_item_id"]
+            isOneToOne: false
+            referencedRelation: "service_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_orders: {
+        Row: {
+          created_at: string | null
+          customer_address: string | null
+          customer_email: string | null
+          customer_lat: number | null
+          customer_lng: number | null
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          notes: string | null
+          order_number: string
+          paid_at: string | null
+          payment_url: string | null
+          status: string
+          total: number
+          updated_at: string | null
+          user_id: string | null
+          xendit_invoice_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_lat?: number | null
+          customer_lng?: number | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: string
+          paid_at?: string | null
+          payment_url?: string | null
+          status?: string
+          total?: number
+          updated_at?: string | null
+          user_id?: string | null
+          xendit_invoice_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_lat?: number | null
+          customer_lng?: number | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: string
+          paid_at?: string | null
+          payment_url?: string | null
+          status?: string
+          total?: number
+          updated_at?: string | null
+          user_id?: string | null
+          xendit_invoice_id?: string | null
+        }
+        Relationships: []
+      }
+      service_standby_users: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_standby_users_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_settings: {
         Row: {
@@ -10541,6 +10887,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          reference_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          reference_id?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          reference_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_organizations: {
         Row: {
           created_at: string
@@ -10955,6 +11334,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_user_emails: {
+        Args: { p_user_ids: string[] }
+        Returns: {
+          email: string
+          last_sign_in_at: string
+          user_id: string
+        }[]
+      }
       admin_get_users_auth_info: {
         Args: never
         Returns: {
@@ -10997,6 +11384,7 @@ export type Database = {
         Returns: string
       }
       generate_program_order_number: { Args: never; Returns: string }
+      generate_svc_order_number: { Args: never; Returns: string }
       get_admin_dashboard_stats: { Args: never; Returns: Json }
       get_admin_skill_analytics: { Args: never; Returns: Json }
       get_employee_ids_for_user: {
