@@ -6,11 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Shield, Save, ExternalLink } from "lucide-react";
+import { Shield, Save, ExternalLink, Mail } from "lucide-react";
 
 const AdminSettings = () => {
   const [recaptchaEnabled, setRecaptchaEnabled] = useState(false);
   const [recaptchaSiteKey, setRecaptchaSiteKey] = useState("");
+  const [emailEnabled, setEmailEnabled] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -22,11 +23,12 @@ const AdminSettings = () => {
     const { data } = await supabase
       .from("app_settings")
       .select("key, value")
-      .in("key", ["recaptcha_enabled", "recaptcha_site_key"]);
+      .in("key", ["recaptcha_enabled", "recaptcha_site_key", "email_sending_enabled"]);
 
     if (data) {
       setRecaptchaEnabled(data.find((d) => d.key === "recaptcha_enabled")?.value === "true");
       setRecaptchaSiteKey(data.find((d) => d.key === "recaptcha_site_key")?.value || "");
+      setEmailEnabled(data.find((d) => d.key === "email_sending_enabled")?.value === "true");
     }
     setLoading(false);
   };
@@ -37,6 +39,7 @@ const AdminSettings = () => {
       const updates = [
         supabase.from("app_settings").update({ value: recaptchaEnabled ? "true" : "false" }).eq("key", "recaptcha_enabled"),
         supabase.from("app_settings").update({ value: recaptchaSiteKey.trim() }).eq("key", "recaptcha_site_key"),
+        supabase.from("app_settings").update({ value: emailEnabled ? "true" : "false" }).eq("key", "email_sending_enabled"),
       ];
       await Promise.all(updates);
       toast.success("Settings saved successfully");
@@ -61,6 +64,35 @@ const AdminSettings = () => {
         <h2 className="text-xl font-semibold text-foreground">Settings</h2>
         <p className="text-sm text-muted-foreground">Configure platform settings and integrations</p>
       </div>
+
+      {/* Email Sending Toggle */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Mail className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Email Sending</CardTitle>
+              <CardDescription>Global toggle for all outgoing emails (notifications, invites, daily job match, marketing)</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border">
+            <div>
+              <p className="text-sm font-medium text-foreground">Enable Email Sending</p>
+              <p className="text-xs text-muted-foreground">When disabled, no emails will be sent from the platform</p>
+            </div>
+            <Switch checked={emailEnabled} onCheckedChange={setEmailEnabled} />
+          </div>
+          {!emailEnabled && (
+            <div className="mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
+              ⚠️ All email sending is currently disabled. No notification, invitation, or automated emails will be sent.
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* reCAPTCHA Settings */}
       <Card>
@@ -111,13 +143,13 @@ const AdminSettings = () => {
               ⚠️ reCAPTCHA is enabled but no site key is configured. It will not appear on auth pages until a valid site key is provided.
             </div>
           )}
-
-          <Button onClick={handleSave} disabled={saving} className="gap-2">
-            <Save className="w-4 h-4" />
-            {saving ? "Saving..." : "Save Settings"}
-          </Button>
         </CardContent>
       </Card>
+
+      <Button onClick={handleSave} disabled={saving} className="gap-2">
+        <Save className="w-4 h-4" />
+        {saving ? "Saving..." : "Save Settings"}
+      </Button>
     </div>
   );
 };

@@ -27,6 +27,19 @@ Deno.serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
+    // Check global email kill switch
+    const { data: emailToggle } = await supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", "email_sending_enabled")
+      .single();
+    if (emailToggle?.value !== "true") {
+      return new Response(JSON.stringify({ message: "Email sending is globally disabled" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // 1. Get all open opportunities
     const { data: opportunities, error: oppErr } = await supabase
       .from("opportunities")
